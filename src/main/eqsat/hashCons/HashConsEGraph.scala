@@ -23,7 +23,7 @@ final case class HashConsEGraph[NodeT] private(unionFind: DisjointSet[EClassRef]
   //      in the e-class. That is, classData(ref).parents contains parent if and only if there exists an e-node in
   //      classData(ref) such that parent is in the e-node's arguments.
 
-  override def classes: Seq[EClassRef] = classData.keys.toSeq
+  override def classes: Iterable[EClassRef] = classData.keys
 
   override def tryCanonicalize(ref: EClassRef): Option[EClassRef] = {
     val canonical = unionFind.find(ref)

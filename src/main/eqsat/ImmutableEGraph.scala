@@ -22,10 +22,10 @@ trait ImmutableEGraph[NodeT] {
   def tryCanonicalize(ref: EClassRef): Option[EClassRef]
 
   /**
-   * The set of unique e-classes in this e-graph.
+   * Enumerates all unique e-classes in this e-graph.
    * @return All unique e-classes in the e-graph, represented as their canonical references.
    */
-  def classes: Seq[EClassRef]
+  def classes: Iterable[EClassRef]
 
   /**
    * The set of nodes of a given e-class.
