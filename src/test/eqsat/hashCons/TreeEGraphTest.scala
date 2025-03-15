@@ -15,6 +15,8 @@ class TreeEGraphTest {
     val egraph = HashConsEGraph.empty[Int]
     val node = ENode(0, Seq.empty)
     val (c, egraph2) = egraph.add(node)
+    assert(egraph2.classes.size == 1)
+    assert(egraph2.classes.head == c)
     assert(egraph2.nodes(c).size == 1)
     assert(egraph2.nodes(c).head == node)
   }
