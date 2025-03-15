@@ -11,5 +11,5 @@ final case class EClass[ExprT](ref: EClassRef, graph: ImmutableEGraph[ExprT]) {
    * Gets all nodes in the e-class.
    * @return All nodes in the e-class.
    */
-  def nodes: Seq[ENode[ExprT]] = graph.nodes(ref)
+  def nodes: Set[ENode[ExprT]] = graph.nodes(ref)
 }

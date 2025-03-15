@@ -7,6 +7,8 @@ package eqsat
  * @tparam ExprT The type of the expression that the e-graph represents.
  */
 trait ImmutableEGraph[ExprT] {
+  // Core API:
+
   /**
    * Gets the current canonical reference to an e-class, if the e-class is defined in this e-graph; otherwise, returns
    * None.
@@ -17,18 +19,17 @@ trait ImmutableEGraph[ExprT] {
   def tryCanonicalize(ref: EClassRef): Option[EClassRef]
 
   /**
-   * Gets the current canonical reference to an e-class.
-   * @param ref The reference to canonicalize.
-   * @return The canonical reference to the e-class pointed to by ref.
+   * The set of unique e-classes in this e-graph.
+   * @return All unique e-classes in the e-graph, represented as their canonical references.
    */
-  def canonicalize(ref: EClassRef): EClassRef = tryCanonicalize(ref).get
+  def classes: Seq[EClassRef]
 
   /**
    * The set of nodes of a given e-class.
    * @param ref The e-class whose nodes to find.
    * @return All nodes in the e-class pointed to by ref.
    */
-  def nodes(ref: EClassRef): Seq[ENode[ExprT]]
+  def nodes(ref: EClassRef): Set[ENode[ExprT]]
 
   /**
    * Finds the e-class of a given e-node.
@@ -65,4 +66,34 @@ trait ImmutableEGraph[ExprT] {
    * @return The new e-graph with the e-graph rebuilt.
    */
   def rebuilt: ImmutableEGraph[ExprT]
+
+  // Helper methods:
+
+  /**
+   * Gets the current canonical reference to an e-class.
+   * @param ref The reference to canonicalize.
+   * @return The canonical reference to the e-class pointed to by ref.
+   */
+  def canonicalize(ref: EClassRef): EClassRef = tryCanonicalize(ref).get
+
+  /**
+   * Canonicalizes an e-node.
+   * @param node The e-node to canonicalize.
+   * @return The canonicalized e-node.
+   */
+  def canonicalize(node: ENode[ExprT]): ENode[ExprT] = ENode(node.nodeType, node.args.map(canonicalize))
+
+  /**
+   * Determines whether the e-graph contains a given e-class.
+   * @param ref The e-class to check for.
+   * @return True if the e-graph contains the e-class; otherwise, false.
+   */
+  def contains(ref: EClassRef): Boolean = tryCanonicalize(ref).isDefined
+
+  /**
+   * Determines whether the e-graph contains a given e-node.
+   * @param node The e-node to check for.
+   * @return True if the e-graph contains the e-node; otherwise, false.
+   */
+  def contains(node: ENode[ExprT]): Boolean = find(node).isDefined
 }
