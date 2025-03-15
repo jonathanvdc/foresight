@@ -47,12 +47,14 @@ trait ImmutableEGraph[NodeT] {
   def add(node: ENode[NodeT]): (EClassRef, ImmutableEGraph[NodeT])
 
   /**
-   * Unions two e-classes in this e-graph. The e-class reference of the resulting e-class is returned.
+   * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
+   * The effects of this operation may be deferred until the e-graph is rebuilt.
+   *
    * @param left The reference to the first e-class to union.
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  def union(left: EClassRef, right: EClassRef): (EClassRef, ImmutableEGraph[NodeT])
+  def union(left: EClassRef, right: EClassRef): ImmutableEGraph[NodeT]
 
   /**
    * Determines whether the e-graph requires a rebuild. A rebuild is required when the e-graph is in an inconsistent
