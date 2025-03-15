@@ -4,7 +4,7 @@ import eqsat.EClassRef
 import org.junit.Test
 
 /**
- * Tests the behavior of empty e-graphs.
+ * Tests the behavior of empty hash-consed e-graphs.
  */
 class EmptyEGraphTest {
   /**
