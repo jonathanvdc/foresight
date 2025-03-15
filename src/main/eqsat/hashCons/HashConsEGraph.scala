@@ -9,12 +9,12 @@ import eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
  * @param classData The data of each e-class in the e-graph.
  * @param classRepairWorklist The set of e-classes in the e-graph that may contain nodes pointing to non-canonical
  *                            e-classes. The e-classes in this worklist may themselves be non-canonical.
- * @tparam ExprT The type of the expression that the e-graph represents.
+ * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-private[eqsat] final case class HashConsEGraph[ExprT] private(unionFind: DisjointSet[EClassRef],
-                                                              hashCons: Map[ENode[ExprT], EClassRef],
-                                                              classData: Map[EClassRef, HashConsEClassData[ExprT]],
-                                                              classRepairWorklist: Seq[EClassRef]) extends ImmutableEGraph[ExprT] {
+private[eqsat] final case class HashConsEGraph[NodeT] private(unionFind: DisjointSet[EClassRef],
+                                                              hashCons: Map[ENode[NodeT], EClassRef],
+                                                              classData: Map[EClassRef, HashConsEClassData[NodeT]],
+                                                              classRepairWorklist: Seq[EClassRef]) extends ImmutableEGraph[NodeT] {
 
   // We guarantee the following invariants:
   //   1. All non-canonical EClassRefs in the e-graph are referred to by the e-nodes of the e-classes in the repair
@@ -31,13 +31,13 @@ private[eqsat] final case class HashConsEGraph[ExprT] private(unionFind: Disjoin
 
   override def canonicalize(ref: EClassRef): EClassRef = unionFind.find(ref)
 
-  override def nodes(ref: EClassRef): Set[ENode[ExprT]] = classData(ref).nodes
+  override def nodes(ref: EClassRef): Set[ENode[NodeT]] = classData(ref).nodes
 
-  override def find(node: ENode[ExprT]): Option[EClassRef] = {
+  override def find(node: ENode[NodeT]): Option[EClassRef] = {
     hashCons.get(canonicalize(node)).map(canonicalize)
   }
 
-  override def add(node: ENode[ExprT]): (EClassRef, ImmutableEGraph[ExprT]) = {
+  override def add(node: ENode[NodeT]): (EClassRef, ImmutableEGraph[NodeT]) = {
     val canonicalNode = canonicalize(node)
     find(canonicalNode) match {
       case Some(ref) => (ref, this)
@@ -53,7 +53,7 @@ private[eqsat] final case class HashConsEGraph[ExprT] private(unionFind: Disjoin
     }
   }
 
-  override def union(left: EClassRef, right: EClassRef): (EClassRef, ImmutableEGraph[ExprT]) = {
+  override def union(left: EClassRef, right: EClassRef): (EClassRef, ImmutableEGraph[NodeT]) = {
     val leftRoot = canonicalize(left)
     val rightRoot = canonicalize(right)
     if (leftRoot == rightRoot) {
@@ -88,5 +88,5 @@ private[eqsat] final case class HashConsEGraph[ExprT] private(unionFind: Disjoin
 
   override def requiresRebuild: Boolean = classRepairWorklist.nonEmpty
 
-  override def rebuilt: ImmutableEGraph[ExprT] = ???
+  override def rebuilt: ImmutableEGraph[NodeT] = ???
 }
