@@ -16,10 +16,11 @@ private[eqsat] final case class HashConsEGraph[ExprT] private(unionFind: Disjoin
                                                               classData: Map[EClassRef, HashConsEClassData[ExprT]],
                                                               classRepairWorklist: Seq[EClassRef]) extends ImmutableEGraph[ExprT] {
 
-  // When the e-graph does not require repair (i.e., when the repair worklist is empty), we guarantee the following
-  // invariant: except for the union-find data structure, all EClassRefs in the e-graph are canonicalized.
-  // When the repair worklist is not empty, all non-canonical EClassRefs in the e-graph are referred to by the e-nodes
-  // of the e-classes in the repair worklist.
+  // We guarantee the following invariants:
+  //   1. All non-canonical EClassRefs in the e-graph are referred to by the e-nodes of the e-classes in the repair
+  //      worklist.
+  //   2. The e-nodes in the hash-cons map are always kept in sync with the e-nodes in classData. That is,
+  //      hashCons(node) == ref if and only if classData(ref).nodes contains node.
 
   override def classes: Seq[EClassRef] = classData.keys.toSeq
 
