@@ -175,3 +175,15 @@ final case class HashConsEGraph[NodeT] private(unionFind: DisjointSet[EClassRef]
     HashConsEGraph(unionFind, hashCons, classData, List.empty)
   }
 }
+
+/**
+ * A companion object for the hash-consed e-graph.
+ */
+object HashConsEGraph {
+  /**
+   * Creates a new hash-consed e-graph with no e-nodes.
+   * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
+   * @return An empty hash-consed e-graph.
+   */
+  def empty[NodeT]: HashConsEGraph[NodeT] = HashConsEGraph(DisjointSet.empty, Map.empty, Map.empty, List.empty)
+}
