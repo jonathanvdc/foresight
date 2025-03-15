@@ -10,10 +10,10 @@ import eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
  * @param unionWorklist The worklist of e-classes that need to be unioned.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-final case class HashConsEGraph[NodeT] private(unionFind: DisjointSet[EClassRef],
-                                               hashCons: Map[ENode[NodeT], EClassRef],
-                                               classData: Map[EClassRef, HashConsEClassData[NodeT]],
-                                               unionWorklist: List[(EClassRef, EClassRef)]) extends ImmutableEGraph[NodeT] {
+final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSet[EClassRef],
+                                               private val hashCons: Map[ENode[NodeT], EClassRef],
+                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]],
+                                               private val unionWorklist: List[(EClassRef, EClassRef)]) extends ImmutableEGraph[NodeT] {
 
   // We guarantee the following invariants:
   //   1. All nodes in hashCons and classData are kept canonical with regard to the current state of unionFind.
@@ -29,8 +29,6 @@ final case class HashConsEGraph[NodeT] private(unionFind: DisjointSet[EClassRef]
     val canonical = unionFind.find(ref)
     if (canonical == ref) Some(canonical).filter(classData.contains) else Some(canonical)
   }
-
-  override def canonicalize(ref: EClassRef): EClassRef = unionFind.find(ref)
 
   override def nodes(ref: EClassRef): Set[ENode[NodeT]] = classData(ref).nodes
 
