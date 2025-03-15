@@ -1,0 +1,16 @@
+.idea
+*.dot
+*.swp
+tmp.*
+out
+project/*
+# build.properties contains the sbt version to use for this project
+!/project/build.properties
+resources
+target
+modelsimproject
+generatedFiles/
+target-generatedFiles/
+lib/
+.vscode/
+.bsp/
