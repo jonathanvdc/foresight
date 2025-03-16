@@ -5,8 +5,8 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3 # Retrieve the repository contents
-      - uses: actions/setup-java@v3 # Set up a JDK
+      - uses: actions/checkout@v4 # Retrieve the repository contents
+      - uses: actions/setup-java@v4 # Set up a JDK
         with:
           distribution: temurin
           java-version: 17
