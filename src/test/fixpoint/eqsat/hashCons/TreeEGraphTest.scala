@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.ENode
+import fixpoint.eqsat.{ENode, Tree}
 import org.junit.Test
 
 /**
@@ -147,5 +147,24 @@ class TreeEGraphTest {
     assert(egraph3.canonicalize(c2) == c2)
     assert(egraph3.canonicalize(arg) == arg)
     assert(egraph3.canonicalize(node) == node)
+  }
+
+  /**
+   * Creates an e-graph containing a tree.
+   */
+  @Test
+  def fromTree(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val tree = Tree(0, Seq(Tree(1, Seq.empty), Tree(2, Seq.empty)))
+    val (c, egraph2) = egraph.add(tree)
+    assert(egraph2.classes.size == 3)
+    assert(egraph2.classes.toSeq.contains(c))
+    assert(egraph2.nodes(c).size == 1)
+    assert(egraph2.nodes(c).head.nodeType == 0)
+    assert(!egraph2.requiresRebuild)
+
+    assert(egraph2.canonicalize(c) == c)
+
+    egraph2.asInstanceOf[HashConsEGraph[Int]].checkInvariants()
   }
 }

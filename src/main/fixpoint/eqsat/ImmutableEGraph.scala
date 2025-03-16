@@ -101,6 +101,19 @@ trait ImmutableEGraph[NodeT] {
    * @return True if the e-graph contains the e-node; otherwise, false.
    */
   final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
+
+  /**
+   * Adds a tree to the e-graph.
+   * @param tree The tree to add.
+   * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
+   */
+  final def add(tree: Tree[NodeT]): (EClassRef, ImmutableEGraph[NodeT]) = {
+    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassRef], this))((acc, arg) => {
+      val (node, egraph) = acc._2.add(arg)
+      (acc._1 :+ node, egraph)
+    })
+    graphWithArgs.add(ENode(tree.nodeType, args))
+  }
 }
 
 /**
