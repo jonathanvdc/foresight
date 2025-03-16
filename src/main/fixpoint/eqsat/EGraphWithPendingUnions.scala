@@ -53,6 +53,6 @@ object EGraphWithPendingUnions {
    * @tparam Repr The type of the e-graph.
    * @return An e-graph with pending unions.
    */
-  def from[Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] =
+  def apply[Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] =
     EGraphWithPendingUnions(egraph, Nil)
 }
