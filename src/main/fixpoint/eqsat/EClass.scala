@@ -1,4 +1,4 @@
-package eqsat
+package fixpoint.eqsat
 
 /**
  * An e-class in an e-graph. An e-class is a set of equivalent e-nodes.

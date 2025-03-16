@@ -1,9 +1,10 @@
-package eqsat.hashCons
+package fixpoint.eqsat.hashCons
 
-import eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
+import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
+ *
  * @param unionFind The disjoint set data structure that maintains the union-find information of the e-classes.
  * @param hashCons The hash-consing map that maps e-nodes to e-classes.
  * @param classData The data of each e-class in the e-graph.

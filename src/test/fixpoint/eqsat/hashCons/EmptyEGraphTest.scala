@@ -1,6 +1,6 @@
-package eqsat.hashCons
+package fixpoint.eqsat.hashCons
 
-import eqsat.EClassRef
+import fixpoint.eqsat.EClassRef
 import org.junit.Test
 
 /**

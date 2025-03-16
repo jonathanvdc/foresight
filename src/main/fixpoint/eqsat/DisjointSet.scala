@@ -1,4 +1,4 @@
-package eqsat
+package fixpoint.eqsat
 
 /**
  * An immutable disjoint set data structure.

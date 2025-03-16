@@ -1,4 +1,4 @@
-package eqsat
+package fixpoint.eqsat
 
 /**
  * An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a

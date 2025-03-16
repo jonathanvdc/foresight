@@ -1,6 +1,6 @@
-package eqsat.hashCons
+package fixpoint.eqsat.hashCons
 
-import eqsat.ENode
+import fixpoint.eqsat.ENode
 import org.junit.Test
 
 /**

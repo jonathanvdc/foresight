@@ -1,4 +1,4 @@
-package eqsat
+package fixpoint.eqsat
 
 import org.junit.Test
 

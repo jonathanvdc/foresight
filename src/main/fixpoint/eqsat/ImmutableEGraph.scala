@@ -1,6 +1,6 @@
-package eqsat
+package fixpoint.eqsat
 
-import eqsat.hashCons.HashConsEGraph
+import fixpoint.eqsat.hashCons.HashConsEGraph
 
 /**
  * An immutable e-graph. An e-graph is a data structure that represents a set of expressions. Each expression is
