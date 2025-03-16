@@ -6,6 +6,8 @@ out
 project/*
 # build.properties contains the sbt version to use for this project
 !/project/build.properties
+!/project/Dependencies.scala
+!/project/plugins.sbt
 resources
 target
 modelsimproject
