@@ -35,6 +35,14 @@ trait ImmutableEGraph[NodeT] {
   def nodes(ref: EClassRef): Set[ENode[NodeT]]
 
   /**
+   * The set of all e-classes that refer to an e-class through their e-nodes. An e-class A has a parent B if and only if
+   * there is an e-node in B that takes A as an argument.
+   * @param ref The e-class whose parents to find.
+   * @return All e-classes that point to ref through their e-nodes.
+   */
+  def parents(ref: EClassRef): Set[EClassRef]
+
+  /**
    * Finds the e-class of a given e-node.
    * @param node The e-node to find the e-class of.
    * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.

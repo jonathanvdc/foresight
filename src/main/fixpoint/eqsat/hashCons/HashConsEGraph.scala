@@ -31,6 +31,8 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
 
   override def nodes(ref: EClassRef): Set[ENode[NodeT]] = classData(canonicalize(ref)).nodes
 
+  override def parents(ref: EClassRef): Set[EClassRef] = classData(canonicalize(ref)).parents
+
   override def find(node: ENode[NodeT]): Option[EClassRef] = {
     hashCons.get(canonicalize(node)).map(canonicalize)
   }

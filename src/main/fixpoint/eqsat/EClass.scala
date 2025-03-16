@@ -12,4 +12,10 @@ final case class EClass[NodeT](ref: EClassRef, graph: ImmutableEGraph[NodeT]) {
    * @return All nodes in the e-class.
    */
   def nodes: Set[ENode[NodeT]] = graph.nodes(ref)
+
+  /**
+   * Gets all parents of the e-class.
+   * @return All parents of the e-class.
+   */
+  def parents: Set[EClassRef] = graph.parents(ref)
 }

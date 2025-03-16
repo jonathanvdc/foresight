@@ -19,6 +19,7 @@ class TreeEGraphTest {
     assert(egraph2.classes.head == c)
     assert(egraph2.nodes(c).size == 1)
     assert(egraph2.nodes(c).head == node)
+    assert(egraph2.parents(c).isEmpty)
 
     assert(egraph2.canonicalize(c) == c)
     assert(egraph2.canonicalize(node) == node)
@@ -43,6 +44,8 @@ class TreeEGraphTest {
     assert(egraph3.nodes(c1).head == node1)
     assert(egraph3.nodes(c2).size == 1)
     assert(egraph3.nodes(c2).head == node2)
+    assert(egraph3.parents(c1).isEmpty)
+    assert(egraph3.parents(c2).isEmpty)
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
@@ -78,6 +81,9 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == node1)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node2)
+    assert(egraph4.parents(c1) == Set(c2, c3))
+    assert(egraph4.parents(c2).isEmpty)
+    assert(egraph4.parents(c3).isEmpty)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
@@ -114,6 +120,9 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == arg2)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node)
+    assert(egraph4.parents(c1) == Set(c3))
+    assert(egraph4.parents(c2) == Set(c3))
+    assert(egraph4.parents(c3).isEmpty)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
@@ -145,6 +154,8 @@ class TreeEGraphTest {
     assert(egraph3.nodes(c1).head == arg)
     assert(egraph3.nodes(c2).size == 1)
     assert(egraph3.nodes(c2).head == node)
+    assert(egraph3.parents(c1) == Set(c2))
+    assert(egraph3.parents(c2).isEmpty)
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
