@@ -4,9 +4,9 @@ package fixpoint.eqsat
  * An e-graph with pending unions. This class is used to represent an e-graph that has unions that have not been applied yet.
  * @param egraph The e-graph.
  * @param pending The pending unions.
- * @tparam NodeT The type of the nodes in the e-graph.
+ * @tparam Repr The type of the e-graph.
  */
-final case class EGraphWithPendingUnions[NodeT](egraph: EGraph[NodeT], pending: List[(EClassRef, EClassRef)]) {
+final case class EGraphWithPendingUnions[+Repr <: EGraph[_]](egraph: Repr, pending: List[(EClassRef, EClassRef)]) {
   /**
    * Determines whether the e-graph requires a rebuild.
    * @return True if the e-graph requires a rebuild, otherwise false.
@@ -21,7 +21,7 @@ final case class EGraphWithPendingUnions[NodeT](egraph: EGraph[NodeT], pending: 
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[NodeT] = {
+  def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[Repr] = {
     if (egraph.canonicalize(left) == egraph.canonicalize(right)) {
       this
     } else {
@@ -33,11 +33,24 @@ final case class EGraphWithPendingUnions[NodeT](egraph: EGraph[NodeT], pending: 
    * Rebuilds the e-graph, applying all pending unions.
    * @return The new e-graph with the e-graph rebuilt.
    */
-  def rebuilt: EGraph[NodeT] = {
+  def rebuilt: Repr = {
     if (pending.isEmpty) {
       egraph
     } else {
-      egraph.unionMany(pending)._2
+      egraph.unionMany(pending)._2.asInstanceOf[Repr]
     }
   }
+}
+
+/**
+ * A companion object for the e-graph with pending unions.
+ */
+object EGraphWithPendingUnions {
+  /**
+   * Creates a new e-graph with pending unions.
+   * @param egraph The e-graph.
+   * @tparam Repr The type of the e-graph.
+   * @return An e-graph with pending unions.
+   */
+  def from[Repr <: EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] = EGraphWithPendingUnions(egraph, Nil)
 }

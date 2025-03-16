@@ -117,8 +117,8 @@ trait EGraph[NodeT] {
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  final def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[NodeT] =
-    EGraphWithPendingUnions(this, List.empty).union(left, right)
+  def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[EGraph[NodeT]] =
+    EGraphWithPendingUnions.from(this).union(left, right)
 
   // Debugging and testing:
 
