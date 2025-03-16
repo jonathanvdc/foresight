@@ -177,6 +177,9 @@ class UnionTest {
     egraph4.checkInvariants()
   }
 
+  /**
+   * Creates an e-graph containing a node that references by using the union operation.
+   */
   @Test
   def selfCycle(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
