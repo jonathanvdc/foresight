@@ -6,7 +6,7 @@ package fixpoint.eqsat
  * @param graph The e-graph that the e-class belongs to.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-class.
  */
-final case class EClass[NodeT](ref: EClassRef, graph: ImmutableEGraph[NodeT]) {
+final case class EClass[NodeT](ref: EClassRef, graph: EGraph[NodeT]) {
   /**
    * Gets all nodes in the e-class.
    * @return All nodes in the e-class.

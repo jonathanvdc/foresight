@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
+import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, EGraph}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -12,7 +12,7 @@ import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
  */
 final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSet[EClassRef],
                                                private val hashCons: Map[ENode[NodeT], EClassRef],
-                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]]) extends ImmutableEGraph[NodeT] {
+                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]]) extends EGraph[NodeT] {
 
   // We guarantee the following invariants:
   //   1. All nodes in hashCons and classData are kept canonical with regard to the current state of unionFind.

@@ -6,7 +6,7 @@ package fixpoint.eqsat
  * @param pending The pending unions.
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-final case class EGraphWithPendingUnions[NodeT](egraph: ImmutableEGraph[NodeT], pending: List[(EClassRef, EClassRef)]) {
+final case class EGraphWithPendingUnions[NodeT](egraph: EGraph[NodeT], pending: List[(EClassRef, EClassRef)]) {
   /**
    * Determines whether the e-graph requires a rebuild.
    * @return True if the e-graph requires a rebuild, otherwise false.
@@ -33,7 +33,7 @@ final case class EGraphWithPendingUnions[NodeT](egraph: ImmutableEGraph[NodeT], 
    * Rebuilds the e-graph, applying all pending unions.
    * @return The new e-graph with the e-graph rebuilt.
    */
-  def rebuilt: ImmutableEGraph[NodeT] = {
+  def rebuilt: EGraph[NodeT] = {
     if (pending.isEmpty) {
       egraph
     } else {

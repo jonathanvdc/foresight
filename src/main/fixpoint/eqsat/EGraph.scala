@@ -9,7 +9,7 @@ import fixpoint.eqsat.hashCons.HashConsEGraph
  *
  * @tparam NodeT The node type of the expressions that the e-graph represents.
  */
-trait ImmutableEGraph[NodeT] {
+trait EGraph[NodeT] {
   // Core API:
 
   /**
@@ -55,7 +55,7 @@ trait ImmutableEGraph[NodeT] {
    * @param node The e-node to add to the e-graph.
    * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.
    */
-  def add(node: ENode[NodeT]): (EClassRef, ImmutableEGraph[NodeT])
+  def add(node: ENode[NodeT]): (EClassRef, EGraph[NodeT])
 
   /**
    * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
@@ -64,7 +64,7 @@ trait ImmutableEGraph[NodeT] {
    * @param pairs The pairs of e-classes to union.
    * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
    */
-  def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], ImmutableEGraph[NodeT])
+  def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], EGraph[NodeT])
 
   // Helper methods:
 
@@ -101,7 +101,7 @@ trait ImmutableEGraph[NodeT] {
    * @param tree The tree to add.
    * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
    */
-  final def add(tree: Tree[NodeT]): (EClassRef, ImmutableEGraph[NodeT]) = {
+  final def add(tree: Tree[NodeT]): (EClassRef, EGraph[NodeT]) = {
     val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassRef], this))((acc, arg) => {
       val (node, egraph) = acc._2.add(arg)
       (acc._1 :+ node, egraph)
@@ -131,11 +131,11 @@ trait ImmutableEGraph[NodeT] {
 /**
  * A companion object for the immutable e-graph trait.
  */
-object ImmutableEGraph {
+object EGraph {
   /**
    * Creates a new empty e-graph.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @return An empty e-graph.
    */
-  def empty[NodeT]: ImmutableEGraph[NodeT] = HashConsEGraph.empty[NodeT]
+  def empty[NodeT]: EGraph[NodeT] = HashConsEGraph.empty[NodeT]
 }
