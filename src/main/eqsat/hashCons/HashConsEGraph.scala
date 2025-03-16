@@ -127,11 +127,13 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
           val canonicalNode = ENode(node.nodeType, canonicalArgs)
           hashCons.get(canonicalNode) match {
             case Some(other) =>
+              data = HashConsEClassData(data.nodes - node, data.parents)
+              hashCons = hashCons - node
               unionWorklist = (ref, other) :: unionWorklist
 
             case None =>
               data = HashConsEClassData(data.nodes - node + canonicalNode, data.parents)
-              hashCons = hashCons + (canonicalNode -> ref)
+              hashCons = (hashCons - node) + (canonicalNode -> ref)
               parentsRepairWorklist = parentsRepairWorklist ++ canonicalNode.args
           }
         }

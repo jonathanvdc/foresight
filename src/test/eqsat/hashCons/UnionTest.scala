@@ -105,4 +105,30 @@ class UnionTest {
     assert(egraph5.nodes(c1) == Set(arg1, arg2))
     assert(egraph5.nodes(c3) == Set(ENode(2, Seq(argClass, argClass))))
   }
+
+  @Test
+  def upwardMerge(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val arg1 = ENode(0, Seq.empty)
+    val arg2 = ENode(1, Seq.empty)
+    val (c1, egraph2) = egraph.add(arg1)
+    val (c2, egraph3) = egraph2.add(arg2)
+
+    val node1 = ENode(2, Seq(c1))
+    val node2 = ENode(2, Seq(c2))
+    val (c3, egraph4) = egraph3.add(node1)
+    val (c4, egraph5) = egraph4.add(node2)
+
+    assert(egraph5.classes.size == 4)
+
+    val egraph6 = egraph5.union(c1, c2).rebuilt
+    val argClass = egraph6.canonicalize(c1)
+
+    assert(egraph6.classes.size == 2)
+    assert(egraph6.canonicalize(c1) == egraph6.canonicalize(c2))
+    assert(egraph6.canonicalize(c3) == egraph6.canonicalize(c4))
+    assert(egraph6.nodes(c1) == egraph6.nodes(c2))
+    assert(egraph6.nodes(c1) == Set(arg1, arg2))
+    assert(egraph6.nodes(c3) == Set(ENode(2, Seq(argClass))))
+  }
 }
