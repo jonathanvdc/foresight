@@ -106,6 +106,10 @@ class UnionTest {
     assert(egraph5.nodes(c3) == Set(ENode(2, Seq(argClass, argClass))))
   }
 
+  /**
+   * Creates an e-graph containing two leaf nodes and two nodes that reference the leaf nodes, then unions the leaf nodes.
+   * The union operation unifies the leaf nodes as well as the nodes that reference them.
+   */
   @Test
   def upwardMerge(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
@@ -130,5 +134,52 @@ class UnionTest {
     assert(egraph6.nodes(c1) == egraph6.nodes(c2))
     assert(egraph6.nodes(c1) == Set(arg1, arg2))
     assert(egraph6.nodes(c3) == Set(ENode(2, Seq(argClass))))
+  }
+
+  /**
+   * Creates an e-graph containing two leaf nodes and two nodes that reference the leaf nodes, then unions the leaf nodes.
+   * The union operation unifies the leaf nodes but not the nodes that reference them.
+   */
+  @Test
+  def noUpwardMerge(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val arg1 = ENode(0, Seq.empty)
+    val arg2 = ENode(1, Seq.empty)
+    val (c1, egraph2) = egraph.add(arg1)
+    val (c2, egraph3) = egraph2.add(arg2)
+
+    val node1 = ENode(2, Seq(c1))
+    val node2 = ENode(3, Seq(c2))
+    val (c3, egraph4) = egraph3.add(node1)
+    val (c4, egraph5) = egraph4.add(node2)
+
+    assert(egraph5.classes.size == 4)
+
+    val egraph6 = egraph5.union(c1, c2).rebuilt
+
+    assert(egraph6.classes.size == 3)
+    assert(egraph6.canonicalize(c1) == egraph6.canonicalize(c2))
+    assert(egraph6.nodes(c1) == egraph6.nodes(c2))
+    assert(egraph6.nodes(c1) == Set(arg1, arg2))
+    assert(egraph6.nodes(c3) == Set(ENode(2, Seq(egraph6.canonicalize(c1)))))
+    assert(egraph6.nodes(c4) == Set(ENode(3, Seq(egraph6.canonicalize(c1)))))
+  }
+
+  @Test
+  def selfCycle(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val node = ENode(0, Seq.empty)
+    val (c1, egraph2) = egraph.add(node)
+
+    val selfCycle = ENode(1, Seq(c1))
+    val (c2, egraph3) = egraph2.add(selfCycle)
+
+    assert(egraph3.classes.size == 2)
+
+    val egraph4 = egraph3.union(c1, c2).rebuilt
+    val argClass = egraph4.canonicalize(c1)
+
+    assert(egraph4.classes.size == 1)
+    assert(egraph4.nodes(c1) == Set(node, ENode(1, Seq(argClass))))
   }
 }
