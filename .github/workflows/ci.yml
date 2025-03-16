@@ -9,7 +9,8 @@ jobs:
       - uses: actions/setup-java@v4 # Set up a JDK
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
           cache: sbt # Cache the artifacts downloaded by sbt across CI runs
+      - uses: sbt/setup-sbt@v1
       - name: unit tests
         run: sbt +test
