@@ -19,10 +19,11 @@ class TreeEGraphTest {
     assert(egraph2.classes.head == c)
     assert(egraph2.nodes(c).size == 1)
     assert(egraph2.nodes(c).head == node)
-    assert(!egraph2.requiresRebuild)
 
     assert(egraph2.canonicalize(c) == c)
     assert(egraph2.canonicalize(node) == node)
+
+    egraph2.checkInvariants()
   }
 
   /**
@@ -42,12 +43,13 @@ class TreeEGraphTest {
     assert(egraph3.nodes(c1).head == node1)
     assert(egraph3.nodes(c2).size == 1)
     assert(egraph3.nodes(c2).head == node2)
-    assert(!egraph3.requiresRebuild)
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
     assert(egraph3.canonicalize(node1) == node1)
     assert(egraph3.canonicalize(node2) == node2)
+
+    egraph3.checkInvariants()
   }
 
   /**
@@ -76,7 +78,6 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == node1)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node2)
-    assert(!egraph4.requiresRebuild)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
@@ -84,6 +85,8 @@ class TreeEGraphTest {
     assert(egraph4.canonicalize(arg) == arg)
     assert(egraph4.canonicalize(node1) == node1)
     assert(egraph4.canonicalize(node2) == node2)
+
+    egraph4.checkInvariants()
   }
 
   /**
@@ -111,7 +114,6 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == arg2)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node)
-    assert(!egraph4.requiresRebuild)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
@@ -119,6 +121,8 @@ class TreeEGraphTest {
     assert(egraph4.canonicalize(arg1) == arg1)
     assert(egraph4.canonicalize(arg2) == arg2)
     assert(egraph4.canonicalize(node) == node)
+
+    egraph4.checkInvariants()
   }
 
   /**
@@ -141,12 +145,13 @@ class TreeEGraphTest {
     assert(egraph3.nodes(c1).head == arg)
     assert(egraph3.nodes(c2).size == 1)
     assert(egraph3.nodes(c2).head == node)
-    assert(!egraph3.requiresRebuild)
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
     assert(egraph3.canonicalize(arg) == arg)
     assert(egraph3.canonicalize(node) == node)
+
+    egraph3.checkInvariants()
   }
 
   /**
@@ -161,7 +166,6 @@ class TreeEGraphTest {
     assert(egraph2.classes.toSeq.contains(c))
     assert(egraph2.nodes(c).size == 1)
     assert(egraph2.nodes(c).head.nodeType == 0)
-    assert(!egraph2.requiresRebuild)
 
     val firstArg = egraph2.nodes(c).head.args.head
     val secondArg = egraph2.nodes(c).head.args(1)
@@ -170,6 +174,6 @@ class TreeEGraphTest {
 
     assert(egraph2.canonicalize(c) == c)
 
-    egraph2.asInstanceOf[HashConsEGraph[Int]].checkInvariants()
+    egraph2.checkInvariants()
   }
 }

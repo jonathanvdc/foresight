@@ -8,13 +8,11 @@ import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, ImmutableEGraph}
  * @param unionFind The disjoint set data structure that maintains the union-find information of the e-classes.
  * @param hashCons The hash-consing map that maps e-nodes to e-classes.
  * @param classData The data of each e-class in the e-graph.
- * @param unionWorklist The worklist of e-classes that need to be unioned.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
 final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSet[EClassRef],
                                                private val hashCons: Map[ENode[NodeT], EClassRef],
-                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]],
-                                               private val unionWorklist: List[(EClassRef, EClassRef)]) extends ImmutableEGraph[NodeT] {
+                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]]) extends ImmutableEGraph[NodeT] {
 
   // We guarantee the following invariants:
   //   1. All nodes in hashCons and classData are kept canonical with regard to the current state of unionFind.
@@ -49,27 +47,18 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
         val classDataWithUpdatedChildren = classDataWithNode ++ canonicalNode.args.distinct.map(c =>
           c -> classData(c).copy(parents = classData(c).parents + ref))
 
-        (ref, HashConsEGraph(unionFind, newHashCons, classDataWithUpdatedChildren, unionWorklist))
+        (ref, HashConsEGraph(unionFind, newHashCons, classDataWithUpdatedChildren))
     }
   }
 
-  override def union(left: EClassRef, right: EClassRef): HashConsEGraph[NodeT] = {
-    val canonicalLeft = canonicalize(left)
-    val canonicalRight = canonicalize(right)
-    if (canonicalLeft == canonicalRight) {
-      this
-    } else {
-      HashConsEGraph(unionFind, hashCons, classData, (canonicalLeft, canonicalRight) :: unionWorklist)
-    }
-  }
-
-  override def requiresRebuild: Boolean = unionWorklist.nonEmpty
-
-  override def rebuilt: HashConsEGraph[NodeT] = {
+  override def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], HashConsEGraph[NodeT]) = {
     var unionFind = this.unionFind
     var hashCons = this.hashCons
     var classData = this.classData
-    var unionWorklist = this.unionWorklist
+    var unionWorklist = pairs.toList
+
+    // The pairs of e-classes that were unified.
+    var unifiedPairs = List.empty[(EClassRef, EClassRef)]
 
     // The nodes repair set contains all e-classes containing nodes that might refer to non-canonical e-classes.
     var nodesRepairWorklist = Set.empty[EClassRef]
@@ -85,6 +74,8 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
       } else {
         // Union the two classes and figure out which one is the dominant class.
         unionFind = unionFind.union(leftRoot, rightRoot)
+        unifiedPairs = (leftRoot, rightRoot) :: unifiedPairs
+
         val domRoot = unionFind.find(leftRoot)
         val subRoot = if (domRoot == leftRoot) rightRoot else leftRoot
 
@@ -174,13 +165,15 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
       parentsRepairWorklist = Set.empty
     }
 
-    HashConsEGraph(unionFind, hashCons, classData, List.empty)
+    val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).toSet
+    val equivalentGroups = touched.groupBy(unionFind.find).values.toSet
+    equivalentGroups -> HashConsEGraph(unionFind, hashCons, classData)
   }
 
   /**
    * Checks that the invariants of the hash-consed e-graph are satisfied.
    */
-  private[hashCons] def checkInvariants(): Unit = {
+  private[eqsat] override def checkInvariants(): Unit = {
     // Check that hashCons is canonicalized.
     for ((node, ref) <- hashCons) {
       assert(canonicalize(node) == node)
@@ -221,5 +214,5 @@ object HashConsEGraph {
    * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
    * @return An empty hash-consed e-graph.
    */
-  def empty[NodeT]: HashConsEGraph[NodeT] = HashConsEGraph(DisjointSet.empty, Map.empty, Map.empty, List.empty)
+  def empty[NodeT]: HashConsEGraph[NodeT] = HashConsEGraph(DisjointSet.empty, Map.empty, Map.empty)
 }

@@ -50,27 +50,13 @@ trait ImmutableEGraph[NodeT] {
   def add(node: ENode[NodeT]): (EClassRef, ImmutableEGraph[NodeT])
 
   /**
-   * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
-   * The effects of this operation may be deferred until the e-graph is rebuilt.
-   *
-   * @param left The reference to the first e-class to union.
-   * @param right The reference to the second e-class to union.
-   * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
+   * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
+   * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
+   * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
+   * @param pairs The pairs of e-classes to union.
+   * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
    */
-  def union(left: EClassRef, right: EClassRef): ImmutableEGraph[NodeT]
-
-  /**
-   * Determines whether the e-graph requires a rebuild. A rebuild is required when the e-graph is in an inconsistent
-   * state.
-   * @return True if the e-graph requires a rebuild; otherwise, false.
-   */
-  def requiresRebuild: Boolean
-
-  /**
-   * Rebuilds the e-graph. This operation is used to ensure that the e-graph is in a consistent state.
-   * @return The new e-graph with the e-graph rebuilt.
-   */
-  def rebuilt: ImmutableEGraph[NodeT]
+  def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], ImmutableEGraph[NodeT])
 
   // Helper methods:
 
@@ -114,6 +100,24 @@ trait ImmutableEGraph[NodeT] {
     })
     graphWithArgs.add(ENode(tree.nodeType, args))
   }
+
+  /**
+   * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
+   * The effects of this operation are deferred until the e-graph is rebuilt.
+   *
+   * @param left The reference to the first e-class to union.
+   * @param right The reference to the second e-class to union.
+   * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
+   */
+  final def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[NodeT] =
+    EGraphWithPendingUnions(this, List.empty).union(left, right)
+
+  // Debugging and testing:
+
+  /**
+   * Checks the invariants of the e-graph.
+   */
+  private[eqsat] def checkInvariants(): Unit = ()
 }
 
 /**
