@@ -122,8 +122,9 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
       //      for parent set repair.
       var data = classData(ref)
       for (node <- data.nodes) {
-        val canonicalNode = canonicalize(node)
-        if (canonicalNode.args != node.args) {
+        val canonicalArgs = node.args.map(unionFind.find)
+        if (canonicalArgs != node.args) {
+          val canonicalNode = ENode(node.nodeType, canonicalArgs)
           hashCons.get(canonicalNode) match {
             case Some(other) =>
               unionWorklist = (ref, other) :: unionWorklist
@@ -142,7 +143,7 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
     def repairParents(ref: EClassRef): Unit = {
       // Repairing the parents of an e-class consists of canonicalizing all parents of the e-class.
       val data = classData(ref)
-      val canonicalParents = data.parents.map(canonicalize)
+      val canonicalParents = data.parents.map(unionFind.find)
       if (canonicalParents != data.parents) {
         classData = classData + (ref -> HashConsEClassData(data.nodes, canonicalParents))
       }
@@ -158,13 +159,13 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
 
       // Process the node repair worklist. The repairNodes operation may add new e-classes to the union worklist,
       // but will not add elements to its own repair worklist.
-      for (ref <- nodesRepairWorklist.map(canonicalize)) {
+      for (ref <- nodesRepairWorklist.map(unionFind.find)) {
         repairNodes(ref)
       }
       nodesRepairWorklist = Set.empty
 
       // Process the parents repair worklist. The repairParents operation will not add elements to any worklist.
-      for (ref <- parentsRepairWorklist.map(canonicalize)) {
+      for (ref <- parentsRepairWorklist.map(unionFind.find)) {
         repairParents(ref)
       }
       parentsRepairWorklist = Set.empty

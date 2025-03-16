@@ -23,4 +23,86 @@ class UnionTest {
     assert(egraph4.nodes(c1) == egraph4.nodes(c2))
     assert(egraph4.nodes(c1) == Set(node1, node2))
   }
+
+  /**
+   * Creates an e-graph containing two nodes with a common argument, then unions them.
+   */
+  @Test
+  def unionTwoNodesWithCommonArgument(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val arg = ENode(0, Seq.empty)
+    val (c1, egraph2) = egraph.add(arg)
+
+    val node1 = ENode(1, Seq(c1))
+    val node2 = ENode(2, Seq(c1))
+    val (c2, egraph3) = egraph2.add(node1)
+    val (c3, egraph4) = egraph3.add(node2)
+
+    assert(egraph4.classes.size == 3)
+
+    val egraph5 = egraph4.union(c2, c3).rebuilt
+
+    assert(egraph5.classes.size == 2)
+    assert(egraph5.nodes(c2) == egraph5.nodes(c3))
+    assert(egraph5.nodes(c2) == Set(node1, node2))
+  }
+
+  /**
+   * Creates an e-graph containing three nodes, then unions them.
+   */
+  @Test
+  def unionThreeNodes(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val node1 = ENode(1, Seq.empty)
+    val node2 = ENode(2, Seq.empty)
+    val node3 = ENode(3, Seq.empty)
+    val (c1, egraph2) = egraph.add(node1)
+    val (c2, egraph3) = egraph2.add(node2)
+    val (c3, egraph4) = egraph3.add(node3)
+
+    assert(egraph4.classes.size == 3)
+
+    val egraph5 = egraph4.union(c1, c2).rebuilt
+    val egraph6 = egraph5.union(c1, c3).rebuilt
+
+    assert(egraph6.classes.size == 1)
+    assert(egraph6.nodes(c1) == egraph6.nodes(c2))
+    assert(egraph6.nodes(c1) == egraph6.nodes(c3))
+    assert(egraph6.nodes(c1) == Set(node1, node2, node3))
+
+    assert(egraph4.union(c1, c2).union(c1, c3).requiresRebuild)
+    val egraph7 = egraph4.union(c1, c2).union(c1, c3).rebuilt
+
+    assert(egraph7.classes.size == 1)
+    assert(egraph7.nodes(c1) == egraph7.nodes(c2))
+    assert(egraph7.nodes(c1) == egraph7.nodes(c3))
+    assert(egraph7.nodes(c1) == Set(node1, node2, node3))
+
+    assert(egraph6 == egraph7)
+  }
+
+  /**
+   * Creates an e-graph containing a node with two arguments, then unions the arguments.
+   */
+  @Test
+  def unionArgumentNodes(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val arg1 = ENode(0, Seq.empty)
+    val arg2 = ENode(1, Seq.empty)
+    val (c1, egraph2) = egraph.add(arg1)
+    val (c2, egraph3) = egraph2.add(arg2)
+
+    val node = ENode(2, Seq(c1, c2))
+    val (c3, egraph4) = egraph3.add(node)
+
+    assert(egraph4.classes.size == 3)
+
+    val egraph5 = egraph4.union(c1, c2).rebuilt
+    val argClass = egraph5.canonicalize(c1)
+
+    assert(egraph5.classes.size == 2)
+    assert(egraph5.nodes(c1) == egraph5.nodes(c2))
+    assert(egraph5.nodes(c1) == Set(arg1, arg2))
+    assert(egraph5.nodes(c3) == Set(ENode(2, Seq(argClass, argClass))))
+  }
 }
