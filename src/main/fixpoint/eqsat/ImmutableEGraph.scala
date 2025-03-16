@@ -79,28 +79,28 @@ trait ImmutableEGraph[NodeT] {
    * @param ref The reference to canonicalize.
    * @return The canonical reference to the e-class pointed to by ref.
    */
-  def canonicalize(ref: EClassRef): EClassRef = tryCanonicalize(ref).get
+  final def canonicalize(ref: EClassRef): EClassRef = tryCanonicalize(ref).get
 
   /**
    * Canonicalizes an e-node.
    * @param node The e-node to canonicalize.
    * @return The canonicalized e-node.
    */
-  def canonicalize(node: ENode[NodeT]): ENode[NodeT] = ENode(node.nodeType, node.args.map(canonicalize))
+  final def canonicalize(node: ENode[NodeT]): ENode[NodeT] = ENode(node.nodeType, node.args.map(canonicalize))
 
   /**
    * Determines whether the e-graph contains a given e-class.
    * @param ref The e-class to check for.
    * @return True if the e-graph contains the e-class; otherwise, false.
    */
-  def contains(ref: EClassRef): Boolean = tryCanonicalize(ref).isDefined
+  final def contains(ref: EClassRef): Boolean = tryCanonicalize(ref).isDefined
 
   /**
    * Determines whether the e-graph contains a given e-node.
    * @param node The e-node to check for.
    * @return True if the e-graph contains the e-node; otherwise, false.
    */
-  def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
+  final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
 }
 
 /**
