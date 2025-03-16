@@ -175,6 +175,40 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
 
     HashConsEGraph(unionFind, hashCons, classData, List.empty)
   }
+
+  /**
+   * Checks that the invariants of the hash-consed e-graph are satisfied.
+   */
+  private[hashCons] def checkInvariants(): Unit = {
+    // Check that hashCons is canonicalized.
+    for ((node, ref) <- hashCons) {
+      assert(canonicalize(node) == node)
+      assert(canonicalize(ref) == ref)
+    }
+
+    // Check that classData is canonicalized.
+    for ((ref, data) <- classData) {
+      assert(canonicalize(ref) == ref)
+      for (node <- data.nodes) {
+        assert(canonicalize(node) == node)
+      }
+      for (parent <- data.parents) {
+        assert(canonicalize(parent) == parent)
+      }
+    }
+
+    // Check that the hash-cons map is in sync with the class data.
+    for ((node, ref) <- hashCons) {
+      assert(classData(ref).nodes.contains(node))
+    }
+
+    // Check that the parents set of each e-class is in sync with the e-class arguments of the e-nodes in the e-class.
+    for ((ref, data) <- classData) {
+      for (parent <- data.parents) {
+        assert(classData(parent).nodes.exists(_.args.contains(ref)))
+      }
+    }
+  }
 }
 
 /**

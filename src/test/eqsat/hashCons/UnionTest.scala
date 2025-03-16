@@ -22,6 +22,8 @@ class UnionTest {
     assert(egraph4.classes.size == 1)
     assert(egraph4.nodes(c1) == egraph4.nodes(c2))
     assert(egraph4.nodes(c1) == Set(node1, node2))
+
+    egraph4.checkInvariants()
   }
 
   /**
@@ -45,6 +47,8 @@ class UnionTest {
     assert(egraph5.classes.size == 2)
     assert(egraph5.nodes(c2) == egraph5.nodes(c3))
     assert(egraph5.nodes(c2) == Set(node1, node2))
+
+    egraph5.checkInvariants()
   }
 
   /**
@@ -79,6 +83,8 @@ class UnionTest {
     assert(egraph7.nodes(c1) == Set(node1, node2, node3))
 
     assert(egraph6 == egraph7)
+
+    egraph7.checkInvariants()
   }
 
   /**
@@ -104,6 +110,8 @@ class UnionTest {
     assert(egraph5.nodes(c1) == egraph5.nodes(c2))
     assert(egraph5.nodes(c1) == Set(arg1, arg2))
     assert(egraph5.nodes(c3) == Set(ENode(2, Seq(argClass, argClass))))
+
+    egraph5.checkInvariants()
   }
 
   /**
@@ -134,6 +142,8 @@ class UnionTest {
     assert(egraph6.nodes(c1) == egraph6.nodes(c2))
     assert(egraph6.nodes(c1) == Set(arg1, arg2))
     assert(egraph6.nodes(c3) == Set(ENode(2, Seq(argClass))))
+
+    egraph6.checkInvariants()
   }
 
   /**
@@ -163,6 +173,8 @@ class UnionTest {
     assert(egraph6.nodes(c1) == Set(arg1, arg2))
     assert(egraph6.nodes(c3) == Set(ENode(2, Seq(egraph6.canonicalize(c1)))))
     assert(egraph6.nodes(c4) == Set(ENode(3, Seq(egraph6.canonicalize(c1)))))
+
+    egraph4.checkInvariants()
   }
 
   @Test
@@ -181,5 +193,7 @@ class UnionTest {
 
     assert(egraph4.classes.size == 1)
     assert(egraph4.nodes(c1) == Set(node, ENode(1, Seq(argClass))))
+
+    egraph4.checkInvariants()
   }
 }
