@@ -1,6 +1,6 @@
 ThisBuild / scalaVersion := "2.11.12"
 
-lazy val arithExpr = (project in file("."))
+lazy val fixpoint = (project in file("."))
   .settings(
     name          := "fixpoint",
     version       := "1.0",
