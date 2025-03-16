@@ -5,9 +5,11 @@ package fixpoint.eqsat
  * @param egraph The e-graph.
  * @param metadata The metadata associated with the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
+ * @tparam Repr The type of the underlying e-graph.
  */
-final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[String, Metadata[NodeT, _]])
-  extends EGraphLike[NodeT, EGraphWithMetadata[NodeT]] with EGraph[NodeT] {
+final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]] private(egraph: Repr,
+                                                                                                        private val metadata: Map[String, Metadata[NodeT, _]])
+  extends EGraphLike[NodeT, EGraphWithMetadata[NodeT, Repr]] with EGraph[NodeT] {
 
   /**
    * Registers metadata with the e-graph.
@@ -16,7 +18,7 @@ final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[
    * @tparam MetadataT The type of the metadata.
    * @return The e-graph with the added metadata.
    */
-  def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): EGraphWithMetadata[NodeT] = {
+  def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): EGraphWithMetadata[NodeT, Repr] = {
     EGraphWithMetadata(egraph, this.metadata + (name -> metadata))
   }
 
@@ -25,7 +27,7 @@ final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[
    * @param name The name of the metadata.
    * @return The e-graph with the removed metadata.
    */
-  def removeMetadata(name: String): EGraphWithMetadata[NodeT] = {
+  def removeMetadata(name: String): EGraphWithMetadata[NodeT, Repr] = {
     EGraphWithMetadata(egraph, metadata - name)
   }
 
@@ -45,13 +47,29 @@ final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[
   override def parents(ref: EClassRef): Set[EClassRef] = egraph.parents(ref)
   override def find(node: ENode[NodeT]): Option[EClassRef] = egraph.find(node)
 
-  override def add(node: ENode[NodeT]): (EClassRef, EGraphWithMetadata[NodeT]) = {
+  override def add(node: ENode[NodeT]): (EClassRef, EGraphWithMetadata[NodeT, Repr]) = {
     val (ref, newEgraph) = egraph.add(node)
     (ref, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph))))
   }
 
-  override def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], EGraphWithMetadata[NodeT]) = {
+  override def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], EGraphWithMetadata[NodeT, Repr]) = {
     val (equivalences, newEgraph) = egraph.unionMany(pairs)
     (equivalences, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onUnionMany(equivalences, newEgraph))))
+  }
+}
+
+/**
+ * Companion object for e-graphs with metadata.
+ */
+object EGraphWithMetadata {
+  /**
+   * Creates an e-graph that manages metadata.
+   * @param egraph The e-graph.
+   * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
+   * @tparam Repr The type of the underlying e-graph.
+   * @return The e-graph with metadata.
+   */
+  def apply[NodeT, Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr): EGraphWithMetadata[NodeT, Repr] = {
+    EGraphWithMetadata(egraph, Map.empty)
   }
 }
