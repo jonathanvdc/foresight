@@ -6,7 +6,8 @@ package fixpoint.eqsat
  * @param pending The pending unions.
  * @tparam Repr The type of the e-graph.
  */
-final case class EGraphWithPendingUnions[+Repr <: EGraph[_]](egraph: Repr, pending: List[(EClassRef, EClassRef)]) {
+final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr,
+                                                                                      pending: List[(EClassRef, EClassRef)]) {
   /**
    * Determines whether the e-graph requires a rebuild.
    * @return True if the e-graph requires a rebuild, otherwise false.
@@ -37,7 +38,7 @@ final case class EGraphWithPendingUnions[+Repr <: EGraph[_]](egraph: Repr, pendi
     if (pending.isEmpty) {
       egraph
     } else {
-      egraph.unionMany(pending)._2.asInstanceOf[Repr]
+      egraph.unionMany(pending)._2
     }
   }
 }
@@ -52,5 +53,6 @@ object EGraphWithPendingUnions {
    * @tparam Repr The type of the e-graph.
    * @return An e-graph with pending unions.
    */
-  def from[Repr <: EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] = EGraphWithPendingUnions(egraph, Nil)
+  def from[Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] =
+    EGraphWithPendingUnions(egraph, Nil)
 }

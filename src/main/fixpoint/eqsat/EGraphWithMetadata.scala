@@ -6,7 +6,9 @@ package fixpoint.eqsat
  * @param metadata The metadata associated with the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[String, Metadata[NodeT, _]]) extends EGraph[NodeT] {
+final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[String, Metadata[NodeT, _]])
+  extends EGraphLike[NodeT, EGraphWithMetadata[NodeT]] with EGraph[NodeT] {
+
   /**
    * Registers metadata with the e-graph.
    * @param name The name of the metadata.
@@ -14,8 +16,17 @@ final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[
    * @tparam MetadataT The type of the metadata.
    * @return The e-graph with the added metadata.
    */
-  def withMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): EGraphWithMetadata[NodeT] = {
+  def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): EGraphWithMetadata[NodeT] = {
     EGraphWithMetadata(egraph, this.metadata + (name -> metadata))
+  }
+
+  /**
+   * Unregisters metadata from the e-graph.
+   * @param name The name of the metadata.
+   * @return The e-graph with the removed metadata.
+   */
+  def removeMetadata(name: String): EGraphWithMetadata[NodeT] = {
+    EGraphWithMetadata(egraph, metadata - name)
   }
 
   /**
@@ -33,9 +44,6 @@ final case class EGraphWithMetadata[NodeT](egraph: EGraph[NodeT], metadata: Map[
   override def nodes(ref: EClassRef): Set[ENode[NodeT]] = egraph.nodes(ref)
   override def parents(ref: EClassRef): Set[EClassRef] = egraph.parents(ref)
   override def find(node: ENode[NodeT]): Option[EClassRef] = egraph.find(node)
-
-  override def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[EGraphWithMetadata[NodeT]] =
-    EGraphWithPendingUnions.from(this).union(left, right)
 
   override def add(node: ENode[NodeT]): (EClassRef, EGraphWithMetadata[NodeT]) = {
     val (ref, newEgraph) = egraph.add(node)

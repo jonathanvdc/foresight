@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, EGraph}
+import fixpoint.eqsat.{DisjointSet, EClassRef, EGraph, EGraphLike, ENode}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -10,9 +10,10 @@ import fixpoint.eqsat.{DisjointSet, EClassRef, ENode, EGraph}
  * @param classData The data of each e-class in the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSet[EClassRef],
-                                               private val hashCons: Map[ENode[NodeT], EClassRef],
-                                               private val classData: Map[EClassRef, HashConsEClassData[NodeT]]) extends EGraph[NodeT] {
+private[eqsat] final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSet[EClassRef],
+                                                              private val hashCons: Map[ENode[NodeT], EClassRef],
+                                                              private val classData: Map[EClassRef, HashConsEClassData[NodeT]])
+  extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] {
 
   // We guarantee the following invariants:
   //   1. All nodes in hashCons and classData are kept canonical with regard to the current state of unionFind.
@@ -175,7 +176,7 @@ final case class HashConsEGraph[NodeT] private(private val unionFind: DisjointSe
   /**
    * Checks that the invariants of the hash-consed e-graph are satisfied.
    */
-  private[eqsat] override def checkInvariants(): Unit = {
+  def checkInvariants(): Unit = {
     // Check that hashCons is canonicalized.
     for ((node, ref) <- hashCons) {
       assert(canonicalize(node) == node)
