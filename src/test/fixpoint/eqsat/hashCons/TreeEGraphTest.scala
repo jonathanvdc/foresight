@@ -163,6 +163,11 @@ class TreeEGraphTest {
     assert(egraph2.nodes(c).head.nodeType == 0)
     assert(!egraph2.requiresRebuild)
 
+    val firstArg = egraph2.nodes(c).head.args.head
+    val secondArg = egraph2.nodes(c).head.args(1)
+    assert(egraph2.nodes(firstArg).head.nodeType == 1)
+    assert(egraph2.nodes(secondArg).head.nodeType == 2)
+
     assert(egraph2.canonicalize(c) == c)
 
     egraph2.asInstanceOf[HashConsEGraph[Int]].checkInvariants()
