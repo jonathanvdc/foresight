@@ -4,7 +4,7 @@ import eqsat.ENode
 import org.junit.Test
 
 /**
- * Tests for the behavior of hash-consed e-graphs containing trees.
+ * Tests for the behavior of hash-consed e-graphs containing trees and directed acyclic graphs.
  */
 class TreeEGraphTest {
   /**
