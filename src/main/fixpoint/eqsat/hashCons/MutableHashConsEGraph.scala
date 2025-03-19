@@ -96,6 +96,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
+    val oldClassData = classData
+
     var unionWorklist = pairs.toList
 
     // The pairs of e-classes that were unified.
@@ -343,7 +345,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       usersRepairWorklist = Set.empty
     }
 
-    val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).toSet
-    touched.groupBy(canonicalize).values.toSet
+    val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).map(_.ref).toSet
+    touched.map(c => (canonicalize(c), c)).groupBy(_._1.ref).values.map(_.map {
+      case (canonical, original) =>
+        EClassCall(original, SlotMap.identity(oldClassData(original).slots).composeFresh(canonical.args.inverse))
+    }).toSet
   }
 }
