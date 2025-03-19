@@ -1,5 +1,6 @@
 package fixpoint.eqsat.hashCons
 
+import fixpoint.eqsat.slots.Slot
 import fixpoint.eqsat.{ENode, Tree}
 import org.junit.Test
 
@@ -184,6 +185,30 @@ class TreeEGraphTest {
     assert(egraph2.nodes(secondArg).head.nodeType == 2)
 
     assert(egraph2.canonicalize(c) == c)
+
+    egraph2.checkInvariants()
+  }
+
+  @Test
+  def singleSlottedNode(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val v0 = Slot.fresh()
+    val v1 = Slot.fresh()
+
+    val node = ENode(0, Seq.empty, Seq(v0, v1), Seq.empty)
+    val (c, egraph2) = egraph.add(node)
+
+    assert(c.args.size == 2)
+
+    assert(egraph2.classes.size == 1)
+    assert(egraph2.classes.toSeq.contains(c.ref))
+    assert(egraph2.nodes(c).size == 1)
+    assert(egraph2.nodes(c).head == node)
+    assert(egraph2.users(c.ref).isEmpty)
+
+    assert(egraph2.canonicalize(c) == c)
+    assert(egraph2.canonicalize(node).applied == node)
 
     egraph2.checkInvariants()
   }

@@ -7,17 +7,21 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * sequence of e-class references that represent the arguments of the e-node.
  *
  * @param nodeType The node type of the e-node.
- * @param slots The slots used by the e-node.
+ * @param privateSlots The slots used by the e-node that are not visible outside the e-node. These slots are redundant
+ *                     by construction. Their purpose is to allow e-nodes to introduce fresh variable bindings, such as
+ *                     in let expressions or lambda abstractions.
+ * @param publicSlots The slots used by the e-node that are visible outside the e-node. These slots refer to variables
+ *                    defined elsewhere.
  * @param args The arguments of the e-node.
  * @tparam NodeT The type of the node that the e-node represents. Node types contain all information required to form
  *               an expression aside from its slots and arguments.
  */
-final case class ENode[NodeT](nodeType: NodeT, slots: Seq[Slot], args: Seq[AppliedRef]) {
+final case class ENode[NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[AppliedRef]) {
   /**
    * Gets all slots used by the e-node, including the slots used by its arguments.
    * @return The set of slots used by the e-node.
    */
-  def allSlots: Seq[Slot] = slots ++ args.flatMap(_.args.values)
+  def allSlots: Seq[Slot] = privateSlots ++ publicSlots ++ args.flatMap(_.args.values)
 
   /**
    * Gets all distinct slots used by the e-node, including the slots used by its arguments. Distinct slots appear in
@@ -33,9 +37,10 @@ final case class ENode[NodeT](nodeType: NodeT, slots: Seq[Slot], args: Seq[Appli
    * @return The e-node with the slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    val newSlots = slots.map(slot => renaming(slot))
+    val newPrivateSlots = privateSlots.map(renaming.apply)
+    val newPublicSlots = publicSlots.map(renaming.apply)
     val newArgs = args.map(ref => ref.copy(args = ref.args.compose(renaming)))
-    copy(slots = newSlots, args = newArgs)
+    copy(privateSlots = newPrivateSlots, publicSlots = newPublicSlots, args = newArgs)
   }
 
   /**
@@ -67,5 +72,7 @@ object ENode {
    * @tparam NodeT The type of the node that the e-node represents.
    * @return The e-node with the given node type and arguments.
    */
-  def unslotted[NodeT](nodeType: NodeT, args: Seq[AppliedRef]): ENode[NodeT] = ENode(nodeType, Seq.empty, args)
+  def unslotted[NodeT](nodeType: NodeT, args: Seq[AppliedRef]): ENode[NodeT] = {
+    ENode(nodeType, Seq.empty, Seq.empty, args)
+  }
 }

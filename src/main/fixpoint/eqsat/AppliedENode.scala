@@ -20,7 +20,7 @@ final case class AppliedENode[NodeT](renaming: SlotMap, node: ENode[NodeT]) {
    * Gets the slots used by the e-node after renaming.
    * @return The slots used by the e-node.
    */
-  def slots: Seq[Slot] = applied.slots
+  def slots: Seq[Slot] = applied.publicSlots
 
   /**
    * Gets the arguments of the e-node after renaming.

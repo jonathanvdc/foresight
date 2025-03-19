@@ -72,7 +72,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         // Generate slots for the e-class and use them to construct the e-class's data.
         val shape = canonicalNode.node
         val classSlotsToNodeSlots = SlotMap.bijectionFromFreshTo(shape.distinctSlots.toSet)
-        val slots = classSlotsToNodeSlots.keys
+        val slots = classSlotsToNodeSlots.keys -- shape.privateSlots
         val newClassData = EClassData(
           slots,
           Map(shape -> classSlotsToNodeSlots.inverse),
