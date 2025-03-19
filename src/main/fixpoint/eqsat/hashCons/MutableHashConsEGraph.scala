@@ -248,6 +248,25 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
+    def inferSelfSymmetries(ref: EClassRef, node: ENode[NodeT]): Unit = {
+      val shape = node.shape
+      groupCompatibleVariants(node).foreach(variant => {
+        val variantShape = variant.shape
+        if (shape.node == variantShape.node) {
+          val permutation = shape.renaming.compose(variantShape.renaming.inverse)
+
+          val data = classData(ref)
+          data.permutations.tryAdd(permutation) match {
+            case Some(newPerms) =>
+              classData = classData + (ref -> data.copy(permutations = newPerms))
+              touchedNodes(data)
+
+            case None =>
+          }
+        }
+      })
+    }
+
     def repairNode(node: ENode[NodeT]): Unit = {
       // The first step to repairing a hashcons entry is to canonicalize the node.
       // Once canonicalized, there are three possibilities:
@@ -266,13 +285,26 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
         hashCons.get(canonicalNode.node) match {
           case Some(other) =>
+            // Union the original node with the canonicalized node.
             classData = classData + (ref -> data.copy(nodes = data.nodes - node))
             hashCons = hashCons - node
             unionWorklist = (AppliedRef(ref, oldRenaming.inverse), AppliedRef(other, newRenaming.inverse)) :: unionWorklist
+
           case None =>
+            // Shrink e-class slots if the canonical node has fewer slots
+            if (!data.slots.subsetOf(newRenaming.keys)) {
+              shrinkSlots(ref, data.slots.intersect(newRenaming.keys))
+              repairNode(node)
+              return
+            }
+
+            // Update the e-class data and hash-cons map.
             classData = classData + (ref -> data.copy(nodes = data.nodes - node + (canonicalNode.node -> newRenaming)))
             hashCons = hashCons - node + (canonicalNode.node -> ref)
             touchedUsers(data)
+
+            // Infer symmetries from the canonicalized node.
+            inferSelfSymmetries(ref, canonicalNode.rename(newRenaming).applied)
         }
       }
     }
@@ -294,12 +326,14 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
       unionWorklist = List.empty
 
-      // Process the node repair worklist. The repairNodes operation may add new e-classes to the union worklist,
-      // but will not add elements to its own repair worklist.
-      for (node <- nodesRepairWorklist) {
-        repairNode(node)
+      // Process the node repair worklist. The repairNodes operation may add new e-classes to any worklist.
+      while (nodesRepairWorklist.nonEmpty) {
+        val copy = nodesRepairWorklist
+        nodesRepairWorklist = Set.empty
+        for (node <- copy) {
+          repairNode(node)
+        }
       }
-      nodesRepairWorklist = Set.empty
 
       // Process the parents repair worklist. The repairUsers operation will not add elements to any worklist.
       for (ref <- usersRepairWorklist.map(canonicalize)) {
