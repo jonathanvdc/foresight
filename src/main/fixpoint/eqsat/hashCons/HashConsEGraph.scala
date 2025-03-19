@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassData, EClassRef, EGraph, EGraphLike, ENode}
+import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassRef, EGraph, EGraphLike, ENode}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.

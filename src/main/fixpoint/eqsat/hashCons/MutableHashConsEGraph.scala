@@ -1,7 +1,7 @@
 package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.slots.{PermutationGroup, Slot, SlotMap}
-import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassData, EClassRef, ENode}
+import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassRef, ENode}
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],

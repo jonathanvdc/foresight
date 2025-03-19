@@ -1,9 +1,10 @@
-package fixpoint.eqsat
+package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.slots.{PermutationGroup, Slot, SlotMap}
+import fixpoint.eqsat.{AppliedENode, EClassRef, ENode}
 
 /**
- * The data of an e-class.
+ * The data of an e-class in a hash-consed e-graph.
  *
  * @param slots The slots of the e-class.
  * @param nodes The nodes of the e-class, along with the renaming of the slots. The keys of the map are e-node shapes
@@ -13,11 +14,10 @@ import fixpoint.eqsat.slots.{PermutationGroup, Slot, SlotMap}
  * @param users The e-nodes that take the e-class as an argument.
  * @tparam NodeT The type of the nodes.
  */
-final case class EClassData[NodeT](slots: Set[Slot],
-                                   nodes: Map[ENode[NodeT], SlotMap],
-                                   permutations: PermutationGroup[SlotMap],
-                                   users: Set[ENode[NodeT]]) {
-
+private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
+                                                  nodes: Map[ENode[NodeT], SlotMap],
+                                                  permutations: PermutationGroup[SlotMap],
+                                                  users: Set[ENode[NodeT]]) {
   /**
    * Gets the applied nodes.
    * @return The applied nodes.
