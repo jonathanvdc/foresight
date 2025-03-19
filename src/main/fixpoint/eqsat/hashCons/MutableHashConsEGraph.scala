@@ -33,7 +33,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     val canonicalizedArgs = node.copy(args = node.args.map(canonicalize))
     groupCompatibleVariants(canonicalizedArgs).toSeq
       .map(_.asShapeCall)
-      .minBy(_.shape.allSlots)
+      .minBy(_.shape.slots)
   }
 
   private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {
@@ -71,8 +71,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
         // Generate slots for the e-class and use them to construct the e-class's data.
         val shape = canonicalNode.shape
-        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.distinctSlots.toSet)
-        val slots = (shape.distinctSlots.toSet -- shape.privateSlots).map(nodeSlotsToClassSlots.apply)
+        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slots.toSet)
+        val slots = (shape.slots.toSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
         val newClassData = EClassData(
           slots,
           Map(shape -> nodeSlotsToClassSlots),
@@ -91,7 +91,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
           c -> classData(c).copy(users = classData(c).users + shape))
 
         val publicRenaming = SlotMap(
-          canonicalNode.renaming.iterator.filter(p => !shape.privateSlots.contains(p._1)).toMap)
+          canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
         EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
     }
   }

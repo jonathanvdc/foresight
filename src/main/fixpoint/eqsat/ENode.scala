@@ -7,28 +7,21 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * sequence of e-class references that represent the arguments of the e-node.
  *
  * @param nodeType The node type of the e-node.
- * @param privateSlots The slots used by the e-node that are not visible outside the e-node. These slots are redundant
- *                     by construction. Their purpose is to allow e-nodes to introduce fresh variable bindings, such as
- *                     in let expressions or lambda abstractions.
- * @param publicSlots The slots used by the e-node that are visible outside the e-node. These slots refer to variables
- *                    defined elsewhere.
+ * @param definitions The slots used by the e-node that are not visible outside the e-node. These slots are
+ *                    redundant by construction. Their purpose is to allow e-nodes to introduce variable bindings, such
+ *                    as in let expressions or lambda abstractions.
+ * @param uses The slots used by the e-node that are visible outside the e-node. These slots refer to variables
+ *             defined elsewhere.
  * @param args The arguments of the e-node.
  * @tparam NodeT The type of the node that the e-node represents. Node types contain all information required to form
  *               an expression aside from its slots and arguments.
  */
-final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[EClassCall]) {
+final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]) {
   /**
-   * Gets all slots used by the e-node, including the slots used by its arguments.
+   * Gets all slots used by the e-node: definition slots, used slots and slots from arguments.
    * @return The set of slots used by the e-node.
    */
-  def allSlots: Seq[Slot] = privateSlots ++ publicSlots ++ args.flatMap(_.args.values)
-
-  /**
-   * Gets all distinct slots used by the e-node, including the slots used by its arguments. Distinct slots appear in
-   * the list in the same order as they appear in the slots and args.
-   * @return The set of distinct slots used by the e-node.
-   */
-  def distinctSlots: Seq[Slot] = allSlots.distinct
+  def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.args.values)
 
   /**
    * Renames the slots of the e-node according to a renaming.
@@ -37,10 +30,10 @@ final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicS
    * @return The e-node with the slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    val newPrivateSlots = privateSlots.map(renaming.apply)
-    val newPublicSlots = publicSlots.map(renaming.apply)
+    val newDefinitions = definitions.map(renaming.apply)
+    val newUses = uses.map(renaming.apply)
     val newArgs = args.map(ref => ref.copy(args = ref.args.compose(renaming)))
-    copy(privateSlots = newPrivateSlots, publicSlots = newPublicSlots, args = newArgs)
+    copy(definitions = newDefinitions, uses = newUses, args = newArgs)
   }
 
   /**
@@ -50,7 +43,7 @@ final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicS
    * @return The e-node with the slots renamed.
    */
   def asShapeCall: ShapeCall[NodeT] = {
-    val renamedSlots = SlotMap(distinctSlots.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
+    val renamedSlots = SlotMap(slots.distinct.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
     ShapeCall(rename(renamedSlots), renamedSlots.inverse)
   }
 

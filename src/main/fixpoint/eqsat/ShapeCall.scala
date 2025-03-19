@@ -19,16 +19,16 @@ final case class ShapeCall[+NodeT](shape: ENode[NodeT], renaming: SlotMap) {
   def nodeType: NodeT = shape.nodeType
 
   /**
-   * Gets the private slots used by the e-node after renaming.
-   * @return The private slots used by the e-node.
+   * Gets the e-node's slot definitions after renaming.
+   * @return The e-node's slot definitions.
    */
-  def privateSlots: Seq[Slot] = asNode.privateSlots
+  def definitions: Seq[Slot] = asNode.definitions
 
   /**
-   * Gets the public slots used by the e-node after renaming.
-   * @return The public slots used by the e-node.
+   * Gets the e-node's slot uses after renaming.
+   * @return The e-node's slot uses.
    */
-  def publicSlots: Seq[Slot] = asNode.publicSlots
+  def uses: Seq[Slot] = asNode.uses
 
   /**
    * Gets the arguments of the e-node after renaming.
