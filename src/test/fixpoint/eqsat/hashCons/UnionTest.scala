@@ -1,6 +1,7 @@
 package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.ENode
+import fixpoint.eqsat.slots.Slot
 import org.junit.Test
 
 class UnionTest {
@@ -196,5 +197,50 @@ class UnionTest {
     assert(egraph4.nodes(c1) == Set(node, ENode.unslotted(1, Seq(argClass))))
 
     egraph4.checkInvariants()
+  }
+
+  @Test
+  def xUnionYEliminatesSlot(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    val (a, egraph2) = egraph.add(ENode(0, Seq.empty, Seq(x), Seq.empty))
+    val (b, egraph3) = egraph2.add(ENode(0, Seq.empty, Seq(y), Seq.empty))
+
+    assert(egraph3.classes.size == 1)
+
+    assert(a.args.size == 1)
+    assert(b.args.size == 1)
+
+    val egraph4 = egraph3.union(a, b).rebuilt
+
+    val canonical = egraph4.canonicalize(a)
+    assert(egraph4.classes.size == 1)
+    assert(canonical.args.size == 0)
+  }
+
+  @Test
+  def xyUnionYzEliminatesSlots(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+    val z = Slot.fresh()
+
+    val (a, egraph2) = egraph.add(ENode(0, Seq.empty, Seq(x, y), Seq.empty))
+    val (b, egraph3) = egraph2.add(ENode(0, Seq.empty, Seq(y, z), Seq.empty))
+
+    assert(egraph3.classes.size == 1)
+
+    assert(a.args.size == 2)
+    assert(b.args.size == 2)
+
+    val egraph4 = egraph3.union(a, b).rebuilt
+
+    val canonical = egraph4.canonicalize(a)
+    assert(egraph4.classes.size == 1)
+    assert(canonical.args.size == 0)
   }
 }

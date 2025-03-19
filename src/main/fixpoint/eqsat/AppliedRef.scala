@@ -22,5 +22,8 @@ final case class AppliedRef(ref: EClassRef, args: SlotMap) {
    * @param renaming The renaming of the argument slots.
    * @return The applied reference with the arguments renamed.
    */
-  def rename(renaming: SlotMap): AppliedRef = AppliedRef(ref, args.compose(renaming))
+  def rename(renaming: SlotMap): AppliedRef = {
+    assert(args.values.subsetOf(renaming.keys), "Argument slots must be in the renaming.")
+    AppliedRef(ref, args.composePartial(renaming))
+  }
 }
