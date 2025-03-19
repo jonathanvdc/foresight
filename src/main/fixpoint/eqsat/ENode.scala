@@ -28,9 +28,14 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return The e-node with the slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
+    assert({
+      val allSlots = slots.toSet
+      renaming.keys.forall(allSlots.contains)
+    })
+
     val newDefinitions = definitions.map(renaming.apply)
     val newUses = uses.map(renaming.apply)
-    val newArgs = args.map(ref => ref.copy(args = ref.args.compose(renaming)))
+    val newArgs = args.map(ref => ref.copy(args = ref.args.composePartial(renaming)))
     copy(definitions = newDefinitions, uses = newUses, args = newArgs)
   }
 
