@@ -23,7 +23,7 @@ class TreeEGraphTest {
     assert(egraph2.users(c.ref).isEmpty)
 
     assert(egraph2.canonicalize(c) == c)
-    assert(egraph2.canonicalize(node).node == node)
+    assert(egraph2.canonicalize(node).asNode == node)
 
     egraph2.checkInvariants()
   }
@@ -50,8 +50,8 @@ class TreeEGraphTest {
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
-    assert(egraph3.canonicalize(node1).node == node1)
-    assert(egraph3.canonicalize(node2).node == node2)
+    assert(egraph3.canonicalize(node1).asNode == node1)
+    assert(egraph3.canonicalize(node2).asNode == node2)
 
     egraph3.checkInvariants()
   }
@@ -89,9 +89,9 @@ class TreeEGraphTest {
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
     assert(egraph4.canonicalize(c3) == c3)
-    assert(egraph4.canonicalize(arg).node == arg)
-    assert(egraph4.canonicalize(node1).node == node1)
-    assert(egraph4.canonicalize(node2).node == node2)
+    assert(egraph4.canonicalize(arg).asNode == arg)
+    assert(egraph4.canonicalize(node1).asNode == node1)
+    assert(egraph4.canonicalize(node2).asNode == node2)
 
     egraph4.checkInvariants()
   }
@@ -128,9 +128,9 @@ class TreeEGraphTest {
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
     assert(egraph4.canonicalize(c3) == c3)
-    assert(egraph4.canonicalize(arg1).node == arg1)
-    assert(egraph4.canonicalize(arg2).node == arg2)
-    assert(egraph4.canonicalize(node).node == node)
+    assert(egraph4.canonicalize(arg1).asNode == arg1)
+    assert(egraph4.canonicalize(arg2).asNode == arg2)
+    assert(egraph4.canonicalize(node).asNode == node)
 
     egraph4.checkInvariants()
   }
@@ -160,8 +160,8 @@ class TreeEGraphTest {
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
-    assert(egraph3.canonicalize(arg).node == arg)
-    assert(egraph3.canonicalize(node).node == node)
+    assert(egraph3.canonicalize(arg).asNode == arg)
+    assert(egraph3.canonicalize(node).asNode == node)
 
     egraph3.checkInvariants()
   }
@@ -208,7 +208,7 @@ class TreeEGraphTest {
     assert(egraph2.users(c.ref).isEmpty)
 
     assert(egraph2.canonicalize(c) == c)
-    assert(egraph2.canonicalize(node).node == node)
+    assert(egraph2.canonicalize(node).asNode == node)
 
     egraph2.checkInvariants()
   }

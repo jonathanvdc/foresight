@@ -51,7 +51,7 @@ final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicS
    */
   def asShapeCall: ShapeCall[NodeT] = {
     val renamedSlots = SlotMap(distinctSlots.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
-    ShapeCall(renamedSlots.inverse, rename(renamedSlots))
+    ShapeCall(rename(renamedSlots), renamedSlots.inverse)
   }
 
   /**

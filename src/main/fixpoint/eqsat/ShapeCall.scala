@@ -11,7 +11,7 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * @param shape The e-node.
  * @tparam NodeT The type of the e-node.
  */
-final case class ShapeCall[+NodeT](renaming: SlotMap, shape: ENode[NodeT]) {
+final case class ShapeCall[+NodeT](shape: ENode[NodeT], renaming: SlotMap) {
   /**
    * Gets the node type of the e-node.
    * @return The node type of the e-node.
@@ -19,22 +19,28 @@ final case class ShapeCall[+NodeT](renaming: SlotMap, shape: ENode[NodeT]) {
   def nodeType: NodeT = shape.nodeType
 
   /**
-   * Gets the slots used by the e-node after renaming.
-   * @return The slots used by the e-node.
+   * Gets the private slots used by the e-node after renaming.
+   * @return The private slots used by the e-node.
    */
-  def slots: Seq[Slot] = node.publicSlots
+  def privateSlots: Seq[Slot] = asNode.privateSlots
+
+  /**
+   * Gets the public slots used by the e-node after renaming.
+   * @return The public slots used by the e-node.
+   */
+  def publicSlots: Seq[Slot] = asNode.publicSlots
 
   /**
    * Gets the arguments of the e-node after renaming.
    * @return The arguments of the e-node.
    */
-  def args: Seq[EClassCall] = node.args
+  def args: Seq[EClassCall] = asNode.args
 
   /**
    * Gets the e-node with the slots renamed according to the renaming.
    * @return The e-node with the slots renamed.
    */
-  def node: ENode[NodeT] = shape.rename(renaming)
+  def asNode: ENode[NodeT] = shape.rename(renaming)
 
   /**
    * Composes the renaming with another renaming.
@@ -44,6 +50,6 @@ final case class ShapeCall[+NodeT](renaming: SlotMap, shape: ENode[NodeT]) {
    */
   def rename(renaming: SlotMap): ShapeCall[NodeT] = {
     val newRenaming = this.renaming.compose(renaming)
-    ShapeCall(newRenaming, shape)
+    ShapeCall(shape, newRenaming)
   }
 }

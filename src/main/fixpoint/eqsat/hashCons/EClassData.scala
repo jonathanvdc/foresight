@@ -23,6 +23,6 @@ private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
    * @return The applied nodes.
    */
   def appliedNodes: Set[ShapeCall[NodeT]] = {
-    nodes.map { case (node, renaming) => ShapeCall(renaming, node) }.toSet
+    nodes.map { case (node, renaming) => ShapeCall(node, renaming) }.toSet
   }
 }
