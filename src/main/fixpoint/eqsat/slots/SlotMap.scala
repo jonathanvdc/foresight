@@ -201,13 +201,13 @@ object SlotMap {
   }
 
   /**
-   * Create a bijection from fresh slots to a set of slots.
+   * Create a bijection from a set of slots to fresh slots.
    *
-   * @param set The set of slots that serve as values in the bijection.
+   * @param set The set of slots that serve as keys in the bijection.
    * @return A new slot map.
    */
-  def bijectionFromFreshTo(set: Set[Slot]): SlotMap = {
-    val newMap = set.map(x => Slot.fresh() -> x).toMap
+  def bijectionFromSetToFresh(set: Set[Slot]): SlotMap = {
+    val newMap = set.map(x => x -> Slot.fresh()).toMap
     SlotMap(newMap)
   }
 }

@@ -212,4 +212,30 @@ class TreeEGraphTest {
 
     egraph2.checkInvariants()
   }
+
+  @Test
+  def lambdaAndVar(): Unit = {
+    sealed trait NodeType
+    case object Lambda extends NodeType
+    case object Var extends NodeType
+
+    val egraph = HashConsEGraph.empty[NodeType]
+
+    val x = Slot.fresh()
+
+    val varAccess = ENode(Var, Seq.empty, Seq(x), Seq.empty)
+    val (c1, egraph2) = egraph.add(varAccess)
+    assert(egraph2.classes.size == 1)
+    assert(c1.args.size == 1)
+
+    val lambda = ENode(Lambda, Seq(x), Seq.empty, Seq(c1))
+    val (c2, egraph3) = egraph2.add(lambda)
+    assert(egraph3.classes.size == 2)
+    assert(c2.args.size == 0)
+
+    assert(egraph3.canonicalize(c1) == c1)
+    assert(egraph3.canonicalize(c2) == c2)
+
+    egraph3.checkInvariants()
+  }
 }

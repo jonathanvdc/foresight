@@ -16,7 +16,7 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * @tparam NodeT The type of the node that the e-node represents. Node types contain all information required to form
  *               an expression aside from its slots and arguments.
  */
-final case class ENode[NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[AppliedRef]) {
+final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[AppliedRef]) {
   /**
    * Gets all slots used by the e-node, including the slots used by its arguments.
    * @return The set of slots used by the e-node.

@@ -71,11 +71,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
         // Generate slots for the e-class and use them to construct the e-class's data.
         val shape = canonicalNode.node
-        val classSlotsToNodeSlots = SlotMap.bijectionFromFreshTo(shape.distinctSlots.toSet)
-        val slots = classSlotsToNodeSlots.keys -- shape.privateSlots
+        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.distinctSlots.toSet)
+        val slots = (shape.distinctSlots.toSet -- shape.privateSlots).map(nodeSlotsToClassSlots.apply)
         val newClassData = EClassData(
           slots,
-          Map(shape -> classSlotsToNodeSlots.inverse),
+          Map(shape -> nodeSlotsToClassSlots),
           PermutationGroup.identity(SlotMap.identity(slots)),
           Set.empty[ENode[NodeT]])
 
@@ -90,7 +90,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         classData = classData ++ canonicalNode.args.map(_.ref).distinct.map(c =>
           c -> classData(c).copy(users = classData(c).users + shape))
 
-        AppliedRef(ref, classSlotsToNodeSlots.compose(canonicalNode.renaming))
+        val publicRenaming = SlotMap(
+          canonicalNode.renaming.iterator.filter(p => !shape.privateSlots.contains(p._1)).toMap)
+        AppliedRef(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
     }
   }
 

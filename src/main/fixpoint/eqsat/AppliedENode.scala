@@ -9,7 +9,7 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * @param node The e-node.
  * @tparam NodeT The type of the e-node.
  */
-final case class AppliedENode[NodeT](renaming: SlotMap, node: ENode[NodeT]) {
+final case class AppliedENode[+NodeT](renaming: SlotMap, node: ENode[NodeT]) {
   /**
    * Gets the node type of the e-node.
    * @return The node type of the e-node.

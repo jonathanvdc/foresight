@@ -93,10 +93,10 @@ class SlotMapTest {
   }
 
   @Test
-  def testBijectionFromFreshTo(): Unit = {
-    val map = SlotMap.bijectionFromFreshTo(Set(Slot.numeric(0), Slot.numeric(1)))
+  def testBijectionFromSetToFresh(): Unit = {
+    val map = SlotMap.bijectionFromSetToFresh(Set(Slot.numeric(0), Slot.numeric(1)))
     assert(map.size == 2)
-    assert(map.values == Set(Slot.numeric(0), Slot.numeric(1)))
+    assert(map.keys == Set(Slot.numeric(0), Slot.numeric(1)))
     assert(map.isBijection)
     assert(!map.isPermutation)
     map.check()
