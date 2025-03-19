@@ -119,40 +119,6 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] {
     SlotMap(newMap)
   }
 
-  /**
-   * Remove a slot from the slot map.
-   *
-   * @param x The slot to remove.
-   * @return A new slot map with the slot removed.
-   */
-  def remove(x: Slot): SlotMap = {
-    val newMap = map - x
-    SlotMap(newMap)
-  }
-
-  /**
-   * Union with another slot map. If the slot maps contain the same slot, the result will contain the mapping from
-   * the other slot map.
-   *
-   * @param other The other slot map.
-   * @return A new slot map.
-   */
-  def union(other: SlotMap): SlotMap = {
-    val newMap = map ++ other.map
-    SlotMap(newMap)
-  }
-
-  /**
-   * Try to union with another slot map. If the slot maps contain the same slot with different values, return None.
-   *
-   * @param other The other slot map.
-   * @return A new slot map, or None if the slot maps contain the same slot with different values.
-   */
-  def tryUnion(other: SlotMap): Option[SlotMap] = {
-    val newMap = map ++ other.map
-    if (newMap.size == map.size + other.map.size) Some(SlotMap(newMap)) else None
-  }
-
   private[eqsat] def check(): Unit = {
     val found = mutable.HashSet[Slot]()
     map.keys.foreach { x =>
