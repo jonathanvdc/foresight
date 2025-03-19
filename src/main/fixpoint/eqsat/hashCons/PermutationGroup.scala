@@ -1,4 +1,6 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat.hashCons
+
+import fixpoint.eqsat.Slot
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -89,7 +91,7 @@ object PermutationGroup {
 
   def identity[P <: Permutation[P]](identity: P): PermutationGroup[P] = PermutationGroup(identity, None)
 
-  private[slots] def buildOt[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): Map[Slot, P] = {
+  private[hashCons] def buildOt[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): Map[Slot, P] = {
     val ot = mutable.Map(stab -> identity)
     var len = 0
     while (len != ot.size) {
@@ -108,7 +110,7 @@ object PermutationGroup {
     ot.toMap
   }
 
-  private[slots] def schreiersLemma[P <: Permutation[P]](stab: Slot, ot: Map[Slot, P], generators: Set[P]): Set[P] = {
+  private[hashCons] def schreiersLemma[P <: Permutation[P]](stab: Slot, ot: Map[Slot, P], generators: Set[P]): Set[P] = {
     val out = mutable.Set[P]()
     for {
       (_, r) <- ot
@@ -121,7 +123,7 @@ object PermutationGroup {
     out.toSet
   }
 
-  private[slots] def findLowestNonstab[P <: Permutation[P]](generators: Set[P]): Option[Slot] = {
+  private[hashCons] def findLowestNonstab[P <: Permutation[P]](generators: Set[P]): Option[Slot] = {
     val found = generators.flatMap(_.iterator.collect { case (x, y) if x != y => x })
     if (found.isEmpty) {
       None

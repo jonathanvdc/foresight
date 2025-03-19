@@ -1,7 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.ENode
-import fixpoint.eqsat.slots.Slot
+import fixpoint.eqsat.{ENode, Slot}
 import org.junit.Test
 
 class UnionTest {

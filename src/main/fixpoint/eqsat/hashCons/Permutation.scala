@@ -1,7 +1,10 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat.hashCons
+
+import fixpoint.eqsat.Slot
 
 /**
  * A permutation of slots.
+ *
  * @tparam Repr The type of the permutation.
  */
 trait Permutation[Repr <: Permutation[Repr]] {

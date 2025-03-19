@@ -1,7 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.slots.{Slot, SlotMap}
-import fixpoint.eqsat.{EClassCall, EClassRef}
+import fixpoint.eqsat.{EClassCall, EClassRef, Slot, SlotMap}
 
 private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, EClassCall]) {
   /**

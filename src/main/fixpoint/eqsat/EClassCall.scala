@@ -1,7 +1,5 @@
 package fixpoint.eqsat
 
-import fixpoint.eqsat.slots.{Slot, SlotMap}
-
 /**
  * An application of an e-class reference to arguments. These arguments come in the form of a slot map, where the keys
  * are the parameter slots of the e-class and the values are the arguments.

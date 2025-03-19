@@ -1,7 +1,5 @@
 package fixpoint.eqsat
 
-import fixpoint.eqsat.slots.{Slot, SlotMap}
-
 /**
  * An e-node that has been decomposed into a shape and a renaming map that assigns argument slots to the shape's
  * numeric slots.

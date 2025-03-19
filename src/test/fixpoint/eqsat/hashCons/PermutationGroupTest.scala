@@ -1,5 +1,6 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat.hashCons
 
+import fixpoint.eqsat.{Slot, SlotMap}
 import org.junit.Test
 
 import scala.collection.mutable

@@ -1,4 +1,4 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat
 
 import org.junit.Test
 

@@ -1,7 +1,5 @@
 package fixpoint.eqsat
 
-import fixpoint.eqsat.slots.{Slot, SlotMap}
-
 /**
  * An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a
  * sequence of e-class references that represent the arguments of the e-node.

@@ -1,7 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.slots.Slot
-import fixpoint.eqsat.{ENode, Tree}
+import fixpoint.eqsat.{ENode, Slot, Tree}
 import org.junit.Test
 
 /**

@@ -1,4 +1,4 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat
 
 /**
  * A slot in an e-graph. Slots are unique identifiers for variables in the e-graph.

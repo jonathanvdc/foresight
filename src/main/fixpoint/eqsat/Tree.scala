@@ -1,7 +1,5 @@
 package fixpoint.eqsat
 
-import fixpoint.eqsat.slots.Slot
-
 /**
  * A tree data structure.
  *

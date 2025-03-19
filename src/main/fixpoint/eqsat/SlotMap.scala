@@ -1,5 +1,6 @@
-package fixpoint.eqsat.slots
+package fixpoint.eqsat
 
+import fixpoint.eqsat.hashCons.Permutation
 import scala.collection.mutable
 
 /**
@@ -153,7 +154,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] {
     if (newMap.size == map.size + other.map.size) Some(SlotMap(newMap)) else None
   }
 
-  private[slots] def check(): Unit = {
+  private[eqsat] def check(): Unit = {
     val found = mutable.HashSet[Slot]()
     map.keys.foreach { x =>
       assert(!found.contains(x))

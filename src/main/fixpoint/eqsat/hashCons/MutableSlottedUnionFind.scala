@@ -1,7 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{EClassCall, EClassRef}
-import fixpoint.eqsat.slots.Slot
+import fixpoint.eqsat.{EClassCall, EClassRef, Slot}
 
 private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
   def add(key: EClassRef, slots: Set[Slot]): Unit = {
