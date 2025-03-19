@@ -1,6 +1,4 @@
-package fixpoint.eqsat.hashCons
-
-import fixpoint.eqsat.Slot
+package fixpoint.eqsat
 
 /**
  * A permutation of slots.

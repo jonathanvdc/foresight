@@ -1,6 +1,5 @@
 package fixpoint.eqsat
 
-import fixpoint.eqsat.hashCons.Permutation
 import scala.collection.mutable
 
 /**

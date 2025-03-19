@@ -10,9 +10,9 @@ import fixpoint.eqsat.{ShapeCall, EClassCall, EClassRef, EGraph, EGraphLike, ENo
  * @param classData The data of each e-class in the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-private[eqsat] final case class HashConsEGraph[NodeT] private[eqsat](private val unionFind: SlottedUnionFind,
-                                                                     private val hashCons: Map[ENode[NodeT], EClassRef],
-                                                                     private val classData: Map[EClassRef, EClassData[NodeT]])
+private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private val unionFind: SlottedUnionFind,
+                                                                        private val hashCons: Map[ENode[NodeT], EClassRef],
+                                                                        private val classData: Map[EClassRef, EClassData[NodeT]])
   extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] {
 
   // We guarantee the following invariants:
