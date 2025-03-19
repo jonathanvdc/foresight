@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{ENode, Slot}
+import fixpoint.eqsat.{ENode, Slot, Tree}
 import org.junit.Test
 
 class UnionTest {
@@ -284,5 +284,38 @@ class UnionTest {
     assert(dCan.args.size == 0)
 
     assert(cCan == dCan)
+  }
+
+  @Test
+  def xMinusXUnionZeroEliminatesSlot(): Unit = {
+    sealed trait NodeType
+    case object Var extends NodeType
+    case class Const(value: Int) extends NodeType
+    case object Minus extends NodeType
+
+    val egraph = HashConsEGraph.empty[NodeType]
+
+    val x = Slot.fresh()
+
+    val xMinusX = Tree(Minus, Seq.empty, Seq.empty, Seq(
+      Tree(Var, Seq.empty, Seq(x), Seq.empty),
+      Tree(Var, Seq.empty, Seq(x), Seq.empty)))
+
+    val (c, egraph2) = egraph.add(xMinusX)
+
+    assert(egraph2.classes.size == 2)
+    assert(c.args.size == 1)
+
+    val zero = ENode(Const(0), Seq.empty, Seq.empty, Seq.empty)
+    val (d, egraph3) = egraph2.add(zero)
+
+    assert(egraph3.classes.size == 3)
+    assert(d.args.size == 0)
+
+    val egraph4 = egraph3.union(c, d).rebuilt
+
+    assert(egraph4.classes.size == 2)
+    assert(egraph4.canonicalize(c).args.size == 0)
+    assert(egraph4.canonicalize(c) == egraph4.canonicalize(d))
   }
 }

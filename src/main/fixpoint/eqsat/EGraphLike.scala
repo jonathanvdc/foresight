@@ -113,7 +113,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
       val (node, egraph) = acc._2.add(arg)
       (acc._1 :+ node, egraph)
     })
-    graphWithArgs.add(ENode(tree.nodeType, tree.privateSlots, tree.publicSlots, args))
+    graphWithArgs.add(ENode(tree.nodeType, tree.definitions, tree.uses, args))
   }
 
   /**
