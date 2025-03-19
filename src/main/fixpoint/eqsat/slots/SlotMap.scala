@@ -3,7 +3,7 @@ package fixpoint.eqsat.slots
 import scala.collection.mutable
 
 /**
- * A mapping of slots to slots.
+ * A mapping of parameter slots to argument slots.
  *
  * @param map The mapping of slots to slots.
  */
@@ -185,7 +185,7 @@ object SlotMap {
    * @param pairs The slot pairs.
    * @return A new slot map.
    */
-  def fromPairs(pairs: Seq[(Slot, Slot)]): SlotMap = {
+  def fromPairs(pairs: Iterable[(Slot, Slot)]): SlotMap = {
     SlotMap(pairs.toMap)
   }
 

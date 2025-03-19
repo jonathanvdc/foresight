@@ -17,7 +17,15 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @return The canonical reference to the e-class pointed to by ref, if the e-class is defined in this e-graph;
    *         otherwise, None.
    */
-  def tryCanonicalize(ref: EClassRef): Option[EClassRef]
+  def tryCanonicalize(ref: EClassRef): Option[AppliedRef]
+
+  /**
+   * Canonicalizes an e-node, canonicalizing its arguments and decomposing it into a canonical shape and a renaming of
+   * the shape's parameter slots to argument slots.
+   * @param node The e-node to canonicalize.
+   * @return The canonicalized e-node.
+   */
+  def canonicalize(node: ENode[NodeT]): AppliedENode[NodeT]
 
   /**
    * Enumerates all unique e-classes in this e-graph.
@@ -26,26 +34,25 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   def classes: Iterable[EClassRef]
 
   /**
-   * The set of nodes of a given e-class.
-   * @param ref The e-class whose nodes to find.
-   * @return All nodes in the e-class pointed to by ref.
+   * The set of nodes of a given e-class application.
+   * @param app The e-class whose nodes to find.
+   * @return All nodes in the e-class pointed to by app.
    */
-  def nodes(ref: EClassRef): Set[ENode[NodeT]]
+  def nodes(app: AppliedRef): Set[ENode[NodeT]]
 
   /**
-   * The set of all e-classes that refer to an e-class through their e-nodes. An e-class A has a parent B if and only if
-   * there is an e-node in B that takes A as an argument.
-   * @param ref The e-class whose parents to find.
+   * The set of all e-nodes that refer to an e-class.
+   * @param ref The e-class whose uses to find.
    * @return All e-classes that point to ref through their e-nodes.
    */
-  def parents(ref: EClassRef): Set[EClassRef]
+  def users(ref: EClassRef): Set[ENode[NodeT]]
 
   /**
    * Finds the e-class of a given e-node.
    * @param node The e-node to find the e-class of.
    * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.
    */
-  def find(node: ENode[NodeT]): Option[EClassRef]
+  def find(node: ENode[NodeT]): Option[AppliedRef]
 
   /**
    * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
@@ -53,7 +60,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @param node The e-node to add to the e-graph.
    * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.
    */
-  def add(node: ENode[NodeT]): (EClassRef, This)
+  def add(node: ENode[NodeT]): (AppliedRef, This)
 
   /**
    * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
@@ -62,7 +69,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @param pairs The pairs of e-classes to union.
    * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
    */
-  def unionMany(pairs: Seq[(EClassRef, EClassRef)]): (Set[Set[EClassRef]], This)
+  def unionMany(pairs: Seq[(AppliedRef, AppliedRef)]): (Set[Set[AppliedRef]], This)
 
   // Helper methods:
 
@@ -71,14 +78,16 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @param ref The reference to canonicalize.
    * @return The canonical reference to the e-class pointed to by ref.
    */
-  final def canonicalize(ref: EClassRef): EClassRef = tryCanonicalize(ref).get
+  final def canonicalize(ref: EClassRef): AppliedRef = tryCanonicalize(ref).get
 
   /**
-   * Canonicalizes an e-node.
-   * @param node The e-node to canonicalize.
-   * @return The canonicalized e-node.
+   * Canonicalizes an e-class reference application.
+   * @param ref The e-class application to canonicalize.
+   * @return The canonicalized e-class application.
    */
-  final def canonicalize(node: ENode[NodeT]): ENode[NodeT] = ENode(node.nodeType, node.args.map(canonicalize))
+  final def canonicalize(ref: AppliedRef): AppliedRef = {
+    canonicalize(ref.ref).rename(ref.args)
+  }
 
   /**
    * Determines whether the e-graph contains a given e-class.
@@ -99,12 +108,12 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @param tree The tree to add.
    * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
    */
-  final def add(tree: Tree[NodeT]): (EClassRef, This) = {
-    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassRef], this))((acc, arg) => {
+  final def add(tree: Tree[NodeT]): (AppliedRef, This) = {
+    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[AppliedRef], this))((acc, arg) => {
       val (node, egraph) = acc._2.add(arg)
       (acc._1 :+ node, egraph)
     })
-    graphWithArgs.add(ENode(tree.nodeType, args))
+    graphWithArgs.add(ENode(tree.nodeType, tree.slots, args))
   }
 
   /**
@@ -115,6 +124,6 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  final def union(left: EClassRef, right: EClassRef): EGraphWithPendingUnions[This] =
+  final def union(left: AppliedRef, right: AppliedRef): EGraphWithPendingUnions[This] =
     EGraphWithPendingUnions(this.asInstanceOf[This]).union(left, right)
 }

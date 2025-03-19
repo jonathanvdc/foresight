@@ -10,10 +10,6 @@ import scala.collection.mutable
  * @tparam P The type of the permutations in the group.
  */
 final case class PermutationGroup[P <: Permutation[P]](identity: P, next: Option[NextPermutation[P]]) {
-  def this(identity: P, generators: Set[P]) = {
-    this(identity, PermutationGroup.findLowestNonstab(generators).map(s => NextPermutation(s, identity, generators)))
-  }
-
   /**
    * Check if the group is trivial. A group is trivial if it only contains the identity permutation.
    * @return True if the group is trivial.
@@ -55,16 +51,17 @@ final case class PermutationGroup[P <: Permutation[P]](identity: P, next: Option
       }
   }
 
-  def add(p: P): Boolean = addSet(Set(p))
+  def add(p: P): PermutationGroup[P] = tryAdd(p).getOrElse(this)
 
-  def addSet(perms: Set[P]): Boolean = {
+  def tryAdd(p: P): Option[PermutationGroup[P]] = tryAddSet(Set(p))
+
+  def tryAddSet(perms: Set[P]): Option[PermutationGroup[P]] = {
     val newPerms = perms.filterNot(p => contains(p))
     if (newPerms.nonEmpty) {
-      val newGroup = new PermutationGroup(identity, generators ++ newPerms)
-      this.copy(identity = newGroup.identity, next = newGroup.next)
-      true
+      val newGroup = PermutationGroup(identity, generators ++ newPerms)
+      Some(this.copy(identity = newGroup.identity, next = newGroup.next))
     } else {
-      false
+      None
     }
   }
 
@@ -80,15 +77,19 @@ object NextPermutation {
   def apply[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): NextPermutation[P] = {
     val ot = PermutationGroup.buildOt(stab, identity, generators)
     val newGenerators = PermutationGroup.schreiersLemma(stab, ot, generators)
-    val g = new PermutationGroup(identity, newGenerators)
+    val g = PermutationGroup(identity, newGenerators)
     NextPermutation(stab, ot, g)
   }
 }
 
-private object PermutationGroup {
+object PermutationGroup {
+  def apply[P <: Permutation[P]](identity: P, generators: Set[P]): PermutationGroup[P] = {
+    this(identity, PermutationGroup.findLowestNonstab(generators).map(s => NextPermutation(s, identity, generators)))
+  }
+
   def identity[P <: Permutation[P]](identity: P): PermutationGroup[P] = PermutationGroup(identity, None)
 
-  def buildOt[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): Map[Slot, P] = {
+  private[slots] def buildOt[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): Map[Slot, P] = {
     val ot = mutable.Map(stab -> identity)
     var len = 0
     while (len != ot.size) {
@@ -107,7 +108,7 @@ private object PermutationGroup {
     ot.toMap
   }
 
-  def schreiersLemma[P <: Permutation[P]](stab: Slot, ot: Map[Slot, P], generators: Set[P]): Set[P] = {
+  private[slots] def schreiersLemma[P <: Permutation[P]](stab: Slot, ot: Map[Slot, P], generators: Set[P]): Set[P] = {
     val out = mutable.Set[P]()
     for {
       (_, r) <- ot
@@ -120,7 +121,7 @@ private object PermutationGroup {
     out.toSet
   }
 
-  def findLowestNonstab[P <: Permutation[P]](generators: Set[P]): Option[Slot] = {
+  private[slots] def findLowestNonstab[P <: Permutation[P]](generators: Set[P]): Option[Slot] = {
     val found = generators.flatMap(_.iterator.collect { case (x, y) if x != y => x })
     if (found.isEmpty) {
       None

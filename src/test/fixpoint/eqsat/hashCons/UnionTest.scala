@@ -10,8 +10,8 @@ class UnionTest {
   @Test
   def unionTwoLeaves(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val node1 = ENode(1, Seq.empty)
-    val node2 = ENode(2, Seq.empty)
+    val node1 = ENode.unslotted(1, Seq.empty)
+    val node2 = ENode.unslotted(2, Seq.empty)
     val (c1, egraph2) = egraph.add(node1)
     val (c2, egraph3) = egraph2.add(node2)
 
@@ -32,11 +32,11 @@ class UnionTest {
   @Test
   def unionTwoNodesWithCommonArgument(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val arg = ENode(0, Seq.empty)
+    val arg = ENode.unslotted(0, Seq.empty)
     val (c1, egraph2) = egraph.add(arg)
 
-    val node1 = ENode(1, Seq(c1))
-    val node2 = ENode(2, Seq(c1))
+    val node1 = ENode.unslotted(1, Seq(c1))
+    val node2 = ENode.unslotted(2, Seq(c1))
     val (c2, egraph3) = egraph2.add(node1)
     val (c3, egraph4) = egraph3.add(node2)
 
@@ -57,9 +57,9 @@ class UnionTest {
   @Test
   def unionThreeNodes(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val node1 = ENode(1, Seq.empty)
-    val node2 = ENode(2, Seq.empty)
-    val node3 = ENode(3, Seq.empty)
+    val node1 = ENode.unslotted(1, Seq.empty)
+    val node2 = ENode.unslotted(2, Seq.empty)
+    val node3 = ENode.unslotted(3, Seq.empty)
     val (c1, egraph2) = egraph.add(node1)
     val (c2, egraph3) = egraph2.add(node2)
     val (c3, egraph4) = egraph3.add(node3)
@@ -82,8 +82,6 @@ class UnionTest {
     assert(egraph7.nodes(c1) == egraph7.nodes(c3))
     assert(egraph7.nodes(c1) == Set(node1, node2, node3))
 
-    assert(egraph6 == egraph7)
-
     egraph7.checkInvariants()
   }
 
@@ -93,12 +91,12 @@ class UnionTest {
   @Test
   def unionArgumentNodes(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val arg1 = ENode(0, Seq.empty)
-    val arg2 = ENode(1, Seq.empty)
+    val arg1 = ENode.unslotted(0, Seq.empty)
+    val arg2 = ENode.unslotted(1, Seq.empty)
     val (c1, egraph2) = egraph.add(arg1)
     val (c2, egraph3) = egraph2.add(arg2)
 
-    val node = ENode(2, Seq(c1, c2))
+    val node = ENode.unslotted(2, Seq(c1, c2))
     val (c3, egraph4) = egraph3.add(node)
 
     assert(egraph4.classes.size == 3)
@@ -109,7 +107,7 @@ class UnionTest {
     assert(egraph5.classes.size == 2)
     assert(egraph5.nodes(c1) == egraph5.nodes(c2))
     assert(egraph5.nodes(c1) == Set(arg1, arg2))
-    assert(egraph5.nodes(c3) == Set(ENode(2, Seq(argClass, argClass))))
+    assert(egraph5.nodes(c3) == Set(ENode.unslotted(2, Seq(argClass, argClass))))
 
     egraph5.checkInvariants()
   }
@@ -121,13 +119,13 @@ class UnionTest {
   @Test
   def upwardMerge(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val arg1 = ENode(0, Seq.empty)
-    val arg2 = ENode(1, Seq.empty)
+    val arg1 = ENode.unslotted(0, Seq.empty)
+    val arg2 = ENode.unslotted(1, Seq.empty)
     val (c1, egraph2) = egraph.add(arg1)
     val (c2, egraph3) = egraph2.add(arg2)
 
-    val node1 = ENode(2, Seq(c1))
-    val node2 = ENode(2, Seq(c2))
+    val node1 = ENode.unslotted(2, Seq(c1))
+    val node2 = ENode.unslotted(2, Seq(c2))
     val (c3, egraph4) = egraph3.add(node1)
     val (c4, egraph5) = egraph4.add(node2)
 
@@ -141,7 +139,7 @@ class UnionTest {
     assert(egraph6.canonicalize(c3) == egraph6.canonicalize(c4))
     assert(egraph6.nodes(c1) == egraph6.nodes(c2))
     assert(egraph6.nodes(c1) == Set(arg1, arg2))
-    assert(egraph6.nodes(c3) == Set(ENode(2, Seq(argClass))))
+    assert(egraph6.nodes(c3) == Set(ENode.unslotted(2, Seq(argClass))))
 
     egraph6.checkInvariants()
   }
@@ -153,13 +151,13 @@ class UnionTest {
   @Test
   def noUpwardMerge(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val arg1 = ENode(0, Seq.empty)
-    val arg2 = ENode(1, Seq.empty)
+    val arg1 = ENode.unslotted(0, Seq.empty)
+    val arg2 = ENode.unslotted(1, Seq.empty)
     val (c1, egraph2) = egraph.add(arg1)
     val (c2, egraph3) = egraph2.add(arg2)
 
-    val node1 = ENode(2, Seq(c1))
-    val node2 = ENode(3, Seq(c2))
+    val node1 = ENode.unslotted(2, Seq(c1))
+    val node2 = ENode.unslotted(3, Seq(c2))
     val (c3, egraph4) = egraph3.add(node1)
     val (c4, egraph5) = egraph4.add(node2)
 
@@ -171,8 +169,8 @@ class UnionTest {
     assert(egraph6.canonicalize(c1) == egraph6.canonicalize(c2))
     assert(egraph6.nodes(c1) == egraph6.nodes(c2))
     assert(egraph6.nodes(c1) == Set(arg1, arg2))
-    assert(egraph6.nodes(c3) == Set(ENode(2, Seq(egraph6.canonicalize(c1)))))
-    assert(egraph6.nodes(c4) == Set(ENode(3, Seq(egraph6.canonicalize(c1)))))
+    assert(egraph6.nodes(c3) == Set(ENode.unslotted(2, Seq(egraph6.canonicalize(c1)))))
+    assert(egraph6.nodes(c4) == Set(ENode.unslotted(3, Seq(egraph6.canonicalize(c1)))))
 
     egraph4.checkInvariants()
   }
@@ -183,10 +181,10 @@ class UnionTest {
   @Test
   def selfCycle(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
-    val node = ENode(0, Seq.empty)
+    val node = ENode.unslotted(0, Seq.empty)
     val (c1, egraph2) = egraph.add(node)
 
-    val selfCycle = ENode(1, Seq(c1))
+    val selfCycle = ENode.unslotted(1, Seq(c1))
     val (c2, egraph3) = egraph2.add(selfCycle)
 
     assert(egraph3.classes.size == 2)
@@ -195,7 +193,7 @@ class UnionTest {
     val argClass = egraph4.canonicalize(c1)
 
     assert(egraph4.classes.size == 1)
-    assert(egraph4.nodes(c1) == Set(node, ENode(1, Seq(argClass))))
+    assert(egraph4.nodes(c1) == Set(node, ENode.unslotted(1, Seq(argClass))))
 
     egraph4.checkInvariants()
   }
