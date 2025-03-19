@@ -1,16 +1,16 @@
 package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.slots.{Slot, SlotMap}
-import fixpoint.eqsat.{AppliedRef, EClassRef}
+import fixpoint.eqsat.{EClassCall, EClassRef}
 
-private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, AppliedRef]) {
+private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, EClassCall]) {
   /**
    * Updates the union-find with the given key and value.
    * @param key The key to update.
    * @param value The new value of the key.
    * @return The new union-find with the key updated.
    */
-  def update(key: EClassRef, value: AppliedRef): SlottedUnionFind = {
+  def update(key: EClassRef, value: EClassCall): SlottedUnionFind = {
     SlottedUnionFind(parents + (key -> value))
   }
 
@@ -21,7 +21,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @return The new union-find with the e-class added.
    */
   def add(key: EClassRef, slots: Set[Slot]): SlottedUnionFind = {
-    update(key, AppliedRef(key, SlotMap.identity(slots)))
+    update(key, EClassCall(key, SlotMap.identity(slots)))
   }
 
   /**
@@ -33,7 +33,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @return The representative of the key, the renaming of the path, and the new union-find, if the key is in the
    *         union-find. None otherwise.
    */
-  def tryFindAndCompress(key: EClassRef): Option[(AppliedRef, SlottedUnionFind)] = {
+  def tryFindAndCompress(key: EClassRef): Option[(EClassCall, SlottedUnionFind)] = {
     parents.get(key) match {
       case None => None
       case Some(parent) if parent.ref == key => Some((parent, this))
@@ -51,7 +51,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @param ref The key to find.
    * @return The representative of the key and the new union-find.
    */
-  def findAndCompress(ref: EClassRef): (AppliedRef, SlottedUnionFind) = {
+  def findAndCompress(ref: EClassRef): (EClassCall, SlottedUnionFind) = {
     tryFindAndCompress(ref).get
   }
 
@@ -62,7 +62,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @param ref The key to find.
    * @return The representative of the key and the new union-find, if the key is in the union-find. None otherwise.
    */
-  def tryFindAndCompress(ref: AppliedRef): Option[(AppliedRef, SlottedUnionFind)] = {
+  def tryFindAndCompress(ref: EClassCall): Option[(EClassCall, SlottedUnionFind)] = {
     tryFindAndCompress(ref.ref).map {
       case (rep, disjointSet) => (rep.rename(ref.args), disjointSet)
     }
@@ -75,7 +75,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @param ref The key to find.
    * @return The representative of the key.
    */
-  def findAndCompress(ref: AppliedRef): (AppliedRef, SlottedUnionFind) = {
+  def findAndCompress(ref: EClassCall): (EClassCall, SlottedUnionFind) = {
     tryFindAndCompress(ref).get
   }
 
@@ -86,7 +86,7 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, Appl
    * @param key The key to find.
    * @return The representative of the key, if the key is in the union-find. None otherwise.
    */
-  def tryFind(key: EClassRef): Option[AppliedRef] = {
+  def tryFind(key: EClassRef): Option[EClassCall] = {
     tryFindAndCompress(key).map { _._1 }
   }
 }

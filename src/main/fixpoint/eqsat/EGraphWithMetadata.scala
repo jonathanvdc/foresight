@@ -41,19 +41,19 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
     metadata(name).asInstanceOf[MetadataManagerT]
   }
 
-  override def tryCanonicalize(ref: EClassRef): Option[AppliedRef] = egraph.tryCanonicalize(ref)
-  override def canonicalize(node: ENode[NodeT]): AppliedENode[NodeT] = egraph.canonicalize(node)
+  override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = egraph.tryCanonicalize(ref)
+  override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = egraph.classes
-  override def nodes(app: AppliedRef): Set[ENode[NodeT]] = egraph.nodes(app)
+  override def nodes(call: EClassCall): Set[ENode[NodeT]] = egraph.nodes(call)
   override def users(ref: EClassRef): Set[ENode[NodeT]] = egraph.users(ref)
-  override def find(node: ENode[NodeT]): Option[AppliedRef] = egraph.find(node)
+  override def find(node: ENode[NodeT]): Option[EClassCall] = egraph.find(node)
 
-  override def add(node: ENode[NodeT]): (AppliedRef, EGraphWithMetadata[NodeT, Repr]) = {
+  override def add(node: ENode[NodeT]): (EClassCall, EGraphWithMetadata[NodeT, Repr]) = {
     val (ref, newEgraph) = egraph.add(node)
     (ref, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph))))
   }
 
-  override def unionMany(pairs: Seq[(AppliedRef, AppliedRef)]): (Set[Set[AppliedRef]], EGraphWithMetadata[NodeT, Repr]) = {
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithMetadata[NodeT, Repr]) = {
     val (equivalences, newEgraph) = egraph.unionMany(pairs)
     (equivalences, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onUnionMany(equivalences, newEgraph))))
   }

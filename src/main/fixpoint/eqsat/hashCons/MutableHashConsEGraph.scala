@@ -1,7 +1,7 @@
 package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.slots.{PermutationGroup, Slot, SlotMap}
-import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassRef, ENode}
+import fixpoint.eqsat.{ShapeCall, EClassCall, EClassRef, ENode}
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],
@@ -15,53 +15,53 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     classData(ref).slots
   }
 
-  def tryCanonicalize(ref: EClassRef): Option[AppliedRef] = {
+  def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
     unionFind.tryFindAndCompress(ref)
   }
 
-  def canonicalize(ref: EClassRef): AppliedRef = {
+  def canonicalize(ref: EClassRef): EClassCall = {
     unionFind.findAndCompress(ref)
   }
 
-  def canonicalize(app: AppliedRef): AppliedRef = {
+  def canonicalize(app: EClassCall): EClassCall = {
     canonicalize(app.ref).rename(app.args)
   }
 
-  def canonicalize(node: ENode[NodeT]): AppliedENode[NodeT] = {
+  def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import scala.math.Ordering.Implicits.seqDerivedOrdering
 
     val canonicalizedArgs = node.copy(args = node.args.map(canonicalize))
     groupCompatibleVariants(canonicalizedArgs).toSeq
-      .map(_.shape)
-      .minBy(_.node.allSlots)
+      .map(_.asShapeCall)
+      .minBy(_.shape.allSlots)
   }
 
   private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {
     val groups = node.args.map({
-      case AppliedRef(ref, renaming) =>
+      case EClassCall(ref, renaming) =>
         val data = classData(ref)
-        data.permutations.allPerms.map(perm => AppliedRef(ref, perm.compose(renaming)))
+        data.permutations.allPerms.map(perm => EClassCall(ref, perm.compose(renaming)))
     })
 
     Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
   }
 
-  def find(node: ENode[NodeT]): Option[AppliedRef] = {
+  def find(node: ENode[NodeT]): Option[EClassCall] = {
     findImpl(canonicalize(node))
   }
 
-  private def findImpl(renamedShape: AppliedENode[NodeT]): Option[AppliedRef] = {
-    assert(renamedShape.node.isShape)
+  private def findImpl(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
+    assert(renamedShape.shape.isShape)
 
-    hashCons.get(renamedShape.node).map { ref =>
+    hashCons.get(renamedShape.shape).map { ref =>
       val data = classData(ref)
-      val classToNode = data.nodes(renamedShape.node)
+      val classToNode = data.nodes(renamedShape.shape)
       val out = classToNode.inverse.compose(renamedShape.renaming)
-      AppliedRef(ref, out)
+      EClassCall(ref, out)
     }
   }
 
-  def add(node: ENode[NodeT]): AppliedRef = {
+  def add(node: ENode[NodeT]): EClassCall = {
     val canonicalNode = canonicalize(node)
     findImpl(canonicalNode) match {
       case Some(ref) => ref
@@ -70,7 +70,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         val ref = new EClassRef()
 
         // Generate slots for the e-class and use them to construct the e-class's data.
-        val shape = canonicalNode.node
+        val shape = canonicalNode.shape
         val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.distinctSlots.toSet)
         val slots = (shape.distinctSlots.toSet -- shape.privateSlots).map(nodeSlotsToClassSlots.apply)
         val newClassData = EClassData(
@@ -92,15 +92,15 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
         val publicRenaming = SlotMap(
           canonicalNode.renaming.iterator.filter(p => !shape.privateSlots.contains(p._1)).toMap)
-        AppliedRef(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
+        EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
     }
   }
 
-  def unionMany(pairs: Seq[(AppliedRef, AppliedRef)]): Set[Set[AppliedRef]] = {
+  def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     var unionWorklist = pairs.toList
 
     // The pairs of e-classes that were unified.
-    var unifiedPairs = List.empty[(AppliedRef, AppliedRef)]
+    var unifiedPairs = List.empty[(EClassCall, EClassCall)]
 
     // The nodes repair set contains all e-classes containing nodes that might refer to non-canonical e-classes.
     var nodesRepairWorklist = Set.empty[ENode[NodeT]]
@@ -145,19 +145,19 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       touchedNodes(newData)
     }
 
-    def shrinkAppliedSlots(ref: AppliedRef, slots: Set[Slot]): Unit = {
+    def shrinkAppliedSlots(ref: EClassCall, slots: Set[Slot]): Unit = {
       val appSlotsToClassSlots = ref.args.inverse
       shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
     }
 
-    def mergeInto(subRoot: AppliedRef, domRoot: AppliedRef): Unit = {
+    def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
       assert(map.keys == slots(domRoot.ref))
       assert(map.values == slots(subRoot.ref))
 
       // Update the union-find and record the union in unifiedPairs.
-      unionFind.update(subRoot.ref, AppliedRef(domRoot.ref, map))
+      unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
       unifiedPairs = (subRoot, domRoot) :: unifiedPairs
 
       // Merge the nodes and parents of the dominant and subordinate classes.
@@ -206,7 +206,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       touchedUsers(subData)
     }
 
-    def unify(left: AppliedRef, right: AppliedRef): Unit = {
+    def unify(left: EClassCall, right: EClassCall): Unit = {
       val leftRoot = unionFind.findAndCompress(left)
       val rightRoot = unionFind.findAndCompress(right)
       if (leftRoot != rightRoot) {
@@ -214,7 +214,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
-    def unifyRoots(leftRoot: AppliedRef, rightRoot: AppliedRef): Unit = {
+    def unifyRoots(leftRoot: EClassCall, rightRoot: EClassCall): Unit = {
       // We first determine the set of slots that are common to both e-classes. If this set is smaller than either
       // of the e-classes' slot sets, we shrink the e-classes' slots to the common set. This operation will update
       // the union-find, so we recurse in case of shrinkage.
@@ -251,10 +251,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     }
 
     def inferSelfSymmetries(ref: EClassRef, node: ENode[NodeT]): Unit = {
-      val shape = node.shape
+      val shape = node.asShapeCall
       groupCompatibleVariants(node).foreach(variant => {
-        val variantShape = variant.shape
-        if (shape.node == variantShape.node) {
+        val variantShape = variant.asShapeCall
+        if (shape.shape == variantShape.shape) {
           val permutation = shape.renaming.compose(variantShape.renaming.inverse)
 
           val data = classData(ref)
@@ -280,17 +280,17 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       //      for parent set repair.
       val ref = hashCons(node)
       val canonicalNode = canonicalize(node)
-      if (canonicalNode.node != node) {
+      if (canonicalNode.shape != node) {
         val data = classData(ref)
         val oldRenaming = data.nodes(node)
         val newRenaming = canonicalNode.renaming.compose(oldRenaming)
 
-        hashCons.get(canonicalNode.node) match {
+        hashCons.get(canonicalNode.shape) match {
           case Some(other) =>
             // Union the original node with the canonicalized node.
             classData = classData + (ref -> data.copy(nodes = data.nodes - node))
             hashCons = hashCons - node
-            unionWorklist = (AppliedRef(ref, oldRenaming.inverse), AppliedRef(other, newRenaming.inverse)) :: unionWorklist
+            unionWorklist = (EClassCall(ref, oldRenaming.inverse), EClassCall(other, newRenaming.inverse)) :: unionWorklist
 
           case None =>
             // Shrink e-class slots if the canonical node has fewer slots
@@ -301,12 +301,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             }
 
             // Update the e-class data and hash-cons map.
-            classData = classData + (ref -> data.copy(nodes = data.nodes - node + (canonicalNode.node -> newRenaming)))
-            hashCons = hashCons - node + (canonicalNode.node -> ref)
+            classData = classData + (ref -> data.copy(nodes = data.nodes - node + (canonicalNode.shape -> newRenaming)))
+            hashCons = hashCons - node + (canonicalNode.shape -> ref)
             touchedUsers(data)
 
             // Infer symmetries from the canonicalized node.
-            inferSelfSymmetries(ref, canonicalNode.rename(newRenaming).applied)
+            inferSelfSymmetries(ref, canonicalNode.rename(newRenaming).node)
         }
       }
     }
@@ -314,7 +314,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     def repairUsers(ref: EClassRef): Unit = {
       // Repairing the users of an e-class consists of canonicalizing all users of the e-class.
       val data = classData(ref)
-      val canonicalParents = data.users.map(canonicalize).map(_.node)
+      val canonicalParents = data.users.map(canonicalize).map(_.shape)
       if (canonicalParents != data.users) {
         classData = classData + (ref -> EClassData(data.slots, data.nodes, data.permutations, canonicalParents))
       }

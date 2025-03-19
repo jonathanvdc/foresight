@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{AppliedRef, EClassRef}
+import fixpoint.eqsat.{EClassCall, EClassRef}
 import fixpoint.eqsat.slots.Slot
 
 private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
@@ -8,25 +8,25 @@ private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
     set = set.add(key, slots)
   }
 
-  def update(key: EClassRef, value: AppliedRef): Unit = {
+  def update(key: EClassRef, value: EClassCall): Unit = {
     set = set.update(key, value)
   }
 
-  def tryFindAndCompress(key: EClassRef): Option[AppliedRef] = {
+  def tryFindAndCompress(key: EClassRef): Option[EClassCall] = {
     foldUpdateIntoSet(set.tryFindAndCompress(key))
   }
 
-  def findAndCompress(ref: EClassRef): AppliedRef = {
+  def findAndCompress(ref: EClassRef): EClassCall = {
     val (result, newSet) = set.findAndCompress(ref)
     set = newSet
     result
   }
 
-  def tryFindAndCompress(ref: AppliedRef): Option[AppliedRef] = {
+  def tryFindAndCompress(ref: EClassCall): Option[EClassCall] = {
     foldUpdateIntoSet(set.tryFindAndCompress(ref))
   }
 
-  def findAndCompress(ref: AppliedRef): AppliedRef = {
+  def findAndCompress(ref: EClassCall): EClassCall = {
     val (result, newSet) = set.findAndCompress(ref)
     set = newSet
     result

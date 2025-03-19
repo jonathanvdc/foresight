@@ -13,7 +13,7 @@ trait Metadata[NodeT, MetadataT] {
    * @param graph The e-graph that the e-node was added to.
    * @return The update metadata.
    */
-  def onAdd(node: ENode[NodeT], ref: AppliedRef, graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onAdd(node: ENode[NodeT], ref: EClassCall, graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
 
   /**
    * Updates the metadata when e-classes are unioned in the e-graph.
@@ -21,5 +21,5 @@ trait Metadata[NodeT, MetadataT] {
    * @param graph The e-graph that the e-classes were unioned in.
    * @return The update metadata.
    */
-  def onUnionMany(equivalences: Set[Set[AppliedRef]], graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onUnionMany(equivalences: Set[Set[EClassCall]], graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
 }

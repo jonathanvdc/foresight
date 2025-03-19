@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{AppliedENode, AppliedRef, EClassRef, EGraph, EGraphLike, ENode}
+import fixpoint.eqsat.{ShapeCall, EClassCall, EClassRef, EGraph, EGraphLike, ENode}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -29,17 +29,17 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[eqsat](private val
 
   override def classes: Iterable[EClassRef] = classData.keys
 
-  override def tryCanonicalize(ref: EClassRef): Option[AppliedRef] = {
+  override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
     unionFind.tryFind(ref)
   }
 
-  override def canonicalize(node: ENode[NodeT]): AppliedENode[NodeT] = {
+  override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     toMutable.canonicalize(node)
   }
 
-  override def nodes(app: AppliedRef): Set[ENode[NodeT]] = {
-    val canonicalApp = canonicalize(app)
-    classData(canonicalApp.ref).appliedNodes.map(_.rename(canonicalApp.args).applied)
+  override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
+    val canonicalApp = canonicalize(call)
+    classData(canonicalApp.ref).appliedNodes.map(_.rename(canonicalApp.args).node)
   }
 
   override def users(ref: EClassRef): Set[ENode[NodeT]] = {
@@ -47,21 +47,21 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[eqsat](private val
     classData(canonicalApp.ref).users.map(node => {
       val c = hashCons(node)
       val mapping = classData(c).nodes(node)
-      AppliedENode(mapping, node).applied
+      ShapeCall(mapping, node).node
     })
   }
 
-  override def find(node: ENode[NodeT]): Option[AppliedRef] = {
+  override def find(node: ENode[NodeT]): Option[EClassCall] = {
     toMutable.find(node)
   }
 
-  override def add(node: ENode[NodeT]): (AppliedRef, HashConsEGraph[NodeT]) = {
+  override def add(node: ENode[NodeT]): (EClassCall, HashConsEGraph[NodeT]) = {
     val mutable = toMutable
     val ref = mutable.add(node)
     (ref, mutable.toImmutable)
   }
 
-  override def unionMany(pairs: Seq[(AppliedRef, AppliedRef)]): (Set[Set[AppliedRef]], HashConsEGraph[NodeT]) = {
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
     val mutable = toMutable
     val equivalences = mutable.unionMany(pairs)
     (equivalences, mutable.toImmutable)
@@ -73,7 +73,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[eqsat](private val
   def checkInvariants(): Unit = {
     // Check that hashCons is canonicalized.
     for ((node, ref) <- hashCons) {
-      assert(canonicalize(node).node == node)
+      assert(canonicalize(node).shape == node)
       assert(canonicalize(ref).ref == ref)
     }
 
@@ -82,10 +82,10 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[eqsat](private val
       assert(canonicalize(ref).ref == ref)
       for ((node, _) <- data.nodes) {
         assert(node.isShape)
-        assert(canonicalize(node).node == node)
+        assert(canonicalize(node).shape == node)
       }
       for (user <- data.users) {
-        assert(canonicalize(user).node == user)
+        assert(canonicalize(user).shape == user)
       }
     }
 

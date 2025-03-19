@@ -23,7 +23,7 @@ class TreeEGraphTest {
     assert(egraph2.users(c.ref).isEmpty)
 
     assert(egraph2.canonicalize(c) == c)
-    assert(egraph2.canonicalize(node).applied == node)
+    assert(egraph2.canonicalize(node).node == node)
 
     egraph2.checkInvariants()
   }
@@ -50,8 +50,8 @@ class TreeEGraphTest {
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
-    assert(egraph3.canonicalize(node1).applied == node1)
-    assert(egraph3.canonicalize(node2).applied == node2)
+    assert(egraph3.canonicalize(node1).node == node1)
+    assert(egraph3.canonicalize(node2).node == node2)
 
     egraph3.checkInvariants()
   }
@@ -82,16 +82,16 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == node1)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node2)
-    assert(egraph4.users(c1.ref) == Set(egraph4.canonicalize(node1).node, egraph4.canonicalize(node2).node))
+    assert(egraph4.users(c1.ref) == Set(egraph4.canonicalize(node1).shape, egraph4.canonicalize(node2).shape))
     assert(egraph4.users(c2.ref).isEmpty)
     assert(egraph4.users(c3.ref).isEmpty)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
     assert(egraph4.canonicalize(c3) == c3)
-    assert(egraph4.canonicalize(arg).applied == arg)
-    assert(egraph4.canonicalize(node1).applied == node1)
-    assert(egraph4.canonicalize(node2).applied == node2)
+    assert(egraph4.canonicalize(arg).node == arg)
+    assert(egraph4.canonicalize(node1).node == node1)
+    assert(egraph4.canonicalize(node2).node == node2)
 
     egraph4.checkInvariants()
   }
@@ -121,16 +121,16 @@ class TreeEGraphTest {
     assert(egraph4.nodes(c2).head == arg2)
     assert(egraph4.nodes(c3).size == 1)
     assert(egraph4.nodes(c3).head == node)
-    assert(egraph4.users(c1.ref) == Set(egraph4.canonicalize(node).node))
-    assert(egraph4.users(c2.ref) == Set(egraph4.canonicalize(node).node))
+    assert(egraph4.users(c1.ref) == Set(egraph4.canonicalize(node).shape))
+    assert(egraph4.users(c2.ref) == Set(egraph4.canonicalize(node).shape))
     assert(egraph4.users(c3.ref).isEmpty)
 
     assert(egraph4.canonicalize(c1) == c1)
     assert(egraph4.canonicalize(c2) == c2)
     assert(egraph4.canonicalize(c3) == c3)
-    assert(egraph4.canonicalize(arg1).applied == arg1)
-    assert(egraph4.canonicalize(arg2).applied == arg2)
-    assert(egraph4.canonicalize(node).applied == node)
+    assert(egraph4.canonicalize(arg1).node == arg1)
+    assert(egraph4.canonicalize(arg2).node == arg2)
+    assert(egraph4.canonicalize(node).node == node)
 
     egraph4.checkInvariants()
   }
@@ -155,13 +155,13 @@ class TreeEGraphTest {
     assert(egraph3.nodes(c1).head == arg)
     assert(egraph3.nodes(c2).size == 1)
     assert(egraph3.nodes(c2).head == node)
-    assert(egraph3.users(c1.ref) == Set(egraph3.canonicalize(node).node))
+    assert(egraph3.users(c1.ref) == Set(egraph3.canonicalize(node).shape))
     assert(egraph3.users(c2.ref).isEmpty)
 
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
-    assert(egraph3.canonicalize(arg).applied == arg)
-    assert(egraph3.canonicalize(node).applied == node)
+    assert(egraph3.canonicalize(arg).node == arg)
+    assert(egraph3.canonicalize(node).node == node)
 
     egraph3.checkInvariants()
   }
@@ -208,7 +208,7 @@ class TreeEGraphTest {
     assert(egraph2.users(c.ref).isEmpty)
 
     assert(egraph2.canonicalize(c) == c)
-    assert(egraph2.canonicalize(node).applied == node)
+    assert(egraph2.canonicalize(node).node == node)
 
     egraph2.checkInvariants()
   }

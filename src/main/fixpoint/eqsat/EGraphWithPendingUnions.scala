@@ -7,7 +7,7 @@ package fixpoint.eqsat
  * @tparam Repr The type of the e-graph.
  */
 final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr,
-                                                                                      pending: List[(AppliedRef, AppliedRef)]) {
+                                                                                      pending: List[(EClassCall, EClassCall)]) {
   /**
    * Determines whether the e-graph requires a rebuild.
    * @return True if the e-graph requires a rebuild, otherwise false.
@@ -22,7 +22,7 @@ final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGrap
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  def union(left: AppliedRef, right: AppliedRef): EGraphWithPendingUnions[Repr] = {
+  def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[Repr] = {
     if (egraph.canonicalize(left) == egraph.canonicalize(right)) {
       this
     } else {

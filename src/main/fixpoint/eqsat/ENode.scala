@@ -16,7 +16,7 @@ import fixpoint.eqsat.slots.{Slot, SlotMap}
  * @tparam NodeT The type of the node that the e-node represents. Node types contain all information required to form
  *               an expression aside from its slots and arguments.
  */
-final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[AppliedRef]) {
+final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicSlots: Seq[Slot], args: Seq[EClassCall]) {
   /**
    * Gets all slots used by the e-node, including the slots used by its arguments.
    * @return The set of slots used by the e-node.
@@ -49,16 +49,16 @@ final case class ENode[+NodeT](nodeType: NodeT, privateSlots: Seq[Slot], publicS
    *
    * @return The e-node with the slots renamed.
    */
-  def shape: AppliedENode[NodeT] = {
+  def asShapeCall: ShapeCall[NodeT] = {
     val renamedSlots = SlotMap(distinctSlots.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
-    AppliedENode(renamedSlots.inverse, rename(renamedSlots))
+    ShapeCall(renamedSlots.inverse, rename(renamedSlots))
   }
 
   /**
    * Determines whether the e-node is a shape.
    * @return True if the e-node is a shape; otherwise, false.
    */
-  def isShape: Boolean = this == shape.node
+  def isShape: Boolean = this == asShapeCall.shape
 }
 
 /**
@@ -72,7 +72,7 @@ object ENode {
    * @tparam NodeT The type of the node that the e-node represents.
    * @return The e-node with the given node type and arguments.
    */
-  def unslotted[NodeT](nodeType: NodeT, args: Seq[AppliedRef]): ENode[NodeT] = {
+  def unslotted[NodeT](nodeType: NodeT, args: Seq[EClassCall]): ENode[NodeT] = {
     ENode(nodeType, Seq.empty, Seq.empty, args)
   }
 }

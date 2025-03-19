@@ -1,7 +1,7 @@
 package fixpoint.eqsat.hashCons
 
 import fixpoint.eqsat.slots.{PermutationGroup, Slot, SlotMap}
-import fixpoint.eqsat.{AppliedENode, EClassRef, ENode}
+import fixpoint.eqsat.{ShapeCall, EClassRef, ENode}
 
 /**
  * The data of an e-class in a hash-consed e-graph.
@@ -22,7 +22,7 @@ private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
    * Gets the applied nodes.
    * @return The applied nodes.
    */
-  def appliedNodes: Set[AppliedENode[NodeT]] = {
-    nodes.map { case (node, renaming) => AppliedENode(renaming, node) }.toSet
+  def appliedNodes: Set[ShapeCall[NodeT]] = {
+    nodes.map { case (node, renaming) => ShapeCall(renaming, node) }.toSet
   }
 }
