@@ -238,9 +238,52 @@ class UnionTest {
     assert(b.args.size == 2)
 
     val egraph4 = egraph3.union(a, b).rebuilt
+    assert(egraph4.classes.size == 1)
 
     val canonical = egraph4.canonicalize(a)
-    assert(egraph4.classes.size == 1)
     assert(canonical.args.size == 0)
+  }
+
+  @Test
+  def xyUnionYxProducesPermutation(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    val node1 = ENode(0, Seq.empty, Seq(x, y), Seq.empty)
+    val node2 = ENode(0, Seq.empty, Seq(y, x), Seq.empty)
+
+    val (a, egraph2) = egraph.add(node1)
+    val (b, egraph3) = egraph2.add(node2)
+
+    val node3 = ENode(1, Seq(x, y), Seq.empty, Seq(a))
+    val node4 = ENode(1, Seq(x, y), Seq.empty, Seq(b))
+
+    val (c, egraph4) = egraph3.add(node3)
+    val (d, egraph5) = egraph4.add(node4)
+
+    assert(egraph5.classes.size == 3)
+    assert(c != d)
+
+    assert(a.args.size == 2)
+    assert(b.args.size == 2)
+    assert(c.args.size == 0)
+    assert(d.args.size == 0)
+
+    val egraph6 = egraph5.union(a, b).rebuilt
+    assert(egraph6.classes.size == 2)
+
+    val aCan = egraph6.canonicalize(a)
+    val bCan = egraph6.canonicalize(b)
+    val cCan = egraph6.canonicalize(c)
+    val dCan = egraph6.canonicalize(d)
+
+    assert(aCan.args.size == 2)
+    assert(bCan.args.size == 2)
+    assert(cCan.args.size == 0)
+    assert(dCan.args.size == 0)
+
+    assert(cCan == dCan)
   }
 }
