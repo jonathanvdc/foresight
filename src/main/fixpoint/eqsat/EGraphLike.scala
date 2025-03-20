@@ -1,5 +1,7 @@
 package fixpoint.eqsat
 
+import fixpoint.eqsat.metadata.EGraphWithMetadata
+
 /**
  * An immutable e-graph. An e-graph is a data structure that represents a set of expressions. Each expression is
  * represented by an e-node, which is a node in the e-graph. E-nodes are grouped into e-classes, which are sets of
@@ -126,4 +128,10 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    */
   final def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[This] =
     EGraphWithPendingUnions(this.asInstanceOf[This]).union(left, right)
+
+  /**
+   * Enhances this e-graph with the ability to store metadata.
+   * @return The e-graph with metadata.
+   */
+  final def withMetadata: EGraphWithMetadata[NodeT, This] = EGraphWithMetadata(this.asInstanceOf[This])
 }

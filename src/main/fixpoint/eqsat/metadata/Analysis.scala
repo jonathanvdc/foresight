@@ -1,6 +1,6 @@
-package fixpoint.eqsat.analyses
+package fixpoint.eqsat.metadata
 
-import fixpoint.eqsat.{ENode, SlotMap}
+import fixpoint.eqsat.{EGraph, ENode, SlotMap}
 
 /**
  * An analysis that can be performed on an e-graph.
@@ -33,4 +33,27 @@ trait Analysis[NodeT, A] {
    * @return The joined analysis result.
    */
   def join(left: A, right: A): A
+
+  /**
+   * Analyzes an e-graph.
+   * @param egraph The e-graph to analyze.
+   * @return The analysis metadata for the e-graph.
+   */
+  final def apply(egraph: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
+    val updater = new AnalysisUpdater(this, egraph, Map.empty)
+
+    // First apply the analysis to all e-nodes that have no arguments.
+    for (c <- egraph.classes) {
+      for (node <- egraph.nodes(egraph.canonicalize(c))) {
+        if (node.args.isEmpty) {
+          updater.update(c, make(node, Seq.empty))
+        }
+      }
+    }
+
+    // Process the worklist by applying the analysis to the rest of the e-graph. This will eventually touch all e-nodes.
+    updater.processPending()
+
+    AnalysisMetadata(this, updater.results)
+  }
 }

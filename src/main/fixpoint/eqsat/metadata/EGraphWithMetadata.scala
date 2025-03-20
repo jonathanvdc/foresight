@@ -1,7 +1,10 @@
-package fixpoint.eqsat
+package fixpoint.eqsat.metadata
+
+import fixpoint.eqsat._
 
 /**
  * An e-graph with associated metadata. Metadata is kept in sync with the e-graph upon every change.
+ *
  * @param egraph The e-graph.
  * @param metadata The metadata associated with the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
@@ -20,6 +23,17 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
    */
   def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): EGraphWithMetadata[NodeT, Repr] = {
     EGraphWithMetadata(egraph, this.metadata + (name -> metadata))
+  }
+
+  /**
+   * Adds an analysis to the e-graph.
+   * @param name The name of the analysis.
+   * @param analysis The analysis to add.
+   * @tparam A The type of the analysis result.
+   * @return The e-graph with the added analysis.
+   */
+  def addAnalysis[A](name: String, analysis: Analysis[NodeT, A]): EGraphWithMetadata[NodeT, Repr] = {
+    addMetadata(name, analysis(egraph))
   }
 
   /**

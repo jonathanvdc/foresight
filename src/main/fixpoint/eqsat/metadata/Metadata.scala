@@ -1,7 +1,10 @@
-package fixpoint.eqsat
+package fixpoint.eqsat.metadata
+
+import fixpoint.eqsat.{EClassCall, EGraph, ENode}
 
 /**
  * Metadata associated with an e-graph's nodes or classes. This metadata can respond to changes in the e-graph.
+ *
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam MetadataT The type of the metadata.
  */
