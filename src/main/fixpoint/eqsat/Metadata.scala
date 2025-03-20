@@ -9,17 +9,17 @@ trait Metadata[NodeT, MetadataT] {
   /**
    * Updates the metadata when an e-node is added to the e-graph.
    * @param node The e-node that was added.
-   * @param ref The reference to the e-class that was created for the e-node.
-   * @param graph The e-graph that the e-node was added to.
+   * @param ref The e-class that was created for the e-node, instantiated with an identity slot mapping.
+   * @param after The e-graph that the e-node was added to.
    * @return The update metadata.
    */
-  def onAdd(node: ENode[NodeT], ref: EClassCall, graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onAdd(node: ENode[NodeT], ref: EClassCall, after: EGraph[NodeT]): Metadata[NodeT, MetadataT]
 
   /**
    * Updates the metadata when e-classes are unioned in the e-graph.
    * @param equivalences The equivalences that were created by the union.
-   * @param graph The e-graph that the e-classes were unioned in.
+   * @param after The e-graph that the e-classes were unioned in.
    * @return The update metadata.
    */
-  def onUnionMany(equivalences: Set[Set[EClassCall]], graph: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): Metadata[NodeT, MetadataT]
 }
