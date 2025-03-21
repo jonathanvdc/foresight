@@ -5,7 +5,7 @@ import fixpoint.eqsat.{Slot, SlotMap}
 /**
  * A tree data structure for extraction.
  * @param cost The cost of the tree.
- * @param depth The depth of the tree.
+ * @param size The size of the tree.
  * @param nodeType The type of the tree's root.
  * @param definitions The slots of the root that are defined by the root itself.
  * @param uses The slots of the root that are used by the root and are defined elsewhere.
@@ -14,8 +14,8 @@ import fixpoint.eqsat.{Slot, SlotMap}
  * @tparam C The type of the cost.
  */
 final case class ExtractionTree[+NodeT, C](cost: C,
-                                           depth: Int,
+                                           size: Int,
                                            nodeType: NodeT,
                                            definitions: Seq[Slot],
                                            uses: Seq[Slot],
-                                           args: Seq[(ExtractionTree[NodeT, C], SlotMap)])
+                                           args: Seq[ExtractionTreeCall[NodeT, C]])
