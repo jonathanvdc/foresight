@@ -3,7 +3,17 @@ package fixpoint.eqsat.extraction
 import fixpoint.eqsat.{ENode, SlotMap}
 import fixpoint.eqsat.metadata.Analysis
 
-final case class ExtractionAnalysis[NodeT, C](cost: CostFunction[NodeT, C]) extends Analysis[NodeT, ExtractionTreeCall[NodeT, C]] {
+/**
+ * An analysis that produces extraction trees with minimal cost.
+ * @param cost The cost function for the analysis.
+ * @param costOrdering The ordering for the cost.
+ * @param nodeOrdering An ordering for the nodes.
+ * @tparam NodeT The type of the nodes in the e-graph.
+ * @tparam C The type of the cost.
+ */
+final case class ExtractionAnalysis[NodeT, C](cost: CostFunction[NodeT, C])
+                                             (implicit costOrdering: Ordering[C],
+                                              nodeOrdering: Ordering[NodeT]) extends Analysis[NodeT, ExtractionTreeCall[NodeT, C]] {
 
   /**
    * Renames the slots in an analysis result.
@@ -25,10 +35,9 @@ final case class ExtractionAnalysis[NodeT, C](cost: CostFunction[NodeT, C]) exte
    * @return The analysis result for the node.
    */
   override def make(node: ENode[NodeT], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
-    val cost = cost(node.nodeType, node.definitions, node.uses, args)
-    val size = args.map(_.tree.size).sum + 1
+    val treeCost = cost(node.nodeType, node.definitions, node.uses, args)
     ExtractionTreeCall(
-      ExtractionTree(cost, size, node.nodeType, node.definitions, node.uses, args),
+      ExtractionTree(treeCost, node.nodeType, node.definitions, node.uses, args),
       SlotMap.identity(node.slots.toSet))
   }
 
@@ -39,5 +48,8 @@ final case class ExtractionAnalysis[NodeT, C](cost: CostFunction[NodeT, C]) exte
    * @param right The right analysis result.
    * @return The joined analysis result.
    */
-  override def join(left: ExtractionTreeCall[NodeT, C], right: ExtractionTreeCall[NodeT, C]): ExtractionTreeCall[NodeT, C] = ???
+  override def join(left: ExtractionTreeCall[NodeT, C],
+                    right: ExtractionTreeCall[NodeT, C]): ExtractionTreeCall[NodeT, C] = {
+    ExtractionTreeOrdering[NodeT, C]().callOrdering.min(left, right)
+  }
 }

@@ -1,13 +1,15 @@
 package fixpoint.eqsat
 
 import scala.collection.mutable
+import scala.math.Ordered.orderingToOrdered
+import scala.math.Ordering.Implicits.seqDerivedOrdering
 
 /**
  * A mapping of parameter slots to argument slots.
  *
  * @param map The mapping of slots to slots.
  */
-final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] {
+final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with Ordered[SlotMap] {
   /**
    * The number of slots in the slot map.
    */
@@ -134,6 +136,16 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] {
    * @return The result of applying the slot map.
    */
   override def apply(slot: Slot): Slot = map.getOrElse(slot, slot)
+
+  /**
+   * Compare two slot maps.
+   *
+   * @param that The other slot map.
+   * @return -1 if this slot map is less than the other, 0 if they are equal, and 1 if this slot map is greater.
+   */
+  override def compare(that: SlotMap): Int = {
+    map.toSeq.sorted compare that.map.toSeq.sorted
+  }
 }
 
 /**
