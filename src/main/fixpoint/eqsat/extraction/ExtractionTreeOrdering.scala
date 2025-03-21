@@ -1,6 +1,7 @@
 package fixpoint.eqsat.extraction
 
-import scala.math.Ordered.orderingToOrdered
+import fixpoint.eqsat.Slot
+
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 
 /**
@@ -13,8 +14,9 @@ import scala.math.Ordering.Implicits.seqDerivedOrdering
 final case class ExtractionTreeOrdering[NodeT, C](implicit costOrdering: Ordering[C],
                                                   nodeOrdering: Ordering[NodeT]) extends Ordering[ExtractionTree[NodeT, C]] {
   override def compare(x: ExtractionTree[NodeT, C], y: ExtractionTree[NodeT, C]): Int = {
-    (x.cost, x.size, x.depth, x.nodeType, x.definitions, x.uses, x.args) compare
-      (y.cost, y.size, y.depth, y.nodeType, y.definitions, y.uses, y.args)
+    Ordering.Tuple7[C, Int, Int, NodeT, Seq[Slot], Seq[Slot], Seq[ExtractionTreeCall[NodeT, C]]].compare(
+      (x.cost, x.size, x.depth, x.nodeType, x.definitions, x.uses, x.args),
+      (y.cost, y.size, y.depth, y.nodeType, y.definitions, y.uses, y.args))
   }
 
   private implicit val treeOrdering: Ordering[ExtractionTree[NodeT, C]] = this
@@ -27,7 +29,10 @@ final case class ExtractionTreeOrdering[NodeT, C](implicit costOrdering: Orderin
   private final object ExtractionTreeCallOrdering extends Ordering[ExtractionTreeCall[NodeT, C]] {
 
     override def compare(x: ExtractionTreeCall[NodeT, C], y: ExtractionTreeCall[NodeT, C]): Int = {
-      (x.renaming, x.tree) compare (y.renaming, y.tree)
+      x.renaming compare y.renaming match {
+        case 0 => treeOrdering.compare(x.tree, y.tree)
+        case c => c
+      }
     }
   }
 }

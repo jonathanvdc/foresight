@@ -144,7 +144,18 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * @return -1 if this slot map is less than the other, 0 if they are equal, and 1 if this slot map is greater.
    */
   override def compare(that: SlotMap): Int = {
-    map.toSeq.sorted compare that.map.toSeq.sorted
+    val leftSortedKeys = keys.toSeq.sorted
+    val rightSortedKeys = that.keys.toSeq.sorted
+
+    val keyComparison = leftSortedKeys.compare(rightSortedKeys)
+    if (keyComparison != 0) {
+      return keyComparison
+    }
+
+    val leftSortedValues = leftSortedKeys.map(map)
+    val rightSortedValues = rightSortedKeys.map(that.map)
+
+    leftSortedValues.compare(rightSortedValues)
   }
 }
 
