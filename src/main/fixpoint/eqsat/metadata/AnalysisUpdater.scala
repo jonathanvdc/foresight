@@ -41,8 +41,10 @@ private[metadata] class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT, A],
 
   /**
    * Processes the worklist by applying the analysis to potentially updated e-nodes.
+   * @param initialized Whether the analysis has been initialized for the e-graph. Initialization means that each
+   *                    e-class has an analysis result.
    */
-  def processPending(): Unit = {
+  def processPending(initialized: Boolean = true): Unit = {
     while (worklist.nonEmpty) {
       // Group the worklist by the e-class of the e-node.
       val worklistPerClass = worklist.groupBy(n => egraph.find(n).get.ref)
@@ -52,12 +54,25 @@ private[metadata] class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT, A],
 
       // Apply the analysis to the updates e-nodes in each e-class.
       for ((ref, nodes) <- worklistPerClass) {
-        val result = nodes.foldLeft(results(ref))((acc, node) => {
-          val args = node.args.map(apply)
-          analysis.join(acc, analysis.make(node, args))
+        val init = results.get(ref)
+        if (initialized) {
+          assert(init.isDefined, s"Analysis not initialized for $ref")
+        }
+
+        val result = nodes.foldLeft(init)((acc, node) => {
+          if (node.args.forall(arg => results.contains(arg.ref))) {
+            val args = node.args.map(apply)
+            val nodeResult = analysis.make(node, args)
+            acc match {
+              case None => Some(nodeResult)
+              case Some(result) => Some(analysis.join(result, nodeResult))
+            }
+          } else {
+            acc
+          }
         })
 
-        update(ref, result)
+        result.foreach(update(ref, _))
       }
     }
   }

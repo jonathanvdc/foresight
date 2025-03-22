@@ -57,7 +57,7 @@ trait Analysis[NodeT, A] {
     }
 
     // Process the worklist by applying the analysis to the rest of the e-graph. This will eventually touch all e-nodes.
-    updater.processPending()
+    updater.processPending(initialized = false)
 
     AnalysisMetadata(this, updater.results)
   }
