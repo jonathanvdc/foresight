@@ -1,6 +1,6 @@
 package fixpoint.eqsat.rewriting
 
-import fixpoint.eqsat.{EClassRef, EGraph, EGraphLike}
+import fixpoint.eqsat.{EGraph, EGraphLike}
 
 /**
  * A searcher that searches for matches in an e-graph.
