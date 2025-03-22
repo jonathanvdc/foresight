@@ -35,6 +35,54 @@ class SmallestAstExtractionTest {
   }
 
   /**
+   * Test extracting a tree with slots that appear in the root node.
+   */
+  @Test
+  def extractWithSlots(): Unit = {
+    sealed trait ArithNode extends Ordered[ArithNode] {
+      override def compare(that: ArithNode): Int = this.hashCode().compareTo(that.hashCode())
+    }
+    case object Var extends ArithNode
+
+    val x = Slot.fresh()
+    val tree = Tree(Var, Seq.empty, Seq(x), Seq.empty)
+
+    val analysis = ExtractionAnalysis.smallest[ArithNode]
+
+    val egraph = EGraph.empty[ArithNode].withMetadata.addAnalysis(analysis)
+    val (eclass, egraph2) = egraph.add(tree)
+
+    assert(tree == analysis.extractor(eclass, egraph2))
+  }
+
+  /**
+   * Test extracting a tree with slots that do not appear in the root node.
+   */
+  @Test
+  def extractWithSlotsIndirect(): Unit = {
+    sealed trait ArithNode extends Ordered[ArithNode] {
+      override def compare(that: ArithNode): Int = this.hashCode().compareTo(that.hashCode())
+    }
+    case object Var extends ArithNode
+    case object Plus extends ArithNode
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+    val tree = Tree(
+      Plus,
+      Seq.empty,
+      Seq.empty,
+      Seq(Tree(Var, Seq.empty, Seq(x), Seq.empty), Tree(Var, Seq.empty, Seq(y), Seq.empty)))
+
+    val analysis = ExtractionAnalysis.smallest[ArithNode]
+
+    val egraph = EGraph.empty[ArithNode].withMetadata.addAnalysis(analysis)
+    val (eclass, egraph2) = egraph.add(tree)
+
+    assert(tree == analysis.extractor(eclass, egraph2))
+  }
+
+  /**
    * Test that extraction prefers smaller trees when there are multiple equivalent trees.
    */
   @Test

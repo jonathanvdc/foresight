@@ -35,7 +35,8 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
    * @return The tree with the slots renamed.
    */
   def rename(renaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
-    ExtractionTreeCall(tree, this.renaming.compose(renaming))
+    assert(this.renaming.values.forall(renaming.contains))
+    ExtractionTreeCall(tree, this.renaming.composePartial(renaming))
   }
 
   /**
