@@ -110,7 +110,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 /**
  * A companion object for the hash-consed e-graph.
  */
-object HashConsEGraph {
+private[eqsat] object HashConsEGraph {
   /**
    * Creates a new hash-consed e-graph with no e-nodes.
    * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
