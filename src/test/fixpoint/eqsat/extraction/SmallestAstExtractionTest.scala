@@ -1,6 +1,5 @@
 package fixpoint.eqsat.extraction
 
-import fixpoint.eqsat.hashCons.HashConsEGraph
 import fixpoint.eqsat.{EGraph, ENode, Slot, Tree}
 import org.junit.Test
 
@@ -81,6 +80,9 @@ class SmallestAstExtractionTest {
     val (eclass, egraph2) = egraph.add(tree)
 
     assert(tree == analysis.extractor(eclass, egraph2))
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph2)(eclass, egraph2).applied.toTree == tree)
   }
 
   /**
@@ -121,6 +123,9 @@ class SmallestAstExtractionTest {
     val egraph4 = egraph3.union(c1, c2).rebuilt
 
     assert(zero == analysis.extractor(c1, egraph4))
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph4)(c1, egraph4).applied.toTree == zero)
   }
 
   /**
@@ -146,5 +151,8 @@ class SmallestAstExtractionTest {
 
     assert(egraph4.classes.size == 1)
     assert(analysis.extractor(c2, egraph4) == node)
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph4)(c2, egraph4).applied.toTree == node)
   }
 }

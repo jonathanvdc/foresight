@@ -47,7 +47,17 @@ final case class ShapeCall[+NodeT](shape: ENode[NodeT], renaming: SlotMap) {
    * @return The e-node application that results from composing the renaming with another renaming.
    */
   def rename(renaming: SlotMap): ShapeCall[NodeT] = {
-    val newRenaming = this.renaming.compose(renaming)
-    ShapeCall(shape, newRenaming)
+    ShapeCall(shape, this.renaming.compose(renaming))
+  }
+
+  /**
+   * Composes the renaming with another renaming, but only for the slots that are present in the original and new
+   * renaming.
+   *
+   * @param renaming The new renaming with which to compose the original renaming.
+   * @return The e-node application that results from composing the renaming with another renaming.
+   */
+  def renamePartial(renaming: SlotMap): ShapeCall[NodeT] = {
+    ShapeCall(shape, this.renaming.composePartial(renaming))
   }
 }
