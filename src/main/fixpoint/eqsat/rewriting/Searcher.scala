@@ -11,32 +11,42 @@ import fixpoint.eqsat.{EClassRef, EGraph, EGraphLike}
  */
 trait Searcher[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
   /**
-   * The phases of the searcher.
-   */
-  def phases: Seq[SearcherPhase[NodeT, Any, Any, Any, EGraphT]]
-
-  /**
    * Searches for matches in an e-graph.
    * @param egraph The e-graph to search in.
    * @param parallelize Whether to parallelize the search.
    * @return The output of the searcher.
    */
-  final def search(egraph: EGraphT, parallelize: Boolean = true): OutputT = {
-    var input: Any = ()
-    val classes = egraph.classes
-    for (phase <- phases) {
-      def searchClass(c: EClassRef) = {
-        c -> phase.search(egraph.canonicalize(c), egraph, input)
+  def search(egraph: EGraphT, parallelize: Boolean = true): OutputT
+
+  /**
+   * Chains this searcher with another searcher phase.
+   *
+   * @param phase The phase to chain with.
+   * @tparam IntermediateT The type of the intermediate output of the phase.
+   * @tparam OutputT2 The type of the output of the phase.
+   * @return The chained searcher.
+   */
+  final def chain[IntermediateT, OutputT2](phase: SearcherPhase[NodeT, OutputT, IntermediateT, OutputT2, EGraphT]): Searcher[NodeT, OutputT2, EGraphT] = {
+    new Searcher[NodeT, OutputT2, EGraphT] {
+      override def search(egraph: EGraphT, parallelize: Boolean): OutputT2 = {
+        phase.search(egraph, Searcher.this.search(egraph, parallelize), parallelize)
       }
-
-      val matches = if (parallelize)
-        classes.par.map(searchClass).seq.toMap
-      else
-        classes.map(searchClass).toMap
-
-      input = phase.aggregate(matches)
     }
-    input.asInstanceOf[OutputT]
+  }
+
+  /**
+   * Creates a new searcher that applies both this searcher and another searcher, and returns a pair of the results.
+   *
+   * @param other The other searcher to apply.
+   * @tparam OutputT2 The type of the output of the other searcher.
+   * @return A searcher that applies both this searcher and the other searcher.
+   */
+  final def product[OutputT2](other: Searcher[NodeT, OutputT2, EGraphT]): Searcher[NodeT, (OutputT, OutputT2), EGraphT] = {
+    new Searcher[NodeT, (OutputT, OutputT2), EGraphT] {
+      override def search(egraph: EGraphT, parallelize: Boolean): (OutputT, OutputT2) = {
+        (Searcher.this.search(egraph, parallelize), other.search(egraph, parallelize))
+      }
+    }
   }
 }
 
@@ -45,40 +55,18 @@ trait Searcher[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph
  */
 object Searcher {
   /**
-   * Creates a searcher with a single phase.
+   * Creates a searcher from a single phase.
    *
-   * @param phase1 The phase of the searcher.
+   * @param phase The phase of the searcher.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam OutputT The type of the output that the searcher produces.
    * @tparam EGraphT The type of the e-graph that the searcher searches in.
    * @tparam T1 The type of the intermediate output of the first phase.
    * @return A searcher with a single phase.
    */
-  def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1](phase1: SearcherPhase[NodeT, Unit, T1, OutputT, EGraphT]):
-  Searcher[NodeT, OutputT, EGraphT] = {
+  def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1](phase: SearcherPhase[NodeT, Unit, T1, OutputT, EGraphT]): Searcher[NodeT, OutputT, EGraphT] = {
     new Searcher[NodeT, OutputT, EGraphT] {
-      override def phases: Seq[SearcherPhase[NodeT, Any, Any, Any, EGraphT]] = Seq(phase1.erase)
-    }
-  }
-
-  /**
-   * Creates a searcher with two phases.
-   *
-   * @param phase1 The first phase of the searcher.
-   * @param phase2 The second phase of the searcher.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam OutputT The type of the output that the searcher produces.
-   * @tparam EGraphT The type of the e-graph that the searcher searches in.
-   * @tparam T1 The type of the intermediate output of the first phase.
-   * @tparam T2 The type of the result of the first phase and the input to the second phase.
-   * @tparam T3 The type of the intermediate output of the second phase.
-   * @return A searcher with two phases.
-   */
-  def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1, T2, T3](phase1: SearcherPhase[NodeT, Unit, T1, T2, EGraphT],
-                                                                                                  phase2: SearcherPhase[NodeT, T2, T3, OutputT, EGraphT]):
-  Searcher[NodeT, OutputT, EGraphT] = {
-    new Searcher[NodeT, OutputT, EGraphT] {
-      override def phases: Seq[SearcherPhase[NodeT, Any, Any, Any, EGraphT]] = Seq(phase1.erase, phase2.erase)
+      override def search(egraph: EGraphT, parallelize: Boolean): OutputT = phase.search(egraph, (), parallelize)
     }
   }
 }

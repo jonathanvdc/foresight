@@ -29,16 +29,16 @@ trait SearcherPhase[NodeT, InputT, IntermediateT, OutputT, EGraphT <: EGraphLike
   def aggregate(matches: Map[EClassRef, IntermediateT]): OutputT
 
   /**
-   * Erases the input and output types of the searcher phase.
-   * @return The searcher phase with the input and output types erased.
+   * Searches for matches in an e-graph.
+   * @param egraph The e-graph to search in.
+   * @param input The input to the searcher phase.
+   * @param parallelize Whether to parallelize the search.
+   * @return The output of the searcher phase.
    */
-  private[rewriting] final def erase: SearcherPhase[NodeT, Any, Any, Any, EGraphT] = {
-    new SearcherPhase[NodeT, Any, Any, Any, EGraphT] {
-      override def search(call: EClassCall, egraph: EGraphT, input: Any): Any =
-        SearcherPhase.this.search(call, egraph, input.asInstanceOf[InputT])
-
-      override def aggregate(matches: Map[EClassRef, Any]): Any =
-        SearcherPhase.this.aggregate(matches.asInstanceOf[Map[EClassRef, IntermediateT]]).asInstanceOf[Any]
-    }
+  final def search(egraph: EGraphT, input: InputT, parallelize: Boolean = true): OutputT = {
+    val classes = egraph.classes
+    val searchClass = (c: EClassRef) => c -> search(egraph.canonicalize(c), egraph, input)
+    val matches = if (parallelize) classes.par.map(searchClass).seq.toMap else classes.map(searchClass).toMap
+    aggregate(matches)
   }
 }
