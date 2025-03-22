@@ -1,6 +1,6 @@
 package fixpoint.eqsat.hashCons
 
-import fixpoint.eqsat.{EClassRef, ENode, ShapeCall, Slot, SlotMap}
+import fixpoint.eqsat.{ENode, ShapeCall, Slot, SlotMap}
 
 /**
  * The data of an e-class in a hash-consed e-graph.
