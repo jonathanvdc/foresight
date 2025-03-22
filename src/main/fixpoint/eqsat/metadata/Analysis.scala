@@ -1,6 +1,6 @@
 package fixpoint.eqsat.metadata
 
-import fixpoint.eqsat.{EGraph, ENode, SlotMap}
+import fixpoint.eqsat.{EGraph, EGraphLike, ENode, SlotMap}
 
 /**
  * An analysis that can be performed on an e-graph.
@@ -9,6 +9,11 @@ import fixpoint.eqsat.{EGraph, ENode, SlotMap}
  * @tparam A The type of the analysis result.
  */
 trait Analysis[NodeT, A] {
+  /**
+   * The name of the analysis.
+   */
+  def name: String
+
   /**
    * Renames the slots in an analysis result.
    * @param result The analysis result to rename.
@@ -55,5 +60,14 @@ trait Analysis[NodeT, A] {
     updater.processPending()
 
     AnalysisMetadata(this, updater.results)
+  }
+
+  /**
+   * Gets the analysis metadata from an e-graph.
+   * @param egraph The e-graph to get the metadata from.
+   * @return The analysis metadata.
+   */
+  final def get(egraph: EGraphWithMetadata[NodeT, _]): AnalysisMetadata[NodeT, A] = {
+    egraph.getMetadata(name)
   }
 }

@@ -27,13 +27,12 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
 
   /**
    * Adds an analysis to the e-graph.
-   * @param name The name of the analysis.
    * @param analysis The analysis to add.
    * @tparam A The type of the analysis result.
    * @return The e-graph with the added analysis.
    */
-  def addAnalysis[A](name: String, analysis: Analysis[NodeT, A]): EGraphWithMetadata[NodeT, Repr] = {
-    addMetadata(name, analysis(egraph))
+  def addAnalysis[A](analysis: Analysis[NodeT, A]): EGraphWithMetadata[NodeT, Repr] = {
+    addMetadata(analysis.name, analysis(egraph))
   }
 
   /**
