@@ -1,6 +1,6 @@
 package fixpoint.eqsat.extraction
 
-import fixpoint.eqsat.{Slot, SlotMap}
+import fixpoint.eqsat.{Slot, Tree}
 
 /**
  * A tree data structure for extraction.
@@ -28,4 +28,13 @@ final case class ExtractionTree[+NodeT, C](cost: C,
    * @return The depth of the tree.
    */
   val depth: Int = args.map(_.depth).max + 1
+
+  /**
+   * Turns the extraction tree into an expression tree.
+   * @return The expression tree.
+   */
+  def toTree: Tree[NodeT] = {
+    val newArgs = args.map(_.applied.toTree)
+    Tree(nodeType, definitions, uses, newArgs)
+  }
 }

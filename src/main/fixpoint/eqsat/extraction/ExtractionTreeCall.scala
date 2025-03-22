@@ -27,4 +27,25 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
    * @return The depth of the tree.
    */
   def depth: Int = tree.depth
+
+  /**
+   * Renames the slots in the tree.
+   * @param renaming The renaming of the slots. The keys of the map are the slots as they appear in the tree, and the
+   *                 values are the slots to which they are renamed.
+   * @return The tree with the slots renamed.
+   */
+  def rename(renaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
+    ExtractionTreeCall(tree, this.renaming.compose(renaming))
+  }
+
+  /**
+   * The tree with the renaming applied.
+   * @return The tree with the renaming applied.
+   */
+  def applied: ExtractionTree[NodeT, C] = {
+    val newDefinitions = tree.definitions.map(renaming.apply)
+    val newUses = tree.uses.map(renaming.apply)
+    val newArgs = tree.args.map(_.rename(renaming))
+    ExtractionTree(tree.cost, tree.nodeType, newDefinitions, newUses, newArgs)
+  }
 }
