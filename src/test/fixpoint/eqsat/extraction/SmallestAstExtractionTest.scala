@@ -1,6 +1,7 @@
 package fixpoint.eqsat.extraction
 
-import fixpoint.eqsat.{EGraph, Slot, Tree}
+import fixpoint.eqsat.hashCons.HashConsEGraph
+import fixpoint.eqsat.{EGraph, ENode, Slot, Tree}
 import org.junit.Test
 
 class SmallestAstExtractionTest {
@@ -120,5 +121,30 @@ class SmallestAstExtractionTest {
     val egraph4 = egraph3.union(c1, c2).rebuilt
 
     assert(zero == analysis.extractor(c1, egraph4))
+  }
+
+  /**
+   * Test that extraction terminates when there is a self-cycle.
+   */
+  @Test
+  def extractFromSelfCycle(): Unit = {
+    val analysis = ExtractionAnalysis.smallest[Int]
+
+    val egraph = EGraph.empty[Int].withMetadata.addAnalysis(analysis)
+    val node = Tree.unslotted(0, Seq.empty)
+    val (c1, egraph2) = egraph.add(node)
+
+    assert(analysis.extractor(c1, egraph2) == node)
+
+    val selfCycle = ENode.unslotted(1, Seq(c1))
+    val (c2, egraph3) = egraph2.add(selfCycle)
+
+    assert(egraph3.classes.size == 2)
+    assert(analysis.extractor(c2, egraph3) == Tree.unslotted(1, Seq(node)))
+
+    val egraph4 = egraph3.union(c1, c2).rebuilt
+
+    assert(egraph4.classes.size == 1)
+    assert(analysis.extractor(c2, egraph4) == node)
   }
 }
