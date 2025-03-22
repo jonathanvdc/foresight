@@ -27,7 +27,7 @@ final case class ExtractionTree[+NodeT, C](cost: C,
    * Gets the depth of the tree.
    * @return The depth of the tree.
    */
-  val depth: Int = args.map(_.depth).max + 1
+  val depth: Int = (args.map(_.depth) :+ 0).max + 1
 
   /**
    * Turns the extraction tree into an expression tree.
