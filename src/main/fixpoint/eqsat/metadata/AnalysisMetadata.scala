@@ -13,13 +13,23 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
   /**
    * Computes the analysis result for an e-class application.
    * @param call The e-class application.
+   * @param egraph The e-graph that the e-class application is in.
    * @return The analysis result for the e-class application.
    */
-  def apply(call: EClassCall): A = analysis.rename(results(call.ref), call.args)
+  def apply(call: EClassCall, egraph: EGraph[NodeT]): A = applyPrecanonicalized(egraph.canonicalize(call))
+
+  /**
+   * Computes the analysis result for an e-class application, assuming that the e-class application has already been
+   * canonicalized.
+   * @param call The e-class application.
+   * @return The analysis result for the e-class application.
+   */
+  private def applyPrecanonicalized(call: EClassCall): A = analysis.rename(results(call.ref), call.args)
 
   def onAdd(node: ENode[NodeT], call: EClassCall, after: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
-    val args = node.args.map(apply)
-    val result = analysis.make(node, args)
+    val genericNode = node.rename(call.args.inverse)
+    val args = genericNode.args.map(applyPrecanonicalized)
+    val result = analysis.make(genericNode, args)
     AnalysisMetadata(analysis, results + (call.ref -> result))
   }
 

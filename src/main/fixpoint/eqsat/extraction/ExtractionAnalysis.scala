@@ -26,7 +26,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
   def extractor[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]]: Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] = {
     new Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] {
       override def apply(call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]): Tree[NodeT] = {
-        val extractionTree = get(egraph)(call)
+        val extractionTree = get(egraph)(call, egraph)
         extractionTree.applied.toTree
       }
     }
