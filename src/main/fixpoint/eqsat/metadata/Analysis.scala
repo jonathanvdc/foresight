@@ -1,6 +1,6 @@
 package fixpoint.eqsat.metadata
 
-import fixpoint.eqsat.{EGraph, EGraphLike, ENode, SlotMap}
+import fixpoint.eqsat.{EGraph, ENode, SlotMap}
 
 /**
  * An analysis that can be performed on an e-graph.
