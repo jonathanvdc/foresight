@@ -17,6 +17,9 @@ class SmallestAstExtractionTest {
     val (eclass, egraph2) = egraph.add(node)
 
     assert(node == analysis.extractor(eclass, egraph2))
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph2)(eclass, egraph2).applied.toTree == node)
   }
 
   /**
@@ -32,6 +35,9 @@ class SmallestAstExtractionTest {
     val (eclass, egraph2) = egraph.add(tree)
 
     assert(tree == analysis.extractor(eclass, egraph2))
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph2)(eclass, egraph2).applied.toTree == tree)
   }
 
   /**
@@ -53,6 +59,9 @@ class SmallestAstExtractionTest {
     val (eclass, egraph2) = egraph.add(tree)
 
     assert(tree == analysis.extractor(eclass, egraph2))
+
+    // Test that recomputing the analysis works too.
+    assert(analysis(egraph2)(eclass, egraph2).applied.toTree == tree)
   }
 
   /**
