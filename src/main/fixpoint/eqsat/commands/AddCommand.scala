@@ -8,7 +8,7 @@ import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike}
  * @param node The e-node to add to the e-graph.
  * @param result The e-class symbol that represents the added e-node.
  */
-final case class AddCommand[NodeT](node: ENodeSymbol[NodeT], result: EClassSymbol) extends Command[NodeT] {
+final case class AddCommand[NodeT](node: ENodeSymbol[NodeT], result: VirtualEClassSymbol) extends Command[NodeT] {
   override def args: Seq[EClassSymbol] = node.args :+ result
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
