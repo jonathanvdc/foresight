@@ -1,6 +1,6 @@
 package fixpoint.eqsat.commands
 
-import fixpoint.eqsat.{EGraph, EGraphLike}
+import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike}
 
 /**
  * A command that can be applied to an e-graph.
@@ -8,10 +8,18 @@ import fixpoint.eqsat.{EGraph, EGraphLike}
  */
 trait Command[NodeT] {
   /**
+   * All e-class symbols that are arguments to the command.
+   */
+  def args: Seq[EClassSymbol]
+
+  /**
    * Applies the command to the given e-graph.
    * @param egraph The e-graph to which the command should be applied.
-   * @return The new e-graph and a map from virtual e-class symbols to real e-class symbols.
+   * @param reification A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class
+   *                    symbols.
+   * @return The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols.
    *         The map contains an entry for each virtual e-class symbol that is created by the command.
    */
-  def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr): (Repr, Map[VirtualEClassSymbol, RealEClassSymbol])
+  def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
+                                                                reification: Map[VirtualEClassSymbol, EClassCall]): (Option[Repr], Map[VirtualEClassSymbol, EClassCall])
 }

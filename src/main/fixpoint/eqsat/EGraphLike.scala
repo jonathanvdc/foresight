@@ -119,6 +119,21 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
+   * Adds a node to the e-graph, returning the new e-graph if the node was not already present.
+   * @param node The node to add.
+   * @return The e-class reference of the node in the e-graph, and the new e-graph with the node added.
+   *         If the node was already present, then None is returned.
+   */
+  final def tryAdd(node: ENode[NodeT]): (EClassCall, Option[This]) = {
+    find(node) match {
+      case Some(call) => (call, None)
+      case None =>
+        val (call, egraph) = add(node)
+        (call, Some(egraph))
+    }
+  }
+
+  /**
    * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
    * The effects of this operation are deferred until the e-graph is rebuilt.
    *
