@@ -16,7 +16,8 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
                                                                                                searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
                                                                                                applier: Applier[NodeT, MatchT, EGraphT]) {
   /**
-   * Tries to apply the rule to an e-graph.
+   * Finds all matches of the rule's searcher and applies each match to an e-graph. If the rule made no changes to the
+   * e-graph, returns None.
    * @param egraph The e-graph to apply the rule to.
    * @param parallelize Whether to parallelize the search.
    * @return The e-graph after applying the rule, or None if the rule made no changes to the e-graph.
@@ -32,7 +33,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
   }
 
   /**
-   * Applies the rule to an e-graph.
+   * Finds all matches of the rule's searcher and applies each match to an e-graph.
    * @param egraph The e-graph to apply the rule to.
    * @param parallelize Whether to parallelize the search.
    * @return The e-graph after applying the rule.
