@@ -13,14 +13,14 @@ final case class PatternApplier[NodeT](pattern: Pattern[NodeT]) extends Applier[
   override def apply(m: PatternMatch[NodeT], egraph: EGraph[NodeT]): Command[NodeT] = {
     val tree = instantiate(pattern, m)
     val builder = new CommandQueueBuilder[NodeT]
-    val c = builder.add(tree.mapCalls(EClassSymbol.real))
+    val c = builder.add(tree)
     builder.union(EClassSymbol.real(m.root), c)
     builder.queue
   }
 
-  private def instantiate(pattern: Pattern[NodeT], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassCall] = {
+  private def instantiate(pattern: Pattern[NodeT], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
-      case v: Pattern.Var[NodeT] => MixedTree.Call(m.varMapping(v))
+      case v: Pattern.Var[NodeT] => MixedTree.Call(EClassSymbol.real(m.varMapping(v)))
 
       case Pattern.Node(t, defs, uses, args) =>
         MixedTree.Node(t, defs.map(m.slotMapping), uses.map(m.slotMapping), args.map(instantiate(_, m)))
