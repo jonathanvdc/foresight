@@ -5,7 +5,13 @@ package fixpoint.eqsat.rewriting.patterns
  * e-classes in e-graphs.
  * @tparam NodeT The type of the nodes in the pattern.
  */
-sealed trait Pattern[+NodeT]
+sealed trait Pattern[NodeT] {
+  /**
+   * Converts the pattern to a pattern applier.
+   * @return The pattern applier.
+   */
+  def toApplier: PatternApplier[NodeT] = PatternApplier(this)
+}
 
 /**
  * A companion object for patterns.
