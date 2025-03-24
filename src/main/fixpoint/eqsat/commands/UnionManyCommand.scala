@@ -8,7 +8,8 @@ import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike, EGraphWithPendingUnions}
  * @param pairs The pairs of e-class symbols to union.
  */
 final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)]) extends Command[NodeT] {
-  override def args: Seq[EClassSymbol] = pairs.flatMap(pair => Seq(pair._1, pair._2))
+  override def uses: Seq[EClassSymbol] = pairs.flatMap(pair => Seq(pair._1, pair._2))
+  override def definitions: Seq[VirtualEClassSymbol] = Seq.empty
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
                                                                          reification: Map[VirtualEClassSymbol, EClassCall]): (Option[Repr], Map[VirtualEClassSymbol, EClassCall]) = {

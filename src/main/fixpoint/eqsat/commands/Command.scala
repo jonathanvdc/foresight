@@ -8,9 +8,14 @@ import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike}
  */
 trait Command[NodeT] {
   /**
-   * All e-class symbols that are arguments to the command.
+   * All e-class symbols that need to be reified to run the command.
    */
-  def args: Seq[EClassSymbol]
+  def uses: Seq[EClassSymbol]
+
+  /**
+   * All e-class symbols that are defined by the command.
+   */
+  def definitions: Seq[VirtualEClassSymbol]
 
   /**
    * Applies the command to the given e-graph.
