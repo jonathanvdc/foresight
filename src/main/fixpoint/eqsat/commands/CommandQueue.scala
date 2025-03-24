@@ -1,6 +1,6 @@
 package fixpoint.eqsat.commands
 
-import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike}
+import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 
 /**
  * A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.
@@ -31,6 +31,26 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
     val result = EClassSymbol.virtual()
     (result, CommandQueue(commands :+ AddCommand(node, result)))
+  }
+
+  /**
+   * Appends a command to the queue that adds a new tree to the e-graph.
+   * @param tree The tree to add to the e-graph.
+   * @return The virtual e-class symbol that represents the added tree and the new command queue.
+   */
+  def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val (addedArgs, newQueue) = args.foldLeft((Seq.empty[EClassSymbol], this)) {
+          case ((added, queue), arg: MixedTree[NodeT, EClassSymbol]) =>
+            val (result, newQueue) = queue.add(arg)
+            (added :+ result, newQueue)
+        }
+        newQueue.add(ENodeSymbol(t, defs, uses, addedArgs))
+
+      case MixedTree.Call(call) =>
+        (call, this)
+    }
   }
 
   /**

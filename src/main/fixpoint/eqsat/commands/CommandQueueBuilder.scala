@@ -1,7 +1,10 @@
 package fixpoint.eqsat.commands
 
+import fixpoint.eqsat.{EClassCall, MixedTree}
+
 /**
  * Constructs a queue of commands that can be applied to an e-graph.
+ *
  * @tparam NodeT The node type of the expressions that the e-graph represents.
  */
 final class CommandQueueBuilder[NodeT] {
@@ -19,6 +22,17 @@ final class CommandQueueBuilder[NodeT] {
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
     val (symbol, newQueue) = queueUnderConstruction.add(node)
+    queueUnderConstruction = newQueue
+    symbol
+  }
+
+  /**
+   * Appends a command that adds a tree to the e-graph.
+   * @param tree The tree to add.
+   * @return The e-class symbol that represents the added tree.
+   */
+  def add(tree: MixedTree[NodeT, EClassSymbol]): EClassSymbol = {
+    val (symbol, newQueue) = queueUnderConstruction.add(tree)
     queueUnderConstruction = newQueue
     symbol
   }
