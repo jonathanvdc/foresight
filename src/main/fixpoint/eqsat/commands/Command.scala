@@ -10,12 +10,12 @@ trait Command[NodeT] {
   /**
    * All e-class symbols that need to be reified to run the command.
    */
-  def uses: Seq[EClassSymbol]
+  def uses: Seq[EClassSymbol.Virtual]
 
   /**
    * All e-class symbols that are defined by the command.
    */
-  def definitions: Seq[VirtualEClassSymbol]
+  def definitions: Seq[EClassSymbol.Virtual]
 
   /**
    * Applies the command to the given e-graph.
@@ -26,5 +26,5 @@ trait Command[NodeT] {
    *         The map contains an entry for each virtual e-class symbol that is created by the command.
    */
   def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                reification: Map[VirtualEClassSymbol, EClassCall]): (Option[Repr], Map[VirtualEClassSymbol, EClassCall])
+                                                                reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
 }

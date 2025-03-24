@@ -8,11 +8,11 @@ import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
  * @param commands The commands to be applied to the e-graph.
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
-  override def uses: Seq[EClassSymbol] = commands.flatMap(_.uses)
-  override def definitions: Seq[VirtualEClassSymbol] = commands.flatMap(_.definitions)
+  override def uses: Seq[EClassSymbol.Virtual] = commands.flatMap(_.uses)
+  override def definitions: Seq[EClassSymbol.Virtual] = commands.flatMap(_.definitions)
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                         reification: Map[VirtualEClassSymbol, EClassCall]): (Option[Repr], Map[VirtualEClassSymbol, EClassCall]) = {
+                                                                         reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     var newEGraph: Option[Repr] = None
     var newReification = reification
     for (command <- commands) {

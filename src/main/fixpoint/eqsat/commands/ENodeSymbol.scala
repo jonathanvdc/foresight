@@ -16,7 +16,7 @@ final case class ENodeSymbol[NodeT](nodeType: NodeT, definitions: Seq[Slot], use
    * @param reification A map from virtual e-class symbols to e-class calls.
    * @return The e-node that the e-node symbol represents.
    */
-  def reify(reification: Map[VirtualEClassSymbol, EClassCall]): ENode[NodeT] = {
+  def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = {
     val reifiedArgs = args.map(_.reify(reification))
     ENode(nodeType, definitions, uses, reifiedArgs)
   }
