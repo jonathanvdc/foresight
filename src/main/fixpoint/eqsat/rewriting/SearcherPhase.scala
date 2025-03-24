@@ -11,7 +11,7 @@ import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike}
  * @tparam OutputT The type of the output that the searcher produces for the entire e-graph.
  * @tparam EGraphT The type of the e-graph that the searcher searches in.
  */
-trait SearcherPhase[NodeT, InputT, IntermediateT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait SearcherPhase[NodeT, -InputT, IntermediateT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
   /**
    * Searches for matches in an e-class.
    * @param call The e-class call to search for matches of.

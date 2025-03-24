@@ -9,7 +9,7 @@ import fixpoint.eqsat.commands.Command
  * @tparam MatchT The type of the match.
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
-trait Applier[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
   /**
    * Creates a command that applies a match to an e-graph.
    * @param m The match to apply.

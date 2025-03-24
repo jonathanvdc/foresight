@@ -9,7 +9,7 @@ import fixpoint.eqsat.{EGraph, EGraphLike}
  * @tparam OutputT The type of the output that the searcher produces.
  * @tparam EGraphT The type of the e-graph that the searcher searches in.
  */
-trait Searcher[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
   /**
    * Searches for matches in an e-graph.
    * @param egraph The e-graph to search in.
