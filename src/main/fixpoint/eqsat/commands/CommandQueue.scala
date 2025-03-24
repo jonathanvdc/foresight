@@ -1,40 +1,56 @@
 package fixpoint.eqsat.commands
 
-import fixpoint.eqsat.EGraph
-
-import scala.collection.mutable.ArrayBuffer
+import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike}
 
 /**
- * A queue of commands that can be applied to an e-graph.
- * @param egraph A base e-graph to which the commands in the queue can be applied. Commands may also be applied to a
- *               derived version of the e-graph.
+ * A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.
  * @tparam NodeT The node type of the expressions that the e-graph represents.
+ * @param commands The commands to be applied to the e-graph.
  */
-final class CommandQueue[NodeT](egraph: EGraph[NodeT]) {
-  private val cmds: ArrayBuffer[Command[NodeT]] = ArrayBuffer.empty
+final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
+  override def args: Seq[EClassSymbol] = commands.flatMap(_.args)
 
-  /**
-   * All commands that have been added to the mutator.
-   */
-  def commands: Seq[Command[NodeT]] = cmds
-
-  /**
-   * Adds a new e-node to the e-graph.
-   * @param node The e-node to add.
-   * @return The e-class symbol that represents the added e-node.
-   */
-  def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
-    val result = EClassSymbol.virtual()
-    cmds += AddCommand(node, result)
-    result
+  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
+                                                                         reification: Map[VirtualEClassSymbol, EClassCall]): (Option[Repr], Map[VirtualEClassSymbol, EClassCall]) = {
+    var newEGraph: Option[Repr] = None
+    var newReification = reification
+    for (command <- commands) {
+      val (newEGraphOpt, newReificationPart) = command.apply(egraph, newReification)
+      newEGraph = newEGraphOpt.orElse(newEGraph)
+      newReification ++= newReificationPart
+    }
+    (newEGraph, newReification)
   }
 
   /**
-   * Unions two e-classes in the e-graph.
-   * @param a The first e-class to union.
-   * @param b The second e-class to union.
+   * Appends a command to the queue that adds a new e-node to the e-graph.
+   * @param node The e-node to add to the e-graph.
+   * @return The virtual e-class symbol that represents the added e-node and the new command queue.
    */
-  def union(a: EClassSymbol, b: EClassSymbol): Unit = {
-    cmds += UnionManyCommand(Seq(a -> b))
+  def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
+    val result = EClassSymbol.virtual()
+    (result, CommandQueue(commands :+ AddCommand(node, result)))
+  }
+
+  /**
+   * Appends a command to the queue that unions two e-classes in the e-graph.
+   * @param left The first e-class to union.
+   * @param right The second e-class to union.
+   * @return The new command queue.
+   */
+  def union(left: EClassSymbol, right: EClassSymbol): CommandQueue[NodeT] = {
+    CommandQueue(commands :+ UnionManyCommand(Seq((left, right))))
   }
 }
+
+/**
+ * A companion object for command queues.
+ */
+object CommandQueue {
+  /**
+   * An empty command queue.
+   * @tparam NodeT The node type of the expressions that the e-graph represents.
+   */
+  def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
+}
+
