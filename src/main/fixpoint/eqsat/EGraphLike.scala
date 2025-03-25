@@ -114,6 +114,25 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
 
   /**
+   * Adds a mixed tree to the e-graph.
+   * @param tree The tree to add.
+   * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
+   */
+  final def add(tree: MixedTree[NodeT, EClassCall]): (EClassCall, This) = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This]))((acc, arg) => {
+          val (node, egraph) = acc._2.add(arg)
+          (acc._1 :+ node, egraph)
+        })
+        graphWithArgs.add(ENode(t, defs, uses, newArgs))
+
+      case MixedTree.Call(call) =>
+        (call, this.asInstanceOf[This])
+    }
+  }
+
+  /**
    * Adds a tree to the e-graph.
    * @param tree The tree to add.
    * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.

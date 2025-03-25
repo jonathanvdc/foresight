@@ -2,6 +2,7 @@ package fixpoint.eqsat
 
 /**
  * A mixed tree that can contain both nodes and e-class calls.
+ *
  * @tparam NodeT The type of the nodes in the tree.
  * @tparam CallT The type of the e-class calls in the tree.
  */
@@ -25,6 +26,8 @@ trait MixedTree[+NodeT, +CallT] {
  * A companion object for mixed trees.
  */
 object MixedTree {
+  import scala.language.implicitConversions
+
   /**
    * A node in a mixed tree.
    * @param nodeType The type of the node.
@@ -46,4 +49,14 @@ object MixedTree {
    * @tparam CallT The type of the e-class calls.
    */
   final case class Call[NodeT, CallT](call: CallT) extends MixedTree[NodeT, CallT]
+
+  /**
+   * Converts an e-node to a mixed tree.
+   * @param node The e-node to convert.
+   * @tparam NodeT The type of the node.
+   * @return The converted mixed tree.
+   */
+  implicit def fromENode[NodeT](node: ENode[NodeT]): MixedTree[NodeT, EClassCall] = {
+    MixedTree.Node[NodeT, EClassCall](node.nodeType, node.definitions, node.uses, node.args.map(Call[NodeT, EClassCall]))
+  }
 }

@@ -47,4 +47,16 @@ object Pattern {
    * @tparam NodeT The type of the nodes.
    */
   final class Var[NodeT] extends Pattern[NodeT]
+
+  /**
+   * A companion object for Var.
+   */
+  object Var {
+    /**
+     * Creates a fresh variable.
+     * @tparam NodeT The type of the nodes.
+     * @return The fresh variable.
+     */
+    def fresh[NodeT](): Var[NodeT] = new Var[NodeT]
+  }
 }
