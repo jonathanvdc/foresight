@@ -1,4 +1,4 @@
-package fixpoint.eqsat.rewriting
+package fixpoint.eqsat.parallel
 
 /**
  * A trait that provides a method to apply a function to each element of an iterable.

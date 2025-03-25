@@ -2,6 +2,7 @@ package fixpoint.eqsat.rewriting
 
 import fixpoint.eqsat.{EGraph, EGraphLike}
 import fixpoint.eqsat.commands.CommandQueue
+import fixpoint.eqsat.parallel.ParallelMap
 
 /**
  * A rule that can be applied to an e-graph.

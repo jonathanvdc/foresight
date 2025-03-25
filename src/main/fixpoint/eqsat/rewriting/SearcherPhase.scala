@@ -1,5 +1,6 @@
 package fixpoint.eqsat.rewriting
 
+import fixpoint.eqsat.parallel.ParallelMap
 import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike}
 
 /**
