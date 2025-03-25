@@ -13,8 +13,8 @@ final case class MachineSearcherPhase[NodeT, EGraphT <: EGraphLike[NodeT, EGraph
   extends SearcherPhase[NodeT, Unit, Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]], EGraphT] {
 
   override def search(call: EClassCall, egraph: EGraphT, input: Unit): Seq[PatternMatch[NodeT]] = {
-    val state = MachineState(call)
-    Machine.run(instructions, state, instructions).map { state =>
+    val state = MachineState[NodeT](call)
+    Machine.run(egraph, state, instructions).map { state =>
       PatternMatch(call, state.boundVars, state.boundSlots)
     }.toSeq
   }
