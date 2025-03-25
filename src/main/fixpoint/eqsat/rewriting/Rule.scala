@@ -1,7 +1,7 @@
 package fixpoint.eqsat.rewriting
 
 import fixpoint.eqsat.{EGraph, EGraphLike}
-import fixpoint.eqsat.commands.CommandQueue
+import fixpoint.eqsat.commands.{Command, CommandQueue}
 import fixpoint.eqsat.parallel.ParallelMap
 
 /**
@@ -25,7 +25,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    */
   def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Option[EGraphT] = {
     val matches = searcher.search(egraph, parallelize)
-    val commands = parallelize(matches, applier.apply(_, egraph)).toSeq
+    val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq
     CommandQueue(commands).optimized(egraph, Map())._1
   }
 

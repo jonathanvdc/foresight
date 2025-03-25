@@ -13,6 +13,26 @@ trait ParallelMap {
    * @return The result of applying the function to each element of the iterable.
    */
   def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B]
+
+  /**
+   * Creates a new parallel mapping strategy that cancels the operation if a cancellation token is canceled.
+   * @param token The cancellation token to use.
+   * @return The new parallel mapping strategy.
+   */
+  @throws[OperationCanceledException.type]
+  final def cancelable(token: CancellationToken): ParallelMap = new ParallelMap {
+    override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
+      if (token.isCanceled) {
+        throw OperationCanceledException
+      }
+      ParallelMap.this.apply(inputs, (a: A) => {
+        if (token.isCanceled) {
+          throw OperationCanceledException
+        }
+        f(a)
+      })
+    }
+  }
 }
 
 /**
