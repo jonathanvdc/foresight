@@ -76,35 +76,42 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
 
   /**
    * Applies this strategy with a timeout.
-   * @param timeout The timeout for the strategy.
+   * @param timeout The timeout for the strategy. If the strategy does not complete within the timeout, it is canceled.
+   *                The timeout is a time budget that is shared across all iterations of the strategy.
    * @return A new strategy that applies this strategy with a timeout.
    */
-  final def withTimeout(timeout: Duration): Strategy[EGraphT, (Data, Int, CancellationToken)] = {
-    new Strategy[EGraphT, (Data, Int, CancellationToken)] {
-      override def initialData: (Data, Int, CancellationToken) = (Strategy.this.initialData, 0, new CancellationToken)
+  final def withTimeout(timeout: Duration): Strategy[EGraphT, (Data, Duration)] = {
+    new Strategy[EGraphT, (Data, Duration)] {
+      override def initialData: (Data, Duration) = (Strategy.this.initialData, timeout)
       override def apply(egraph: EGraphT,
-                         data: (Data, Int, CancellationToken),
-                         parallelize: ParallelMap): (Option[EGraphT], (Data, Int, CancellationToken)) = {
-        val (innerData, iteration, token) = data
+                         data: (Data, Duration),
+                         parallelize: ParallelMap): (Option[EGraphT], (Data, Duration)) = {
+        val (innerData, remainingTime) = data
 
-        // If the operation has already been cancelled, return the current data.
-        if (token.isCanceled) {
+        // If the remaining time is zero, return immediately.
+        if (remainingTime.toNanos <= 0) {
           return (None, data)
         }
 
-        // On the first iteration, set the clock to cancel the operation after the timeout.
-        if (iteration == 0) {
-          token.cancelAfter(timeout)
-        }
+        // Set up a cancellation token that will cancel the operation once we are out of time.
+        val token = new CancellationToken
+        token.cancelAfter(remainingTime)
 
         // Apply the strategy and catch the cancellation exception if the cancellation request comes in while the
         // operation is in progress.
         try {
+          val timeBefore = System.nanoTime()
           val (newEgraph, newData) = Strategy.this(egraph, innerData, parallelize.cancelable(token))
-          (newEgraph, (newData, iteration + 1, token))
+          val timeAfter = System.nanoTime()
+          val elapsedNanos = timeAfter - timeBefore
+          if (elapsedNanos >= remainingTime.toNanos) {
+            (newEgraph, (newData, Duration.Zero))
+          } else {
+            (newEgraph, (newData, remainingTime - Duration.fromNanos(elapsedNanos)))
+          }
         } catch {
           case OperationCanceledException =>
-            (None, data)
+            (None, (innerData, Duration.Zero))
         }
       }
     }
