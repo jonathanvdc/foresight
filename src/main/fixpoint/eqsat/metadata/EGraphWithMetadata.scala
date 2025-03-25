@@ -60,6 +60,7 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   override def nodes(call: EClassCall): Set[ENode[NodeT]] = egraph.nodes(call)
   override def users(ref: EClassRef): Set[ENode[NodeT]] = egraph.users(ref)
   override def find(node: ENode[NodeT]): Option[EClassCall] = egraph.find(node)
+  override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
   override def add(node: ENode[NodeT]): (EClassCall, EGraphWithMetadata[NodeT, Repr]) = {
     val (ref, newEgraph) = egraph.add(node)

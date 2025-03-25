@@ -23,4 +23,17 @@ object MachineError {
   final case class NoMatchingNode[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](instruction: Instruction.BindNode[NodeT, EGraphT],
                                                                                                    call: EClassCall)
     extends MachineError[NodeT]
+
+  /**
+   * An error that occurs when two e-class calls are expected to be equal but are not.
+   * @param instruction The `Compare` instruction that failed to find equal e-class calls.
+   * @param first The first e-class call.
+   * @param second The second e-class call.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph.
+   */
+  final case class InconsistentVars[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](instruction: Instruction.Compare[NodeT, EGraphT],
+                                                                                                     first: EClassCall,
+                                                                                                     second: EClassCall)
+    extends MachineError[NodeT]
 }

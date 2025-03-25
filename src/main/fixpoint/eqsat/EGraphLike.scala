@@ -57,6 +57,14 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   def find(node: ENode[NodeT]): Option[EClassCall]
 
   /**
+   * Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.
+   * @param first The first e-class to compare.
+   * @param second The second e-class to compare.
+   * @return True if the e-classes are the same; otherwise, false.
+   */
+  def areSame(first: EClassCall, second: EClassCall): Boolean
+
+  /**
    * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
    * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
    * @param node The e-node to add to the e-graph.

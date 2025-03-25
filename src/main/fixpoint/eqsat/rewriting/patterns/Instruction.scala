@@ -76,4 +76,22 @@ object Instruction {
       Left(Set(machine.bindVar(variable, machine.registers(register))))
     }
   }
+
+  /**
+   * An instruction that compares two registers for equality.
+   * @param register1 The index of the first register to compare.
+   * @param register2 The index of the second register to compare.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph.
+   */
+  final case class Compare[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register1: Int, register2: Int)
+    extends Instruction[NodeT, EGraphT] {
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
+      if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
+        Left(Set(machine))
+      } else {
+        Right(MachineError.InconsistentVars(this, machine.registers(register1), machine.registers(register2)))
+      }
+    }
+  }
 }

@@ -1,11 +1,23 @@
 package fixpoint.eqsat.rewriting.patterns
 
+import fixpoint.eqsat.EGraph
+import fixpoint.eqsat.rewriting.Searcher
+
 /**
  * A pattern that represents a tree of nodes, variables, and substitutions. The pattern is used to match against
  * e-classes in e-graphs.
+ *
  * @tparam NodeT The type of the nodes in the pattern.
  */
 sealed trait Pattern[NodeT] {
+  /**
+   * Converts the pattern to a searcher.
+   * @return The searcher.
+   */
+  def toSearcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraph[NodeT]] = {
+    Searcher(MachineSearcherPhase[NodeT, EGraph[NodeT]](PatternCompiler.compile(this)))
+  }
+
   /**
    * Converts the pattern to a pattern applier.
    * @return The pattern applier.

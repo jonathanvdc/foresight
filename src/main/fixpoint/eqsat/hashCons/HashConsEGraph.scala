@@ -105,6 +105,35 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
       }
     }
   }
+
+  /**
+   * Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.
+   *
+   * @param first  The first e-class to compare.
+   * @param second The second e-class to compare.
+   * @return True if the e-classes are the same; otherwise, false.
+   */
+  override def areSame(first: EClassCall, second: EClassCall): Boolean = {
+    // First canonicalize the e-classes.
+    val canonicalFirst = canonicalize(first)
+    val canonicalSecond = canonicalize(second)
+
+    if (canonicalFirst.ref != canonicalSecond.ref) {
+      // If the canonical e-class references are different, then the e-classes are different.
+      false
+    } else if (canonicalFirst.args == canonicalSecond.args) {
+      // If the canonical e-class calls are the same, then the argument calls are the same.
+      true
+    } else if (canonicalFirst.args.values == canonicalSecond.args.values) {
+      // If the canonical e-class calls refer to the same e-class but have differently ordered arguments, then the
+      // e-class calls may still be the same if the e-class slots can be permuted.
+      classData(canonicalFirst.ref).permutations.allPerms.exists { perm =>
+        perm.compose(canonicalFirst.args) == canonicalSecond.args
+      }
+    } else {
+      false
+    }
+  }
 }
 
 /**

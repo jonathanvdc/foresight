@@ -270,6 +270,8 @@ class UnionTest {
     assert(c.args.size == 0)
     assert(d.args.size == 0)
 
+    assert(!egraph5.areSame(a, b))
+
     val egraph6 = egraph5.union(a, b).rebuilt
     assert(egraph6.classes.size == 2)
 
@@ -284,6 +286,7 @@ class UnionTest {
     assert(dCan.args.size == 0)
 
     assert(cCan == dCan)
+    assert(egraph6.areSame(a, b))
   }
 
   @Test
