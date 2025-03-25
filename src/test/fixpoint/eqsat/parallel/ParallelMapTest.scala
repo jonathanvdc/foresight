@@ -45,11 +45,37 @@ class ParallelMapTest {
     for (impl <- implementations) {
       val token = new CancellationToken
       try {
-        impl.cancelable(token).apply[Int, Int](0 until 1000, i => {
+        impl.cancelable(token).apply[Int, Int](0 until 100, i => {
           if (i == 0) {
             token.cancel()
           }
           Thread.sleep(10)
+          i
+        })
+        assert(false)
+      } catch {
+        case OperationCanceledException =>
+      }
+    }
+  }
+
+  /**
+   * Tests that parallel maps can be cancelled from a separate thread.
+   */
+  @Test
+  def cancelFromSeparateThread(): Unit = {
+    for (impl <- implementations) {
+      val token = new CancellationToken
+      val thread = new Thread(new Runnable {
+        override def run(): Unit = {
+          Thread.sleep(10)
+          token.cancel()
+        }
+      })
+      thread.start()
+      try {
+        impl.cancelable(token).apply[Int, Int](0 until 100, i => {
+          Thread.sleep(20)
           i
         })
         assert(false)
