@@ -14,7 +14,7 @@ trait MixedTree[+NodeT, +CallT] {
    */
   def mapCalls[NewCallT](f: CallT => NewCallT): MixedTree[NodeT, NewCallT] = this match {
     case MixedTree.Node(nodeType, definitions, uses, children) =>
-      MixedTree.Node(nodeType, definitions, uses, children.map(_.mapCalls[NewCallT](f)))
+      MixedTree.Node[NodeT, NewCallT](nodeType, definitions, uses, children.map(_.mapCalls[NewCallT](f)))
 
     case MixedTree.Call(call) =>
       MixedTree.Call(f(call))
