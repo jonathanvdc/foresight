@@ -64,12 +64,12 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
 
   override def add(node: ENode[NodeT]): (EClassCall, EGraphWithMetadata[NodeT, Repr]) = {
     val (ref, newEgraph) = egraph.add(node)
-    (ref, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph))))
+    (ref, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph)).view.force))
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithMetadata[NodeT, Repr]) = {
     val (equivalences, newEgraph) = egraph.unionMany(pairs)
-    (equivalences, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onUnionMany(equivalences, newEgraph))))
+    (equivalences, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onUnionMany(equivalences, newEgraph)).view.force))
   }
 }
 
