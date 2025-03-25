@@ -16,7 +16,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
     var newEGraph: Option[Repr] = None
     var newReification = reification
     for (command <- commands) {
-      val (newEGraphOpt, newReificationPart) = command.apply(egraph, newReification)
+      val (newEGraphOpt, newReificationPart) = command.apply(newEGraph.getOrElse(egraph), newReification)
       newEGraph = newEGraphOpt.orElse(newEGraph)
       newReification ++= newReificationPart
     }

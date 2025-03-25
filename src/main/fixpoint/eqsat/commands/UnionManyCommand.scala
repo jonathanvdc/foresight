@@ -18,11 +18,11 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
                                                                          reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     val withUnions = pairs.foldLeft(EGraphWithPendingUnions(egraph)) { (acc, pair) =>
       val reifiedPair = (pair._1.reify(reification), pair._2.reify(reification))
-      acc.egraph.union(reifiedPair._1, reifiedPair._2)
+      acc.union(reifiedPair._1, reifiedPair._2)
     }
 
     if (withUnions.requiresRebuild) {
-      (Some(withUnions.egraph), Map.empty)
+      (Some(withUnions.rebuilt), Map.empty)
     } else {
       (None, Map.empty)
     }
