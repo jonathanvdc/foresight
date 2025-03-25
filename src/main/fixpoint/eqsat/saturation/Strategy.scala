@@ -53,7 +53,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
-   * Applies this strategy until a fixpoint is reached.
+   * Creates a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached.
    * @return A new strategy that applies this strategy until a fixpoint is reached.
    */
   final def untilFixpoint: Strategy[EGraphT, Data] = {
@@ -75,7 +75,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
-   * Applies this strategy with a timeout.
+   * Creates a strategy that runs this strategy with a timeout.
    * @param timeout The timeout for the strategy. If the strategy does not complete within the timeout, it is canceled.
    *                The timeout is a time budget that is shared across all iterations of the strategy.
    * @return A new strategy that applies this strategy with a timeout.
