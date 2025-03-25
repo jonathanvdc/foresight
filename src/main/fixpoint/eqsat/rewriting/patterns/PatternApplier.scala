@@ -1,6 +1,6 @@
 package fixpoint.eqsat.rewriting.patterns
 
-import fixpoint.eqsat.{EClassCall, EGraph, MixedTree}
+import fixpoint.eqsat.{EGraph, MixedTree}
 import fixpoint.eqsat.commands.{Command, CommandQueueBuilder, EClassSymbol}
 import fixpoint.eqsat.rewriting.Applier
 

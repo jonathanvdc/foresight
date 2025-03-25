@@ -1,7 +1,7 @@
 package fixpoint.eqsat.rewriting.patterns
 
 import fixpoint.eqsat.EGraph
-import fixpoint.eqsat.rewriting.Searcher
+import fixpoint.eqsat.rewriting.{Applier, Searcher}
 
 /**
  * A pattern that represents a tree of nodes, variables, and substitutions. The pattern is used to match against
@@ -22,7 +22,7 @@ sealed trait Pattern[NodeT] {
    * Converts the pattern to a pattern applier.
    * @return The pattern applier.
    */
-  def toApplier: PatternApplier[NodeT] = PatternApplier(this)
+  def toApplier: Applier[NodeT, PatternMatch[NodeT], EGraph[NodeT]] = PatternApplier(this)
 }
 
 /**
