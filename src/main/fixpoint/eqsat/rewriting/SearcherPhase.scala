@@ -32,13 +32,13 @@ trait SearcherPhase[NodeT, -InputT, IntermediateT, +OutputT, EGraphT <: EGraphLi
    * Searches for matches in an e-graph.
    * @param egraph The e-graph to search in.
    * @param input The input to the searcher phase.
-   * @param parallelize Whether to parallelize the search.
+   * @param parallelize The parallelization strategy to use.
    * @return The output of the searcher phase.
    */
-  final def search(egraph: EGraphT, input: InputT, parallelize: Boolean = true): OutputT = {
+  final def search(egraph: EGraphT, input: InputT, parallelize: ParallelMap = ParallelMap.parallel): OutputT = {
     val classes = egraph.classes
     val searchClass = (c: EClassRef) => c -> search(egraph.canonicalize(c), egraph, input)
-    val matches = if (parallelize) classes.par.map(searchClass).seq.toMap else classes.map(searchClass).toMap
+    val matches = parallelize(classes, searchClass).toMap
     aggregate(matches)
   }
 }

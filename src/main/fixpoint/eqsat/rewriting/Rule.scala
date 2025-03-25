@@ -19,26 +19,22 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * Finds all matches of the rule's searcher and applies each match to an e-graph. If the rule made no changes to the
    * e-graph, returns None.
    * @param egraph The e-graph to apply the rule to.
-   * @param parallelize Whether to parallelize the search.
+   * @param parallelize The parallelization strategy to use.
    * @return The e-graph after applying the rule, or None if the rule made no changes to the e-graph.
    */
-  def tryApply(egraph: EGraphT, parallelize: Boolean = true): Option[EGraphT] = {
+  def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Option[EGraphT] = {
     val matches = searcher.search(egraph, parallelize)
-    val commands = if (parallelize)
-      matches.par.map(applier.apply(_, egraph)).seq
-    else
-      matches.map(applier.apply(_, egraph))
-
+    val commands = parallelize(matches, applier.apply(_, egraph)).toSeq
     CommandQueue(commands).optimized(egraph, Map())._1
   }
 
   /**
    * Finds all matches of the rule's searcher and applies each match to an e-graph.
    * @param egraph The e-graph to apply the rule to.
-   * @param parallelize Whether to parallelize the search.
+   * @param parallelize The parallelization strategy to use.
    * @return The e-graph after applying the rule.
    */
-  def apply(egraph: EGraphT, parallelize: Boolean = true): EGraphT = {
+  def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): EGraphT = {
     tryApply(egraph, parallelize).getOrElse(egraph)
   }
 }

@@ -13,10 +13,10 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
   /**
    * Searches for matches in an e-graph.
    * @param egraph The e-graph to search in.
-   * @param parallelize Whether to parallelize the search.
+   * @param parallelize The parallelization strategy to use.
    * @return The output of the searcher.
    */
-  def search(egraph: EGraphT, parallelize: Boolean = true): OutputT
+  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): OutputT
 
   /**
    * Chains this searcher with another searcher phase.
@@ -28,7 +28,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
    */
   final def chain[IntermediateT, OutputT2](phase: SearcherPhase[NodeT, OutputT, IntermediateT, OutputT2, EGraphT]): Searcher[NodeT, OutputT2, EGraphT] = {
     new Searcher[NodeT, OutputT2, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: Boolean): OutputT2 = {
+      override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT2 = {
         phase.search(egraph, Searcher.this.search(egraph, parallelize), parallelize)
       }
     }
@@ -43,7 +43,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
    */
   final def product[OutputT2](other: Searcher[NodeT, OutputT2, EGraphT]): Searcher[NodeT, (OutputT, OutputT2), EGraphT] = {
     new Searcher[NodeT, (OutputT, OutputT2), EGraphT] {
-      override def search(egraph: EGraphT, parallelize: Boolean): (OutputT, OutputT2) = {
+      override def search(egraph: EGraphT, parallelize: ParallelMap): (OutputT, OutputT2) = {
         (Searcher.this.search(egraph, parallelize), other.search(egraph, parallelize))
       }
     }
@@ -66,7 +66,7 @@ object Searcher {
    */
   def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1](phase: SearcherPhase[NodeT, Unit, T1, OutputT, EGraphT]): Searcher[NodeT, OutputT, EGraphT] = {
     new Searcher[NodeT, OutputT, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: Boolean): OutputT = phase.search(egraph, (), parallelize)
+      override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT = phase.search(egraph, (), parallelize)
     }
   }
 }
