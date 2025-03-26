@@ -164,7 +164,52 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all)//.untilFixpoint
+    val strategy = MaximalRuleApplication(Rules.all) // .untilFixpoint
+    val Some(egraph4) = strategy(egraph3)
+
+    assert(egraph4.areSame(c1, c2))
+  }
+
+  @Test
+  def distributivity(): Unit = {
+    // (x+y) * (y+z) = (z+y) * (y+x)
+    val x = Var(Slot.fresh())
+    val y = Var(Slot.fresh())
+    val z = Var(Slot.fresh())
+    val xPlusY = Add(x, y)
+    val yPlusZ = Add(y, z)
+    val zPlusY = Add(z, y)
+    val yPlusX = Add(y, x)
+    val xPlusYTimesYPlusZ = Mul(xPlusY, yPlusZ)
+    val zPlusYTimesYPlusX = Mul(zPlusY, yPlusX)
+
+    val egraph = EGraph.empty[Arith]
+    val (c1, egraph2) = egraph.add(xPlusYTimesYPlusZ)
+    val (c2, egraph3) = egraph2.add(zPlusYTimesYPlusX)
+
+    assert(!egraph3.areSame(c1, c2))
+
+    val strategy = MaximalRuleApplication(Rules.all) // .untilFixpoint
+    val Some(egraph4) = strategy(egraph3)
+
+    assert(egraph4.areSame(c1, c2))
+  }
+
+  @Test
+  def squareOfSum(): Unit = {
+    // (x+y)**2 = x**2 + x*y + x*y + y**2
+    val x = Var(Slot.fresh())
+    val y = Var(Slot.fresh())
+    val lhs = Mul(Add(x, y), Add(x, y))
+    val rhs = Add(Mul(x, x), Add(Mul(x, y), Add(Mul(y, x), Mul(y, y))))
+
+    val egraph = EGraph.empty[Arith]
+    val (c1, egraph2) = egraph.add(lhs)
+    val (c2, egraph3) = egraph2.add(rhs)
+
+    assert(!egraph3.areSame(c1, c2))
+
+    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
     val Some(egraph4) = strategy(egraph3)
 
     assert(egraph4.areSame(c1, c2))

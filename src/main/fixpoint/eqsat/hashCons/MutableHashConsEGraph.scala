@@ -366,8 +366,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             val newRenaming = canonicalNode.renaming.compose(oldRenaming)
 
             // Shrink e-class slots if the canonical node has fewer slots
-            if (!data.slots.subsetOf(newRenaming.keys)) {
-              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.keys))
+            if (!data.slots.subsetOf(newRenaming.values)) {
+              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.values))
             }
 
             // Update the e-class data and hash-cons map.
