@@ -39,6 +39,8 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
     SlotMap(map + (k -> v))
   }
 
+  private def sortedByKeys = map.toSeq.sortBy(_._1)
+
   /**
    * Get the value to which a key slot maps.
    *
@@ -47,11 +49,15 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    */
   def get(k: Slot): Option[Slot] = map.get(k)
 
-  def iterator: Iterator[(Slot, Slot)] = map.iterator
+  def iterator: Iterator[(Slot, Slot)] = sortedByKeys.iterator
 
-  def keys: Set[Slot] = map.keys.toSet
+  def keys: Seq[Slot] = sortedByKeys.map(_._1)
 
-  def values: Set[Slot] = map.values.toSet
+  def values: Seq[Slot] = sortedByKeys.map(_._2)
+
+  def keySet: Set[Slot] = map.keySet
+
+  def valueSet: Set[Slot] = map.values.toSet
 
   /**
    * Invert the slot map. For a, b in the slot map, the result will contain b -> a.
@@ -77,7 +83,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    *
    * @return True if the slot map is a permutation.
    */
-  def isPermutation: Boolean = isBijection && keys == values
+  def isPermutation: Boolean = isBijection && keySet == valueSet
 
   /**
    * Compose with another slot map. For a, b, c such that a -> b in this slot map and b -> c in the other slot map,
@@ -87,7 +93,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * @return A new slot map.
    */
   def compose(other: SlotMap): SlotMap = {
-    if (values != other.keys) {
+    if (valueSet != other.keySet) {
       throw new IllegalArgumentException("Slot maps are not composable")
     }
     composePartial(other)
@@ -144,8 +150,8 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * @return -1 if this slot map is less than the other, 0 if they are equal, and 1 if this slot map is greater.
    */
   override def compare(that: SlotMap): Int = {
-    val leftSortedKeys = keys.toSeq.sorted
-    val rightSortedKeys = that.keys.toSeq.sorted
+    val leftSortedKeys = keys
+    val rightSortedKeys = that.keys
 
     val keyComparison = leftSortedKeys.compare(rightSortedKeys)
     if (keyComparison != 0) {

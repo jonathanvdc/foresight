@@ -30,7 +30,7 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
   def rename(renaming: SlotMap): ENode[NodeT] = {
     assert({
       val allSlots = slots.toSet
-      renaming.keys.forall(allSlots.contains)
+      renaming.keySet.forall(allSlots.contains)
     })
 
     val newDefinitions = definitions.map(renaming.apply)

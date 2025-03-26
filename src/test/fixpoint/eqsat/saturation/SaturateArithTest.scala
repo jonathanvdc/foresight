@@ -1,7 +1,7 @@
 package fixpoint.eqsat.saturation
 
 import fixpoint.eqsat.rewriting.Rule
-import fixpoint.eqsat.{EGraph, ENode, MixedTree, Slot}
+import fixpoint.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 import fixpoint.eqsat.rewriting.patterns.{Pattern, PatternMatch, SlotVar}
 import org.junit.Test
 
@@ -206,6 +206,53 @@ class SaturateArithTest {
     val egraph = EGraph.empty[Arith]
     val (c1, egraph2) = egraph.add(lhs)
     val (c2, egraph3) = egraph2.add(rhs)
+
+    assert(!egraph3.areSame(c1, c2))
+
+    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
+    val Some(egraph4) = strategy(egraph3)
+
+    assert(egraph4.areSame(c1, c2))
+  }
+
+  @Test
+  def distributivity2(): Unit = {
+    // z*(x+y) = z*(y+x)
+    val x = Var(Slot.fresh())
+    val y = Var(Slot.fresh())
+    val z = Var(Slot.fresh())
+    val lhs = Mul(z, Add(x, y))
+    val rhs = Mul(z, Add(y, x))
+
+    val egraph = EGraph.empty[Arith]
+    val (c1, egraph2) = egraph.add(lhs)
+    val (c2, egraph3) = egraph2.add(rhs)
+
+    assert(!egraph3.areSame(c1, c2))
+
+    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
+    val Some(egraph4) = strategy(egraph3)
+
+    assert(egraph4.areSame(c1, c2))
+  }
+
+  def addChain(slots: Seq[Slot]): MixedTree[Arith, EClassCall] = {
+    slots.map(s => MixedTree.fromENode(Var(s))).reduceLeft(Add(_, _))
+  }
+
+  @Test
+  def rearrangeChains(): Unit = {
+    // x0+...+xN = xN+...+x0
+    val N = 5
+
+    val slots = (0 to N).map(_ => Slot.fresh())
+
+    val a = addChain(slots)
+    val b = addChain(slots.reverse)
+
+    val egraph = EGraph.empty[Arith]
+    val (c1, egraph2) = egraph.add(a)
+    val (c2, egraph3) = egraph2.add(b)
 
     assert(!egraph3.areSame(c1, c2))
 

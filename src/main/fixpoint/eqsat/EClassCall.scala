@@ -14,7 +14,13 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * parameter slots of the e-class reference.
    * @return The slots used by the applied reference.
    */
-  def slots: Set[Slot] = args.values
+  def slots: Seq[Slot] = args.values
+
+  /**
+   * Gets the argument slots of the applied reference.
+   * @return The argument slots of the applied reference.
+   */
+  def slotSet: Set[Slot] = args.valueSet
 
   /**
    * Renames the argument slots of the applied reference.
@@ -22,7 +28,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return The applied reference with the arguments renamed.
    */
   def rename(renaming: SlotMap): EClassCall = {
-    assert(args.values.subsetOf(renaming.keys), "Argument slots must be in the renaming.")
+    assert(args.valueSet.subsetOf(renaming.keySet), "Argument slots must be in the renaming.")
     EClassCall(ref, args.composePartial(renaming))
   }
 }

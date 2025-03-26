@@ -185,8 +185,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
-      assert(map.keys == slots(domRoot.ref))
-      assert(map.values == slots(subRoot.ref))
+      assert(map.keySet == slots(domRoot.ref))
+      assert(map.valueSet == slots(subRoot.ref))
 
       // Update the union-find and record the union in unifiedPairs.
       unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
@@ -250,11 +250,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We first determine the set of slots that are common to both e-classes. If this set is smaller than either
       // of the e-classes' slot sets, we shrink the e-classes' slots to the common set. This operation will update
       // the union-find, so we recurse in case of shrinkage.
-      val slots = leftRoot.slots intersect rightRoot.slots
-      if (slots != leftRoot.slots) {
+      val slots = leftRoot.slotSet intersect rightRoot.slotSet
+      if (slots != leftRoot.slotSet) {
         shrinkAppliedSlots(leftRoot, slots)
         unify(leftRoot, rightRoot)
-      } else if (slots != rightRoot.slots) {
+      } else if (slots != rightRoot.slotSet) {
         shrinkAppliedSlots(rightRoot, slots)
         unify(leftRoot, rightRoot)
       } else if (leftRoot.ref == rightRoot.ref) {
@@ -366,8 +366,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             val newRenaming = canonicalNode.renaming.compose(oldRenaming)
 
             // Shrink e-class slots if the canonical node has fewer slots
-            if (!data.slots.subsetOf(newRenaming.values)) {
-              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.values))
+            if (!data.slots.subsetOf(newRenaming.valueSet)) {
+              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.valueSet))
             }
 
             // Update the e-class data and hash-cons map.

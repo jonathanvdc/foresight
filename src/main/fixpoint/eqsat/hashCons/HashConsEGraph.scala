@@ -124,7 +124,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     } else if (canonicalFirst.args == canonicalSecond.args) {
       // If the canonical e-class calls are the same, then the argument calls are the same.
       true
-    } else if (canonicalFirst.args.values == canonicalSecond.args.values) {
+    } else if (canonicalFirst.args.valueSet == canonicalSecond.args.valueSet) {
       // If the canonical e-class calls refer to the same e-class but have differently ordered arguments, then the
       // e-class calls may still be the same if the e-class slots can be permuted.
       classData(canonicalFirst.ref).permutations.allPerms.exists { perm =>

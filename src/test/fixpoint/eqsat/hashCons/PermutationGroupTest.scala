@@ -46,7 +46,7 @@ class PermutationGroupTest {
   }
 
   private def checkGroup(generators: Set[SlotMap]): Unit = {
-    val omega = generators.head.values
+    val omega = generators.head.valueSet
     val identity = SlotMap.identity(omega)
     val group = PermutationGroup(identity, generators)
     val l = group.allPerms
