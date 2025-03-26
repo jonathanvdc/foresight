@@ -48,6 +48,11 @@ class SaturateArithTest {
       distributivity1,
       distributivity2)
 
+    def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).untilFixpoint
+    def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).untilFixpoint.recordApplications
+
+    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(simpleStrategy, cachingStrategy)
+
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
       val x = Pattern.Var.fresh[Arith]()
       val y = Pattern.Var.fresh[Arith]()
@@ -144,10 +149,10 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 
   @Test
@@ -166,10 +171,10 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all) // .untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 
   @Test
@@ -191,10 +196,10 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all) // .untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 
   @Test
@@ -211,10 +216,10 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 
   @Test
@@ -232,10 +237,10 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 
   def addChain(slots: Seq[Slot]): MixedTree[Arith, EClassCall] = {
@@ -258,9 +263,9 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    val strategy = MaximalRuleApplication(Rules.all).untilFixpoint
-    val Some(egraph4) = strategy(egraph3)
-
-    assert(egraph4.areSame(c1, c2))
+    for (strategy <- Rules.strategies) {
+      val Some(egraph4) = strategy(egraph3)
+      assert(egraph4.areSame(c1, c2))
+    }
   }
 }
