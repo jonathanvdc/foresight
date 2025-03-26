@@ -1,6 +1,8 @@
 package fixpoint.eqsat
 
 import fixpoint.eqsat.metadata.EGraphWithMetadata
+import fixpoint.eqsat.rewriting.PortableMatch
+import fixpoint.eqsat.saturation.EGraphWithRecordedApplications
 
 /**
  * An immutable e-graph. An e-graph is a data structure that represents a set of expressions. Each expression is

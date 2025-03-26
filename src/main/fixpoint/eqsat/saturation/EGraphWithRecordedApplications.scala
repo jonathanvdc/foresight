@@ -11,9 +11,9 @@ import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCa
  * @tparam Repr The type of the underlying e-graph.
  * @tparam Match The type of the matches that have been applied to the e-graph.
  */
-final case class EGraphWithAppliedMatches[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Repr, Match]](egraph: Repr,
-                                                                                                                                       applied: Map[String, Set[Match]])
-  extends EGraphLike[Node, EGraphWithAppliedMatches[Node, Repr, Match]] with EGraph[Node] {
+final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Repr, Match]](egraph: Repr,
+                                                                                                                                             applied: Map[String, Set[Match]])
+  extends EGraphLike[Node, EGraphWithRecordedApplications[Node, Repr, Match]] with EGraph[Node] {
 
   override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = egraph.tryCanonicalize(ref)
   override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
@@ -23,18 +23,18 @@ final case class EGraphWithAppliedMatches[Node, Repr <: EGraphLike[Node, Repr] w
   override def find(node: ENode[Node]): Option[EClassCall] = egraph.find(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
-  override def add(node: ENode[Node]): (EClassCall, EGraphWithAppliedMatches[Node, Repr, Match]) = {
+  override def add(node: ENode[Node]): (EClassCall, EGraphWithRecordedApplications[Node, Repr, Match]) = {
     val (ref, newEgraph) = egraph.add(node)
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // do not need to be updated because they are not affected by adding a new node to the graph.
-    (ref, EGraphWithAppliedMatches(newEgraph, applied))
+    (ref, EGraphWithRecordedApplications(newEgraph, applied))
   }
 
-  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithAppliedMatches[Node, Repr, Match]) = {
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {
     val (newClasses, newEgraph) = egraph.unionMany(pairs)
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // need to be updated because they may be affected by the union operation.
-    (newClasses, EGraphWithAppliedMatches(newEgraph, applied.mapValues(_.map(_.port(newEgraph)).view.force)))
+    (newClasses, EGraphWithRecordedApplications(newEgraph, applied.mapValues(_.map(_.port(newEgraph)).view.force)))
   }
 
   /**
@@ -46,12 +46,29 @@ final case class EGraphWithAppliedMatches[Node, Repr <: EGraphLike[Node, Repr] w
 
   /**
    * Records that a set of matches have been applied to the e-graph.
-   * @param matches The match applications to record.
+   * @param appliedMatches The match applications to record.
    * @return The e-graph with the recorded match applications.
    */
-  def recordApplications(matches: Map[String, Set[Match]]): EGraphWithAppliedMatches[Node, Repr, Match] = {
-    EGraphWithAppliedMatches(egraph, applied ++ matches.map {
+  def record(appliedMatches: Map[String, Set[Match]]): EGraphWithRecordedApplications[Node, Repr, Match] = {
+    EGraphWithRecordedApplications(egraph, applied ++ appliedMatches.map {
       case (ruleName, newApplications) => ruleName -> (applications(ruleName) ++ newApplications)
     })
+  }
+}
+
+/**
+ * The companion object for the [[EGraphWithRecordedApplications]] class.
+ */
+object EGraphWithRecordedApplications {
+  /**
+   * Constructs an e-graph with no applied matches.
+   * @param egraph The e-graph.
+   * @tparam Node The type of the nodes described by the e-nodes in the e-graph.
+   * @tparam Repr The type of the underlying e-graph.
+   * @tparam Match The type of the matches that have been applied to the e-graph.
+   * @return The e-graph with no applied matches.
+   */
+  def apply[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Repr, Match]](egraph: Repr): EGraphWithRecordedApplications[Node, Repr, Match] = {
+    EGraphWithRecordedApplications(egraph, Map())
   }
 }
