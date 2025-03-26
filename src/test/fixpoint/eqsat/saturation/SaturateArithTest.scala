@@ -5,6 +5,8 @@ import fixpoint.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 import fixpoint.eqsat.rewriting.patterns.{Pattern, PatternMatch, SlotVar}
 import org.junit.Test
 
+import scala.language.implicitConversions
+
 class SaturateArithTest {
   // Define a language for arithmetic expressions involving variable references, addition, multiplication, and integer
   // literals.
