@@ -98,23 +98,48 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     val oldClassData = classData
 
-    var unionWorklist = pairs.toList
-
     // The pairs of e-classes that were unified.
     var unifiedPairs = List.empty[(EClassCall, EClassCall)]
 
+    // The union worklist contains pairs of e-classes that need to be unified. Elements of the union worklist may be
+    // canonical or non-canonical e-class calls. The unification algorithm will canonicalize the calls as needed.
+    var unionWorklist = pairs.toList
+
+    // The permutation addition worklist contains pairs of e-classes and permutation groups that need to be added to the
+    // e-class data. The permutation addition worklist is used to delay the addition of permutations until after the
+    // hash cons and class data have been repaired.
+    var permutationAdditionWorklist = Set.empty[(EClassRef, SlotMap)]
+
+    // The slot shrinking worklist contains pairs of e-classes and the sets of slots to which the e-class slots will
+    // be restricted.
+    var slotShrinkingWorklist = Set.empty[(EClassRef, Set[Slot])]
+
     // The nodes repair set contains all e-classes containing nodes that might refer to non-canonical e-classes.
+    // The invariant maintained throughout the unification algorithm is that the elements of the node repair set
+    // are in the hash cons.
     var nodesRepairWorklist = Set.empty[ENode[NodeT]]
 
     // The parents repair set contains all e-classes whose parents set might contain non-canonical e-classes.
     var usersRepairWorklist = Set.empty[EClassRef]
 
     def touchedNodes(data: EClassData[NodeT]): Unit = {
+      assert(data.nodes.keys.forall(hashCons.contains))
+      assert(data.users.forall(hashCons.contains))
       nodesRepairWorklist = nodesRepairWorklist ++ data.nodes.keys ++ data.users
     }
 
     def touchedUsers(data: EClassData[NodeT]): Unit = {
       usersRepairWorklist = usersRepairWorklist ++ data.nodes.flatMap(_._1.args.map(_.ref))
+    }
+
+    def canonicalizeSlots(ref: EClassRef, slots: Set[Slot]): (EClassRef, Set[Slot]) = {
+      val canonical = canonicalize(ref)
+      if (canonical.ref == ref) {
+        (ref, slots)
+      } else {
+        val inv = canonical.args.inverse
+        (canonical.ref, slots.map(inv(_)))
+      }
     }
 
     def shrinkSlots(ref: EClassRef, slots: Set[Slot]): Unit = {
@@ -151,6 +176,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
     }
 
+    def renamePermutation(permutation: SlotMap, renaming: SlotMap): SlotMap = {
+      SlotMap(permutation.iterator.collect {
+        case (k, v) if renaming.contains(k) && renaming.contains(v) => (renaming(k), renaming(v))
+      }.toMap)
+    }
+
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
@@ -175,10 +206,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
       // Merge permutations of subordinate class into dominant class.
       val subToDom = subRoot.args.compose(domRoot.args.inverse)
-      val subPermutations = subData.permutations.generators.map(slotMap =>
-        SlotMap(slotMap.iterator.collect {
-          case (k, v) if subToDom.contains(k) && subToDom.contains(v) => (subToDom(k), subToDom(v))
-        }.toMap))
+      val subPermutations = subData.permutations.generators.map(renamePermutation(_, subToDom))
 
       val newPermutations = domData.permutations.tryAddSet(subPermutations) match {
         case Some(newPerms) =>
@@ -196,7 +224,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
       // Update the hash-cons so that all nodes from the subordinate class now point to the dominant class. Make no
       // attempt at canonicalizing the nodes, as we will perform this operation in the rebuilding logic.
+      assert(subData.nodes.keys.forall(hashCons.contains))
+      assert(subData.nodes.keys.forall(hashCons(_) == subRoot.ref))
       hashCons = hashCons ++ subData.nodes.keys.map(_ -> domRoot.ref)
+      assert(subData.nodes.keys.forall(hashCons(_) == domRoot.ref))
 
       // The merge we just performed may have broken the invariant that all EClassRefs in the e-graph are canonicalized.
       // Specifically, the subordinate class may still be referred to by other e-nodes, either in the form of a direct
@@ -251,23 +282,48 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
-    def inferSelfSymmetries(ref: EClassRef, node: ENode[NodeT]): Unit = {
+    /**
+     * Propagates slot symmetries from an e-node to an e-class.
+     * @param ref The e-class reference that contains the e-node.
+     * @param node The e-node from which symmetries are propagated.
+     */
+    def propagateSymmetries(ref: EClassRef, node: ENode[NodeT]): Unit = {
       val shape = node.asShapeCall
       groupCompatibleVariants(node).foreach(variant => {
         val variantShape = variant.asShapeCall
         if (shape.shape == variantShape.shape) {
-          val permutation = shape.renaming.compose(variantShape.renaming.inverse)
+          val permutation = shape.renaming.inverse.compose(variantShape.renaming)
 
           val data = classData(ref)
           data.permutations.tryAdd(permutation) match {
-            case Some(newPerms) =>
-              classData = classData + (ref -> data.copy(permutations = newPerms))
-              touchedNodes(data)
+            case Some(_) =>
+              permutationAdditionWorklist = permutationAdditionWorklist + (ref -> permutation)
 
             case None =>
           }
         }
       })
+    }
+
+    def canonicalizePermutations(ref: EClassRef, perms: Set[SlotMap]): (EClassRef, Set[SlotMap]) = {
+      val canonical = canonicalize(ref)
+      if (canonical.ref == ref) {
+        (ref, perms)
+      } else {
+        (canonical.ref, perms.map(renamePermutation(_, canonical.args.inverse)))
+      }
+    }
+
+    def addPermutations(ref: EClassRef, perms: Set[SlotMap]): Unit = {
+      val (canonicalRef, canonicalPerms) = canonicalizePermutations(ref, perms)
+      val data = classData(canonicalRef)
+      data.permutations.tryAddSet(canonicalPerms) match {
+        case Some(newPerms) =>
+          classData = classData + (canonicalRef -> data.copy(permutations = newPerms))
+          touchedNodes(data)
+
+        case None =>
+      }
     }
 
     def repairNode(node: ENode[NodeT]): Unit = {
@@ -287,10 +343,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         // oldRenaming : old node slot -> old e-class slot.
         val oldRenaming = data.nodes(node)
 
-        // newRenaming : canonical node slot -> old e-class slot,
-        // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
-        val newRenaming = canonicalNode.renaming.compose(oldRenaming)
-
         hashCons.get(canonicalNode.shape) match {
           case Some(other) =>
             // canonicalNodeRenaming : canonical node slot -> canonical e-class slot.
@@ -309,11 +361,13 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             unionWorklist = (EClassCall(ref, oldRenaming.inverse), EClassCall(other, canonicalCallArgs)) :: unionWorklist
 
           case None =>
+            // newRenaming : canonical node slot -> old e-class slot,
+            // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
+            val newRenaming = canonicalNode.renaming.compose(oldRenaming)
+
             // Shrink e-class slots if the canonical node has fewer slots
             if (!data.slots.subsetOf(newRenaming.keys)) {
-              shrinkSlots(ref, data.slots.intersect(newRenaming.keys))
-              repairNode(node)
-              return
+              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.keys))
             }
 
             // Update the e-class data and hash-cons map.
@@ -322,7 +376,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             touchedUsers(data)
 
             // Infer symmetries from the canonicalized node.
-            inferSelfSymmetries(ref, canonicalNode.rename(newRenaming).asNode)
+            propagateSymmetries(ref, canonicalNode.rename(newRenaming).asNode)
         }
       }
     }
@@ -336,22 +390,38 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
-    while (unionWorklist.nonEmpty || nodesRepairWorklist.nonEmpty || usersRepairWorklist.nonEmpty) {
-      // Process all unions in the worklist. The unify operation may add new e-classes to the repair worklists,
+    while (unionWorklist.nonEmpty || permutationAdditionWorklist.nonEmpty || slotShrinkingWorklist.nonEmpty
+      || nodesRepairWorklist.nonEmpty || usersRepairWorklist.nonEmpty) {
+
+      // Process all unions in the worklist. The unify operation may add new elements to the repair worklists,
       // but will not add elements to its own union worklist.
       for ((left, right) <- unionWorklist) {
         unify(left, right)
       }
       unionWorklist = List.empty
 
-      // Process the node repair worklist. The repairNodes operation may add new e-classes to any worklist.
-      while (nodesRepairWorklist.nonEmpty) {
-        val copy = nodesRepairWorklist
-        nodesRepairWorklist = Set.empty
-        for (node <- copy) {
-          repairNode(node)
-        }
+      // Process all permutation additions in the worklist. The addPermutations operation may add new elements to the
+      // repair worklists, but will not add elements to its own permutation addition worklist.
+      for ((ref, perms) <- permutationAdditionWorklist.groupBy(_._1)) {
+        addPermutations(ref, perms.map(_._2))
       }
+      permutationAdditionWorklist = Set.empty
+
+      // Process all slot shrinkings in the worklist. The shrinkSlots operation may add new elements to the repair
+      // worklists, but will not add elements to its own slot shrinking worklist.
+      for ((ref, slots) <- slotShrinkingWorklist) {
+        val (canonical, newSlots) = canonicalizeSlots(ref, slots)
+        shrinkSlots(canonical, newSlots)
+      }
+      slotShrinkingWorklist = Set.empty
+
+      // Process the node repair worklist. The repairNodes operation may add new e-classes to any worklist except for
+      // the node repair worklist.
+      assert(nodesRepairWorklist.forall(hashCons.contains))
+      for (node <- nodesRepairWorklist) {
+        repairNode(node)
+      }
+      nodesRepairWorklist = Set.empty
 
       // Process the parents repair worklist. The repairUsers operation will not add elements to any worklist.
       for (ref <- usersRepairWorklist.map(canonicalize)) {
