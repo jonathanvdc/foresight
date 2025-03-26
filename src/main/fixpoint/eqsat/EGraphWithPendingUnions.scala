@@ -23,7 +23,7 @@ final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGrap
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
   def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[Repr] = {
-    if (egraph.canonicalize(left) == egraph.canonicalize(right)) {
+    if (egraph.areSame(left, right)) {
       this
     } else {
       EGraphWithPendingUnions(egraph, (left, right) :: pending)
