@@ -1,6 +1,7 @@
 package fixpoint.eqsat.saturation
 
 import fixpoint.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
+import fixpoint.eqsat.rewriting.PortableMatch
 import fixpoint.eqsat.{EGraph, EGraphLike}
 
 import scala.concurrent.duration.Duration
@@ -112,6 +113,35 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
         } catch {
           case OperationCanceledException =>
             (None, (innerData, Duration.Zero))
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The companion object for the [[Strategy]] class.
+ */
+object Strategy {
+  implicit class WithRecordedApplications[NodeT,
+                                          EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                                          Match <: PortableMatch[EGraphT, Match],
+                                          Data](strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) {
+
+    /**
+     * Creates a strategy that records applied matches within each iteration of the strategy. Recorded match
+     * applications do not escape individual iterations of this strategy.
+     * @return A new strategy that records applied matches.
+     */
+    def recordApplications: Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
+        override def initialData: Data = strategy.initialData
+
+        override def apply(egraph: EGraphT,
+                           data: Data,
+                           parallelize: ParallelMap): (Option[EGraphT], Data) = {
+          val (newEGraph, newData) = strategy(EGraphWithRecordedApplications(egraph), data, parallelize)
+          (newEGraph.map(_.egraph), newData)
         }
       }
     }
