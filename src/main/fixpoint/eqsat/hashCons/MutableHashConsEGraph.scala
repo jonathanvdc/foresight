@@ -283,15 +283,30 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       val canonicalNode = canonicalize(node)
       if (canonicalNode.shape != node) {
         val data = classData(ref)
+
+        // oldRenaming : old node slot -> old e-class slot.
         val oldRenaming = data.nodes(node)
+
+        // newRenaming : canonical node slot -> old e-class slot,
+        // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
         val newRenaming = canonicalNode.renaming.compose(oldRenaming)
 
         hashCons.get(canonicalNode.shape) match {
           case Some(other) =>
-            // Union the original node with the canonicalized node.
+            // canonicalNodeRenaming : canonical node slot -> canonical e-class slot.
+            val canonicalNodeRenaming = classData(other).nodes(canonicalNode.shape)
+
+            // Union the original node with the canonicalized node in the class data. Remove the old node from the
+            // hash-cons.
             classData = classData + (ref -> data.copy(nodes = data.nodes - node))
             hashCons = hashCons - node
-            unionWorklist = (EClassCall(ref, oldRenaming.inverse), EClassCall(other, newRenaming.inverse)) :: unionWorklist
+
+            // Construct two calls that we append to the union worklist. The first is a call to the original old e-class
+            // and takes an oldRenaming.inverse : old e-class slot -> old node slot.
+            // The second is a call to the canonicalized e-class and takes an argument map
+            // canonicalCallArgs : canonical e-class slot -> old node slot.
+            val canonicalCallArgs = canonicalNodeRenaming.inverse.compose(canonicalNode.renaming)
+            unionWorklist = (EClassCall(ref, oldRenaming.inverse), EClassCall(other, canonicalCallArgs)) :: unionWorklist
 
           case None =>
             // Shrink e-class slots if the canonical node has fewer slots
