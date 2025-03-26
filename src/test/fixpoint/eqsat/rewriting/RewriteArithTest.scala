@@ -34,8 +34,6 @@ class RewriteArithTest {
   }
 
   object Rules {
-    def all: Seq[Rule[Arith, _, EGraph[Arith]]] = Seq(xPlusZeroEqualsX)
-
     val xPlusZeroEqualsX: Rule[Arith, _, EGraph[Arith]] = {
       val x = SlotVar.fresh()
       Rule(
