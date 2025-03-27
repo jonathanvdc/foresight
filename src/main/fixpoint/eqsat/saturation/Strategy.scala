@@ -76,6 +76,34 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
+   * Creates a strategy that runs this strategy with a limit on the number of iterations. The limit is the maximum
+   * number of iterations that the strategy will run. Once the limit is reached, the strategy will make no further
+   * changes to the e-graph.
+   * @param limit The maximum number of iterations to run the strategy. If the limit is zero, the strategy will never
+   *              change the e-graph.
+   * @return A new strategy that applies this strategy with a limit on the number of iterations.
+   */
+  final def withIterationLimit(limit: Int): Strategy[EGraphT, (Data, Int)] = {
+    new Strategy[EGraphT, (Data, Int)] {
+      override def initialData: (Data, Int) = (Strategy.this.initialData, limit)
+      override def apply(egraph: EGraphT,
+                         data: (Data, Int),
+                         parallelize: ParallelMap): (Option[EGraphT], (Data, Int)) = {
+        val (innerData, remainingIterations) = data
+
+        // If the remaining iterations is zero, return immediately.
+        if (remainingIterations <= 0) {
+          return (None, data)
+        }
+
+        // Apply the strategy.
+        val (newEgraph, newData) = Strategy.this(egraph, innerData, parallelize)
+        (newEgraph, (newData, remainingIterations - 1))
+      }
+    }
+  }
+
+  /**
    * Creates a strategy that runs this strategy with a timeout.
    * @param timeout The timeout for the strategy. If the strategy does not complete within the timeout, it is canceled.
    *                The timeout is a time budget that is shared across all iterations of the strategy.
