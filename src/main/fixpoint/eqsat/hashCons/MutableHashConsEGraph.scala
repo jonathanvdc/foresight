@@ -353,6 +353,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             classData = classData + (ref -> data.copy(nodes = data.nodes - node))
             hashCons = hashCons - node
 
+            // TODO: can we be more specific in terms of which users need to be repaired?
+            touchedUsers(data)
+
             // Construct two calls that we append to the union worklist. The first is a call to the original old e-class
             // and takes an oldRenaming.inverse : old e-class slot -> old node slot.
             // The second is a call to the canonicalized e-class and takes an argument map
@@ -373,6 +376,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             // Update the e-class data and hash-cons map.
             classData = classData + (ref -> data.copy(nodes = data.nodes - node + (canonicalNode.shape -> newRenaming)))
             hashCons = hashCons - node + (canonicalNode.shape -> ref)
+
+            // TODO: can we be more specific in terms of which users need to be repaired?
             touchedUsers(data)
 
             // Infer symmetries from the canonicalized node.
@@ -424,10 +429,13 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       nodesRepairWorklist = Set.empty
 
       // Process the parents repair worklist. The repairUsers operation will not add elements to any worklist.
-      for (ref <- usersRepairWorklist.map(canonicalize)) {
-        repairUsers(ref.ref)
+      for (ref <- usersRepairWorklist) {
+        repairUsers(canonicalize(ref).ref)
       }
       usersRepairWorklist = Set.empty
+
+      // At this point, the invariants have been restored. Check that they have been.
+      // toImmutable.checkInvariants()
     }
 
     val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).map(_.ref).toSet
