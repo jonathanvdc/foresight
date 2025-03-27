@@ -154,7 +154,7 @@ object Strategy {
   implicit class WithRecordedApplications[NodeT,
                                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                           Match <: PortableMatch[EGraphT, Match],
-                                          Data](strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) {
+                                          Data](val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
 
     /**
      * Creates a strategy that records applied matches within each iteration of the strategy. Recorded match

@@ -14,6 +14,25 @@ final case class PatternMatch[NodeT](root: EClassCall,
                                      varMapping: Map[Pattern.Var[NodeT], EClassCall],
                                      slotMapping: Map[SlotVar, Slot]) extends PortableMatch[EGraph[NodeT], PatternMatch[NodeT]] {
 
+  /**
+   * Merges this match with another match.
+   * @param other The other match.
+   * @return The merged match.
+   */
+  def merge(other: PatternMatch[NodeT]): PatternMatch[NodeT] = {
+    if (varMapping.keySet.intersect(other.varMapping.keySet).exists(k => varMapping(k) != other.varMapping(k))) {
+      throw new IllegalArgumentException("Variable mappings are not compatible")
+    }
+
+    if (slotMapping.keySet.intersect(other.slotMapping.keySet).exists(k => slotMapping(k) != other.slotMapping(k))) {
+      throw new IllegalArgumentException("Slot mappings are not compatible")
+    }
+
+    val newVarMapping = varMapping ++ other.varMapping
+    val newSlotMapping = slotMapping ++ other.slotMapping
+    PatternMatch(root, newVarMapping, newSlotMapping)
+  }
+
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
     val newVarMapping = varMapping.mapValues(egraph.canonicalize).view.force

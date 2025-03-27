@@ -1,6 +1,7 @@
 package fixpoint.eqsat.rewriting
 
 import fixpoint.eqsat.parallel.ParallelMap
+import fixpoint.eqsat.rewriting.patterns.PatternMatch
 import fixpoint.eqsat.{EGraph, EGraphLike}
 
 /**
@@ -68,6 +69,28 @@ object Searcher {
   def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1](phase: SearcherPhase[NodeT, Unit, T1, OutputT, EGraphT]): Searcher[NodeT, OutputT, EGraphT] = {
     new Searcher[NodeT, OutputT, EGraphT] {
       override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT = phase.search(egraph, (), parallelize)
+    }
+  }
+
+  implicit class SearcherOfPatternMatchProductOps[NodeT,
+                                                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val searcher: Searcher[NodeT, (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]), EGraphT]) extends AnyVal {
+    /**
+     * Merges the two pattern matches produced by the searcher.
+     * @return A searcher that merges the two pattern matches.
+     */
+    def merge: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
+      new Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] {
+        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[PatternMatch[NodeT]] = {
+          // Find the individual matches.
+          val (matches1, matches2) = searcher.search(egraph, parallelize)
+
+          // Merge their cartesian product.
+          for {
+            match1 <- matches1
+            match2 <- matches2
+          } yield match1.merge(match2)
+        }
+      }
     }
   }
 }
