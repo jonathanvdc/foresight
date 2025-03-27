@@ -7,13 +7,54 @@ import fixpoint.eqsat.EClassCall
  */
 sealed trait EClassSymbol {
   /**
+   * Checks if the e-class symbol is a concrete e-class application.
+   * @return A Boolean value indicating whether the e-class symbol is a real e-class application.
+   */
+  final def isReal: Boolean = this match {
+    case EClassSymbol.Real(_) => true
+    case _: EClassSymbol.Virtual => false
+  }
+
+  /**
+   * Checks if the e-class symbol is a virtual e-class application.
+   * @return A Boolean value indicating whether the e-class symbol is a virtual e-class application.
+   */
+  final def isVirtual: Boolean = !isReal
+
+  /**
    * Reifies the e-class symbol using the given reification.
    * @param reification A map from virtual e-class symbols to e-class calls.
    * @return The e-class call that the e-class symbol represents.
    */
-  def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
+  final def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
     case EClassSymbol.Real(call) => call
-    case virtual: EClassSymbol.Virtual => reification(virtual)
+    case virtual: EClassSymbol.Virtual =>
+      reification(virtual)
+  }
+
+  /**
+   * Tries to reify the e-class symbol using the given reification.
+   * @param reification A map from virtual e-class symbols to e-class calls.
+   * @return The e-class call that the e-class symbol represents, if it is a real e-class symbol or a virtual symbol
+   *         that is in the reification map. Otherwise, `None`.
+   */
+  final def tryReify(reification: Map[EClassSymbol.Virtual, EClassCall]): Option[EClassCall] = this match {
+    case EClassSymbol.Real(call) => Some(call)
+    case virtual: EClassSymbol.Virtual => reification.get(virtual)
+  }
+
+  /**
+   * Refines the e-class symbol using the given reification.
+   * @param reification A map from virtual e-class symbols to e-class calls.
+   * @return The real e-class symbol that the e-class symbol represents, if one exists in the reification map. Otherwise,
+   *         the original e-class symbol.
+   */
+  final def refine(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassSymbol = this match {
+    case EClassSymbol.Real(call) => EClassSymbol.real(call)
+    case virtual: EClassSymbol.Virtual => reification.get(virtual) match {
+      case Some(call) => EClassSymbol.real(call)
+      case None => virtual
+    }
   }
 }
 

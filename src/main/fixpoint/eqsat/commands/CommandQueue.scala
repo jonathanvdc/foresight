@@ -8,7 +8,7 @@ import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
  * @param commands The commands to be applied to the e-graph.
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
-  override def uses: Seq[EClassSymbol.Virtual] = commands.flatMap(_.uses)
+  override def uses: Seq[EClassSymbol] = commands.flatMap(_.uses)
   override def definitions: Seq[EClassSymbol.Virtual] = commands.flatMap(_.definitions)
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
@@ -106,6 +106,17 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
       case queue: CommandQueue[NodeT] => queue.flatCommands
       case command => Seq(command)
     }
+  }
+
+  override def simplify(egraph: EGraph[NodeT],
+                        partialReification: Map[EClassSymbol.Virtual, EClassCall]): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
+    val (newQueue, newReification) = flatCommands.foldLeft((CommandQueue.empty[NodeT], partialReification)) {
+      case ((newQueue, reification), command) =>
+        val (simplified, newReification) = command.simplify(egraph, reification)
+        (newQueue.chain(simplified), reification ++ newReification)
+    }
+
+    (newQueue.optimized, newReification)
   }
 }
 

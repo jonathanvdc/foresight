@@ -66,7 +66,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return The command that applies the matches to the e-graph.
    */
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
-    val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq
+    val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph).simplify(egraph)).toSeq
     CommandQueue(commands).optimized
   }
 }
