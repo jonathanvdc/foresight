@@ -28,8 +28,7 @@ sealed trait EClassSymbol {
    */
   final def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
     case EClassSymbol.Real(call) => call
-    case virtual: EClassSymbol.Virtual =>
-      reification(virtual)
+    case virtual: EClassSymbol.Virtual => reification(virtual)
   }
 
   /**
