@@ -9,7 +9,17 @@ package fixpoint.eqsat
  * @param args The children of the node.
  * @tparam NodeT The type of the node.
  */
-final case class Tree[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[Tree[NodeT]])
+final case class Tree[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[Tree[NodeT]]) {
+  /**
+   * Maps the nodes of the tree to new nodes.
+   * @param f The function to apply to the nodes of the tree.
+   * @tparam NewNodeT The type of new node.
+   * @return The tree with the nodes replaced by new nodes.
+   */
+  def map[NewNodeT](f: NodeT => NewNodeT): Tree[NewNodeT] = {
+    Tree(f(nodeType), definitions, uses, args.map(_.map(f)))
+  }
+}
 
 /**
  * A companion object for the tree data structure.
