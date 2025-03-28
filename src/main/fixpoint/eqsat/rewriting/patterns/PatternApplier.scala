@@ -1,6 +1,6 @@
 package fixpoint.eqsat.rewriting.patterns
 
-import fixpoint.eqsat.{EGraph, MixedTree}
+import fixpoint.eqsat.{EGraph, MixedTree, Slot}
 import fixpoint.eqsat.commands.{Command, CommandQueueBuilder, EClassSymbol}
 import fixpoint.eqsat.rewriting.Applier
 
@@ -23,7 +23,14 @@ final case class PatternApplier[NodeT](pattern: Pattern[NodeT]) extends Applier[
       case v: Pattern.Var[NodeT] => MixedTree.Call[NodeT, EClassSymbol](EClassSymbol.real(m(v)))
 
       case Pattern.Node(t, defs, uses, args) =>
-        MixedTree.Node[NodeT, EClassSymbol](t, defs.map(m(_)), uses.map(m(_)), args.map(instantiate(_, m)))
+        val defSlots = defs.map { s =>
+          m.slotMapping.get(s) match {
+            case Some(v) => v
+            case None => Slot.fresh()
+          }
+        }
+        val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
+        MixedTree.Node[NodeT, EClassSymbol](t, defSlots, uses.map(newMatch(_)), args.map(instantiate(_, newMatch)))
     }
   }
 }
