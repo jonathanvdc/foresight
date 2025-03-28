@@ -507,7 +507,7 @@ object Mul extends Value {
   override def typeArgCount: Int = 0
   override def valueArgCount: Int = 2
 
-  override def inferType(typeArgs: Seq[Tree[Type]], valueArgTypes: Seq[Tree[Type]): Tree[Type] = {
+  override def inferType(typeArgs: Seq[Tree[Type]], valueArgTypes: Seq[Tree[Type]]): Tree[Type] = {
     valueArgTypes.head
   }
 
