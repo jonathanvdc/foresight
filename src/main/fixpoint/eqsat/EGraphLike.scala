@@ -116,6 +116,27 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
 
   /**
+   * Determines whether the e-graph contains a given tree.
+   * @param tree The tree to check for.
+   * @return True if the e-graph contains the tree; otherwise, false.
+   */
+  final def contains(tree: Tree[NodeT]): Boolean = find(tree).isDefined
+
+  /**
+   * Finds the e-class corresponding to the root of a tree.
+   * @param tree The tree to find in the e-graph.
+   * @return The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.
+   */
+  final def find(tree: Tree[NodeT]): Option[EClassCall] = {
+    val args = tree.args.map(find).collect { case Some(call) => call }
+    if (args.size == tree.args.size) {
+      find(ENode(tree.nodeType, tree.definitions, tree.uses, args))
+    } else {
+      None
+    }
+  }
+
+  /**
    * Adds a mixed tree to the e-graph.
    * @param tree The tree to add.
    * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
