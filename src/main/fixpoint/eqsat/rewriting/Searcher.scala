@@ -92,7 +92,7 @@ object Searcher {
     def mapWithEGraph[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = {
       new Searcher[NodeT, Seq[OutputT], EGraphT] {
         override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
-          parallelize(searcher.search(egraph, parallelize), f(_, egraph)).toSeq
+          parallelize(searcher.search(egraph, parallelize), (x: MatchT) => f(x, egraph)).toSeq
         }
       }
     }
@@ -121,7 +121,7 @@ object Searcher {
       new Searcher[NodeT, Seq[MatchT], EGraphT] {
         override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
           val matches = searcher.search(egraph, parallelize)
-          parallelize(matches, f(_, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
+          parallelize(matches, (x: MatchT) => f(x, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
         }
       }
     }
