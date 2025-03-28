@@ -145,6 +145,20 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       }
     }
   }
+
+  /**
+   * Creates a strategy that drops the data carried by this strategy, running each iteration with the initial data.
+   * @return A new strategy that applies this strategy without carrying any data.
+   */
+  final def dropData: Strategy[EGraphT, Unit] = {
+    new Strategy[EGraphT, Unit] {
+      override def initialData: Unit = ()
+      override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
+        val (newEGraph, _) = Strategy.this(egraph, Strategy.this.initialData, parallelize)
+        (newEGraph, ())
+      }
+    }
+  }
 }
 
 /**
