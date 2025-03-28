@@ -13,6 +13,10 @@ object SearcherOps {
     Pattern.Node[ArrayIR](Int32Type, Seq.empty, Seq.empty, Seq.empty).compiled
   }
 
+  private def doubleTypePattern = {
+    Pattern.Node[ArrayIR](DoubleType, Seq.empty, Seq.empty, Seq.empty).compiled
+  }
+
   implicit class SearcherOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT])
     extends AnyVal {
 
@@ -51,6 +55,17 @@ object SearcherOps {
     def requireInt32Type(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filterWithEGraph((m, egraph) => {
         int32TypePattern.matches(m(t), egraph)
+      })
+    }
+
+    /**
+     * Requires that the given variable is a double type. Matches that do not satisfy this condition are filtered out.
+     * @param t The variable to check.
+     * @return The searcher that filters out matches where the variable is not a double type.
+     */
+    def requireDoubleType(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+      searcher.filterWithEGraph((m, egraph) => {
+        doubleTypePattern.matches(m(t), egraph)
       })
     }
   }

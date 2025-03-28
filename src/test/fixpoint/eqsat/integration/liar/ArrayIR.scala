@@ -444,16 +444,12 @@ final case class ConstDouble(value: Double) extends Value {
     Tree.unslotted(DoubleType, Seq.empty)
   }
 
-  def apply(value: Double): Tree[ArrayIR] = {
-    Tree(ConstDouble(value), Seq.empty, Seq.empty, Seq(inferType(Seq.empty, Seq.empty)))
+  def toPattern: Pattern[ArrayIR] = {
+    Pattern.Node(ConstDouble(value), Seq.empty, Seq.empty, Seq.empty)
   }
 
-  def unapply(tree: Tree[ArrayIR]): Option[(Double, Tree[Type])] = {
-    tree match {
-      case Tree(ConstDouble(value), Seq(), Seq(), Seq(t)) =>
-        Some((value, Type.asType(t)))
-      case _ => None
-    }
+  def toTree: Tree[ArrayIR] = {
+    Tree.unslotted(ConstDouble(value), Seq(inferType(Seq.empty, Seq.empty)))
   }
 }
 
@@ -468,15 +464,12 @@ final case class ConstInt32(value: Int) extends Value {
     Tree.unslotted(Int32Type, Seq.empty)
   }
 
-  def apply(value: Int): Tree[ArrayIR] = {
-    Tree(ConstInt32(value), Seq.empty, Seq.empty, Seq(inferType(Seq.empty, Seq.empty)))
+  def toPattern: Pattern[ArrayIR] = {
+    Pattern.Node(ConstInt32(value), Seq.empty, Seq.empty, Seq.empty)
   }
 
-  def unapply(tree: Tree[ArrayIR]): Option[(Int, Tree[Type])] = {
-    tree match {
-      case Tree(ConstInt32(value), Seq(), Seq(), Seq(t)) => Some((value, Type.asType(t)))
-      case _ => None
-    }
+  def toTree: Tree[ArrayIR] = {
+    Tree.unslotted(ConstInt32(value), Seq(inferType(Seq.empty, Seq.empty)))
   }
 }
 
