@@ -458,6 +458,83 @@ final case class ConstDouble(value: Double) extends Value {
 }
 
 /**
+ * A 32-bit integer constant in the minimalist array IR.
+ */
+final case class ConstInt32(value: Int) extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 0
+
+  override def inferType(typeArgs: Seq[Tree[Type]], valueArgTypes: Seq[Tree[Type]]): Tree[Type] = {
+    Tree.unslotted(Int32Type, Seq.empty)
+  }
+
+  def apply(value: Int): Tree[ArrayIR] = {
+    Tree(ConstInt32(value), Seq.empty, Seq.empty, Seq(inferType(Seq.empty, Seq.empty)))
+  }
+
+  def unapply(tree: Tree[ArrayIR]): Option[(Int, Tree[Type])] = {
+    tree match {
+      case Tree(ConstInt32(value), Seq(), Seq(), Seq(t)) => Some((value, Type.asType(t)))
+      case _ => None
+    }
+  }
+}
+
+/**
+ * An addition operation in the minimalist array IR.
+ */
+object Add extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 2
+
+  override def inferType(typeArgs: Seq[Tree[Type]], valueArgTypes: Seq[Tree[Type]): Tree[Type] = {
+    valueArgTypes.head
+  }
+
+  def apply(lhs: Pattern[ArrayIR], rhs: Pattern[ArrayIR]): Pattern[ArrayIR] = {
+    Pattern.Node(Add, Seq.empty, Seq.empty, Seq(Pattern.Var.fresh[ArrayIR](), lhs, rhs))
+  }
+
+  def apply(lhs: Tree[ArrayIR], rhs: Tree[ArrayIR]): Tree[ArrayIR] = {
+    Tree.unslotted(Add, Seq(inferType(Seq.empty, Seq(Value.typeOf(lhs), Value.typeOf(rhs))), lhs, rhs))
+  }
+
+  def unapply(tree: Tree[ArrayIR]): Option[(Tree[ArrayIR], Tree[ArrayIR], Tree[Type])] = {
+    tree match {
+      case Tree(Add, Seq(), Seq(), Seq(t, lhs, rhs)) => Some((lhs, rhs, Type.asType(t)))
+      case _ => None
+    }
+  }
+}
+
+/**
+ * A multiplication operation in the minimalist array IR.
+ */
+object Mul extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 2
+
+  override def inferType(typeArgs: Seq[Tree[Type]], valueArgTypes: Seq[Tree[Type]): Tree[Type] = {
+    valueArgTypes.head
+  }
+
+  def apply(lhs: Pattern[ArrayIR], rhs: Pattern[ArrayIR]): Pattern[ArrayIR] = {
+    Pattern.Node(Mul, Seq.empty, Seq.empty, Seq(Pattern.Var.fresh[ArrayIR](), lhs, rhs))
+  }
+
+  def apply(lhs: Tree[ArrayIR], rhs: Tree[ArrayIR]): Tree[ArrayIR] = {
+    Tree.unslotted(Mul, Seq(inferType(Seq.empty, Seq(Value.typeOf(lhs), Value.typeOf(rhs))), lhs, rhs))
+  }
+
+  def unapply(tree: Tree[ArrayIR]): Option[(Tree[ArrayIR], Tree[ArrayIR], Tree[Type])] = {
+    tree match {
+      case Tree(Mul, Seq(), Seq(), Seq(t, lhs, rhs)) => Some((lhs, rhs, Type.asType(t)))
+      case _ => None
+    }
+  }
+}
+
+/**
  * A function call in the minimalist array IR.
  */
 trait ExternFunctionCall extends Value {
