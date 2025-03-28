@@ -11,11 +11,17 @@ import fixpoint.eqsat.rewriting.{Applier, Searcher}
  */
 sealed trait Pattern[NodeT] {
   /**
+   * Compiles the pattern into a compiled pattern.
+   * @return The compiled pattern.
+   */
+  def compiled: CompiledPattern[NodeT, EGraph[NodeT]] = CompiledPattern(PatternCompiler.compile(this))
+
+  /**
    * Converts the pattern to a searcher.
    * @return The searcher.
    */
   def toSearcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraph[NodeT]] = {
-    Searcher(MachineSearcherPhase[NodeT, EGraph[NodeT]](PatternCompiler.compile(this)))
+    Searcher(MachineSearcherPhase(compiled))
   }
 
   /**

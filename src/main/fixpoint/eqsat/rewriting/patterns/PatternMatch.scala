@@ -15,6 +15,20 @@ final case class PatternMatch[NodeT](root: EClassCall,
                                      slotMapping: Map[SlotVar, Slot]) extends PortableMatch[EGraph[NodeT], PatternMatch[NodeT]] {
 
   /**
+   * Gets the e-class application that corresponds to a variable.
+   * @param variable The variable.
+   * @return The e-class application.
+   */
+  def apply(variable: Pattern.Var[NodeT]): EClassCall = varMapping(variable)
+
+  /**
+   * Gets the slot that corresponds to a slot variable.
+   * @param slot The slot variable.
+   * @return The slot.
+   */
+  def apply(slot: SlotVar): Slot = slotMapping(slot)
+
+  /**
    * Merges this match with another match.
    * @param other The other match.
    * @return The merged match.

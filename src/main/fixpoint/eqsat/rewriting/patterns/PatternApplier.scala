@@ -20,10 +20,10 @@ final case class PatternApplier[NodeT](pattern: Pattern[NodeT]) extends Applier[
 
   private def instantiate(pattern: Pattern[NodeT], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
-      case v: Pattern.Var[NodeT] => MixedTree.Call[NodeT, EClassSymbol](EClassSymbol.real(m.varMapping(v)))
+      case v: Pattern.Var[NodeT] => MixedTree.Call[NodeT, EClassSymbol](EClassSymbol.real(m(v)))
 
       case Pattern.Node(t, defs, uses, args) =>
-        MixedTree.Node[NodeT, EClassSymbol](t, defs.map(m.slotMapping), uses.map(m.slotMapping), args.map(instantiate(_, m)))
+        MixedTree.Node[NodeT, EClassSymbol](t, defs.map(m(_)), uses.map(m(_)), args.map(instantiate(_, m)))
     }
   }
 }

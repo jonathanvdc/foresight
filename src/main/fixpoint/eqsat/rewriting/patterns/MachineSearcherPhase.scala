@@ -5,18 +5,15 @@ import fixpoint.eqsat.rewriting.SearcherPhase
 
 /**
  * A phase of a searcher that searches for matches of a pattern machine in an e-graph.
- * @param instructions The instructions of the pattern machine.
+ * @param pattern The pattern to search for.
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the searcher searches in.
  */
-final case class MachineSearcherPhase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](instructions: List[Instruction[NodeT, EGraphT]])
+final case class MachineSearcherPhase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: CompiledPattern[NodeT, EGraphT])
   extends SearcherPhase[NodeT, Unit, Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]], EGraphT] {
 
   override def search(call: EClassCall, egraph: EGraphT, input: Unit): Seq[PatternMatch[NodeT]] = {
-    val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions).map { state =>
-      PatternMatch(call, state.boundVars, state.boundSlots)
-    }.toSeq
+    pattern.search(call, egraph)
   }
 
   override def aggregate(matches: Map[EClassRef, Seq[PatternMatch[NodeT]]]): Seq[PatternMatch[NodeT]] = {
