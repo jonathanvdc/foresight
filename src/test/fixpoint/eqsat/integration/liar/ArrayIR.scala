@@ -292,11 +292,11 @@ object IFold extends Value {
     elementType
   }
 
-  def apply[A](array: MixedTree[ArrayIR, A], init: MixedTree[ArrayIR, A], foldFunction: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+  def apply[A](size: MixedTree[ArrayIR, A], init: MixedTree[ArrayIR, A], foldFunction: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
     MixedTree.unslotted(
       IFold,
       Seq(
-        array,
+        size,
         init,
         foldFunction))
   }

@@ -2,6 +2,7 @@ package fixpoint.eqsat.integration.liar
 
 import fixpoint.eqsat.extraction.ExtractionAnalysis
 import fixpoint.eqsat.integration.liar.CoreRules.LiarRule
+import fixpoint.eqsat.parallel.ParallelMap
 import fixpoint.eqsat.{EGraph, Slot}
 import fixpoint.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import org.junit.Test
@@ -60,6 +61,9 @@ class CoreRuleTests {
 
     assert(egraph5.contains(indexedBuild))
     assert(egraph5.areSame(c1, egraph5.find(indexedBuild).get))
+    assert(egraph5.areSame(c1, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), zero)).get))
+    assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), zero)).get))
+    assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), one)).get))
   }
 
   @Test
@@ -95,6 +99,24 @@ class CoreRuleTests {
     val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
+  }
+
+  @Test
+  def betaReduceAdd(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val t = Int32Type.toTree
+    val zero = ConstInt32(0).toTree
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+    val add = Lambda(x, t, Lambda(y, t, Add(Var(x, t), Var(y, t))))
+    val application = Apply(Apply(add, zero), zero)
+
+    val (c1, egraph2) = egraph.add(application)
+
+    val egraph3 = strategy(2, rules = Seq(CoreRules.eliminateLambda))(egraph2, ParallelMap.sequential).get
+
+    assert(egraph3.areSame(c1, egraph3.find(Add(zero, zero)).get))
   }
 
   @Test
