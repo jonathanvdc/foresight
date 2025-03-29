@@ -98,7 +98,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @return The canonicalized e-class application.
    */
   final def canonicalize(call: EClassCall): EClassCall = {
-    canonicalize(call.ref).rename(call.args)
+    canonicalize(call.ref).renamePartial(call.args)
   }
 
   /**

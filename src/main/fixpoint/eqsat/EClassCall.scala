@@ -31,4 +31,13 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
     assert(args.valueSet.subsetOf(renaming.keySet), "Argument slots must be in the renaming.")
     EClassCall(ref, args.composePartial(renaming))
   }
+
+  /**
+   * Renames the argument slots of the applied reference. Argument slots that are not in the renaming are dropped.
+   * @param renaming The renaming of the argument slots.
+   * @return The applied reference with the arguments renamed.
+   */
+  def renamePartial(renaming: SlotMap): EClassCall = {
+    EClassCall(ref, args.composePartial(renaming))
+  }
 }

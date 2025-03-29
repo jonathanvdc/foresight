@@ -115,6 +115,20 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
 
   /**
    * Compose with another slot map. For a, b, c such that a -> b in this slot map and b -> c in the other slot map,
+   * the result will contain a -> c. Retains the original mapping a -> b if b is not in the other slot map.
+   *
+   * @param other The other slot map.
+   * @return A new slot map.
+   */
+  def composeRetain(other: SlotMap): SlotMap = {
+    val newMap = map.map { case (k, v) =>
+      k -> other.get(v).getOrElse(v)
+    }
+    SlotMap(newMap)
+  }
+
+  /**
+   * Compose with another slot map. For a, b, c such that a -> b in this slot map and b -> c in the other slot map,
    * the result will contain a -> c. If b is not in the other slot map, it is replaced with a fresh slot.
    *
    * @param other The other slot map.

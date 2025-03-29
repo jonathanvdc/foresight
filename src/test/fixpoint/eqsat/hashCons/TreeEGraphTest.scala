@@ -235,6 +235,9 @@ class TreeEGraphTest {
     assert(egraph3.canonicalize(c1) == c1)
     assert(egraph3.canonicalize(c2) == c2)
 
+    val lambdaNode = egraph3.nodes(c2).head
+    assert(lambdaNode.definitions.head == lambdaNode.args.head.args.values.head)
+
     egraph3.checkInvariants()
   }
 }
