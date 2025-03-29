@@ -321,4 +321,82 @@ class UnionTest {
     assert(egraph4.canonicalize(c).args.size == 0)
     assert(egraph4.canonicalize(c) == egraph4.canonicalize(d))
   }
+
+  @Test
+  def zeroTimesXUnionZeroEliminatesSlot(): Unit = {
+    sealed trait NodeType
+    case object Var extends NodeType
+    case class Const(value: Int) extends NodeType
+    case object Mul extends NodeType
+
+    val egraph = HashConsEGraph.empty[NodeType]
+
+    val x = Slot.fresh()
+
+    val zeroTimesX = Tree.unslotted(
+      Mul,
+      Seq(
+        Tree.unslotted(Const(0), Seq.empty),
+        Tree(Var, Seq.empty, Seq(x), Seq.empty)))
+
+    val (c, egraph2) = egraph.add(zeroTimesX)
+
+    assert(egraph2.classes.size == 3)
+    assert(c.args.size == 1)
+
+    val zero = ENode(Const(0), Seq.empty, Seq.empty, Seq.empty)
+    val (d, egraph3) = egraph2.add(zero)
+
+    assert(egraph3.classes.size == 3)
+    assert(d.args.size == 0)
+
+    val egraph4 = egraph3.union(c, d).rebuilt
+
+    assert(egraph4.classes.size == 2)
+    assert(egraph4.canonicalize(c).args.size == 0)
+    assert(egraph4.canonicalize(c) == egraph4.canonicalize(d))
+  }
+
+  @Test
+  def zeroTimesXUnionZeroEliminatesSlot2(): Unit = {
+    sealed trait NodeType
+    case object Var extends NodeType
+    case class Const(value: Int) extends NodeType
+    case object Mul extends NodeType
+
+    val egraph = HashConsEGraph.empty[NodeType]
+
+    val x = Slot.fresh()
+
+    val zeroTimesX = Tree.unslotted(
+      Mul,
+      Seq(
+        Tree.unslotted(Const(0), Seq.empty),
+        Tree(Var, Seq.empty, Seq(x), Seq.empty)))
+    val zeroTimesXTimesOne = Tree.unslotted(
+      Mul,
+      Seq(
+        zeroTimesX,
+        Tree.unslotted(Const(1), Seq.empty)))
+
+    val (c, egraph2) = egraph.add(zeroTimesX)
+    val (e, egraph3) = egraph2.add(zeroTimesXTimesOne)
+
+    assert(egraph3.classes.size == 5)
+    assert(c.args.size == 1)
+    assert(e.args.size == 1)
+
+    val zero = ENode(Const(0), Seq.empty, Seq.empty, Seq.empty)
+    val (d, egraph4) = egraph3.add(zero)
+
+    assert(egraph4.classes.size == 5)
+    assert(d.args.size == 0)
+
+    val egraph5 = egraph4.union(c, d).rebuilt
+
+    assert(egraph5.classes.size == 4)
+    assert(egraph5.canonicalize(c).args.size == 0)
+    assert(egraph5.canonicalize(c) == egraph5.canonicalize(d))
+    assert(egraph5.canonicalize(e).args.size == 0)
+  }
 }
