@@ -28,8 +28,7 @@ class CoreRuleTests {
     val (c1, egraph2) = egraph.add(zero)
     val (c2, egraph3) = egraph2.add(one)
 
-    val strat = strategy(1)
-    val egraph4 = strat(egraph3, strat.initialData, ParallelMap.sequential)._1.get
+    val egraph4 = strategy(1)(egraph3).get
 
     val x = Slot.fresh()
     assert(egraph4.contains(Apply(Lambda(x, Int32Type.toTree, zero), one)))
@@ -41,5 +40,22 @@ class CoreRuleTests {
     assert(egraph4.areSame(c2, egraph4.find(Apply(Lambda(x, Int32Type.toTree, one), zero)).get))
     assert(egraph4.areSame(c1, egraph4.find(Apply(Lambda(x, Int32Type.toTree, zero), zero)).get))
     assert(egraph4.areSame(c2, egraph4.find(Apply(Lambda(x, Int32Type.toTree, one), one)).get))
+  }
+
+  @Test
+  def introduceIndexBuild(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val zero = ConstInt32(0).toTree
+    val one = ConstInt32(1).toTree
+
+    val (c1, egraph2) = egraph.add(zero)
+    val (c2, egraph3) = egraph2.add(one)
+    val (c3, egraph4) = egraph3.add(ArrayType(DoubleType.toTree, ConstIntType(100).toTree))
+
+    val egraph5 = strategy(2)(egraph4).get
+
+    val x = Slot.fresh()
+    assert(egraph5.contains(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), one)))
   }
 }

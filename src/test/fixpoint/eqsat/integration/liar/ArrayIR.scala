@@ -68,6 +68,10 @@ object Int32Type extends Type {
 final case class ConstIntType(value: Int) extends Type {
   override def typeArgCount: Int = 0
   override def valueArgCount: Int = 0
+
+  def toTree: Tree[Type] = {
+    Tree.unslotted(ConstIntType(value), Seq.empty)
+  }
 }
 
 /**
