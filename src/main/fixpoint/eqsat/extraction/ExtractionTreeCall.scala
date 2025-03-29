@@ -1,6 +1,6 @@
 package fixpoint.eqsat.extraction
 
-import fixpoint.eqsat.SlotMap
+import fixpoint.eqsat.{Slot, SlotMap}
 
 /**
  * A renamed extraction tree.
@@ -10,6 +10,8 @@ import fixpoint.eqsat.SlotMap
  * @tparam C The type of the cost.
  */
 final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], renaming: SlotMap) {
+  assert(tree.slotSet.forall(renaming.contains))
+
   /**
    * Gets the cost of the tree.
    * @return The cost of the tree.
@@ -27,6 +29,18 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
    * @return The depth of the tree.
    */
   def depth: Int = tree.depth
+
+  /**
+   * The slots of the tree, in the order in which they appear, after applying the renaming.
+   * @return The slots of the tree.
+   */
+  def slots: Seq[Slot] = tree.slots.map(renaming(_))
+
+  /**
+   * The set of slots of the tree after applying the renaming.
+   * @return The slots of the tree.
+   */
+  def slotSet: Set[Slot] = tree.slotSet.map(renaming(_))
 
   /**
    * Renames the slots in the tree.

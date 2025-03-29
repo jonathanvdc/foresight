@@ -41,7 +41,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    * @return The analysis result with the slots renamed.
    */
   override def rename(result: ExtractionTreeCall[NodeT, C], renaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
-    ExtractionTreeCall(result.tree, result.renaming.composePartial(renaming))
+    ExtractionTreeCall(result.tree, result.renaming.composeRetain(renaming))
   }
 
   /**
@@ -53,9 +53,11 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    */
   override def make(node: ENode[NodeT], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
     val treeCost = cost(node.nodeType, node.definitions, node.uses, args)
+    val tree = ExtractionTree(treeCost, node.nodeType, node.definitions, node.uses, args)
+    // assert(node.slots.toSet.subsetOf(tree.slotSet))
     ExtractionTreeCall(
-      ExtractionTree(treeCost, node.nodeType, node.definitions, node.uses, args),
-      SlotMap.identity(node.slots.toSet -- node.definitions))
+      tree,
+      SlotMap.identity(tree.slotSet))
   }
 
   /**

@@ -30,6 +30,18 @@ final case class ExtractionTree[+NodeT, C](cost: C,
   val depth: Int = (args.map(_.depth) :+ 0).max + 1
 
   /**
+   * The slots of the tree, in the order in which they appear.
+   * @return The slots of the tree.
+   */
+  def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.slots)
+
+  /**
+   * The set of slots of the tree after applying the renaming.
+   * @return The slots of the tree.
+   */
+  val slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.slotSet)
+
+  /**
    * Turns the extraction tree into an expression tree.
    * @return The expression tree.
    */

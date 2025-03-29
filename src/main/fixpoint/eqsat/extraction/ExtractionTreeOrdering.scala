@@ -29,8 +29,8 @@ final case class ExtractionTreeOrdering[NodeT, C](implicit costOrdering: Orderin
   private final object ExtractionTreeCallOrdering extends Ordering[ExtractionTreeCall[NodeT, C]] {
 
     override def compare(x: ExtractionTreeCall[NodeT, C], y: ExtractionTreeCall[NodeT, C]): Int = {
-      x.renaming compare y.renaming match {
-        case 0 => treeOrdering.compare(x.tree, y.tree)
+      treeOrdering.compare(x.tree, y.tree) match {
+        case 0 => x.renaming compare y.renaming
         case c => c
       }
     }
