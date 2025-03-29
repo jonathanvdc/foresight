@@ -80,6 +80,24 @@ class CoreRuleTests {
   }
 
   @Test
+  def betaReduceIdentityWithExtraSlot(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val t = Int32Type.toTree
+    val zero = ConstInt32(0).toTree
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+    val identity = Lambda(x, t, Apply(Lambda(y, t, Var(x, t)), Var(x, t)))
+    val application = Apply(identity, zero)
+
+    val (c1, egraph2) = egraph.add(application)
+
+    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+
+    assert(egraph3.areSame(c1, egraph3.find(zero).get))
+  }
+
+  @Test
   def eliminateIndexBuild(): Unit = {
     val egraph = EGraph.empty[ArrayIR]
 
