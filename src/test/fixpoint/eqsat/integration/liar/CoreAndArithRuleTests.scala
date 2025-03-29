@@ -2,7 +2,6 @@ package fixpoint.eqsat.integration.liar
 
 import fixpoint.eqsat.extraction.ExtractionAnalysis
 import fixpoint.eqsat.integration.liar.CoreRules.LiarRule
-import fixpoint.eqsat.parallel.ParallelMap
 import fixpoint.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import fixpoint.eqsat.{EGraph, Slot}
 import org.junit.Test

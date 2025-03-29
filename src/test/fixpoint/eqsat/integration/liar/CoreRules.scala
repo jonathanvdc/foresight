@@ -8,7 +8,8 @@ import fixpoint.eqsat.integration.liar.SearcherOps._
 import fixpoint.eqsat.metadata.EGraphWithMetadata
 
 object CoreRules {
-  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]]
+  type LiarEGraph = EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], LiarEGraph]
 
   def all: Seq[LiarRule] = introductionRules ++ eliminationRules
 
