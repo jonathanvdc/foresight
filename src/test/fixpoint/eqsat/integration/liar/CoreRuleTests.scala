@@ -114,4 +114,42 @@ class CoreRuleTests {
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
   }
+
+  @Test
+  def eliminateTupleFst(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val zero = ConstInt32(0).toTree
+    val one = ConstInt32(1).toTree
+
+    val tuple = Tuple(zero, one)
+    val fst = Fst(tuple)
+
+    val (c1, egraph2) = egraph.add(fst)
+
+    assert(!egraph2.areSame(c1, egraph2.find(zero).get))
+
+    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+
+    assert(egraph3.areSame(c1, egraph3.find(zero).get))
+  }
+
+  @Test
+  def eliminateTupleSnd(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val zero = ConstInt32(0).toTree
+    val one = ConstInt32(1).toTree
+
+    val tuple = Tuple(zero, one)
+    val snd = Snd(tuple)
+
+    val (c1, egraph2) = egraph.add(snd)
+
+    assert(!egraph2.areSame(c1, egraph2.find(one).get))
+
+    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+
+    assert(egraph3.areSame(c1, egraph3.find(one).get))
+  }
 }
