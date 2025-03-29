@@ -101,6 +101,20 @@ object MixedTree {
     MixedTree.Node[NodeT, A](tree.nodeType, tree.definitions, tree.uses, args)
   }
 
+  implicit class MixedTreeOfEClassCallOps[NodeT](val tree: MixedTree[NodeT, EClassCall]) extends AnyVal {
+    /**
+     * Computes the set of all slots that appear in the tree.
+     * @return The set of slots.
+     */
+    def slotSet: Set[Slot] = tree match {
+      case MixedTree.Node(_, defs, uses, children) =>
+        defs.toSet ++ uses ++ children.flatMap(_.slotSet)
+
+      case MixedTree.Call(call) =>
+        call.slotSet
+    }
+  }
+
   /**
    * Extension methods for mixed trees of patterns.
    * @param tree The mixed tree of patterns.

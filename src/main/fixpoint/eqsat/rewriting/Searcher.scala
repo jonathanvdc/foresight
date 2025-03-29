@@ -3,7 +3,7 @@ package fixpoint.eqsat.rewriting
 import fixpoint.eqsat.metadata.EGraphWithMetadata
 import fixpoint.eqsat.parallel.ParallelMap
 import fixpoint.eqsat.rewriting.patterns.{CompiledPattern, MachineSearcherPhase, Pattern, PatternMatch}
-import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree}
+import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 
 /**
  * A searcher that searches for matches in an e-graph.
@@ -149,6 +149,24 @@ object Searcher {
         override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
           val matches = searcher.search(egraph, parallelize)
           parallelize(matches, f).zip(matches).collect { case (true, m) => m }.toSeq
+        }
+      }
+    }
+  }
+
+  implicit class SearcherOfPatternMatch[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
+    /**
+     * Requires that the expression bound to a variable is independent of a set of slots. That is, the expression may
+     * not contain any of the slots in the set. Potential matches that do not satisfy this condition are filtered out.
+     * @param expr The variable to check.
+     * @param slots The slots to check.
+     * @return A searcher that filters out matches that do not satisfy the condition.
+     */
+    def requireIndependent(expr: Pattern.Var[NodeT], slots: Slot*): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
+      new Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] {
+        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[PatternMatch[NodeT]] = {
+          val matches = searcher.search(egraph, parallelize)
+          matches.filter(_.isIndependent(expr, slots.toSet))
         }
       }
     }

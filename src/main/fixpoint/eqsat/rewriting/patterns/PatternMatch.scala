@@ -53,4 +53,17 @@ final case class PatternMatch[NodeT](root: EClassCall,
     val newSlotMapping = slotMapping
     PatternMatch(newRoot, newVarMapping, newSlotMapping)
   }
+
+  /**
+   * Checks if an expression is independent of a given set of slots. That is, none of the slots in the set occur in the
+   * expression.
+   * @param expr The expression to check.
+   * @param slots The slots to check.
+   * @return True if the expression is independent of the slots, false otherwise.
+   */
+  def isIndependent(expr: Pattern.Var[NodeT], slots: Set[Slot]): Boolean = {
+    val exprSlots = apply(expr).slotSet
+    val commonSlots = exprSlots.intersect(slots)
+    commonSlots.isEmpty
+  }
 }
