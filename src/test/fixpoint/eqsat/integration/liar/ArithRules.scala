@@ -8,7 +8,7 @@ import fixpoint.eqsat.integration.liar.SearcherOps._
 object ArithRules {
   import fixpoint.eqsat.integration.liar.CoreRules.LiarRule
 
-  def allRules: Seq[LiarRule] = Seq(
+  def all: Seq[LiarRule] = Seq(
     simplifyAddZeroRight,
     simplifyMulOneRight,
     simplifyMulOneLeft,
