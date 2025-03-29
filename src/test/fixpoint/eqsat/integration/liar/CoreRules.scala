@@ -1,5 +1,6 @@
 package fixpoint.eqsat.integration.liar
 
+import fixpoint.eqsat.integration.liar.ApplierOps.ApplierOfPatternMatchOps
 import fixpoint.eqsat.{EGraph, MixedTree, Slot}
 import fixpoint.eqsat.rewriting.Rule
 import fixpoint.eqsat.rewriting.patterns.{Pattern, PatternMatch}
@@ -9,12 +10,15 @@ import fixpoint.eqsat.metadata.EGraphWithMetadata
 object CoreRules {
   type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]]
 
+  def all: Seq[LiarRule] = introductionRules ++ eliminationRules
+
   def introductionRules: Seq[LiarRule] = Seq(
     introduceLambda,
     introduceIndexBuild
   )
 
   def eliminationRules: Seq[LiarRule] = Seq(
+    eliminateLambda,
     eliminateIndexBuild,
     eliminateFstTuple,
     eliminateSndTuple
@@ -65,6 +69,20 @@ object CoreRules {
             .requireMetadata)
         .merge,
       IndexAt(Build(MixedTree.Call(N), MixedTree.Call(f)), MixedTree.Call(i)).toApplier)
+  }
+
+  val eliminateLambda: LiarRule = {
+    // (λx. e) y -> e[x/y]
+    val e = Pattern.Var.fresh[ArrayIR]()
+    val t = MixedTree.Call(Pattern.Var.fresh[ArrayIR]())
+    val x = Slot.fresh()
+    val y = Pattern.Var.fresh[ArrayIR]()
+    Rule(
+      "(λx. e) y -> e[x/y]",
+      Apply(Lambda(x, t, MixedTree.Call(e)), MixedTree.Call(y)).toSearcher,
+      MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
+        .toApplier[EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]]
+        .substitute(e, x, y, e))
   }
 
   val eliminateIndexBuild: LiarRule = {
