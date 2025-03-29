@@ -292,9 +292,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       groupCompatibleVariants(node).foreach(variant => {
         val variantShape = variant.asShapeCall
         if (shape.shape == variantShape.shape) {
-          val permutation = shape.renaming.inverse.compose(variantShape.renaming)
-
           val data = classData(ref)
+          val permutation = shape.renaming.inverse.compose(variantShape.renaming).filterKeys(data.slots)
+
           data.permutations.tryAdd(permutation) match {
             case Some(_) =>
               permutationAdditionWorklist = permutationAdditionWorklist + (ref -> permutation)

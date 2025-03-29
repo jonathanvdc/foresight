@@ -177,6 +177,15 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
 
     leftSortedValues.compare(rightSortedValues)
   }
+
+  /**
+   * Filters the slot map by a predicate on the keys.
+   * @param p The predicate to filter the keys by.
+   * @return A new slot map with only the keys that satisfy the predicate.
+   */
+  def filterKeys(p: Slot => Boolean): SlotMap = {
+    SlotMap(map.filterKeys(p))
+  }
 }
 
 /**
