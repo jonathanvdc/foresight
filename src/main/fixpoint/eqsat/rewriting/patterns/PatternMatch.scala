@@ -1,7 +1,7 @@
 package fixpoint.eqsat.rewriting.patterns
 
 import fixpoint.eqsat.rewriting.PortableMatch
-import fixpoint.eqsat.{EClassCall, EGraph, Slot}
+import fixpoint.eqsat.{EClassCall, EGraph, MixedTree, Slot}
 
 /**
  * A match of a pattern.
@@ -11,22 +11,22 @@ import fixpoint.eqsat.{EClassCall, EGraph, Slot}
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class PatternMatch[NodeT](root: EClassCall,
-                                     varMapping: Map[Pattern.Var[NodeT], EClassCall],
-                                     slotMapping: Map[SlotVar, Slot]) extends PortableMatch[EGraph[NodeT], PatternMatch[NodeT]] {
+                                     varMapping: Map[Pattern.Var[NodeT], MixedTree[NodeT, EClassCall]],
+                                     slotMapping: Map[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
 
   /**
-   * Gets the e-class application that corresponds to a variable.
+   * Gets the tree that corresponds to a variable.
    * @param variable The variable.
-   * @return The e-class application.
+   * @return The tree.
    */
-  def apply(variable: Pattern.Var[NodeT]): EClassCall = varMapping(variable)
+  def apply(variable: Pattern.Var[NodeT]): MixedTree[NodeT, EClassCall] = varMapping(variable)
 
   /**
    * Gets the slot that corresponds to a slot variable.
    * @param slot The slot variable.
    * @return The slot.
    */
-  def apply(slot: SlotVar): Slot = slotMapping(slot)
+  def apply(slot: Slot): Slot = slotMapping(slot)
 
   /**
    * Merges this match with another match.
@@ -49,7 +49,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
 
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
-    val newVarMapping = varMapping.mapValues(egraph.canonicalize).view.force
+    val newVarMapping = varMapping.mapValues(_.mapCalls(egraph.canonicalize)).view.force
     val newSlotMapping = slotMapping
     PatternMatch(newRoot, newVarMapping, newSlotMapping)
   }

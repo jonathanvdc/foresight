@@ -33,12 +33,12 @@ object Instruction {
    */
   final case class BindNode[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register: Int,
                                                                                              nodeType: NodeT,
-                                                                                             definitions: Seq[SlotVar],
-                                                                                             uses: Seq[SlotVar],
+                                                                                             definitions: Seq[Slot],
+                                                                                             uses: Seq[Slot],
                                                                                              argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
-    private def matchesSlot(machine: MachineState[NodeT], pair: (SlotVar, Slot)): Boolean = {
+    private def matchesSlot(machine: MachineState[NodeT], pair: (Slot, Slot)): Boolean = {
       val (expected, actual) = pair
       machine.boundSlots.get(expected).forall(_ == actual)
     }

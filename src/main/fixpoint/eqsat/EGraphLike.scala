@@ -116,11 +116,37 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
 
   /**
+   * Determines whether the e-graph contains a given mixed tree.
+   * @param tree The mixed tree to check for.
+   * @return True if the e-graph contains the tree; otherwise, false.
+   */
+  final def contains(tree: MixedTree[NodeT, EClassCall]): Boolean = find(tree).isDefined
+
+  /**
    * Determines whether the e-graph contains a given tree.
    * @param tree The tree to check for.
    * @return True if the e-graph contains the tree; otherwise, false.
    */
   final def contains(tree: Tree[NodeT]): Boolean = find(tree).isDefined
+
+  /**
+   * Finds the e-class corresponding to the root of a mixed tree.
+   * @param tree The mixed tree to find in the e-graph.
+   * @return The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.
+   */
+  final def find(tree: MixedTree[NodeT, EClassCall]): Option[EClassCall] = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val newArgs = args.map(find).collect { case Some(call) => call }
+        if (newArgs.size == args.size) {
+          find(ENode(t, defs, uses, newArgs))
+        } else {
+          None
+        }
+
+      case MixedTree.Call(call) => Some(call)
+    }
+  }
 
   /**
    * Finds the e-class corresponding to the root of a tree.

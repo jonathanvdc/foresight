@@ -1,6 +1,6 @@
 package fixpoint.eqsat.rewriting.patterns
 
-import fixpoint.eqsat.{EGraph, MixedTree, Slot}
+import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 import fixpoint.eqsat.commands.{Command, CommandQueueBuilder, EClassSymbol}
 import fixpoint.eqsat.rewriting.Applier
 
@@ -8,9 +8,10 @@ import fixpoint.eqsat.rewriting.Applier
  * An applier that applies a pattern match to an e-graph.
  * @param pattern The pattern to apply.
  * @tparam NodeT The type of the nodes in the e-graph.
+ * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
-final case class PatternApplier[NodeT](pattern: Pattern[NodeT]) extends Applier[NodeT, PatternMatch[NodeT], EGraph[NodeT]] {
-  override def apply(m: PatternMatch[NodeT], egraph: EGraph[NodeT]): Command[NodeT] = {
+final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]]) extends Applier[NodeT, PatternMatch[NodeT], EGraphT] {
+  override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
     val tree = instantiate(pattern, m)
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.add(tree)
@@ -18,11 +19,13 @@ final case class PatternApplier[NodeT](pattern: Pattern[NodeT]) extends Applier[
     builder.queue
   }
 
-  private def instantiate(pattern: Pattern[NodeT], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
+  private def instantiate(pattern: MixedTree[NodeT, Pattern[NodeT]], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
-      case v: Pattern.Var[NodeT] => MixedTree.Call[NodeT, EClassSymbol](EClassSymbol.real(m(v)))
+      case MixedTree.Call(p) => p match {
+        case v: Pattern.Var[NodeT] => m(v).mapCalls(EClassSymbol.real)
+      }
 
-      case Pattern.Node(t, defs, uses, args) =>
+      case MixedTree.Node(t, defs, uses, args) =>
         val defSlots = defs.map { s =>
           m.slotMapping.get(s) match {
             case Some(v) => v

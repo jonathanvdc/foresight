@@ -1,7 +1,8 @@
 package fixpoint.eqsat.saturation
 
+import fixpoint.eqsat.metadata.{Analysis, EGraphWithMetadata}
 import fixpoint.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
-import fixpoint.eqsat.rewriting.PortableMatch
+import fixpoint.eqsat.rewriting.{PortableMatch, Searcher}
 import fixpoint.eqsat.{EGraph, EGraphLike}
 
 import scala.concurrent.duration.Duration
@@ -165,9 +166,53 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
  * The companion object for the [[Strategy]] class.
  */
 object Strategy {
+  implicit class WithMetadata[NodeT,
+                              EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                              Data](val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
+
+    /**
+     * Adds an analysis to the e-graph metadata. The analysis is carried over from one iteration to the next.
+     * @param analysis The analysis to add to the e-graph.
+     * @tparam A The type of the analysis.
+     * @return A new strategy that enhances the e-graph with an analysis.
+     */
+    def addAnalysis[A](analysis: Analysis[NodeT, A]): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
+      new Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] {
+        override def initialData: (Data, Boolean) = (strategy.initialData, false)
+
+        override def apply(egraph: EGraphWithMetadata[NodeT, EGraphT],
+                           data: (Data, Boolean),
+                           parallelize: ParallelMap): (Option[EGraphWithMetadata[NodeT, EGraphT]], (Data, Boolean)) = {
+          val (innerData, hasAddedAnalysis) = data
+          val updatedGraph = if (hasAddedAnalysis) egraph else egraph.addAnalysis(analysis)
+          val (newEGraph, newData) = strategy(updatedGraph, innerData, parallelize)
+          (newEGraph, (newData, hasAddedAnalysis || newEGraph.isDefined))
+        }
+      }
+    }
+
+    /**
+     * Creates a strategy that adds metadata to the e-graph within each iteration of the strategy. Metadata does not
+     * escape individual iterations of this strategy.
+     * @return A new strategy that enhances the e-graph with metadata.
+     */
+    def closeMetadata: Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
+        override def initialData: Data = strategy.initialData
+
+        override def apply(egraph: EGraphT,
+                           data: Data,
+                           parallelize: ParallelMap): (Option[EGraphT], Data) = {
+          val (newEGraph, newData) = strategy(EGraphWithMetadata(egraph), data, parallelize)
+          (newEGraph.map(_.egraph), newData)
+        }
+      }
+    }
+  }
+
   implicit class WithRecordedApplications[NodeT,
                                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                                          Match <: PortableMatch[EGraphT, Match],
+                                          Match <: PortableMatch[NodeT, Match],
                                           Data](val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
 
     /**
@@ -175,7 +220,7 @@ object Strategy {
      * applications do not escape individual iterations of this strategy.
      * @return A new strategy that records applied matches.
      */
-    def recordApplications: Strategy[EGraphT, Data] = {
+    def closeRecording: Strategy[EGraphT, Data] = {
       new Strategy[EGraphT, Data] {
         override def initialData: Data = strategy.initialData
 

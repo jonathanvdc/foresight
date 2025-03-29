@@ -12,7 +12,7 @@ import fixpoint.eqsat.{EClassCall, ENode, Slot}
  */
 final case class MachineState[NodeT](registers: Seq[EClassCall],
                                      boundVars: Map[Pattern.Var[NodeT], EClassCall],
-                                     boundSlots: Map[SlotVar, Slot],
+                                     boundSlots: Map[Slot, Slot],
                                      boundNodes: Seq[ENode[NodeT]]) {
 
   /**
@@ -22,7 +22,7 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    * @param uses The uses of the node.
    * @return The new machine state.
    */
-  def bindNode(node: ENode[NodeT], definitions: Seq[SlotVar], uses: Seq[SlotVar]): MachineState[NodeT] = {
+  def bindNode(node: ENode[NodeT], definitions: Seq[Slot], uses: Seq[Slot]): MachineState[NodeT] = {
     val newRegisters = registers ++ node.args
     val newBoundSlots = boundSlots ++ (definitions zip node.definitions) ++ (uses zip node.uses)
     MachineState(newRegisters, boundVars, newBoundSlots, boundNodes :+ node)

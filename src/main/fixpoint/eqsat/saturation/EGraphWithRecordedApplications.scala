@@ -11,7 +11,7 @@ import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCa
  * @tparam Repr The type of the underlying e-graph.
  * @tparam Match The type of the matches that have been applied to the e-graph.
  */
-final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Repr, Match]](egraph: Repr,
+final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Node, Match]](egraph: Repr,
                                                                                                                                              applied: Map[String, Set[Match]])
   extends EGraphLike[Node, EGraphWithRecordedApplications[Node, Repr, Match]] with EGraph[Node] {
 
@@ -68,7 +68,7 @@ object EGraphWithRecordedApplications {
    * @tparam Match The type of the matches that have been applied to the e-graph.
    * @return The e-graph with no applied matches.
    */
-  def apply[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Repr, Match]](egraph: Repr): EGraphWithRecordedApplications[Node, Repr, Match] = {
+  def apply[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Node, Match]](egraph: Repr): EGraphWithRecordedApplications[Node, Repr, Match] = {
     EGraphWithRecordedApplications(egraph, Map())
   }
 }

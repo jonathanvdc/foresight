@@ -14,7 +14,7 @@ import fixpoint.eqsat.rewriting.{PortableMatch, Rule}
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph.
  */
-final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT <: PortableMatch[EGraphT, MatchT]](rules: Seq[Rule[NodeT, MatchT, EGraphT]])
+final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT <: PortableMatch[NodeT, MatchT]](rules: Seq[Rule[NodeT, MatchT, EGraphT]])
   extends Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] {
 
   override def initialData: Unit = ()

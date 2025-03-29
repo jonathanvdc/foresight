@@ -1,37 +1,62 @@
 package fixpoint.eqsat.integration.liar
 
+import fixpoint.eqsat.metadata.EGraphWithMetadata
 import fixpoint.eqsat.rewriting.Searcher
-import fixpoint.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import fixpoint.eqsat.{EGraph, EGraphLike}
+import fixpoint.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
+import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree}
 
 object SearcherOps {
   private def functionTypePattern = {
-    FunctionType(Pattern.Var.fresh[ArrayIR](), Pattern.Var.fresh[ArrayIR]()).compiled
+    FunctionType(
+      MixedTree.Call(Pattern.Var.fresh[ArrayIR]()),
+      MixedTree.Call(Pattern.Var.fresh[ArrayIR]())).compiled[EGraph[ArrayIR]]
   }
 
   private def int32TypePattern = {
-    Pattern.Node[ArrayIR](Int32Type, Seq.empty, Seq.empty, Seq.empty).compiled
+    CompiledPattern[ArrayIR, EGraph[ArrayIR]](Int32Type.toTree)
   }
 
   private def doubleTypePattern = {
-    Pattern.Node[ArrayIR](DoubleType, Seq.empty, Seq.empty, Seq.empty).compiled
+    CompiledPattern[ArrayIR, EGraph[ArrayIR]](DoubleType.toTree)
+  }
+
+  implicit class SearcherOfMetadataPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]])
+    extends AnyVal {
+
+    /**
+     * Updates a match to also include the types of already-bound values.
+     *
+     * @param types A mapping of already-bound values, referred to by their variables, to their yet unbound types.
+     * @return The searcher that binds the types to the variables.
+     */
+    def bindTypes(types: Map[Pattern.Var[ArrayIR], Pattern.Var[ArrayIR]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+      searcher.mapWithEGraph((m, egraph) => {
+        val newVarMapping = m.varMapping ++ types.map {
+          case (value, t) =>
+            val (call, newEGraph) = egraph.add(m(value))
+            t -> TypeInferenceAnalysis.get(newEGraph)(call, newEGraph)
+        }
+        PatternMatch(m.root, newVarMapping, m.slotMapping)
+      })
+    }
   }
 
   implicit class SearcherOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT])
     extends AnyVal {
 
     /**
-     * Updates a match to also include the types of already-bound values.
-     * @param types A mapping of already-bound values, referred to by their variables, to their yet unbound types.
-     * @return The searcher that binds the types to the variables.
+     * Requires that the given variables are values. Matches that do not satisfy this condition are filtered out.
+     * @param values The variables to check.
+     * @return The searcher that filters out matches where the variables are not values.
      */
-    def bindTypes(types: Map[Pattern.Var[ArrayIR], Pattern.Var[ArrayIR]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
-      searcher.mapWithEGraph((m, egraph) => {
-        val newVarMapping = m.varMapping ++ types.map {
-          case (value, t) =>
-            t -> egraph.nodes(m.varMapping(value)).head.args.head
-        }
-        PatternMatch(m.root, newVarMapping, m.slotMapping)
+    def requireValues(values: Pattern.Var[ArrayIR]*): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+      searcher.filterWithEGraph((m, egraph) => {
+        values.forall(v => {
+          m(v) match {
+            case MixedTree.Call(c) => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
+            case MixedTree.Node(nodeType, _, _, _) => nodeType.isInstanceOf[Value]
+          }
+        })
       })
     }
 

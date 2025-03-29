@@ -1,8 +1,9 @@
 package fixpoint.eqsat.rewriting
 
+import fixpoint.eqsat.metadata.EGraphWithMetadata
 import fixpoint.eqsat.parallel.ParallelMap
-import fixpoint.eqsat.rewriting.patterns.PatternMatch
-import fixpoint.eqsat.{EGraph, EGraphLike}
+import fixpoint.eqsat.rewriting.patterns.{CompiledPattern, MachineSearcherPhase, Pattern, PatternMatch}
+import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree}
 
 /**
  * A searcher that searches for matches in an e-graph.
@@ -47,6 +48,18 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
     new Searcher[NodeT, (OutputT, OutputT2), EGraphT] {
       override def search(egraph: EGraphT, parallelize: ParallelMap): (OutputT, OutputT2) = {
         (Searcher.this.search(egraph, parallelize), other.search(egraph, parallelize))
+      }
+    }
+  }
+
+  /**
+   * Creates a new searcher that takes an e-graph with metadata as input and runs this searcher on that e-graph.
+   * @return A searcher that takes an e-graph with metadata as input.
+   */
+  final def requireMetadata: Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] = {
+    new Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] {
+      override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
+        Searcher.this.search(egraph.egraph, parallelize)
       }
     }
   }

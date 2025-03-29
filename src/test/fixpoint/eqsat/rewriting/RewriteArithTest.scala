@@ -1,7 +1,7 @@
 package fixpoint.eqsat.rewriting
 
-import fixpoint.eqsat.rewriting.patterns.{Pattern, SlotVar}
-import fixpoint.eqsat.{EGraph, ENode, MixedTree, Slot}
+import fixpoint.eqsat.rewriting.patterns.Pattern
+import fixpoint.eqsat.{EGraph, MixedTree, Slot}
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -9,33 +9,24 @@ import scala.language.implicitConversions
 class RewriteArithTest {
   sealed trait Arith
   object Var extends Arith {
-    def apply(slot: Slot): ENode[Arith] = ENode(this, Seq.empty, Seq(slot), Seq.empty)
-    def apply(slotVar: SlotVar): Pattern.Node[Arith] = Pattern.Node(this, Seq.empty, Seq(slotVar), Seq.empty)
+    def apply[A](slot: Slot): MixedTree[Arith, A] = MixedTree.Node[Arith, A](this, Seq.empty, Seq(slot), Seq.empty)
   }
   object Add extends Arith {
-    def apply(lhs: Pattern[Arith], rhs: Pattern[Arith]): Pattern.Node[Arith] = {
-      Pattern.Node(this, Seq.empty, Seq.empty, Seq(lhs, rhs))
-    }
     def apply[A](lhs: MixedTree[Arith, A], rhs: MixedTree[Arith, A]): MixedTree[Arith, A] =
       MixedTree.Node[Arith, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
   }
   object Minus extends Arith {
-    def apply(lhs: Pattern[Arith], rhs: Pattern[Arith]): Pattern.Node[Arith] = {
-      Pattern.Node(this, Seq.empty, Seq.empty, Seq(lhs, rhs))
-    }
     def apply[A](lhs: MixedTree[Arith, A], rhs: MixedTree[Arith, A]): MixedTree[Arith, A] =
       MixedTree.Node[Arith, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
   }
   final case class Number(value: Int) extends Arith
   object Number {
-    implicit def toPattern(number: Number): Pattern[Arith] = Pattern.Node(number, Seq.empty, Seq.empty, Seq.empty)
     implicit def toMixedTree[A](number: Number): MixedTree[Arith, A] = MixedTree.Node(number, Seq.empty, Seq.empty, Seq.empty)
-    implicit def toENode(number: Number): ENode[Arith] = ENode(number, Seq.empty, Seq.empty, Seq.empty)
   }
 
   object Rules {
     val xPlusZeroEqualsX: Rule[Arith, _, EGraph[Arith]] = {
-      val x = SlotVar.fresh()
+      val x = Slot.fresh()
       Rule(
         "x + 0 = x",
         Add(Var(x), Number(0)).toSearcher,
@@ -43,19 +34,19 @@ class RewriteArithTest {
     }
 
     val xMinusXEqualsZero: Rule[Arith, _, EGraph[Arith]] = {
-      val x = SlotVar.fresh()
+      val x = Slot.fresh()
       Rule(
         "x - x = 0",
         Minus(Var(x), Var(x)).toSearcher,
-        Number(0).toApplier)
+        Number.toMixedTree(Number(0)).toApplier)
     }
 
     val xMinusXEqualsZeroWithPatternVars: Rule[Arith, _, EGraph[Arith]] = {
-      val x = Pattern.Var.fresh[Arith]()
+      val x = MixedTree.Call(Pattern.Var.fresh[Arith]())
       Rule(
         "x - x = 0",
         Minus(x, x).toSearcher,
-        Number(0).toApplier)
+        Number.toMixedTree(Number(0)).toApplier)
     }
   }
 

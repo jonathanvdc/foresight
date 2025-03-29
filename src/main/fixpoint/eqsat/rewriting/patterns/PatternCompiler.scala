@@ -1,6 +1,6 @@
 package fixpoint.eqsat.rewriting.patterns
 
-import fixpoint.eqsat.{EGraph, EGraphLike}
+import fixpoint.eqsat.{EGraph, EGraphLike, MixedTree}
 
 import scala.collection.mutable
 
@@ -13,7 +13,7 @@ object PatternCompiler {
    * @param pattern The pattern to compile.
    * @return The list of instructions.
    */
-  def compile[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: Pattern[NodeT]): List[Instruction[NodeT, EGraphT]] = {
+  def compile[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]]): List[Instruction[NodeT, EGraphT]] = {
     val compiler = new PatternCompiler[NodeT, EGraphT]()
     compiler.compile(pattern, 0)
   }
@@ -34,20 +34,22 @@ private final class PatternCompiler[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
    */
   private var tapeLength: Int = 0
 
-  def compile(pattern: Pattern[NodeT], out: Int): List[Instruction[NodeT, EGraphT]] = {
+  def compile(pattern: MixedTree[NodeT, Pattern[NodeT]], out: Int): List[Instruction[NodeT, EGraphT]] = {
     pattern match {
-      // If we encountered a wildcard, then we want to either bind the wildcard to a concrete expression *or*
-      // ensure that the wildcard is bound consistently.
-      case w: Pattern.Var[NodeT] =>
-        varToReg get w match {
-          case None =>
-            varToReg.put(w, out)
-            List(Instruction.BindVar(out, w))
-          case Some(i) => List(Instruction.Compare(out, i))
-        }
+      case MixedTree.Call(p) => p match {
+        // If we encountered a wildcard, then we want to either bind the wildcard to a concrete expression *or*
+        // ensure that the wildcard is bound consistently.
+        case w: Pattern.Var[NodeT] =>
+          varToReg get w match {
+            case None =>
+              varToReg.put(w, out)
+              List(Instruction.BindVar(out, w))
+            case Some(i) => List(Instruction.Compare(out, i))
+          }
+      }
 
       // If we encountered any other type of expression, we want to unpack it and compile its children.
-      case Pattern.Node(nodeType, definitions, uses, args) =>
+      case MixedTree.Node(nodeType, definitions, uses, args) =>
         val intro = Instruction.BindNode[NodeT, EGraphT](out, nodeType, definitions, uses, args.length)
         val tapeLengthAtIntro = tapeLength + 1
         tapeLength += args.length

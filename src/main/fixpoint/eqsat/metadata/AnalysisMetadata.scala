@@ -1,6 +1,6 @@
 package fixpoint.eqsat.metadata
 
-import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, ENode}
+import fixpoint.eqsat.{EClassCall, EClassRef, EGraph, ENode, MixedTree}
 
 /**
  * Analysis results for an e-graph's classes. This metadata can respond to changes in the e-graph.

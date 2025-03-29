@@ -36,4 +36,3 @@ object MachineResult {
                                                                                             remainingInstructions: List[Instruction[NodeT, EGraphT]])
     extends MachineResult[NodeT, EGraphT]
 }
-
