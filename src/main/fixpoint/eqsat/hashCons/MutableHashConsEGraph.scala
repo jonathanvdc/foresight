@@ -366,7 +366,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
           case None =>
             // newRenaming : canonical node slot -> old e-class slot,
             // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
-            val newRenaming = canonicalNode.renaming.compose(oldRenaming)
+            // We use composePartial here because the canonical node may have fewer slots than the original node due to
+            // slot shrinking in one of the canonical node's argument e-classes. We'll check that the old renaming's
+            // keys is a superset of the values of the canonical node renaming.
+            assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
+            val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
 
             // Shrink e-class slots if the canonical node has fewer slots
             if (!data.slots.subsetOf(newRenaming.valueSet)) {
