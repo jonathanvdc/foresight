@@ -12,7 +12,7 @@ class CoreRuleTests {
       .withIterationLimit(iterationLimit)
       .untilFixpoint
       .closeRecording
-//      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
+      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TypeInferenceAnalysis)
       .closeMetadata
       .dropData
