@@ -156,7 +156,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     var nodesRepairWorklist = Set.empty[ENode[NodeT]]
 
     def touchedClass(ref: EClassRef): Unit = {
-      assert(classData.contains(ref))
       nodesRepairWorklist = nodesRepairWorklist ++ classData(ref).users
     }
 
