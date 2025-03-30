@@ -395,7 +395,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             touchedUsers(data)
 
             // Infer symmetries from the canonicalized node.
-            propagateSymmetries(ref, canonicalNode.rename(newRenaming).asNode)
+            propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming))
         }
       }
     }
