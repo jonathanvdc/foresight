@@ -95,6 +95,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     }
   }
 
+  private def isWellFormed(call: EClassCall): Boolean = {
+    val slots = unionFind.set.findAndCompress(call.ref)._1.args.valueSet
+    slots.subsetOf(call.args.keySet)
+  }
+
   def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     val oldClassData = classData
 
@@ -165,6 +170,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We update the union-find with the new slots. Since the e-class is a root in the union-find, its set of slots in
       // the AppliedRef can simply be set to an identity bijection of the new slots. unionFind.add will take care of
       // constructing that bijection.
+      assert(finalSlots.subsetOf(data.slots))
       unionFind.add(ref, finalSlots)
 
       // We add the e-class's nodes and users to the repair worklist, as they now include redundant slots.
@@ -361,7 +367,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             // The second is a call to the canonicalized e-class and takes an argument map
             // canonicalCallArgs : canonical e-class slot -> old node slot.
             val canonicalCallArgs = canonicalNodeRenaming.inverse.compose(canonicalNode.renaming)
-            unionWorklist = (EClassCall(ref, oldRenaming.inverse), EClassCall(other, canonicalCallArgs)) :: unionWorklist
+            val leftCall = EClassCall(ref, oldRenaming.inverse)
+            val rightCall = EClassCall(other, canonicalCallArgs)
+            assert(isWellFormed(leftCall), "Left call is not well-formed.")
+            assert(isWellFormed(rightCall), "Right call is not well-formed.")
+            unionWorklist = (leftCall, rightCall) :: unionWorklist
 
           case None =>
             // newRenaming : canonical node slot -> old e-class slot,
