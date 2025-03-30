@@ -399,4 +399,66 @@ class UnionTest {
     assert(egraph5.canonicalize(c) == egraph5.canonicalize(d))
     assert(egraph5.canonicalize(e).args.size == 0)
   }
+
+  @Test
+  def canonicalizeAfterShrinking(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val x = Slot.fresh()
+    val (a, egraph2) = egraph.add(ENode(0, Seq.empty, Seq(x), Seq.empty))
+    val (b, egraph3) = egraph2.add(ENode(1, Seq.empty, Seq(x), Seq.empty))
+    val (c, egraph4) = egraph3.add(ENode(2, Seq.empty, Seq(x), Seq.empty))
+    val egraph5 = egraph4.union(a, b).union(a, c).rebuilt
+    val canonical = egraph5.canonicalize(a)
+    assert(canonical.args.size == 1)
+
+    egraph5.checkInvariants()
+
+    val (d, egraph6) = egraph5.add(ENode(2, Seq.empty, Seq.empty, Seq.empty))
+    val egraph7 = egraph6.union(a, d).rebuilt
+    val canonical2 = egraph7.canonicalize(a)
+    assert(canonical2.args.size == 0)
+    val canonical3 = egraph7.canonicalize(b)
+    assert(canonical3.args.size == 0)
+    val canonical4 = egraph7.canonicalize(c)
+    assert(canonical4.args.size == 0)
+
+    egraph7.checkInvariants()
+  }
+
+  @Test
+  def upwardMergeDueToSlotElimination(): Unit = {
+    // This test is similar to the upwardMerge test, but the upward merge is due to slot elimination.
+    val egraph = HashConsEGraph.empty[Int]
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    // First create the same node twice and instantiate it with different slots.
+    val node1 = ENode(0, Seq.empty, Seq(x), Seq.empty)
+    val node2 = ENode(0, Seq.empty, Seq(y), Seq.empty)
+    val (c1, egraph2) = egraph.add(node1)
+    val (c2, egraph3) = egraph2.add(node2)
+
+    // Then create a pair of nodes that take the first two nodes as arguments. The nodes are different only because
+    // c1 and c2 are current different.
+    val node3 = ENode.unslotted(1, Seq(c1, c2))
+    val node4 = ENode.unslotted(1, Seq(c1, c1))
+    val (c3, egraph4) = egraph3.add(node3)
+    val (c4, egraph5) = egraph4.add(node4)
+
+    val node5 = ENode.unslotted(2, Seq.empty)
+    val (c5, egraph6) = egraph5.add(node5)
+
+    assert(egraph6.classes.size == 4)
+    assert(!egraph6.areSame(c1, c2))
+    assert(!egraph6.areSame(c3, c4))
+
+    // We now use a union with c5 to delete the slot in c1/c2 that distinguishes c3 and c4.
+    val egraph7 = egraph6.union(c1, c5).rebuilt
+
+    // Since the slot has been deleted from c1/c2, calls to them with different arguments will now be the same.
+    // Consequently, c3 and c4 now contain identical nodes. Check that an upward merge has unified c3 and c4.
+    assert(egraph7.classes.size == 2)
+    assert(egraph7.areSame(c1, c2))
+    assert(egraph7.areSame(c3, c4))
+  }
 }
