@@ -3,7 +3,6 @@ package fixpoint.eqsat.integration.liar
 import fixpoint.eqsat.{EGraph, Slot}
 import fixpoint.eqsat.extraction.ExtractionAnalysis
 import fixpoint.eqsat.integration.liar.CoreRules.LiarRule
-import fixpoint.eqsat.parallel.ParallelMap
 import fixpoint.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import org.junit.Test
 
@@ -96,7 +95,7 @@ class BlasIdiomRuleTests {
 
     val (_, egraph2) = egraph.add(dotProduct)
 
-    val egraph4 = strategy(2)(egraph2, ParallelMap.sequential).get
+    val egraph4 = strategy(2)(egraph2).get
 
     assert(!egraph4.contains(ddot))
   }
