@@ -60,35 +60,79 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     }
   }
 
+  /**
+   * Creates an empty e-class with the given slots. The e-class is added to the union-find and the class data map.
+   * @param slots The slots of the e-class.
+   * @return The reference to the new e-class.
+   */
+  private def createEmptyClass(slots: Set[Slot]): EClassRef = {
+    val ref = new EClassRef()
+    unionFind.add(ref, slots)
+
+    val data = EClassData[NodeT](slots, Map.empty, PermutationGroup.identity(SlotMap.identity(slots)), Set.empty)
+    classData = classData + (ref -> data)
+
+    ref
+  }
+
+  /**
+   * Adds a node to an e-class. The node is added to the hash cons, the class data, and the argument e-classes' users.
+   * @param ref The reference to the e-class.
+   * @param node The node to add.
+   */
+  private def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit = {
+    // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
+    val data = classData(ref)
+    hashCons = hashCons + (node.shape -> ref)
+    classData = classData + (ref -> data.copy(nodes = data.nodes + (node.shape -> node.renaming)))
+    classData = classData ++ node.shape.args.map(_.ref).distinct.map(c => {
+      val argData = classData(c)
+      c -> argData.copy(users = argData.users + node.shape)
+    })
+  }
+
+  /**
+   * Removes a node from an e-class. The node is removed from the hash cons, the class data, and the argument e-classes'
+   * users.
+   * @param ref The reference to the e-class.
+   * @param shape The node to remove.
+   */
+  private def removeNodeFromClass(ref: EClassRef, shape: ENode[NodeT]): Unit = {
+    assert(shape.isShape)
+
+    // Remove the node from the hash cons, update the class data and remove the node from the argument e-classes' users.
+    val data = classData(ref)
+    hashCons = hashCons - shape
+    classData = classData + (ref -> data.copy(nodes = data.nodes - shape))
+    classData = classData ++ shape.args.map(_.ref).distinct.map(c => {
+      val argData = classData(c)
+      c -> argData.copy(users = argData.users - shape)
+    })
+  }
+
+  /**
+   * Canonicalizes an e-node and adds it to the e-graph. If the e-node is already in the e-graph, the e-class reference
+   * of the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
+   * @param node The e-node to add to the e-graph.
+   * @return The e-class reference of the e-node in the e-graph.
+   */
   def add(node: ENode[NodeT]): EClassCall = {
     val canonicalNode = canonicalize(node)
     findImpl(canonicalNode) match {
       case Some(ref) => ref
       case None =>
-        // Generate a new e-class reference for a brand new e-class.
-        val ref = new EClassRef()
-
-        // Generate slots for the e-class and use them to construct the e-class's data.
+        // Generate slots for the e-class.
         val shape = canonicalNode.shape
         val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slots.toSet)
         val slots = (shape.slots.toSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
-        val newClassData = EClassData(
-          slots,
-          Map(shape -> nodeSlotsToClassSlots),
-          PermutationGroup.identity(SlotMap.identity(slots)),
-          Set.empty[ENode[NodeT]])
 
-        // Add the new class to the union-find.
-        unionFind.add(ref, slots)
+        // Set up an empty e-class with the slots.
+        val ref = createEmptyClass(slots)
 
-        // Update the hash-cons and class data map.
-        hashCons = hashCons + (shape -> ref)
-        classData = classData + (ref -> newClassData)
+        // Add the node to the empty e-class, populating it.
+        addNodeToClass(ref, ShapeCall(canonicalNode.shape, nodeSlotsToClassSlots))
 
-        // Add the new node to the argument e-classes's users.
-        classData = classData ++ canonicalNode.args.map(_.ref).distinct.map(c =>
-          c -> classData(c).copy(users = classData(c).users + shape))
-
+        // Construct an e-class call with the node slots to e-class slots bijection.
         val publicRenaming = SlotMap(
           canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
         EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
@@ -106,45 +150,14 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     // The pairs of e-classes that were unified.
     var unifiedPairs = List.empty[(EClassCall, EClassCall)]
 
-    // The union worklist contains pairs of e-classes that need to be unified. Elements of the union worklist may be
-    // canonical or non-canonical e-class calls. The unification algorithm will canonicalize the calls as needed.
-    var unionWorklist = pairs.toList
-
-    // The permutation addition worklist contains pairs of e-classes and permutation groups that need to be added to the
-    // e-class data. The permutation addition worklist is used to delay the addition of permutations until after the
-    // hash cons and class data have been repaired.
-    var permutationAdditionWorklist = Set.empty[(EClassRef, SlotMap)]
-
-    // The slot shrinking worklist contains pairs of e-classes and the sets of slots to which the e-class slots will
-    // be restricted.
-    var slotShrinkingWorklist = Set.empty[(EClassRef, Set[Slot])]
-
-    // The nodes repair set contains all e-classes containing nodes that might refer to non-canonical e-classes.
+    // The nodes repair set contains all e-nodes that may no longer be canonical.
     // The invariant maintained throughout the unification algorithm is that the elements of the node repair set
     // are in the hash cons.
     var nodesRepairWorklist = Set.empty[ENode[NodeT]]
 
-    // The parents repair set contains all e-classes whose parents set might contain non-canonical e-classes.
-    var usersRepairWorklist = Set.empty[EClassRef]
-
-    def touchedNodes(data: EClassData[NodeT]): Unit = {
-      assert(data.nodes.keys.forall(hashCons.contains))
-      assert(data.users.forall(hashCons.contains))
-      nodesRepairWorklist = nodesRepairWorklist ++ data.nodes.keys ++ data.users
-    }
-
-    def touchedUsers(data: EClassData[NodeT]): Unit = {
-      usersRepairWorklist = usersRepairWorklist ++ data.nodes.flatMap(_._1.args.map(_.ref))
-    }
-
-    def canonicalizeSlots(ref: EClassRef, slots: Set[Slot]): (EClassRef, Set[Slot]) = {
-      val canonical = canonicalize(ref)
-      if (canonical.ref == ref) {
-        (ref, slots)
-      } else {
-        val inv = canonical.args.inverse
-        (canonical.ref, slots.map(inv(_)))
-      }
+    def touchedClass(ref: EClassRef): Unit = {
+      assert(classData.contains(ref))
+      nodesRepairWorklist = nodesRepairWorklist ++ classData(ref).users
     }
 
     def shrinkSlots(ref: EClassRef, slots: Set[Slot]): Unit = {
@@ -173,8 +186,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       assert(finalSlots.subsetOf(data.slots))
       unionFind.add(ref, finalSlots)
 
-      // We add the e-class's nodes and users to the repair worklist, as they now include redundant slots.
-      touchedNodes(newData)
+      // Reducing the slots of an e-class may decanonicalize the e-class' users. Add the potentially affected nodes to
+      // the repair worklist.
+      touchedClass(ref)
     }
 
     def shrinkAppliedSlots(ref: EClassCall, slots: Set[Slot]): Unit = {
@@ -198,50 +212,35 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
       unifiedPairs = (subRoot, domRoot) :: unifiedPairs
 
-      // Merge the nodes and parents of the dominant and subordinate classes.
-      val domData = classData(domRoot.ref)
-      val subData = classData(subRoot.ref)
-
       // Translate the subordinate class' nodes to the dominant class' slots. We use composeFresh to cover potential
       // redundant slots in the subordinate class' nodes.
       val invMap = map.inverse
-      val newNodes = domData.nodes ++ subData.nodes.mapValues(_.composeFresh(invMap))
-
-      // Merge the parents of the dominant and subordinate classes.
-      val newParents = domData.users ++ subData.users
+      val subData = classData(subRoot.ref)
+      for ((node, bijection) <- subData.nodes) {
+        removeNodeFromClass(subRoot.ref, node)
+        addNodeToClass(domRoot.ref, ShapeCall(node, bijection.composeFresh(invMap)))
+        nodesRepairWorklist = nodesRepairWorklist + node
+      }
 
       // Merge permutations of subordinate class into dominant class.
       val subToDom = subRoot.args.compose(domRoot.args.inverse)
       val subPermutations = subData.permutations.generators.map(renamePermutation(_, subToDom))
 
-      val newPermutations = domData.permutations.tryAddSet(subPermutations) match {
-        case Some(newPerms) =>
+      val domData = classData(domRoot.ref)
+      domData.permutations.tryAddSet(subPermutations) match {
+        case Some(newPermutations) =>
           // If the new permutations are not already in the set of permutations, we update the e-class data.
-          // We add the e-class's nodes and users to the repair worklist, as the e-class now has new permutations.
-          touchedNodes(domData)
-          newPerms
+          classData = classData + (domRoot.ref -> domData.copy(permutations = newPermutations))
+          touchedClass(domRoot.ref)
 
-        case None => domData.permutations
+        case None =>
       }
 
-      // Construct the new e-class data and update the class data map.
-      val newClassData = EClassData(domData.slots, newNodes, newPermutations, newParents)
-      classData = (classData - subRoot.ref) + (domRoot.ref -> newClassData)
+      // Check that all nodes have been removed from the subordinate class.
+      assert(classData(subRoot.ref).nodes.isEmpty)
 
-      // Update the hash-cons so that all nodes from the subordinate class now point to the dominant class. Make no
-      // attempt at canonicalizing the nodes, as we will perform this operation in the rebuilding logic.
-      assert(subData.nodes.keys.forall(hashCons.contains))
-      assert(subData.nodes.keys.forall(hashCons(_) == subRoot.ref))
-      hashCons = hashCons ++ subData.nodes.keys.map(_ -> domRoot.ref)
-      assert(subData.nodes.keys.forall(hashCons(_) == domRoot.ref))
-
-      // The merge we just performed may have broken the invariant that all EClassRefs in the e-graph are canonicalized.
-      // Specifically, the subordinate class may still be referred to by other e-nodes, either in the form of a direct
-      // reference, captured by the subordinate class' parents set, or in the form of a child-to-parent reference,
-      // the inverse of which is captured by the e-class arguments of the nodes in the subordinate class.
-      // To repair the invariant, we add the subordinate class' parents set to the repair worklist.
-      touchedNodes(subData)
-      touchedUsers(subData)
+      // Queue all users of the subordinate class for repair.
+      touchedClass(subRoot.ref)
     }
 
     def unify(left: EClassCall, right: EClassCall): Unit = {
@@ -280,7 +279,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         classData = classData + (ref -> newData)
 
         // We add the e-class's nodes and users to the repair worklist, as the e-class now has a new permutation.
-        touchedNodes(newData)
+        touchedClass(ref)
       } else if (classData(leftRoot.ref).nodes.size < classData(rightRoot.ref).nodes.size) {
         mergeInto(rightRoot, leftRoot)
       } else {
@@ -302,34 +301,14 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
           val permutation = shape.renaming.inverse.compose(variantShape.renaming).filterKeys(data.slots)
 
           data.permutations.tryAdd(permutation) match {
-            case Some(_) =>
-              permutationAdditionWorklist = permutationAdditionWorklist + (ref -> permutation)
+            case Some(newPerms) =>
+              classData = classData + (ref -> data.copy(permutations = newPerms))
+              touchedClass(ref)
 
             case None =>
           }
         }
       })
-    }
-
-    def canonicalizePermutations(ref: EClassRef, perms: Set[SlotMap]): (EClassRef, Set[SlotMap]) = {
-      val canonical = canonicalize(ref)
-      if (canonical.ref == ref) {
-        (ref, perms)
-      } else {
-        (canonical.ref, perms.map(renamePermutation(_, canonical.args.inverse)))
-      }
-    }
-
-    def addPermutations(ref: EClassRef, perms: Set[SlotMap]): Unit = {
-      val (canonicalRef, canonicalPerms) = canonicalizePermutations(ref, perms)
-      val data = classData(canonicalRef)
-      data.permutations.tryAddSet(canonicalPerms) match {
-        case Some(newPerms) =>
-          classData = classData + (canonicalRef -> data.copy(permutations = newPerms))
-          touchedNodes(data)
-
-        case None =>
-      }
     }
 
     def repairNode(node: ENode[NodeT]): Unit = {
@@ -356,11 +335,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
             // Union the original node with the canonicalized node in the class data. Remove the old node from the
             // hash-cons.
-            classData = classData + (ref -> data.copy(nodes = data.nodes - node))
-            hashCons = hashCons - node
-
-            // TODO: can we be more specific in terms of which users need to be repaired?
-            touchedUsers(data)
+            removeNodeFromClass(ref, node)
 
             // Construct two calls that we append to the union worklist. The first is a call to the original old e-class
             // and takes an oldRenaming.inverse : old e-class slot -> old node slot.
@@ -371,7 +346,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             val rightCall = EClassCall(other, canonicalCallArgs)
             assert(isWellFormed(leftCall), "Left call is not well-formed.")
             assert(isWellFormed(rightCall), "Right call is not well-formed.")
-            unionWorklist = (leftCall, rightCall) :: unionWorklist
+            unify(leftCall, rightCall)
 
           case None =>
             // newRenaming : canonical node slot -> old e-class slot,
@@ -384,15 +359,14 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
             // Shrink e-class slots if the canonical node has fewer slots
             if (!data.slots.subsetOf(newRenaming.valueSet)) {
-              slotShrinkingWorklist = slotShrinkingWorklist + (ref -> data.slots.intersect(newRenaming.valueSet))
+              shrinkSlots(ref, data.slots.intersect(newRenaming.valueSet))
+              repairNode(node)
+              return
             }
 
-            // Update the e-class data and hash-cons map.
-            classData = classData + (ref -> data.copy(nodes = data.nodes - node + (canonicalNode.shape -> newRenaming)))
-            hashCons = hashCons - node + (canonicalNode.shape -> ref)
-
-            // TODO: can we be more specific in terms of which users need to be repaired?
-            touchedUsers(data)
+            // Eliminate the old node from the e-class and add the canonicalized node.
+            removeNodeFromClass(ref, node)
+            addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
 
             // Infer symmetries from the canonicalized node.
             propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming))
@@ -400,57 +374,20 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
-    def repairUsers(ref: EClassRef): Unit = {
-      // Repairing the users of an e-class consists of canonicalizing all users of the e-class.
-      val data = classData(ref)
-      val canonicalParents = data.users.map(canonicalize).map(_.shape)
-      if (canonicalParents != data.users) {
-        classData = classData + (ref -> EClassData(data.slots, data.nodes, data.permutations, canonicalParents))
-      }
+    // Unify the input pairs.
+    for ((left, right) <- pairs) {
+      unify(left, right)
     }
 
-    while (unionWorklist.nonEmpty || permutationAdditionWorklist.nonEmpty || slotShrinkingWorklist.nonEmpty
-      || nodesRepairWorklist.nonEmpty || usersRepairWorklist.nonEmpty) {
-
-      // Process all unions in the worklist. The unify operation may add new elements to the repair worklists,
-      // but will not add elements to its own union worklist.
-      for ((left, right) <- unionWorklist) {
-        unify(left, right)
-      }
-      unionWorklist = List.empty
-
-      // Process all permutation additions in the worklist. The addPermutations operation may add new elements to the
-      // repair worklists, but will not add elements to its own permutation addition worklist.
-      for ((ref, perms) <- permutationAdditionWorklist.groupBy(_._1)) {
-        addPermutations(ref, perms.map(_._2))
-      }
-      permutationAdditionWorklist = Set.empty
-
-      // Process all slot shrinkings in the worklist. The shrinkSlots operation may add new elements to the repair
-      // worklists, but will not add elements to its own slot shrinking worklist.
-      for ((ref, slots) <- slotShrinkingWorklist) {
-        val (canonical, newSlots) = canonicalizeSlots(ref, slots)
-        shrinkSlots(canonical, newSlots)
-      }
-      slotShrinkingWorklist = Set.empty
-
-      // Process the node repair worklist. The repairNodes operation may add new e-classes to any worklist except for
-      // the node repair worklist.
-      assert(nodesRepairWorklist.forall(hashCons.contains))
-      for (node <- nodesRepairWorklist) {
-        repairNode(node)
-      }
-      nodesRepairWorklist = Set.empty
-
-      // Process the parents repair worklist. The repairUsers operation will not add elements to any worklist.
-      for (ref <- usersRepairWorklist) {
-        repairUsers(canonicalize(ref).ref)
-      }
-      usersRepairWorklist = Set.empty
-
-      // At this point, the invariants have been restored. Check that they have been.
-      // toImmutable.checkInvariants()
+    // Repair all nodes in the repair worklist.
+    while (nodesRepairWorklist.nonEmpty) {
+      val node = nodesRepairWorklist.head
+      nodesRepairWorklist = nodesRepairWorklist - node
+      repairNode(node)
     }
+
+    // Unlink all emptied e-classes from the class data.
+    classData = classData.filterNot(_._2.nodes.isEmpty)
 
     val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).map(_.ref).toSet
     touched.map(c => (canonicalize(c), c)).groupBy(_._1.ref).values.map(_.map {
