@@ -279,7 +279,7 @@ object IndexAt extends Value {
 /**
  * An ifold operation in the minimalist array IR.
  */
-object IFold extends Value {
+object Ifold extends Value {
   override def typeArgCount: Int = 1
   override def valueArgCount: Int = 2
 
@@ -294,7 +294,7 @@ object IFold extends Value {
 
   def apply[A](size: MixedTree[ArrayIR, A], init: MixedTree[ArrayIR, A], foldFunction: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
     MixedTree.unslotted(
-      IFold,
+      Ifold,
       Seq(
         size,
         init,
@@ -303,7 +303,7 @@ object IFold extends Value {
 
   def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
     tree match {
-      case MixedTree.Node(IFold, Seq(), Seq(), Seq(array, init, foldFunction)) =>
+      case MixedTree.Node(Ifold, Seq(), Seq(), Seq(array, init, foldFunction)) =>
         Some((array, init, foldFunction))
       case _ => None
     }

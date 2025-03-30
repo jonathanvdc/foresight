@@ -45,7 +45,7 @@ class CoreAndArithRuleTests {
     val vectorSum = {
       val i = Slot.fresh()
       val acc = Slot.fresh()
-      IFold(
+      Ifold(
         ConstIntType(100).toTree,
         ConstDouble(0.0).toTree,
         Lambda(
@@ -63,7 +63,7 @@ class CoreAndArithRuleTests {
     val dotProduct = {
       val i = Slot.fresh()
       val acc = Slot.fresh()
-      IFold(
+      Ifold(
         ConstIntType(100).toTree,
         ConstDouble(0.0).toTree,
         Lambda(

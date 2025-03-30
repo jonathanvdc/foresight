@@ -33,7 +33,7 @@ class BlasIdiomRuleTests {
     val dotProduct = {
       val i = Slot.fresh()
       val acc = Slot.fresh()
-      IFold(
+      Ifold(
         N,
         ConstDouble(0.0).toTree,
         Lambda(
@@ -49,7 +49,7 @@ class BlasIdiomRuleTests {
               Var(acc, DoubleType.toTree)))))
     }
 
-    val ddot = BlasIdioms.DDot(xs, ys)
+    val ddot = BlasIdioms.Dot(xs, ys)
 
     val (c1, egraph2) = egraph.add(dotProduct)
 
@@ -75,7 +75,7 @@ class BlasIdiomRuleTests {
     val ys = Build(N, Lambda(Slot.fresh(), Int32Type.toTree, Var(acc, DoubleType.toTree)))
 
     val dotProduct = {
-      IFold(
+      Ifold(
         N,
         ConstDouble(0.0).toTree,
         Lambda(
@@ -91,12 +91,49 @@ class BlasIdiomRuleTests {
               Var(acc, DoubleType.toTree)))))
     }
 
-    val ddot = BlasIdioms.DDot(xs, ys)
+    val ddot = BlasIdioms.Dot(xs, ys)
 
     val (_, egraph2) = egraph.add(dotProduct)
 
     val egraph4 = strategy(2)(egraph2).get
 
     assert(!egraph4.contains(ddot))
+  }
+
+  /**
+   * Tests that the axpy rule fires when the pattern is present.
+   */
+  @Test
+  def findAxpy(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+
+    val a = Var(Slot.fresh(), DoubleType.toTree)
+    val xs = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val ys = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+
+    val axpy = BlasIdioms.Axpy(a, xs, ys)
+
+    val build = {
+      val i = Slot.fresh()
+      Build(
+        N,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Add(
+            Mul(
+              a,
+              IndexAt(xs, Var(i, Int32Type.toTree))),
+            IndexAt(ys, Var(i, Int32Type.toTree)))))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(2)(egraph2).get
+
+    assert(egraph4.contains(axpy))
+    assert(egraph4.areSame(c1, egraph4.find(axpy).get))
   }
 }
