@@ -63,7 +63,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    */
   def isIndependent(expr: Pattern.Var[NodeT], slots: Set[Slot]): Boolean = {
     val exprSlots = apply(expr).slotSet
-    val commonSlots = exprSlots.intersect(slots)
+    val commonSlots = exprSlots.intersect(slots.map(apply))
     commonSlots.isEmpty
   }
 }
