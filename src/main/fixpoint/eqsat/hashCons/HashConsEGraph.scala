@@ -62,6 +62,10 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
+    require(
+      pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
+      "All e-class applications must be well-formed.")
+
     val mutable = toMutable
     val equivalences = mutable.unionMany(pairs)
     (equivalences, mutable.toImmutable)

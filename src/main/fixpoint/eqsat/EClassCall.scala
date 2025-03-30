@@ -33,11 +33,22 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
   }
 
   /**
-   * Renames the argument slots of the applied reference. Argument slots that are not in the renaming are dropped.
+   * Renames the argument slots of the e-class application. Argument slots that are not in the renaming are dropped.
    * @param renaming The renaming of the argument slots.
-   * @return The applied reference with the arguments renamed.
+   * @return The applied e-class with the arguments renamed.
    */
   def renamePartial(renaming: SlotMap): EClassCall = {
     EClassCall(ref, args.composePartial(renaming))
+  }
+
+  /**
+   * Checks if the applied e-class is well-formed in the given e-graph. An applied e-class is well-formed if all
+   * the class's slots appear as keys in the argument slot map.
+   * @param egraph The e-graph in which to check the e-class application.
+   * @return True if the application is well-formed in the e-graph; false otherwise.
+   */
+  def isWellFormed(egraph: EGraph[_]): Boolean = {
+    val slots = egraph.canonicalize(ref).args.valueSet
+    slots.subsetOf(args.keySet)
   }
 }
