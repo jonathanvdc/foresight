@@ -16,10 +16,20 @@ package foresight.eqsat
  */
 final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]) {
   /**
-   * Gets all slots used by the e-node: definition slots, used slots and slots from arguments.
-   * @return The set of slots used by the e-node.
+   * All slots that appear in the e-node: definition slots, used slots and slots from arguments.
+   * @return An ordered sequence of slots used by the e-node.
    */
   def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.args.values)
+
+  /**
+   * The set of all distinct slots in the e-node: definition slots, used slots and slots from arguments.
+   * @return The set of slots used by the e-node.
+   */
+  def slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.args.valueSet)
+
+  private def containsSlot(slot: Slot): Boolean = {
+    definitions.contains(slot) || uses.contains(slot) || args.exists(_.args.valueSet.contains(slot))
+  }
 
   /**
    * Renames the slots of the e-node according to a renaming.
@@ -28,10 +38,7 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return The e-node with the slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    assert({
-      val allSlots = slots.toSet
-      renaming.keySet.forall(allSlots.contains)
-    })
+    require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
 
     val newDefinitions = definitions.map(renaming.apply)
     val newUses = uses.map(renaming.apply)

@@ -127,8 +127,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       case None =>
         // Generate slots for the e-class.
         val shape = canonicalNode.shape
-        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slots.toSet)
-        val slots = (shape.slots.toSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
+        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
+        val slots = (shape.slotSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
 
         // Set up an empty e-class with the slots.
         val ref = createEmptyClass(slots)
@@ -289,7 +289,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
         // We add the e-class's nodes and users to the repair worklist, as the e-class now has a new permutation.
         touchedClass(ref)
-      } else if (classData(leftRoot.ref).nodes.size < classData(rightRoot.ref).nodes.size) {
+      } else if (classData(leftRoot.ref).nodes.size > classData(rightRoot.ref).nodes.size) {
         mergeInto(rightRoot, leftRoot)
       } else {
         mergeInto(leftRoot, rightRoot)
