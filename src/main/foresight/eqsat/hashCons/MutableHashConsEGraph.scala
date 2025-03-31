@@ -50,7 +50,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   private def findImpl(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
-    assert(renamedShape.shape.isShape)
+    if (MutableHashConsEGraph.debug) {
+      assert(renamedShape.shape.isShape)
+    }
 
     hashCons.get(renamedShape.shape).map { ref =>
       val data = classData(ref)
@@ -98,7 +100,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @param shape The node to remove.
    */
   private def removeNodeFromClass(ref: EClassRef, shape: ENode[NodeT]): Unit = {
-    assert(shape.isShape)
+    if (MutableHashConsEGraph.debug) {
+      assert(shape.isShape)
+    }
 
     // Remove the node from the hash cons, update the class data and remove the node from the argument e-classes' users.
     val data = classData(ref)
@@ -182,7 +186,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We update the union-find with the new slots. Since the e-class is a root in the union-find, its set of slots in
       // the AppliedRef can simply be set to an identity bijection of the new slots. unionFind.add will take care of
       // constructing that bijection.
-      assert(finalSlots.subsetOf(data.slots))
+      if (MutableHashConsEGraph.debug) {
+        assert(finalSlots.subsetOf(data.slots))
+      }
       unionFind.add(ref, finalSlots)
 
       // Reducing the slots of an e-class may decanonicalize the e-class' users. Add the potentially affected nodes to
@@ -204,8 +210,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
-      assert(map.keySet == slots(domRoot.ref))
-      assert(map.valueSet == slots(subRoot.ref))
+      if (MutableHashConsEGraph.debug) {
+        assert(map.keySet == slots(domRoot.ref))
+        assert(map.valueSet == slots(subRoot.ref))
+      }
 
       // Update the union-find and record the union in unifiedPairs.
       unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
@@ -235,8 +243,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         case None =>
       }
 
-      // Check that all nodes have been removed from the subordinate class.
-      assert(classData(subRoot.ref).nodes.isEmpty)
+      if (MutableHashConsEGraph.debug) {
+        // Check that all nodes have been removed from the subordinate class.
+        assert(classData(subRoot.ref).nodes.isEmpty)
+      }
 
       // Queue all users of the subordinate class for repair.
       touchedClass(subRoot.ref)
@@ -343,8 +353,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             val canonicalCallArgs = canonicalNodeRenaming.inverse.compose(canonicalNode.renaming)
             val leftCall = EClassCall(ref, oldRenaming.inverse)
             val rightCall = EClassCall(other, canonicalCallArgs)
-            assert(isWellFormed(leftCall), "Left call is not well-formed.")
-            assert(isWellFormed(rightCall), "Right call is not well-formed.")
+            if (MutableHashConsEGraph.debug) {
+              assert(isWellFormed(leftCall), "Left call is not well-formed.")
+              assert(isWellFormed(rightCall), "Right call is not well-formed.")
+            }
             unify(leftCall, rightCall)
 
           case None =>
@@ -353,7 +365,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             // We use composePartial here because the canonical node may have fewer slots than the original node due to
             // slot shrinking in one of the canonical node's argument e-classes. We'll check that the old renaming's
             // keys is a superset of the values of the canonical node renaming.
-            assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
+            if (MutableHashConsEGraph.debug) {
+              assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
+            }
             val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
 
             // Shrink e-class slots if the canonical node has fewer slots
@@ -394,4 +408,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         EClassCall(original, SlotMap.identity(oldClassData(original).slots).composeFresh(canonical.args.inverse))
     }).toSet
   }
+}
+
+private object MutableHashConsEGraph {
+  /**
+   * Tells if debug mode is enabled.
+   */
+  final val debug = false
 }
