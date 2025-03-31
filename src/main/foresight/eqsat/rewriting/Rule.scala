@@ -25,7 +25,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return The e-graph after applying the rule, or None if the rule made no changes to the e-graph.
    */
   def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Option[EGraphT] = {
-    delayed(egraph, parallelize)(egraph, Map())._1
+    delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
   }
 
   /**

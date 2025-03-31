@@ -1,5 +1,6 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EGraph, ENode, MixedTree, Slot}
 import org.junit.Test
 
@@ -13,7 +14,7 @@ class CommandQueueBuilderTest {
 
     val egraph = EGraph.empty[Int]
 
-    assert(builder.queue(egraph, Map.empty)._1.isEmpty)
+    assert(builder.queue(egraph, Map.empty, ParallelMap.sequential)._1.isEmpty)
   }
 
   /**
@@ -32,7 +33,7 @@ class CommandQueueBuilderTest {
     assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
     assert(queue.commands.head.asInstanceOf[AddCommand[Int]].node == node)
 
-    val (Some(egraph2), _) = builder.queue(egraph, Map.empty)
+    val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 1)
     assert(egraph2.nodes(egraph2.canonicalize(egraph2.classes.head)).head == node.reify(Map.empty))
   }
@@ -52,7 +53,7 @@ class CommandQueueBuilderTest {
     assert(queue.commands.size == 1)
     assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
 
-    val (Some(egraph2), _) = builder.queue(egraph, Map.empty)
+    val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 1)
   }
 
@@ -73,7 +74,7 @@ class CommandQueueBuilderTest {
     assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
     assert(queue.commands(1).isInstanceOf[AddCommand[Int]])
 
-    val (Some(egraph2), _) = builder.queue(egraph, Map.empty)
+    val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 2)
   }
 
@@ -92,7 +93,7 @@ class CommandQueueBuilderTest {
     val queue = builder.queue
     assert(queue.commands.isEmpty)
 
-    val (None, _) = builder.queue(egraph2, Map.empty)
+    val (None, _) = builder.queue(egraph2, Map.empty, ParallelMap.sequential)
   }
 
   /**
@@ -111,7 +112,7 @@ class CommandQueueBuilderTest {
     assert(queue.commands.size == 1)
     assert(queue.commands.head.isInstanceOf[UnionManyCommand[Int]])
 
-    val (Some(egraph4), _) = builder.queue(egraph3, Map.empty)
+    val (Some(egraph4), _) = builder.queue(egraph3, Map.empty, ParallelMap.sequential)
     assert(egraph4.classes.size == 1)
     assert(egraph4.areSame(a, b))
   }
@@ -139,7 +140,7 @@ class CommandQueueBuilderTest {
     assert(optimizedQueue.commands.size == 1)
     assert(optimizedQueue.commands.head.isInstanceOf[UnionManyCommand[Int]])
 
-    val (Some(egraph5), _) = optimizedQueue(egraph4, Map.empty)
+    val (Some(egraph5), _) = optimizedQueue(egraph4, Map.empty, ParallelMap.sequential)
     assert(egraph5.classes.size == 1)
     assert(egraph5.areSame(a, b))
     assert(egraph5.areSame(b, c))
@@ -167,7 +168,7 @@ class CommandQueueBuilderTest {
     val d = builder.add(node4)
 
     for (queue <- Seq(builder.queue, builder.queue.optimized)) {
-      val (Some(egraph), reification) = queue(EGraph.empty[Int], Map.empty)
+      val (Some(egraph), reification) = queue(EGraph.empty[Int], Map.empty, ParallelMap.sequential)
 
       assert(egraph.classes.size == 2)
       assert(egraph.areSame(a.reify(reification), b.reify(reification)))

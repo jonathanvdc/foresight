@@ -1,7 +1,10 @@
 package foresight.eqsat
 
+import foresight.eqsat.parallel.ParallelMap
+
 /**
  * An e-graph with pending unions. This class is used to represent an e-graph that has unions that have not been applied yet.
+ *
  * @param egraph The e-graph.
  * @param pending The pending unions.
  * @tparam Repr The type of the e-graph.
@@ -32,15 +35,22 @@ final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGrap
 
   /**
    * Rebuilds the e-graph, applying all pending unions.
+   * @param parallelize The parallelization strategy to use.
    * @return The new e-graph with the e-graph rebuilt.
    */
-  def rebuilt: Repr = {
+  def rebuild(parallelize: ParallelMap): Repr = {
     if (pending.isEmpty) {
       egraph
     } else {
-      egraph.unionMany(pending)._2
+      egraph.unionMany(pending, parallelize)._2
     }
   }
+
+  /**
+   * Rebuilds the e-graph, applying all pending unions.
+   * @return The new e-graph with the e-graph rebuilt.
+   */
+  def rebuilt: Repr = rebuild(ParallelMap.default)
 }
 
 /**

@@ -36,7 +36,7 @@ final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[
 
     // Apply the new matches to the e-graph.
     val recorded = newMatches.map { case (ruleName, newMatches, _) => ruleName -> newMatches }.toMap
-    val (newEGraph, _) = update(egraph.record(recorded), Map.empty)
+    val (newEGraph, _) = update(egraph.record(recorded), Map.empty, parallelize)
     (newEGraph, ())
   }
 }

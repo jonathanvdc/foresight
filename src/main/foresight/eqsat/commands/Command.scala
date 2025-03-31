@@ -1,5 +1,6 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
 
 /**
@@ -23,11 +24,13 @@ trait Command[NodeT] {
    * @param egraph The e-graph to which the command should be applied.
    * @param reification A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class
    *                    symbols.
+   * @param parallelize The parallelization strategy to use.
    * @return The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols.
    *         The map contains an entry for each virtual e-class symbol that is created by the command.
    */
   def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
+                                                                reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
 
   /**
    * Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph.

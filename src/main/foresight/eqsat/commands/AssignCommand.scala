@@ -1,5 +1,6 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
 
 /**
@@ -23,7 +24,8 @@ final case class AssignCommand[NodeT](value: EClassSymbol, result: EClassSymbol.
   }
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                         reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+                                                                         reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                         parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     (None, Map(result -> value.reify(reification)))
   }
 }

@@ -1,5 +1,6 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 
 /**
@@ -13,11 +14,12 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   override def definitions: Seq[EClassSymbol.Virtual] = commands.flatMap(_.definitions)
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                         reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+                                                                         reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                         parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     var newEGraph: Option[Repr] = None
     var newReification = reification
     for (command <- commands) {
-      val (newEGraphOpt, newReificationPart) = command.apply(newEGraph.getOrElse(egraph), newReification)
+      val (newEGraphOpt, newReificationPart) = command.apply(newEGraph.getOrElse(egraph), newReification, parallelize)
       newEGraph = newEGraphOpt.orElse(newEGraph)
       newReification ++= newReificationPart
     }

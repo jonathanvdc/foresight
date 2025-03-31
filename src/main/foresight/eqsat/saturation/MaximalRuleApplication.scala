@@ -22,7 +22,7 @@ final case class MaximalRuleApplication[NodeT, EGraphT <: EGraphLike[NodeT, EGra
     val update = CommandQueue(rules.map(_.delayed(egraph, parallelize))).optimized
 
     // Apply the command to the e-graph.
-    val (newEGraph, _) = update(egraph, Map.empty)
+    val (newEGraph, _) = update(egraph, Map.empty, parallelize)
     (newEGraph, ())
   }
 }

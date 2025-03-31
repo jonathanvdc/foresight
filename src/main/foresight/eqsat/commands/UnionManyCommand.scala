@@ -1,5 +1,6 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, EGraphWithPendingUnions}
 
 /**
@@ -15,14 +16,15 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
   override def definitions: Seq[EClassSymbol.Virtual] = Seq.empty
 
   override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                         reification: Map[EClassSymbol.Virtual, EClassCall]): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+                                                                         reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                         parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     val withUnions = pairs.foldLeft(EGraphWithPendingUnions(egraph)) { (acc, pair) =>
       val reifiedPair = (pair._1.reify(reification), pair._2.reify(reification))
       acc.union(reifiedPair._1, reifiedPair._2)
     }
 
     if (withUnions.requiresRebuild) {
-      (Some(withUnions.rebuilt), Map.empty)
+      (Some(withUnions.rebuild(parallelize)), Map.empty)
     } else {
       (None, Map.empty)
     }
