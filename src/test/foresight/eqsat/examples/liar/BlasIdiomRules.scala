@@ -10,7 +10,8 @@ object BlasIdiomRules {
   def all: Seq[LiarRule] = Seq(
     detectDot,
     detectAxpy,
-    detectGemv)
+    detectGemv,
+    detectGemm)
 
   val detectDot: LiarRule = {
     // ifold N (λi acc. xs[i] * ys[i] + acc) 0.0 -> ddot xs ys
@@ -128,5 +129,53 @@ object BlasIdiomRules {
         MixedTree.Call(x),
         MixedTree.Call(beta),
         MixedTree.Call(y)).toApplier)
+  }
+
+  val detectGemm: LiarRule = {
+    // build M (λi. gemvN alpha b a[i] beta c[i]) -> gemmNT alpha a b beta c
+    val M = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val K = Pattern.Var.fresh[ArrayIR]()
+    val scalarType = Pattern.Var.fresh[ArrayIR]()
+
+    val alpha = Pattern.Var.fresh[ArrayIR]()
+    val b = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh[ArrayIR]()
+    val beta = Pattern.Var.fresh[ArrayIR]()
+    val c = Pattern.Var.fresh[ArrayIR]()
+
+    val i = Slot.fresh()
+
+    Rule(
+      "build M (λi. gemvN alpha b a[i] beta c[i]) -> gemmNT alpha a b beta c",
+      Build(
+        MixedTree.Call(M),
+        Lambda(
+          i,
+          Int32Type.toTree,
+          BlasIdioms.Gemv(false)(
+            MixedTree.Call(alpha),
+            MixedTree.Call(b),
+            IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)),
+            MixedTree.Call(beta),
+            IndexAt(MixedTree.Call(c), Var(i, Int32Type.toTree)))))
+        .toSearcher[LiarEGraph]
+        .requireIndependent(alpha, i)
+        .requireIndependent(a, i)
+        .requireIndependent(b, i)
+        .requireIndependent(beta, i)
+        .requireIndependent(c, i)
+        .requireTypes(Map(
+          alpha -> MixedTree.Call(scalarType),
+          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(M)),
+          b -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(K)),
+          beta -> MixedTree.Call(scalarType),
+          c -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)), MixedTree.Call(M)))),
+      BlasIdioms.Gemm(aTransposed = false, bTransposed = true)(
+        MixedTree.Call(alpha),
+        MixedTree.Call(a),
+        MixedTree.Call(b),
+        MixedTree.Call(beta),
+        MixedTree.Call(c)).toApplier)
   }
 }

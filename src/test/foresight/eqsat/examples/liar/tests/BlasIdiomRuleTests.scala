@@ -177,6 +177,9 @@ class BlasIdiomRuleTests {
     assert(egraph4.areSame(c1, egraph4.find(gemv).get))
   }
 
+  /**
+   * Tests that we can find gemv in a matrix-vector multiplication.
+   */
   @Test
   def findGemvInMv(): Unit = {
     val egraph = EGraph.empty[ArrayIR]
@@ -208,5 +211,47 @@ class BlasIdiomRuleTests {
 
     assert(egraph4.contains(gemv))
     assert(egraph4.areSame(c1, egraph4.find(gemv).get))
+  }
+
+  /**
+   * Tests that the gemm rule fires when the pattern is present.
+   */
+  @Test
+  def findGemm(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val M = ConstIntType(100).toTree
+    val N = ConstIntType(200).toTree
+    val K = ConstIntType(300).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), M))
+    val b = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val c = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), M))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemm = BlasIdioms.Gemm(false, true)(alpha, a, b, beta, c)
+
+    val build = {
+      val i = Slot.fresh()
+      Build(
+        M,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          BlasIdioms.Gemv(false)(
+            alpha,
+            b,
+            IndexAt(a, Var(i, Int32Type.toTree)),
+            beta,
+            IndexAt(c, Var(i, Int32Type.toTree)))))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemm))(egraph2).get
+
+    assert(egraph4.contains(gemm))
+    assert(egraph4.areSame(c1, egraph4.find(gemm).get))
   }
 }
