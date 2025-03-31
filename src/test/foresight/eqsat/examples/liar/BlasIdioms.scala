@@ -91,7 +91,11 @@ object BlasIdioms {
       y
     }
 
-    def apply[A](alpha: MixedTree[ArrayIR, A], a: MixedTree[ArrayIR, A], x: MixedTree[ArrayIR, A], beta: MixedTree[ArrayIR, A], y: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
+    def apply[A](alpha: MixedTree[ArrayIR, A],
+                 a: MixedTree[ArrayIR, A],
+                 x: MixedTree[ArrayIR, A],
+                 beta: MixedTree[ArrayIR, A],
+                 y: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(alpha, a, x, beta, y))
   }
 }
