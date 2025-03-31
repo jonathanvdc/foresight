@@ -20,7 +20,7 @@ object SearcherOps {
     CompiledPattern[ArrayIR, EGraph[ArrayIR]](DoubleType.toTree)
   }
 
-  implicit class SearcherOfMetadataPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]])
+  implicit class SearcherOfMetadataPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]])
     extends AnyVal {
 
     /**
@@ -76,7 +76,7 @@ object SearcherOps {
     }
   }
 
-  implicit class SearcherOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT])
+  implicit class SearcherOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT])
     extends AnyVal {
 
     /**

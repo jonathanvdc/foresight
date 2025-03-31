@@ -8,7 +8,8 @@ import fixpoint.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import fixpoint.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot, Tree}
 
 object ApplierOps {
-  implicit class ApplierOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]) extends AnyVal {
+  implicit class ApplierOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]) extends AnyVal {
+
     def substitute(source: Pattern.Var[ArrayIR],
                    from: Slot,
                    to: Pattern.Var[ArrayIR],

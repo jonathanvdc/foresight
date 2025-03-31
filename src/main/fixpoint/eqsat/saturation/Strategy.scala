@@ -168,7 +168,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
 object Strategy {
   implicit class WithMetadata[NodeT,
                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                              Data](val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
+                              Data](private val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
 
     /**
      * Adds an analysis to the e-graph metadata. The analysis is carried over from one iteration to the next.
@@ -213,7 +213,7 @@ object Strategy {
   implicit class WithRecordedApplications[NodeT,
                                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                           Match <: PortableMatch[NodeT, Match],
-                                          Data](val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
+                                          Data](private val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
 
     /**
      * Creates a strategy that records applied matches within each iteration of the strategy. Recorded match

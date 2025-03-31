@@ -94,7 +94,7 @@ object Searcher {
    */
   implicit class SearcherOfSeqOps[NodeT,
                                   MatchT,
-                                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val searcher: Searcher[NodeT, Seq[MatchT], EGraphT]) extends AnyVal {
+                                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[MatchT], EGraphT]) extends AnyVal {
 
     /**
      * Applies a mapping to each element of the searcher's output, using the e-graph as an argument.
@@ -154,7 +154,7 @@ object Searcher {
     }
   }
 
-  implicit class SearcherOfPatternMatch[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
+  implicit class SearcherOfPatternMatch[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
     /**
      * Requires that the expression bound to a variable is independent of a set of slots. That is, the expression may
      * not contain any of the slots in the set. Potential matches that do not satisfy this condition are filtered out.
@@ -179,7 +179,7 @@ object Searcher {
    * @tparam EGraphT The type of the e-graph.
    */
   implicit class SearcherOfPatternMatchProductOps[NodeT,
-                                                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val searcher: Searcher[NodeT, (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]), EGraphT]) extends AnyVal {
+                                                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]), EGraphT]) extends AnyVal {
     /**
      * Merges the two pattern matches produced by the searcher.
      * @return A searcher that merges the two pattern matches.
