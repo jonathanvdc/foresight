@@ -273,7 +273,7 @@ class BlasIdiomRuleTests {
     val zero = ConstDouble(0.0).toTree
     val zeroMat = Build(M, Lambda(Slot.fresh(), Int32Type.toTree, Build(K, Lambda(Slot.fresh(), Int32Type.toTree, zero))))
 
-    val gemm = BlasIdioms.Gemm(false, true)(one, a, b, one, zeroMat)
+    val gemm = BlasIdioms.Gemm(aTransposed = false, bTransposed = true)(one, a, b, one, zeroMat)
 
     val build = {
       val i = Slot.fresh()
