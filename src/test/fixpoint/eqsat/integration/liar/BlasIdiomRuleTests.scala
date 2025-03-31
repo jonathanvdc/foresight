@@ -136,4 +136,76 @@ class BlasIdiomRuleTests {
     assert(egraph4.contains(axpy))
     assert(egraph4.areSame(c1, egraph4.find(axpy).get))
   }
+
+  @Test
+  def findGemv(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val K = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val x = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val y = Var(Slot.fresh(), ArrayType(DoubleType.toTree, K))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemv = BlasIdioms.Gemv(false)(alpha, a, x, beta, y)
+
+    val build = {
+      val i = Slot.fresh()
+      Build(
+        K,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Add(
+            Mul(
+              alpha,
+              BlasIdioms.Dot(IndexAt(a, Var(i, Int32Type.toTree)), x)),
+            Mul(
+              beta,
+              IndexAt(y, Var(i, Int32Type.toTree))))))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemv))(egraph2).get
+
+    assert(egraph4.contains(gemv))
+    assert(egraph4.areSame(c1, egraph4.find(gemv).get))
+  }
+
+  @Test
+  def findGemvInMv(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val K = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val x = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val one = ConstDouble(1.0).toTree
+    val zero = ConstDouble(0.0).toTree
+    val zeroVec = Build(K, Lambda(Slot.fresh(), Int32Type.toTree, zero))
+
+    val gemv = BlasIdioms.Gemv(false)(one, a, x, one, zeroVec)
+
+    val build = {
+      val i = Slot.fresh()
+      Build(
+        K,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          BlasIdioms.Dot(IndexAt(a, Var(i, Int32Type.toTree)), x)))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(4)(egraph2).get
+
+    assert(egraph4.contains(gemv))
+    assert(egraph4.areSame(c1, egraph4.find(gemv).get))
+  }
 }
