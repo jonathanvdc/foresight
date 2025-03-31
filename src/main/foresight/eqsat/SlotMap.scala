@@ -93,9 +93,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * @return A new slot map.
    */
   def compose(other: SlotMap): SlotMap = {
-    if (valueSet != other.keySet) {
-      throw new IllegalArgumentException("Slot maps are not composable")
-    }
+    require(valueSet == other.keySet, "Slot maps are not composable")
     composePartial(other)
   }
 
