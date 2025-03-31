@@ -1,8 +1,8 @@
 ThisBuild / scalaVersion := "2.11.12"
 
-lazy val fixpoint = (project in file("."))
+lazy val foresight = (project in file("."))
   .settings(
-    name          := "fixpoint",
+    name          := "foresight",
     version       := "1.0",
 
     scalacOptions ++= Seq("-Xmax-classfile-name", "100", "-unchecked", "-deprecation", "-feature"),
