@@ -1,10 +1,11 @@
-package foresight.eqsat.integration.liar
+package foresight.eqsat.examples.liar.tests
 
-import CoreRules.LiarRule
-import foresight.eqsat.{EGraph, Slot}
+import foresight.eqsat.examples.liar.CoreRules.LiarRule
+import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
+import foresight.eqsat.{EGraph, Slot}
 import org.junit.Test
 
 class CoreRuleTests {

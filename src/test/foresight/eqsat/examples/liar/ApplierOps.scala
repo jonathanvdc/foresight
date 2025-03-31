@@ -1,4 +1,4 @@
-package foresight.eqsat.integration.liar
+package foresight.eqsat.examples.liar
 
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot, Tree}
 import foresight.eqsat.commands.Command

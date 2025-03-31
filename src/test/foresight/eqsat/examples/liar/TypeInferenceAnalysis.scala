@@ -1,4 +1,4 @@
-package foresight.eqsat.integration.liar
+package foresight.eqsat.examples.liar
 
 import foresight.eqsat.{EClassCall, ENode, MixedTree, SlotMap}
 import foresight.eqsat.metadata.Analysis

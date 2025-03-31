@@ -1,4 +1,4 @@
-package foresight.eqsat.integration.liar
+package foresight.eqsat.examples.liar
 
 import foresight.eqsat.MixedTree
 
