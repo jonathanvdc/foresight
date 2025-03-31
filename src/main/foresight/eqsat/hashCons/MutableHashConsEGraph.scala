@@ -46,10 +46,15 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def find(node: ENode[NodeT]): Option[EClassCall] = {
-    findImpl(canonicalize(node))
+    findUnsafe(canonicalize(node))
   }
 
-  private def findImpl(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
+  /**
+   * Finds the e-class of a given e-node. The e-node must be canonical.
+   * @param renamedShape The canonicalized e-node to find the e-class of.
+   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.
+   */
+  private def findUnsafe(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
     if (MutableHashConsEGraph.debug) {
       assert(renamedShape.shape.isShape)
     }
@@ -115,31 +120,41 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
+   * Adds a new node to the e-graph.
+   * @param canonicalNode A pre-canonicalized node to add to the e-graph.
+   * @return The e-class call of the added node.
+   */
+  private def addNewNode(canonicalNode: ShapeCall[NodeT]): EClassCall = {
+    // Generate slots for the e-class.
+    val shape = canonicalNode.shape
+    val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
+    val slots = (shape.slotSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
+
+    // Set up an empty e-class with the slots.
+    val ref = createEmptyClass(slots)
+
+    // Add the node to the empty e-class, populating it.
+    addNodeToClass(ref, ShapeCall(canonicalNode.shape, nodeSlotsToClassSlots))
+
+    // Construct an e-class call with the node slots to e-class slots bijection.
+    val publicRenaming = SlotMap(
+      canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
+    EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
+  }
+
+  /**
    * Canonicalizes an e-node and adds it to the e-graph. If the e-node is already in the e-graph, the e-class reference
    * of the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
    * @param node The e-node to add to the e-graph.
-   * @return The e-class reference of the e-node in the e-graph.
+   * @return The e-class reference of the e-node in the e-graph, and whether the e-node was added to the e-graph.
    */
-  def add(node: ENode[NodeT]): EClassCall = {
+  def tryAdd(node: ENode[NodeT]): (EClassCall, Boolean) = {
     val canonicalNode = canonicalize(node)
-    findImpl(canonicalNode) match {
-      case Some(ref) => ref
+    findUnsafe(canonicalNode) match {
+      case Some(ref) => (ref, false)
       case None =>
-        // Generate slots for the e-class.
-        val shape = canonicalNode.shape
-        val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
-        val slots = (shape.slotSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
-
-        // Set up an empty e-class with the slots.
-        val ref = createEmptyClass(slots)
-
-        // Add the node to the empty e-class, populating it.
-        addNodeToClass(ref, ShapeCall(canonicalNode.shape, nodeSlotsToClassSlots))
-
-        // Construct an e-class call with the node slots to e-class slots bijection.
-        val publicRenaming = SlotMap(
-          canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
-        EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
+        val ref = addNewNode(canonicalNode)
+        (ref, true)
     }
   }
 

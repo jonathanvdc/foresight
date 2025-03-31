@@ -24,11 +24,15 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
   override def find(node: ENode[Node]): Option[EClassCall] = egraph.find(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
-  override def add(node: ENode[Node]): (EClassCall, EGraphWithRecordedApplications[Node, Repr, Match]) = {
-    val (ref, newEgraph) = egraph.add(node)
-    // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
-    // do not need to be updated because they are not affected by adding a new node to the graph.
-    (ref, EGraphWithRecordedApplications(newEgraph, applied))
+  override def tryAdd(node: ENode[Node]): (EClassCall, Option[EGraphWithRecordedApplications[Node, Repr, Match]]) = {
+    egraph.tryAdd(node) match {
+      case (ref, Some(newEgraph)) =>
+        // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
+        // do not need to be updated because they are not affected by adding a new node to the graph.
+        (ref, Some(EGraphWithRecordedApplications(newEgraph, applied)))
+
+      case (ref, None) => (ref, None)
+    }
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {

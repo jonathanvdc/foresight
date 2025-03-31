@@ -55,10 +55,12 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     toMutable.find(node)
   }
 
-  override def add(node: ENode[NodeT]): (EClassCall, HashConsEGraph[NodeT]) = {
+  override def tryAdd(node: ENode[NodeT]): (EClassCall, Option[HashConsEGraph[NodeT]]) = {
     val mutable = toMutable
-    val ref = mutable.add(node)
-    (ref, mutable.toImmutable)
+    mutable.tryAdd(node) match {
+      case (ref, true) => (ref, Some(mutable.toImmutable))
+      case (ref, false) => (ref, None)
+    }
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {

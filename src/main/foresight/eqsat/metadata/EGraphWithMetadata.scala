@@ -62,9 +62,13 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   override def find(node: ENode[NodeT]): Option[EClassCall] = egraph.find(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
-  override def add(node: ENode[NodeT]): (EClassCall, EGraphWithMetadata[NodeT, Repr]) = {
-    val (ref, newEgraph) = egraph.add(node)
-    (ref, EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph)).view.force))
+  override def tryAdd(node: ENode[NodeT]): (EClassCall, Option[EGraphWithMetadata[NodeT, Repr]]) = {
+    egraph.tryAdd(node) match {
+      case (ref, Some(newEgraph)) =>
+        (ref, Some(EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph)).view.force)))
+      case (ref, None) =>
+        (ref, None)
+    }
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithMetadata[NodeT, Repr]) = {
