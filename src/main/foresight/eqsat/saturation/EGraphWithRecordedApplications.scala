@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
 import foresight.eqsat.rewriting.PortableMatch
 
@@ -35,7 +36,8 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
     }
   }
 
-  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
+                         parallelize: ParallelMap): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {
     val (newClasses, newEgraph) = egraph.unionMany(pairs)
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // need to be updated because they may be affected by the union operation.

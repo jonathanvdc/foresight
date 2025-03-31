@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
 
 /**
@@ -63,7 +64,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     }
   }
 
-  override def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
+                         parallelize: ParallelMap): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
     require(
       pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
       "All e-class applications must be well-formed.")

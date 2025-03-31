@@ -33,7 +33,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
    * @param parallelize The parallelization strategy to use.
    * @return The new e-graph. The new e-graph is `None` if the strategy did not make any changes to the e-graph.
    */
-  final def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Option[EGraphT] = {
+  final def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Option[EGraphT] = {
     apply(egraph, initialData, parallelize)._1
   }
 

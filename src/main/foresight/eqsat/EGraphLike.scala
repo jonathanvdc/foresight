@@ -1,6 +1,7 @@
 package foresight.eqsat
 
 import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
 import foresight.eqsat.saturation.EGraphWithRecordedApplications
 
@@ -81,9 +82,10 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
    * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
    * @param pairs The pairs of e-classes to union.
+   * @param parallelize The parallel map to use for parallel tasks in the union operation.
    * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
    */
-  def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], This)
+  def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): (Set[Set[EClassCall]], This)
 
   // Helper methods:
 
@@ -207,6 +209,18 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
       (acc._1 :+ node, egraph)
     })
     graphWithArgs.add(ENode(tree.nodeType, tree.definitions, tree.uses, args))
+  }
+
+  /**
+   * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
+   * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
+   * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
+   * @param pairs The pairs of e-classes to union.
+   * @param parallelize The parallel map to use for parallel tasks in the union operation.
+   * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
+   */
+  final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], This) = {
+    unionMany(pairs, ParallelMap.default)
   }
 
   /**

@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{EClassCall, MixedTree}
+import foresight.eqsat.MixedTree
 
 /**
  * Constructs a queue of commands that can be applied to an e-graph.

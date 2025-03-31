@@ -19,7 +19,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
    * @param parallelize The parallelization strategy to use.
    * @return The output of the searcher.
    */
-  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): OutputT
+  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): OutputT
 
   /**
    * Chains this searcher with another searcher phase.

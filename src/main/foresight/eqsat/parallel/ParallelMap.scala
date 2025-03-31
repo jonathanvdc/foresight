@@ -52,4 +52,9 @@ object ParallelMap {
   val parallel: ParallelMap = new ParallelMap {
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.par.map(f).seq
   }
+
+  /**
+   * The default parallel mapping strategy.
+   */
+  val default: ParallelMap = parallel
 }

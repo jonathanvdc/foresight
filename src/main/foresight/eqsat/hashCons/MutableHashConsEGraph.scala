@@ -124,7 +124,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @param canonicalNode A pre-canonicalized node to add to the e-graph.
    * @return The e-class call of the added node.
    */
-  private def addNewNode(canonicalNode: ShapeCall[NodeT]): EClassCall = {
+  private def addNewUnsafe(canonicalNode: ShapeCall[NodeT]): EClassCall = {
     // Generate slots for the e-class.
     val shape = canonicalNode.shape
     val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
@@ -153,7 +153,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     findUnsafe(canonicalNode) match {
       case Some(ref) => (ref, false)
       case None =>
-        val ref = addNewNode(canonicalNode)
+        val ref = addNewUnsafe(canonicalNode)
         (ref, true)
     }
   }

@@ -24,7 +24,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @param parallelize The parallelization strategy to use.
    * @return The e-graph after applying the rule, or None if the rule made no changes to the e-graph.
    */
-  def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Option[EGraphT] = {
+  def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Option[EGraphT] = {
     delayed(egraph, parallelize)(egraph, Map())._1
   }
 
@@ -34,7 +34,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @param parallelize The parallelization strategy to use.
    * @return The e-graph after applying the rule.
    */
-  def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): EGraphT = {
+  def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): EGraphT = {
     tryApply(egraph, parallelize).getOrElse(egraph)
   }
 
@@ -44,7 +44,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @param parallelize The parallelization strategy to use.
    * @return The matches found in the e-graph.
    */
-  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Seq[MatchT] = {
+  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
     searcher.search(egraph, parallelize)
   }
 
@@ -54,7 +54,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @param parallelize The parallelization strategy to use.
    * @return The command that applies the rule's matches to the e-graph.
    */
-  def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.parallel): Command[NodeT] = {
+  def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
     val matches = search(egraph, parallelize)
     delayed(matches, egraph, parallelize)
   }
