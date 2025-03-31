@@ -39,6 +39,41 @@ object SearcherOps {
         PatternMatch(m.root, newVarMapping, m.slotMapping)
       })
     }
+
+    /**
+     * Requires that the given variables are bound to types that adhere to the given patterns, with variables shared by
+     * the patterns bound to the same type. Matches that do not satisfy this condition are filtered out.
+     * @param types A mapping of variables to type patterns.
+     * @return The searcher that filters out matches where the variables are not bound to the given type patterns.
+     */
+    def requireTypes(types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+      // Precompile the patterns.
+      val compiledPatterns = types.map {
+        case (v, t) => v -> t.compiled[EGraph[ArrayIR]]
+      }
+
+      def tryMatchVariableToTypePattern(variable: Pattern.Var[ArrayIR],
+                                        pattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]],
+                                        m: PatternMatch[ArrayIR],
+                                        egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
+        val (value, egraphWithValue) = egraph.add(m(variable))
+        val t = TypeInferenceAnalysis.get(egraphWithValue)(value, egraphWithValue)
+
+        val (typeInGraph, egraphWithType) = egraphWithValue.add(t)
+        pattern.search(typeInGraph, egraphWithType).toStream.flatMap(m.tryMerge).headOption
+      }
+
+      // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
+      // If such a match is found, then the original match is kept. Otherwise, it is filtered out.
+      searcher.filterWithEGraph((m, egraph) => {
+        compiledPatterns.foldLeft(Option(m)) {
+          case (Some(newMatch), (variable, pattern)) =>
+            tryMatchVariableToTypePattern(variable, pattern, newMatch, egraph)
+
+          case (None, _) => None
+        }.isDefined
+      })
+    }
   }
 
   implicit class SearcherOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT])

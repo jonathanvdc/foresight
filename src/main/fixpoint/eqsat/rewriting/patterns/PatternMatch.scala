@@ -29,22 +29,44 @@ final case class PatternMatch[NodeT](root: EClassCall,
   def apply(slot: Slot): Slot = slotMapping(slot)
 
   /**
-   * Merges this match with another match.
+   * Creates an updated match with a new variable binding.
+   * @param variable The variable to bind.
+   * @param value The value to bind the variable to.
+   * @return The updated match with the new binding.
+   */
+  def bind(variable: Pattern.Var[NodeT], value: MixedTree[NodeT, EClassCall]): PatternMatch[NodeT] = {
+    val newVarMapping = varMapping + (variable -> value)
+    PatternMatch(root, newVarMapping, slotMapping)
+  }
+
+  /**
+   * Merges this match with another match if possible. The matches are compatible if they do not bind the same variable
+   * to different values or the same slot variable to different slots. If the matches are compatible, the new match
+   * contains all the bindings of both matches. If the matches are incompatible, None is returned.
+   * @param other The other match.
+   * @return The merged match, or None if the matches are incompatible.
+   */
+  def tryMerge(other: PatternMatch[NodeT]): Option[PatternMatch[NodeT]] = {
+    if (varMapping.keySet.intersect(other.varMapping.keySet).exists(k => varMapping(k) != other.varMapping(k))) {
+      None
+    } else if (slotMapping.keySet.intersect(other.slotMapping.keySet).exists(k => slotMapping(k) != other.slotMapping(k))) {
+      None
+    } else {
+      val newVarMapping = varMapping ++ other.varMapping
+      val newSlotMapping = slotMapping ++ other.slotMapping
+      Some(PatternMatch(root, newVarMapping, newSlotMapping))
+    }
+  }
+
+  /**
+   * Merges this match with another match. The matches must be compatible, that is, they must not bind the same variable
+   * to different values or the same slot variable to different slots. If the matches are incompatible, an exception is
+   * thrown.
    * @param other The other match.
    * @return The merged match.
    */
   def merge(other: PatternMatch[NodeT]): PatternMatch[NodeT] = {
-    if (varMapping.keySet.intersect(other.varMapping.keySet).exists(k => varMapping(k) != other.varMapping(k))) {
-      throw new IllegalArgumentException("Variable mappings are not compatible")
-    }
-
-    if (slotMapping.keySet.intersect(other.slotMapping.keySet).exists(k => slotMapping(k) != other.slotMapping(k))) {
-      throw new IllegalArgumentException("Slot mappings are not compatible")
-    }
-
-    val newVarMapping = varMapping ++ other.varMapping
-    val newSlotMapping = slotMapping ++ other.slotMapping
-    PatternMatch(root, newVarMapping, newSlotMapping)
+    tryMerge(other).getOrElse(throw new IllegalArgumentException("Cannot merge incompatible matches"))
   }
 
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
