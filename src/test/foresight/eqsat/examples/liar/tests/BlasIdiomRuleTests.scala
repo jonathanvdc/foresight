@@ -5,7 +5,7 @@ import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
-import org.junit.Test
+import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTests {
   private def strategy(iterationLimit: Int,
@@ -250,6 +250,50 @@ class BlasIdiomRuleTests {
     val (c1, egraph2) = egraph.add(build)
 
     val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemm))(egraph2).get
+
+    assert(egraph4.contains(gemm))
+    assert(egraph4.areSame(c1, egraph4.find(gemm).get))
+  }
+
+  /**
+   * Tests that we can find gemm in a matrix-matrix multiplication. This is a slow test, so it is ignored by default.
+   */
+  @Ignore("Finding gemm in a matrix-matrix multiplication is slow.")
+  @Test
+  def findGemmInMm(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val M = ConstIntType(100).toTree
+    val N = ConstIntType(200).toTree
+    val K = ConstIntType(300).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), M))
+    val b = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val one = ConstDouble(1.0).toTree
+    val zero = ConstDouble(0.0).toTree
+    val zeroMat = Build(M, Lambda(Slot.fresh(), Int32Type.toTree, Build(K, Lambda(Slot.fresh(), Int32Type.toTree, zero))))
+
+    val gemm = BlasIdioms.Gemm(false, true)(one, a, b, one, zeroMat)
+
+    val build = {
+      val i = Slot.fresh()
+      val j = Slot.fresh()
+      Build(
+        M,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Build(
+            K,
+            Lambda(
+              j,
+              Int32Type.toTree,
+              BlasIdioms.Dot(IndexAt(b, Var(j, Int32Type.toTree)), IndexAt(a, Var(i, Int32Type.toTree)))))))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(6)(egraph2).get
 
     assert(egraph4.contains(gemm))
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))
