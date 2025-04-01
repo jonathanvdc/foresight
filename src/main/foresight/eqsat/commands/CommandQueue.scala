@@ -3,6 +3,8 @@ package foresight.eqsat.commands
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 
+import scala.collection.mutable
+
 /**
  * A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.
  *
@@ -89,15 +91,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * @return The optimized command queue.
    */
   def optimized: CommandQueue[NodeT] = {
-    val (unions, otherCommands) = flatCommands.partition {
-      case _: UnionManyCommand[NodeT] => true
-      case _ => false
-    } match {
-      case (left, right) => (left.collect { case u: UnionManyCommand[NodeT] => u }, right)
-    }
-
-    val unionPairs = unions.flatMap(_.pairs)
-    CommandQueue(otherCommands :+ UnionManyCommand(unionPairs))
+    CommandQueue(CommandQueue.independentGroups(flatCommands).flatMap(CommandQueue.optimizeIndependentGroup))
   }
 
   /**
@@ -132,4 +126,104 @@ object CommandQueue {
    * @tparam NodeT The node type of the expressions that the e-graph represents.
    */
   def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
+
+  private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
+    // Reorder the commands to ensure that union commands are at the end of the queue.
+    val (unionCommands, otherCommands) = group.partition {
+      case _: UnionManyCommand[NodeT] => true
+      case _ => false
+    } match {
+      case (left, right) => (left.collect { case u: UnionManyCommand[NodeT] => u }, right)
+    }
+
+    // Partition the remaining commands into addition commands and other commands.
+    val (addCommands, remainingCommands) = otherCommands.partition {
+      case _: AddManyCommand[NodeT] => true
+      case _ => false
+    } match {
+      case (left, right) => (left.collect { case a: AddManyCommand[NodeT] => a }, right)
+    }
+
+    // Merge all the addition and union commands.
+    val addPairs = addCommands.flatMap(_.nodes)
+    val unionPairs = unionCommands.flatMap(_.pairs)
+    (addPairs, unionPairs) match {
+      case (Seq(), Seq()) => remainingCommands
+      case (Seq(), Seq(_*)) => remainingCommands :+ UnionManyCommand[NodeT](unionPairs)
+      case (Seq(_*), Seq()) => remainingCommands :+ AddManyCommand[NodeT](addPairs)
+      case _ => remainingCommands :+ AddManyCommand[NodeT](addPairs) :+ UnionManyCommand[NodeT](unionPairs)
+    }
+  }
+
+  /**
+   * Groups a sequence of commands into independent command groups. Within each group, the commands may run in any
+   * order.
+   * @return A sequence of independent command groups.
+   */
+  private def independentGroups[NodeT](commands: Seq[Command[NodeT]]): Seq[Seq[Command[NodeT]]] = {
+    val commandNumbers = commands.indices
+
+    val defs = commandNumbers.flatMap(i => {
+      commands(i).definitions.map(_ -> i)
+    }).toMap
+
+    // Step 1: Create a dependency graph
+    val dependencyGraph = mutable.Map.empty[Int, Set[Int]]
+    val reverseDependencies = mutable.Map.empty[Int, Set[Int]]
+
+    for (command <- commandNumbers) {
+      dependencyGraph(command) = Set.empty
+      reverseDependencies(command) = Set.empty
+    }
+
+    for (i <- commandNumbers) {
+      for (use <- commands(i).uses.collect { case u: EClassSymbol.Virtual => u }) {
+        defs.get(use) match {
+          case Some(j) if j != i =>
+            dependencyGraph(i) += j
+            reverseDependencies(j) += i
+          case _ =>
+        }
+      }
+    }
+
+    // Step 2: Topological sort to find independent sets of commands
+    val sortedCommands = mutable.ArrayBuffer.empty[Int]
+    val noIncomingEdges = mutable.Queue(commandNumbers.filter(c => dependencyGraph(c).isEmpty): _*)
+
+    while (noIncomingEdges.nonEmpty) {
+      val command = noIncomingEdges.dequeue()
+      sortedCommands += command
+
+      for (dependent <- reverseDependencies(command)) {
+        dependencyGraph(dependent) -= command
+        if (dependencyGraph(dependent).isEmpty) {
+          noIncomingEdges.enqueue(dependent)
+        }
+      }
+    }
+
+    // Step 3: Merge independent commands
+    val groups = mutable.ArrayBuffer.empty[Seq[Command[NodeT]]]
+    var currentBatch = mutable.ArrayBuffer.empty[Command[NodeT]]
+    var currentBatchDefs = Set.empty[EClassSymbol]
+
+    for (command <- sortedCommands) {
+      val cmd = commands(command)
+      if (currentBatch.nonEmpty && cmd.uses.toSet.intersect(currentBatchDefs).nonEmpty) {
+        groups += currentBatch
+        currentBatch = mutable.ArrayBuffer.empty
+        currentBatchDefs = Set.empty
+      }
+
+      currentBatch += cmd
+      currentBatchDefs ++= cmd.definitions
+    }
+
+    if (currentBatch.nonEmpty) {
+      groups += currentBatch
+    }
+
+    groups
+  }
 }

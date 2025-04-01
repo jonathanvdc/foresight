@@ -26,7 +26,8 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @param call The e-class application.
    * @return The analysis result for the e-class application.
    */
-  private def applyPrecanonicalized(call: EClassCall): A = analysis.rename(results(call.ref), call.args)
+  private def applyPrecanonicalized(call: EClassCall): A =
+    analysis.rename(results(call.ref), call.args)
 
   override def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
                          after: EGraph[NodeT],
@@ -34,7 +35,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
 
     val resultsPerNode = parallelize[(ENode[NodeT], EClassCall), (EClassRef, A)](added, {
       case (node, call) =>
-        val genericNode = node.rename(call.args.inverse)
+        val genericNode = after.canonicalize(node).renamePartial(call.args.inverse).asNode
         val args = genericNode.args.map(applyPrecanonicalized)
         call.ref -> analysis.make(genericNode, args)
     })
