@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -35,6 +35,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   }
 
   override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
+    // TODO: implement this without going through the mutable e-graph.
     toMutable.canonicalize(node)
   }
 
@@ -53,15 +54,25 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   }
 
   override def find(node: ENode[NodeT]): Option[EClassCall] = {
+    // TODO: implement this without going through the mutable e-graph.
     toMutable.find(node)
   }
 
-  override def tryAdd(node: ENode[NodeT]): (EClassCall, Option[HashConsEGraph[NodeT]]) = {
+  override def tryAddMany(nodes: Seq[ENode[NodeT]],
+                          parallelize: ParallelMap): (Seq[AddNodeResult], HashConsEGraph[NodeT]) = {
+    // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
+    // is canonicalizing them and looking them up in the e-graph. Canonicalization can be parallelized since adding a
+    // node will never change the canonical form of other nodes - only union operations can do that.
+    //
+    // Node lookups are partially parallelizable, but this is not worth the overhead of separating them into groups
+    // of nodes that can safely be looked up in parallel. Instead, we just parallelize the canonicalization step and
+    // then perform the lookups and additions sequentially.
+
     val mutable = toMutable
-    mutable.tryAdd(node) match {
-      case (ref, true) => (ref, Some(mutable.toImmutable))
-      case (ref, false) => (ref, None)
+    val results = parallelize(nodes, canonicalize).map { node =>
+      mutable.tryAddUnsafe(node)
     }
+    (results.toSeq, mutable.toImmutable)
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],

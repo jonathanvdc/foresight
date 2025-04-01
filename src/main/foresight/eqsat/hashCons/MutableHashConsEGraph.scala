@@ -1,6 +1,6 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall, Slot, SlotMap}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, Slot, SlotMap}
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],
@@ -143,18 +143,19 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
-   * Canonicalizes an e-node and adds it to the e-graph. If the e-node is already in the e-graph, the e-class reference
-   * of the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
-   * @param node The e-node to add to the e-graph.
-   * @return The e-class reference of the e-node in the e-graph, and whether the e-node was added to the e-graph.
+   * Adds a new node to the e-graph. The node is added to the hash cons, the class data, and the argument e-classes'
+   * users. If the e-node is already in the e-graph, the e-class reference of the existing e-node is returned.
+   * Otherwise, the e-node is added to a unique e-class, whose reference is returned.
+   *
+   * @param canonicalNode A pre-canonicalized node to add to the e-graph.
+   * @return The e-class reference of the e-node in the e-graph.
    */
-  def tryAdd(node: ENode[NodeT]): (EClassCall, Boolean) = {
-    val canonicalNode = canonicalize(node)
+  def tryAddUnsafe(canonicalNode: ShapeCall[NodeT]): AddNodeResult = {
     findUnsafe(canonicalNode) match {
-      case Some(ref) => (ref, false)
+      case Some(ref) => AddNodeResult.AlreadyThere(ref)
       case None =>
         val ref = addNewUnsafe(canonicalNode)
-        (ref, true)
+        AddNodeResult.Added(ref)
     }
   }
 

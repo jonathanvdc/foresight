@@ -1,5 +1,6 @@
 package foresight.eqsat.metadata
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassRef, EGraph, ENode, MixedTree}
 
 /**
@@ -27,11 +28,17 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    */
   private def applyPrecanonicalized(call: EClassCall): A = analysis.rename(results(call.ref), call.args)
 
-  def onAdd(node: ENode[NodeT], call: EClassCall, after: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
-    val genericNode = node.rename(call.args.inverse)
-    val args = genericNode.args.map(applyPrecanonicalized)
-    val result = analysis.make(genericNode, args)
-    AnalysisMetadata(analysis, results + (call.ref -> result))
+  override def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
+                         after: EGraph[NodeT],
+                         parallelize: ParallelMap): Metadata[NodeT, AnalysisMetadata[NodeT, A]] = {
+
+    val resultsPerNode = parallelize[(ENode[NodeT], EClassCall), (EClassRef, A)](added, {
+      case (node, call) =>
+        val genericNode = node.rename(call.args.inverse)
+        val args = genericNode.args.map(applyPrecanonicalized)
+        call.ref -> analysis.make(genericNode, args)
+    })
+    AnalysisMetadata(analysis, results ++ resultsPerNode)
   }
 
   def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {

@@ -1,7 +1,7 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
 
 /**
  * An e-graph with associated metadata. Metadata is kept in sync with the e-graph upon every change.
@@ -63,13 +63,18 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   override def find(node: ENode[NodeT]): Option[EClassCall] = egraph.find(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
-  override def tryAdd(node: ENode[NodeT]): (EClassCall, Option[EGraphWithMetadata[NodeT, Repr]]) = {
-    egraph.tryAdd(node) match {
-      case (ref, Some(newEgraph)) =>
-        (ref, Some(EGraphWithMetadata(newEgraph, metadata.mapValues(_.onAdd(node, ref, newEgraph)).view.force)))
-      case (ref, None) =>
-        (ref, None)
+  override def tryAddMany(nodes: Seq[ENode[NodeT]],
+                          parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithMetadata[NodeT, Repr]) = {
+    val (results, newEgraph) = egraph.tryAddMany(nodes, parallelize)
+    val newNodes = nodes.zip(results).collect {
+      case (node, AddNodeResult.Added(call)) =>
+        (node, call)
     }
+
+    val newMetadata = parallelize[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
+      case (key, metadata) => key -> metadata.onAddMany(newNodes, newEgraph, parallelize)
+    }).toMap
+    (results, EGraphWithMetadata(newEgraph, newMetadata))
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],

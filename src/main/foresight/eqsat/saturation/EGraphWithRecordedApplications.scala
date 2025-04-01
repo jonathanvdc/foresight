@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
 import foresight.eqsat.rewriting.PortableMatch
 
 /**
@@ -25,20 +25,19 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
   override def find(node: ENode[Node]): Option[EClassCall] = egraph.find(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
-  override def tryAdd(node: ENode[Node]): (EClassCall, Option[EGraphWithRecordedApplications[Node, Repr, Match]]) = {
-    egraph.tryAdd(node) match {
-      case (ref, Some(newEgraph)) =>
-        // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
-        // do not need to be updated because they are not affected by adding a new node to the graph.
-        (ref, Some(EGraphWithRecordedApplications(newEgraph, applied)))
+  override def tryAddMany(nodes: Seq[ENode[Node]],
+                          parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRecordedApplications[Node, Repr, Match]) = {
+    val (results, newEgraph) = egraph.tryAddMany(nodes, parallelize)
 
-      case (ref, None) => (ref, None)
-    }
+    // Construct a new EGraphWithRecordedApplications with the new e-graph and the same applied matches. The applied
+    // matches do not need to be updated because they are not affected by adding new nodes to the graph.
+    (results, EGraphWithRecordedApplications(newEgraph, applied))
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
                          parallelize: ParallelMap): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {
     val (newClasses, newEgraph) = egraph.unionMany(pairs)
+
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // need to be updated because they may be affected by the union operation.
     (newClasses, EGraphWithRecordedApplications(newEgraph, applied.mapValues(_.map(_.port(newEgraph)).view.force)))

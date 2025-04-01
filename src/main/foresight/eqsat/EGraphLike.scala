@@ -68,14 +68,14 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   def areSame(first: EClassCall, second: EClassCall): Boolean
 
   /**
-   * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
-   * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned
-   * along with the new e-graph.
-   * @param node The e-node to add to the e-graph.
-   * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added. If the e-node
-   *         is already present, then None is returned instead of the new e-graph.
+   * Adds many e-nodes to this e-graph. If any of the e-nodes are already present, then they are not added, and the
+   * corresponding result is an e-class application that contains the e-node. Otherwise, the e-nodes are added to unique
+   * e-classes, whose references are returned along with the new e-graph.
+   * @param nodes The e-nodes to add to the e-graph.
+   * @param parallelize The parallelization strategy to use for parallel tasks in the addition operation.
+   * @return The results of adding each e-node, and the new e-graph with the e-nodes added.
    */
-  def tryAdd(node: ENode[NodeT]): (EClassCall, Option[This])
+  def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): (Seq[AddNodeResult], This)
 
   /**
    * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
@@ -168,14 +168,31 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
 
   /**
    * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
+   * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned
+   * along with the new e-graph.
+   * @param node The e-node to add to the e-graph.
+   * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added. If the e-node
+   *         is already present, then None is returned instead of the new e-graph.
+   */
+  final def tryAdd(node: ENode[NodeT]): (EClassCall, Option[This]) = {
+    tryAddMany(Seq(node), ParallelMap.sequential) match {
+      case (Seq(AddNodeResult.Added(call)), egraph) => (call, Some(egraph))
+      case (Seq(AddNodeResult.AlreadyThere(call)), _) => (call, None)
+      case _ => throw new IllegalStateException("Unexpected result from tryAddMany")
+    }
+  }
+
+  /**
+   * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
    * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
    * @param node The e-node to add to the e-graph.
    * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.
    */
   final def add(node: ENode[NodeT]): (EClassCall, This) = {
-    tryAdd(node) match {
-      case (call, Some(egraph)) => (call, egraph)
-      case (call, None) => (call, this.asInstanceOf[This])
+    tryAddMany(Seq(node), ParallelMap.sequential) match {
+      case (Seq(AddNodeResult.Added(call)), egraph) => (call, egraph)
+      case (Seq(AddNodeResult.AlreadyThere(call)), egraph) => (call, egraph)
+      case _ => throw new IllegalStateException("Unexpected result from tryAddMany")
     }
   }
 
@@ -216,7 +233,6 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
    * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
    * @param pairs The pairs of e-classes to union.
-   * @param parallelize The parallel map to use for parallel tasks in the union operation.
    * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
    */
   final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], This) = {

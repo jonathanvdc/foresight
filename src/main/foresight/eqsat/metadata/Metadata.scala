@@ -1,5 +1,6 @@
 package foresight.eqsat.metadata
 
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, ENode}
 
 /**
@@ -11,12 +12,14 @@ import foresight.eqsat.{EClassCall, EGraph, ENode}
 trait Metadata[NodeT, MetadataT] {
   /**
    * Updates the metadata when an e-node is added to the e-graph.
-   * @param node The e-node that was added.
-   * @param ref The e-class that was created for the e-node, instantiated with an identity slot mapping.
+   * @param added The set of e-nodes that were added to the e-graph, along with their corresponding e-class calls.
    * @param after The e-graph that the e-node was added to.
-   * @return The update metadata.
+   * @param parallelize The parallelization strategy to use.
+   * @return The updated metadata.
    */
-  def onAdd(node: ENode[NodeT], ref: EClassCall, after: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
+                after: EGraph[NodeT],
+                parallelize: ParallelMap): Metadata[NodeT, MetadataT]
 
   /**
    * Updates the metadata when e-classes are unioned in the e-graph.
