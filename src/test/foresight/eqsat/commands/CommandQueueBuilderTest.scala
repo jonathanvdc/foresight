@@ -30,8 +30,8 @@ class CommandQueueBuilderTest {
 
     val queue = builder.queue
     assert(queue.commands.size == 1)
-    assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
-    assert(queue.commands.head.asInstanceOf[AddCommand[Int]].node == node)
+    assert(queue.commands.head.isInstanceOf[AddManyCommand[Int]])
+    assert(queue.commands.head.asInstanceOf[AddManyCommand[Int]].nodes.head._2 == node)
 
     val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 1)
@@ -51,7 +51,7 @@ class CommandQueueBuilderTest {
 
     val queue = builder.queue
     assert(queue.commands.size == 1)
-    assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
+    assert(queue.commands.head.isInstanceOf[AddManyCommand[Int]])
 
     val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 1)
@@ -71,8 +71,8 @@ class CommandQueueBuilderTest {
 
     val queue = builder.queue
     assert(queue.commands.size == 2)
-    assert(queue.commands.head.isInstanceOf[AddCommand[Int]])
-    assert(queue.commands(1).isInstanceOf[AddCommand[Int]])
+    assert(queue.commands.head.isInstanceOf[AddManyCommand[Int]])
+    assert(queue.commands(1).isInstanceOf[AddManyCommand[Int]])
 
     val (Some(egraph2), _) = builder.queue(egraph, Map.empty, ParallelMap.sequential)
     assert(egraph2.classes.size == 2)

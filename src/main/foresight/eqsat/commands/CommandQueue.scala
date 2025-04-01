@@ -33,7 +33,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    */
   def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
     val result = EClassSymbol.virtual()
-    (result, CommandQueue(commands :+ AddCommand(node, result)))
+    (result, CommandQueue(commands :+ AddManyCommand(Seq(result -> node))))
   }
 
   /**
