@@ -144,6 +144,21 @@ object Searcher {
   }
 
   /**
+   * A searcher that flattens the output of another searcher.
+   * @param searcher The searcher to flatten.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam MatchT The type of the matches.
+   * @tparam EGraphT The type of the e-graph that the searcher searches in.
+   */
+  final case class Flatten[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
+    searcher: Searcher[NodeT, Seq[Traversable[MatchT]], EGraphT]) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
+
+    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
+      searcher.search(egraph, parallelize).flatten
+    }
+  }
+
+  /**
    * Searcher extension methods for searchers that produce sequences of matches.
    * @param searcher The searcher to extend.
    * @tparam NodeT The type of the nodes in the e-graph.
@@ -155,6 +170,15 @@ object Searcher {
                                   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[MatchT], EGraphT]) extends AnyVal {
 
     /**
+     * Filters the output of the searcher, retaining only the elements that satisfy the predicate. The predicate
+     * receives the e-graph as an argument.
+     *
+     * @param f The predicate to filter the output.
+     * @return A searcher that filters the output.
+     */
+    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = Filter(searcher, f)
+
+    /**
      * Applies a mapping to each element of the searcher's output, using the e-graph as an argument.
      *
      * @param f The function to apply to each output.
@@ -164,13 +188,31 @@ object Searcher {
     def map[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = Map(searcher, f)
 
     /**
-     * Filters the output of the searcher, retaining only the elements that satisfy the predicate. The predicate
-     * receives the e-graph as an argument.
+     * Applies a mapping to each element of the searcher's output, using the e-graph as an argument, and flattens the
+     * result into a single sequence.
      *
-     * @param f The predicate to filter the output.
-     * @return A searcher that filters the output.
+     * @param f The function to apply to each output.
+     * @tparam OutputT The type of the output.
+     * @return A searcher that applies the function and flattens the result.
      */
-    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = Filter(searcher, f)
+    def flatMap[OutputT](f: (MatchT, EGraphT) => Traversable[OutputT]): Searcher[NodeT, Seq[OutputT], EGraphT] = map(f).flatten
+  }
+
+  /**
+   * Searcher extension methods for searchers that produce sequences of traversable matches.
+   * @param searcher The searcher to extend.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam MatchT The type of the matches.
+   * @tparam EGraphT The type of the e-graph.
+   */
+  implicit class SearcherOfSeqOfTraversableOps[NodeT,
+                                               MatchT,
+                                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[Traversable[MatchT]], EGraphT]) extends AnyVal {
+    /**
+     * Flattens the output of the searcher into a single sequence.
+     * @return A searcher that flattens the output.
+     */
+    def flatten: Searcher[NodeT, Seq[MatchT], EGraphT] = Flatten(searcher)
   }
 
   implicit class SearcherOfPatternMatch[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
