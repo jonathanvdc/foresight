@@ -102,24 +102,10 @@ object Searcher {
      * @tparam OutputT The type of the output.
      * @return A searcher that applies the function to each output.
      */
-    def mapWithEGraph[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = {
+    def map[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = {
       new Searcher[NodeT, Seq[OutputT], EGraphT] {
         override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
           parallelize(searcher.search(egraph, parallelize), (x: MatchT) => f(x, egraph)).toSeq
-        }
-      }
-    }
-
-    /**
-     * Applies a mapping to each element of the searcher's output.
-     * @param f The function to apply to each output.
-     * @tparam OutputT The type of the output.
-     * @return A searcher that applies the function to each output.
-     */
-    def map[OutputT](f: MatchT => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = {
-      new Searcher[NodeT, Seq[OutputT], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
-          parallelize(searcher.search(egraph, parallelize), f).toSeq
         }
       }
     }
@@ -130,25 +116,11 @@ object Searcher {
      * @param f The predicate to filter the output.
      * @return A searcher that filters the output.
      */
-    def filterWithEGraph(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = {
+    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = {
       new Searcher[NodeT, Seq[MatchT], EGraphT] {
         override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
           val matches = searcher.search(egraph, parallelize)
           parallelize(matches, (x: MatchT) => f(x, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
-        }
-      }
-    }
-
-    /**
-     * Filters the output of the searcher, retaining only the elements that satisfy the predicate.
-     * @param f The predicate to filter the output.
-     * @return A searcher that filters the output.
-     */
-    def filter(f: MatchT => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = {
-      new Searcher[NodeT, Seq[MatchT], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
-          val matches = searcher.search(egraph, parallelize)
-          parallelize(matches, f).zip(matches).collect { case (true, m) => m }.toSeq
         }
       }
     }

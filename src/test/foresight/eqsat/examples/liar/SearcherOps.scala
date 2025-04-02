@@ -30,7 +30,7 @@ object SearcherOps {
      * @return The searcher that binds the types to the variables.
      */
     def bindTypes(types: Map[Pattern.Var[ArrayIR], Pattern.Var[ArrayIR]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
-      searcher.mapWithEGraph((m, egraph) => {
+      searcher.map((m, egraph) => {
         val newVarMapping = m.varMapping ++ types.map {
           case (value, t) =>
             val (call, newEGraph) = egraph.add(m(value))
@@ -65,7 +65,7 @@ object SearcherOps {
 
       // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
       // If such a match is found, then the original match is kept. Otherwise, it is filtered out.
-      searcher.filterWithEGraph((m, egraph) => {
+      searcher.filter((m, egraph) => {
         compiledPatterns.foldLeft(Option(m)) {
           case (Some(newMatch), (variable, pattern)) =>
             tryMatchVariableToTypePattern(variable, pattern, newMatch, egraph)
@@ -85,7 +85,7 @@ object SearcherOps {
      * @return The searcher that filters out matches where the variables are not values.
      */
     def requireValues(values: Pattern.Var[ArrayIR]*): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
-      searcher.filterWithEGraph((m, egraph) => {
+      searcher.filter((m, egraph) => {
         values.forall(v => {
           m(v) match {
             case MixedTree.Call(c) => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
@@ -102,7 +102,7 @@ object SearcherOps {
      * @return The searcher that filters out matches where the variable is a function type.
      */
     def requireNonFunctionType(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
-      searcher.filterWithEGraph((m, egraph) => {
+      searcher.filter((m, egraph) => {
         !functionTypePattern.matches(m(t), egraph)
       })
     }
@@ -113,7 +113,7 @@ object SearcherOps {
      * @return The searcher that filters out matches where the variable is not an int32 type.
      */
     def requireInt32Type(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
-      searcher.filterWithEGraph((m, egraph) => {
+      searcher.filter((m, egraph) => {
         int32TypePattern.matches(m(t), egraph)
       })
     }
@@ -124,7 +124,7 @@ object SearcherOps {
      * @return The searcher that filters out matches where the variable is not a double type.
      */
     def requireDoubleType(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
-      searcher.filterWithEGraph((m, egraph) => {
+      searcher.filter((m, egraph) => {
         doubleTypePattern.matches(m(t), egraph)
       })
     }
