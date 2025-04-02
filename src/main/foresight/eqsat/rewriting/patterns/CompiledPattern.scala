@@ -9,7 +9,8 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
-final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](instructions: List[Instruction[NodeT, EGraphT]]) {
+final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]],
+                                                                                                  instructions: List[Instruction[NodeT, EGraphT]]) {
   /**
    * Searches for matches of the pattern in an e-graph.
    * @param call The e-class application to search for.
@@ -58,6 +59,6 @@ object CompiledPattern {
    * @return The compiled pattern.
    */
   def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]]): CompiledPattern[NodeT, EGraphT] = {
-    CompiledPattern(PatternCompiler.compile[NodeT, EGraphT](pattern))
+    CompiledPattern(pattern, PatternCompiler.compile[NodeT, EGraphT](pattern))
   }
 }

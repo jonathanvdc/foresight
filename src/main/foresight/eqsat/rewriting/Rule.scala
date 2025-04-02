@@ -70,4 +70,25 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
     val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph).simplify(egraph)).toSeq
     CommandQueue(commands).optimized
   }
+
+  /**
+   * Tries to reverse the rule.
+   * @return If the rule is reversible, a reversed rule.
+   */
+  def tryReverse: Option[Rule[NodeT, MatchT, EGraphT]] = {
+    val revApplier = searcher match {
+      case r: ReversibleSearcher[NodeT, MatchT, EGraphT] => r.tryReverse
+      case _ => None
+    }
+
+    val revSearcher = applier match {
+      case r: ReversibleApplier[NodeT, MatchT, EGraphT] => r.tryReverse
+      case _ => None
+    }
+
+    (revApplier, revSearcher) match {
+      case (Some(ap), Some(sr)) => Some(Rule(s"$name (reversed)", sr, ap))
+      case _ => None
+    }
+  }
 }

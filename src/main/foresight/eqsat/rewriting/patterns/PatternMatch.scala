@@ -85,8 +85,13 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @return True if the expression is independent of the slots, false otherwise.
    */
   def isIndependent(expr: Pattern.Var[NodeT], slots: Set[Slot]): Boolean = {
-    val exprSlots = apply(expr).slotSet
-    val commonSlots = exprSlots.intersect(slots.map(apply))
-    commonSlots.isEmpty
+    varMapping.get(expr) match {
+      case Some(tree) =>
+        val exprSlots = tree.slotSet
+        val commonSlots = exprSlots.intersect(slots.flatMap(slotMapping.get))
+        commonSlots.isEmpty
+
+      case None => true
+    }
   }
 }

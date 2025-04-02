@@ -70,6 +70,20 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
  */
 object Searcher {
   /**
+   * Creates an empty searcher that produces no matches.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam MatchT The type of the matches.
+   * @tparam EGraphT The type of the e-graph that the searcher searches in.
+   * @return An empty searcher that produces no matches.
+   */
+  def empty[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, Seq[MatchT], EGraphT] = {
+    new ReversibleSearcher[NodeT, MatchT, EGraphT] {
+      override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = Seq.empty
+      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore)
+    }
+  }
+
+  /**
    * Creates a searcher from a single phase.
    *
    * @param phase The phase of the searcher.
@@ -114,11 +128,18 @@ object Searcher {
    */
   final case class Filter[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
     searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
-    predicate: (MatchT, EGraphT) => Boolean) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
+    predicate: (MatchT, EGraphT) => Boolean) extends ReversibleSearcher[NodeT, MatchT, EGraphT] {
 
     override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
       val matches = searcher.search(egraph, parallelize)
       parallelize(matches, (x: MatchT) => predicate(x, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
+    }
+
+    override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = {
+      searcher match {
+        case r: ReversibleSearcher[NodeT, MatchT, EGraphT] => r.tryReverse.map(Applier.Filter(_, predicate))
+        case _ => None
+      }
     }
   }
 

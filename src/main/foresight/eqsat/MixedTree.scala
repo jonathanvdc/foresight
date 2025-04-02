@@ -1,6 +1,6 @@
 package foresight.eqsat
 
-import foresight.eqsat.rewriting.{Applier, Searcher}
+import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, MachineSearcherPhase, Pattern, PatternApplier, PatternCompiler, PatternMatch}
 
 /**
@@ -125,20 +125,21 @@ object MixedTree {
      * Compiles the pattern into a compiled pattern.
      * @return The compiled pattern.
      */
-    def compiled[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: CompiledPattern[NodeT, EGraphT] = CompiledPattern(tree)
+    def compiled[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: CompiledPattern[NodeT, EGraphT] =
+      CompiledPattern(tree)
 
     /**
      * Converts the pattern to a searcher.
      * @return The searcher.
      */
-    def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
-      Searcher(MachineSearcherPhase(compiled))
-    }
+    def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] =
+      ReversibleSearcher(MachineSearcherPhase(compiled))
 
     /**
      * Converts the pattern to a pattern applier.
      * @return The pattern applier.
      */
-    def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Applier[NodeT, PatternMatch[NodeT], EGraphT] = PatternApplier(tree)
+    def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Applier[NodeT, PatternMatch[NodeT], EGraphT] =
+      PatternApplier(tree)
   }
 }
