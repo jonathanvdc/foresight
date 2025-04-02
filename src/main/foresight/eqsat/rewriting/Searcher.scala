@@ -86,6 +86,43 @@ object Searcher {
   }
 
   /**
+   * A searcher that applies a function to the outputs of another searcher.
+   * @param searcher The searcher to apply the function to.
+   * @param f The mapping function to apply to the outputs of the searcher.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam InputT The type of inner searcher's matches.
+   * @tparam OutputT The mapping function's output type.
+   * @tparam EGraphT The type of the e-graph that the searcher searches in.
+   */
+  final case class Map[NodeT, InputT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
+    searcher: Searcher[NodeT, Seq[InputT], EGraphT],
+    f: (InputT, EGraphT) => OutputT) extends Searcher[NodeT, Seq[OutputT], EGraphT] {
+
+    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
+      val matches = searcher.search(egraph, parallelize)
+      parallelize(matches, (x: InputT) => f(x, egraph)).toSeq
+    }
+  }
+
+  /**
+   * A searcher that filters the output of another searcher based on a predicate.
+   * @param searcher The searcher to filter.
+   * @param predicate The predicate to filter the output.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam MatchT The type of the matches.
+   * @tparam EGraphT The type of the e-graph that the searcher searches in.
+   */
+  final case class Filter[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
+    searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
+    predicate: (MatchT, EGraphT) => Boolean) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
+
+    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
+      val matches = searcher.search(egraph, parallelize)
+      parallelize(matches, (x: MatchT) => predicate(x, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
+    }
+  }
+
+  /**
    * Searcher extension methods for searchers that produce sequences of matches.
    * @param searcher The searcher to extend.
    * @tparam NodeT The type of the nodes in the e-graph.
@@ -98,32 +135,21 @@ object Searcher {
 
     /**
      * Applies a mapping to each element of the searcher's output, using the e-graph as an argument.
+     *
      * @param f The function to apply to each output.
      * @tparam OutputT The type of the output.
      * @return A searcher that applies the function to each output.
      */
-    def map[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = {
-      new Searcher[NodeT, Seq[OutputT], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
-          parallelize(searcher.search(egraph, parallelize), (x: MatchT) => f(x, egraph)).toSeq
-        }
-      }
-    }
+    def map[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] = Map(searcher, f)
 
     /**
      * Filters the output of the searcher, retaining only the elements that satisfy the predicate. The predicate
      * receives the e-graph as an argument.
+     *
      * @param f The predicate to filter the output.
      * @return A searcher that filters the output.
      */
-    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = {
-      new Searcher[NodeT, Seq[MatchT], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
-          val matches = searcher.search(egraph, parallelize)
-          parallelize(matches, (x: MatchT) => f(x, egraph)).zip(matches).collect { case (true, m) => m }.toSeq
-        }
-      }
-    }
+    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] = Filter(searcher, f)
   }
 
   implicit class SearcherOfPatternMatch[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
