@@ -40,7 +40,11 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
 
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // need to be updated because they may be affected by the union operation.
-    (newClasses, EGraphWithRecordedApplications(newEgraph, applied.mapValues(_.map(_.port(newEgraph)).view.force)))
+    val portedApplications = parallelize[(String, Set[Match]), (String, Set[Match])](applied, {
+      case (ruleName, matches) =>
+        ruleName -> matches.map(_.port(newEgraph))
+    }).toMap
+    (newClasses, EGraphWithRecordedApplications(newEgraph, portedApplications))
   }
 
   /**
