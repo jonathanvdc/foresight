@@ -168,22 +168,6 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
 
   /**
    * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
-   * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned
-   * along with the new e-graph.
-   * @param node The e-node to add to the e-graph.
-   * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added. If the e-node
-   *         is already present, then None is returned instead of the new e-graph.
-   */
-  final def tryAdd(node: ENode[NodeT]): (EClassCall, Option[This]) = {
-    tryAddMany(Seq(node), ParallelMap.sequential) match {
-      case (Seq(AddNodeResult.Added(call)), egraph) => (call, Some(egraph))
-      case (Seq(AddNodeResult.AlreadyThere(call)), _) => (call, None)
-      case _ => throw new IllegalStateException("Unexpected result from tryAddMany")
-    }
-  }
-
-  /**
-   * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
    * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
    * @param node The e-node to add to the e-graph.
    * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.
