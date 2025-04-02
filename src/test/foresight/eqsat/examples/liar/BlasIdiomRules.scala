@@ -17,10 +17,9 @@ object BlasIdiomRules {
     detectGemm,
     detectTranspose)
 
-  def transformationRules: Seq[LiarRule] = Seq(
-    hoistLhsMulFromDot,
-    foldTransposeIntoGemvN,
-    foldTransposeIntoGemvT)
+  def transformationRules: Seq[LiarRule] = {
+    Seq(hoistLhsMulFromDot) ++ foldTransposeIntoGemv ++ foldTransposeAIntoGemm ++ foldTransposeBIntoGemm
+  }
 
   val detectMemsetZero: LiarRule = {
     // build N (λi. 0.0) -> memset N 0.0
@@ -271,73 +270,99 @@ object BlasIdiomRules {
       Mul(MixedTree.Call(a), BlasIdioms.Dot(MixedTree.Call(xs), MixedTree.Call(ys))).toApplier)
   }
 
-  def foldTransposeIntoGemvN: LiarRule = {
-    // gemvN alpha (transpose a) x beta y -> gemvT alpha a x beta y
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val K = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+  def foldTransposeIntoGemv: Seq[LiarRule] = {
+    // gemvX alpha (transpose a) x beta y -> gemv(not X) alpha a x beta y
 
-    val alpha = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val x = Pattern.Var.fresh[ArrayIR]()
-    val beta = Pattern.Var.fresh[ArrayIR]()
-    val y = Pattern.Var.fresh[ArrayIR]()
+    for (transposition <- Seq(true, false)) yield {
+      val alpha = Pattern.Var.fresh[ArrayIR]()
+      val a = Pattern.Var.fresh[ArrayIR]()
+      val x = Pattern.Var.fresh[ArrayIR]()
+      val beta = Pattern.Var.fresh[ArrayIR]()
+      val y = Pattern.Var.fresh[ArrayIR]()
 
-    Rule(
-      "gemvN alpha (transpose a) x beta y -> gemvT alpha a x beta y",
-      BlasIdioms.Gemv(false)(
-        MixedTree.Call(alpha),
-        BlasIdioms.Transpose(MixedTree.Call(a)),
-        MixedTree.Call(x),
-        MixedTree.Call(beta),
-        MixedTree.Call(y))
-        .toSearcher[LiarEGraph]
-        .requireTypes(Map(
-          alpha -> MixedTree.Call(scalarType),
-          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)), MixedTree.Call(N)),
-          x -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          beta -> MixedTree.Call(scalarType),
-          y -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)))),
-      BlasIdioms.Gemv(true)(
-        MixedTree.Call(alpha),
-        MixedTree.Call(a),
-        MixedTree.Call(x),
-        MixedTree.Call(beta),
-        MixedTree.Call(y)).toApplier)
+      val transposed = BlasIdioms.transpositionToString(transposition)
+      val notTransposed = BlasIdioms.transpositionToString(!transposition)
+
+      Rule(
+        s"gemv$transposed alpha (transpose a) x beta y -> gemv$notTransposed alpha a x beta y",
+        BlasIdioms.Gemv(transposition)(
+            MixedTree.Call(alpha),
+            BlasIdioms.Transpose(MixedTree.Call(a)),
+            MixedTree.Call(x),
+            MixedTree.Call(beta),
+            MixedTree.Call(y))
+          .toSearcher[LiarEGraph],
+        BlasIdioms.Gemv(!transposition)(
+          MixedTree.Call(alpha),
+          MixedTree.Call(a),
+          MixedTree.Call(x),
+          MixedTree.Call(beta),
+          MixedTree.Call(y))
+          .toApplier[LiarEGraph])
+    }
   }
 
-  def foldTransposeIntoGemvT: LiarRule = {
-    // gemvT alpha (transpose a) x beta y -> gemvN alpha a x beta y
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val K = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
-
+  def foldTransposeAIntoGemm: Seq[LiarRule] = {
+    // gemmXY alpha (transpose a) b beta c -> gemm(not X)Y alpha a b beta c
     val alpha = Pattern.Var.fresh[ArrayIR]()
     val a = Pattern.Var.fresh[ArrayIR]()
-    val x = Pattern.Var.fresh[ArrayIR]()
+    val b = Pattern.Var.fresh[ArrayIR]()
     val beta = Pattern.Var.fresh[ArrayIR]()
-    val y = Pattern.Var.fresh[ArrayIR]()
+    val c = Pattern.Var.fresh[ArrayIR]()
 
-    Rule(
-      "gemvT alpha (transpose a) x beta y -> gemvN alpha a x beta y",
-      BlasIdioms.Gemv(true)(
-        MixedTree.Call(alpha),
-        BlasIdioms.Transpose(MixedTree.Call(a)),
-        MixedTree.Call(x),
-        MixedTree.Call(beta),
-        MixedTree.Call(y))
-        .toSearcher[LiarEGraph]
-        .requireTypes(Map(
-          alpha -> MixedTree.Call(scalarType),
-          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(K)),
-          x -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          beta -> MixedTree.Call(scalarType),
-          y -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)))),
-      BlasIdioms.Gemv(false)(
-        MixedTree.Call(alpha),
-        MixedTree.Call(a),
-        MixedTree.Call(x),
-        MixedTree.Call(beta),
-        MixedTree.Call(y)).toApplier)
+    for ((aTransposed, bTransposed) <- Seq((false, false), (false, true), (true, false), (true, true))) yield {
+      val transpositionA = BlasIdioms.transpositionToString(aTransposed)
+      val transpositionB = BlasIdioms.transpositionToString(bTransposed)
+      val notTranspositionA = BlasIdioms.transpositionToString(!aTransposed)
+
+      Rule(
+        s"gemm$transpositionA$transpositionB alpha (transpose a) b beta c -> gemm$notTranspositionA$transpositionB alpha a b beta c",
+        BlasIdioms.Gemm(aTransposed, bTransposed)(
+          MixedTree.Call(alpha),
+          BlasIdioms.Transpose(MixedTree.Call(a)),
+          MixedTree.Call(b),
+          MixedTree.Call(beta),
+          MixedTree.Call(c))
+          .toSearcher[LiarEGraph],
+        BlasIdioms.Gemm(!aTransposed, bTransposed)(
+          MixedTree.Call(alpha),
+          MixedTree.Call(a),
+          MixedTree.Call(b),
+          MixedTree.Call(beta),
+          MixedTree.Call(c))
+          .toApplier[LiarEGraph])
+    }
+  }
+
+  def foldTransposeBIntoGemm: Seq[LiarRule] = {
+    // gemmXY alpha a (transpose b) beta c -> gemmX(not Y) alpha a b beta c
+    val alpha = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh[ArrayIR]()
+    val b = Pattern.Var.fresh[ArrayIR]()
+    val beta = Pattern.Var.fresh[ArrayIR]()
+    val c = Pattern.Var.fresh[ArrayIR]()
+
+    for ((aTransposed, bTransposed) <- Seq((false, false), (false, true), (true, false), (true, true))) yield {
+      val transpositionA = BlasIdioms.transpositionToString(aTransposed)
+      val transpositionB = BlasIdioms.transpositionToString(bTransposed)
+      val notTranspositionB = BlasIdioms.transpositionToString(!bTransposed)
+
+      Rule(
+        s"gemm$transpositionA$transpositionB alpha a (transpose b) beta c -> gemm$transpositionA$notTranspositionB alpha a b beta c",
+        BlasIdioms.Gemm(aTransposed, bTransposed)(
+            MixedTree.Call(alpha),
+            MixedTree.Call(a),
+            BlasIdioms.Transpose(MixedTree.Call(b)),
+            MixedTree.Call(beta),
+            MixedTree.Call(c))
+          .toSearcher[LiarEGraph],
+        BlasIdioms.Gemm(aTransposed, !bTransposed)(
+            MixedTree.Call(alpha),
+            MixedTree.Call(a),
+            MixedTree.Call(b),
+            MixedTree.Call(beta),
+            MixedTree.Call(c))
+          .toApplier[LiarEGraph])
+    }
   }
 }

@@ -394,7 +394,7 @@ class BlasIdiomRuleTests {
   }
 
   @Test
-  def foldTransposeIntoGemvN(): Unit = {
+  def foldTransposeIntoGemvF(): Unit = {
     val egraph = EGraph.empty[ArrayIR]
 
     val N = ConstIntType(100).toTree
@@ -407,9 +407,9 @@ class BlasIdiomRuleTests {
     val beta = Var(Slot.fresh(), DoubleType.toTree)
 
     val gemvT = BlasIdioms.Gemv(true)(alpha, a, x, beta, y)
-    val gemvN = BlasIdioms.Gemv(false)(alpha, BlasIdioms.Transpose(a), x, beta, y)
+    val gemvF = BlasIdioms.Gemv(false)(alpha, BlasIdioms.Transpose(a), x, beta, y)
 
-    val (c1, egraph2) = egraph.add(gemvN)
+    val (c1, egraph2) = egraph.add(gemvF)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -431,13 +431,51 @@ class BlasIdiomRuleTests {
     val beta = Var(Slot.fresh(), DoubleType.toTree)
 
     val gemvT = BlasIdioms.Gemv(true)(alpha, BlasIdioms.Transpose(a), x, beta, y)
-    val gemvN = BlasIdioms.Gemv(false)(alpha, a, x, beta, y)
+    val gemvF = BlasIdioms.Gemv(false)(alpha, a, x, beta, y)
 
     val (c1, egraph2) = egraph.add(gemvT)
 
     val egraph4 = strategy(1)(egraph2).get
 
-    assert(egraph4.contains(gemvN))
-    assert(egraph4.areSame(c1, egraph4.find(gemvN).get))
+    assert(egraph4.contains(gemvF))
+    assert(egraph4.areSame(c1, egraph4.find(gemvF).get))
+  }
+
+  @Test
+  def foldTransposeABIntoGemmFF(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val M = ConstIntType(100).toTree
+    val N = ConstIntType(200).toTree
+    val K = ConstIntType(300).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, M), N))
+    val b = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val c = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), M))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemmFF = BlasIdioms.Gemm(aTransposed = false, bTransposed = false)(
+      alpha, BlasIdioms.Transpose(a), BlasIdioms.Transpose(b), beta, c)
+
+    val gemmFT = BlasIdioms.Gemm(aTransposed = false, bTransposed = true)(
+      alpha, BlasIdioms.Transpose(a), b, beta, c)
+
+    val gemmTF = BlasIdioms.Gemm(aTransposed = true, bTransposed = false)(
+      alpha, a, BlasIdioms.Transpose(b), beta, c)
+
+    val gemmTT = BlasIdioms.Gemm(aTransposed = true, bTransposed = true)(alpha, a, b, beta, c)
+
+    val (c1, egraph2) = egraph.add(gemmFF)
+
+    val egraph3 = strategy(2)(egraph2).get
+
+    assert(egraph3.contains(gemmFT))
+    assert(egraph3.contains(gemmTF))
+    assert(egraph3.areSame(c1, egraph3.find(gemmFT).get))
+    assert(egraph3.areSame(c1, egraph3.find(gemmTF).get))
+
+    assert(egraph3.contains(gemmTT))
+    assert(egraph3.areSame(c1, egraph3.find(gemmTT).get))
   }
 }
