@@ -324,4 +324,39 @@ class BlasIdiomRuleTests {
     assert(egraph4.contains(gemm))
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))
   }
+
+  @Test
+  def findTranspose(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val M = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), M))
+
+    val transpose = BlasIdioms.Transpose(a)
+
+    val build = {
+      val i = Slot.fresh()
+      val j = Slot.fresh()
+      Build(
+        N,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Build(
+            M,
+            Lambda(
+              j,
+              Int32Type.toTree,
+              IndexAt(IndexAt(a, Var(j, Int32Type.toTree)), Var(i, Int32Type.toTree))))))
+    }
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(1)(egraph2).get
+
+    assert(egraph4.contains(transpose))
+    assert(egraph4.areSame(c1, egraph4.find(transpose).get))
+  }
 }

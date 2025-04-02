@@ -167,4 +167,26 @@ object BlasIdioms {
                  c: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(alpha, a, b, beta, c))
   }
+
+  /**
+   * A BLAS matrix transpose.
+   */
+  object Transpose extends ExternFunctionCall {
+    override def name: String = "transpose"
+    override def typeArgCount: Int = 0
+    override def valueArgCount: Int = 1
+
+    override def inferType[A](typeArgs: Seq[MixedTree[Type, A]],
+                              valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+      val Seq(a) = valueArgTypes
+      a match {
+        case ArrayType(ArrayType(elementType, n), m) =>
+          ArrayType(ArrayType(elementType, m), n)
+        case _ => throw new IllegalArgumentException(s"transpose requires a matrix argument, got $a")
+      }
+    }
+
+    def apply[A](a: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
+      MixedTree.unslotted(this, Seq(a))
+  }
 }

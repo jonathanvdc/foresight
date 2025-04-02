@@ -7,12 +7,15 @@ import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.Pattern
 
 object BlasIdiomRules {
-  def all: Seq[LiarRule] = Seq(
+  def all: Seq[LiarRule] = detectionRules
+
+  def detectionRules: Seq[LiarRule] = Seq(
     detectMemsetZero,
     detectDot,
     detectAxpy,
     detectGemv,
-    detectGemm)
+    detectGemm,
+    detectTranspose)
 
   val detectMemsetZero: LiarRule = {
     // build N (λi. 0.0) -> memset N 0.0
@@ -197,5 +200,36 @@ object BlasIdiomRules {
         MixedTree.Call(b),
         MixedTree.Call(beta),
         MixedTree.Call(c)).toApplier)
+  }
+
+  def detectTranspose: LiarRule = {
+    // build N (λi. build M (λj. a[i][j])) -> transpose a
+
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val M = Pattern.Var.fresh[ArrayIR]()
+
+    val a = Pattern.Var.fresh[ArrayIR]()
+
+    val i = Slot.fresh()
+    val j = Slot.fresh()
+
+    Rule(
+      "build N (λi. build M (λj. a[i][j])) -> transpose a",
+      Build(
+        MixedTree.Call(N),
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Build(
+            MixedTree.Call(M),
+            Lambda(
+              j,
+              Int32Type.toTree,
+              IndexAt(IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)), Var(j, Int32Type.toTree))))))
+        .toSearcher[LiarEGraph]
+        .requireIndependent(a, i, j)
+        .requireTypes(Map(
+          a -> ArrayType(ArrayType(DoubleType.toTree, MixedTree.Call(N)), MixedTree.Call(M)))),
+      BlasIdioms.Transpose(MixedTree.Call(a)).toApplier)
   }
 }
