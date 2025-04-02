@@ -7,7 +7,9 @@ import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.Pattern
 
 object BlasIdiomRules {
-  def all: Seq[LiarRule] = detectionRules ++ transformationRules
+  def all: Seq[LiarRule] = oneWayRules ++ oneWayRules.map(_.tryReverse.get)
+
+  def oneWayRules: Seq[LiarRule] = detectionRules ++ transformationRules
 
   def detectionRules: Seq[LiarRule] = Seq(
     detectMemsetZero,
@@ -47,7 +49,6 @@ object BlasIdiomRules {
 
     val xs = Pattern.Var.fresh[ArrayIR]()
     val ys = Pattern.Var.fresh[ArrayIR]()
-    val accType = Pattern.Var.fresh[ArrayIR]()
     val acc = Slot.fresh()
     val i = Slot.fresh()
 
@@ -61,19 +62,18 @@ object BlasIdiomRules {
           Int32Type.toTree,
           Lambda(
             acc,
-            MixedTree.Call(accType),
+            MixedTree.Call(scalarType),
             Add(
               Mul(
                 IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree)),
                 IndexAt(MixedTree.Call(ys), Var(i, Int32Type.toTree))),
-              Var(acc, MixedTree.Call(accType))))))
+              Var(acc, MixedTree.Call(scalarType))))))
         .toSearcher[LiarEGraph]
         .requireIndependent(xs, i, acc)
         .requireIndependent(ys, i, acc)
         .requireTypes(Map(
           xs -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          accType -> MixedTree.Call(scalarType))),
+          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)))),
       BlasIdioms.Dot(MixedTree.Call(xs), MixedTree.Call(ys)).toApplier)
   }
 

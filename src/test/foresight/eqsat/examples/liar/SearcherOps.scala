@@ -2,7 +2,8 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
 import foresight.eqsat.metadata.EGraphWithMetadata
-import foresight.eqsat.rewriting.Searcher
+import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 
 object SearcherOps {
@@ -46,7 +47,7 @@ object SearcherOps {
      * @param types A mapping of variables to type patterns.
      * @return The searcher that filters out matches where the variables are not bound to the given type patterns.
      */
-    def requireTypes(types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+    def requireTypes(types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]]): ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
       // Precompile the patterns.
       val compiledPatterns = types.map {
         case (v, t) => v -> t.compiled[EGraph[ArrayIR]]
@@ -63,16 +64,33 @@ object SearcherOps {
         pattern.search(typeInGraph, egraphWithType).toStream.flatMap(m.tryMerge).headOption
       }
 
-      // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
-      // If such a match is found, then the match is kept. Otherwise, it is filtered out.
-      searcher.flatMap((m, egraph) => {
+      def checkMatch(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
         compiledPatterns.foldLeft(Option(m)) {
           case (Some(newMatch), (variable, pattern)) =>
             tryMatchVariableToTypePattern(variable, pattern, newMatch, egraph)
 
           case (None, _) => None
         }
-      })
+      }
+
+      // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
+      // If such a match is found, then the match is kept. Otherwise, it is filtered out.
+      new ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
+        override def search(egraph: EGraphWithMetadata[ArrayIR, EGraphT], parallelize: ParallelMap): Seq[PatternMatch[ArrayIR]] = {
+          searcher.flatMap(checkMatch).search(egraph, parallelize)
+        }
+
+        override def tryReverse: Option[Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
+          searcher match {
+            case searcher: ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] =>
+              searcher.tryReverse.map(applier => {
+                applier.flatMap(checkMatch)
+              })
+
+            case _ => None
+          }
+        }
+      }
     }
   }
 
