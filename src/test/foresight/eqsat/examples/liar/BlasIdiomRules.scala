@@ -8,10 +8,30 @@ import foresight.eqsat.rewriting.patterns.Pattern
 
 object BlasIdiomRules {
   def all: Seq[LiarRule] = Seq(
+    detectMemsetZero,
     detectDot,
     detectAxpy,
     detectGemv,
     detectGemm)
+
+  val detectMemsetZero: LiarRule = {
+    // build N (λi. 0.0) -> memset N 0.0
+    val N = Pattern.Var.fresh[ArrayIR]()
+
+    val zero = ConstDouble(0.0).toTree
+    val i = Slot.fresh()
+
+    Rule(
+      "build N (λi. 0.0) -> memset N 0",
+      Build(
+        MixedTree.Call(N),
+        Lambda(
+          i,
+          Int32Type.toTree,
+          ConstDouble(0.0).toTree))
+        .toSearcher[LiarEGraph],
+      BlasIdioms.Memset(MixedTree.Call(N), zero).toApplier)
+  }
 
   val detectDot: LiarRule = {
     // ifold N (λi acc. xs[i] * ys[i] + acc) 0.0 -> ddot xs ys

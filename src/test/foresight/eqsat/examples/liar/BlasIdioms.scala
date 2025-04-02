@@ -9,6 +9,26 @@ object BlasIdioms {
   def transpositionToString(transposed: Boolean): String = if (transposed) "T" else "F"
 
   /**
+   * A `memset` function call that initializes an array.
+   */
+  object Memset extends ExternFunctionCall {
+    override def name: String = "memset"
+    override def typeArgCount: Int = 1
+    override def valueArgCount: Int = 1
+
+    override def inferType[A](typeArgs: Seq[MixedTree[Type, A]],
+                              valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+      val Seq(size) = typeArgs
+      val Seq(valueType) = valueArgTypes
+
+      ArrayType(valueType, size)
+    }
+
+    def apply[A](size: MixedTree[Type, A], value: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
+      MixedTree.unslotted(this, Seq(size, value))
+  }
+
+  /**
    * A BLAS `dot` function call.
    */
   object Dot extends ExternFunctionCall {

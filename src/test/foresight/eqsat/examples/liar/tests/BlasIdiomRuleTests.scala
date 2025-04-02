@@ -19,6 +19,32 @@ class BlasIdiomRuleTests {
       .closeMetadata
       .dropData
 
+  @Test
+  def findMemsetZero(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+
+    val zeroArray = {
+      val i = Slot.fresh()
+      Build(
+        N,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          ConstDouble(0.0).toTree))
+    }
+
+    val memsetZero = BlasIdioms.Memset(N, ConstDouble(0.0).toTree)
+
+    val (c1, egraph2) = egraph.add(zeroArray)
+
+    val egraph4 = strategy(1)(egraph2).get
+
+    assert(egraph4.contains(memsetZero))
+    assert(egraph4.areSame(c1, egraph4.find(memsetZero).get))
+  }
+
   /**
    * Tests that the ddot rule fires when the pattern is present.
    */
@@ -230,7 +256,7 @@ class BlasIdiomRuleTests {
     val alpha = Var(Slot.fresh(), DoubleType.toTree)
     val beta = Var(Slot.fresh(), DoubleType.toTree)
 
-    val gemm = BlasIdioms.Gemm(false, true)(alpha, a, b, beta, c)
+    val gemm = BlasIdioms.Gemm(aTransposed = false, bTransposed = true)(alpha, a, b, beta, c)
 
     val build = {
       val i = Slot.fresh()
