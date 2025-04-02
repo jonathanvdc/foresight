@@ -64,14 +64,14 @@ object SearcherOps {
       }
 
       // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
-      // If such a match is found, then the original match is kept. Otherwise, it is filtered out.
-      searcher.filter((m, egraph) => {
+      // If such a match is found, then the match is kept. Otherwise, it is filtered out.
+      searcher.flatMap((m, egraph) => {
         compiledPatterns.foldLeft(Option(m)) {
           case (Some(newMatch), (variable, pattern)) =>
             tryMatchVariableToTypePattern(variable, pattern, newMatch, egraph)
 
           case (None, _) => None
-        }.isDefined
+        }
       })
     }
   }
