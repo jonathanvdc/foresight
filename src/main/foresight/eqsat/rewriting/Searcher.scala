@@ -135,12 +135,10 @@ object Searcher {
      * @return A searcher that filters out matches that do not satisfy the condition.
      */
     def requireIndependent(expr: Pattern.Var[NodeT], slots: Slot*): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
-      new Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[PatternMatch[NodeT]] = {
-          val matches = searcher.search(egraph, parallelize)
-          matches.filter(_.isIndependent(expr, slots.toSet))
-        }
-      }
+      searcher.filter((m, _) => {
+        // Check if the expression is independent of the slots.
+        m.isIndependent(expr, slots.toSet)
+      })
     }
   }
 
