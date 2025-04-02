@@ -91,10 +91,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * @return The optimized command queue.
    */
   def optimized: CommandQueue[NodeT] = {
-    CommandQueue(
-      CommandQueue.mergeUnions(
-        flatCommands,
-        CommandQueue.independentGroups(_).flatMap(CommandQueue.optimizeIndependentGroup)))
+    CommandQueue(CommandQueue.optimizeCommands(flatCommands))
   }
 
   /**
@@ -130,6 +127,17 @@ object CommandQueue {
    */
   def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
 
+  private def optimizeCommands[NodeT](commands: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
+    mergeUnions(commands, others => {
+      val adds = others.collect { case cmd: AddManyCommand[NodeT] => cmd }
+      if (adds.size == others.size) {
+        optimizeAdds(adds)
+      } else {
+        CommandQueue.independentGroups(others).flatMap(CommandQueue.optimizeIndependentGroup)
+      }
+    })
+  }
+
   private def mergeUnions[NodeT](group: Seq[Command[NodeT]],
                                  processRemaining: Seq[Command[NodeT]] => Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
     // Partition the remaining commands into union commands and other commands.
@@ -146,6 +154,35 @@ object CommandQueue {
       case Seq() => processRemaining(remainingCommands)
       case Seq(_*) => processRemaining(remainingCommands) :+ UnionManyCommand[NodeT](unionPairs)
     }
+  }
+
+  private def optimizeAdds[NodeT](group: Seq[AddManyCommand[NodeT]]): Seq[Command[NodeT]] = {
+    // Our aim is to partition the add commands into batches of independent additions. We do this by tracking the
+    // batches in which each node is defined. When we encounter a fresh addition, we add it to batch i + 1 such that
+    // i is the highest batch in which any of its dependencies are defined.
+    val batches = mutable.ArrayBuffer.empty[mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
+    val defs = mutable.Map.empty[EClassSymbol, Int]
+
+    for (command <- group) {
+      val highestDependency = (-1 +: command.uses.collect {
+        case use: EClassSymbol.Virtual if defs.contains(use) => defs(use)
+      }).max
+
+      val batchIndex = highestDependency + 1
+      if (batchIndex == batches.size) {
+        val newBatch = mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])](command.nodes: _*)
+        batches += newBatch
+      } else {
+        batches(batchIndex).appendAll(command.nodes)
+      }
+
+      for (node <- command.nodes) {
+        defs(node._1) = batchIndex
+      }
+    }
+
+    // Merge all the addition commands in each batch.
+    batches.map(AddManyCommand[NodeT])
   }
 
   private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
