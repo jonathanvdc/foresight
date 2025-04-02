@@ -7,7 +7,7 @@ import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.Pattern
 
 object BlasIdiomRules {
-  def all: Seq[LiarRule] = detectionRules
+  def all: Seq[LiarRule] = detectionRules ++ transformationRules
 
   def detectionRules: Seq[LiarRule] = Seq(
     detectMemsetZero,
@@ -16,6 +16,11 @@ object BlasIdiomRules {
     detectGemv,
     detectGemm,
     detectTranspose)
+
+  def transformationRules: Seq[LiarRule] = Seq(
+    hoistLhsMulFromDot,
+    foldTransposeIntoGemvN,
+    foldTransposeIntoGemvT)
 
   val detectMemsetZero: LiarRule = {
     // build N (λi. 0.0) -> memset N 0.0
@@ -231,5 +236,108 @@ object BlasIdiomRules {
         .requireTypes(Map(
           a -> ArrayType(ArrayType(DoubleType.toTree, MixedTree.Call(N)), MixedTree.Call(M)))),
       BlasIdioms.Transpose(MixedTree.Call(a)).toApplier)
+  }
+
+  def hoistLhsMulFromDot: LiarRule = {
+    // dot (build N (λi. a * xs[i])) ys -> a * (dot xs ys)
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val scalarType = Pattern.Var.fresh[ArrayIR]()
+
+    val xs = Pattern.Var.fresh[ArrayIR]()
+    val ys = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh[ArrayIR]()
+
+    val i = Slot.fresh()
+
+    Rule(
+      "dot (build N (λi. a * xs[i])) ys -> a * (dot xs ys)",
+      BlasIdioms.Dot(
+        Build(
+          MixedTree.Call(N),
+          Lambda(
+            i,
+            Int32Type.toTree,
+            Mul(
+              MixedTree.Call(a),
+              IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree))))),
+        MixedTree.Call(ys))
+        .toSearcher[LiarEGraph]
+        .requireIndependent(a, i)
+        .requireIndependent(xs, i)
+        .requireTypes(Map(
+          a -> MixedTree.Call(scalarType),
+          xs -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
+          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)))),
+      Mul(MixedTree.Call(a), BlasIdioms.Dot(MixedTree.Call(xs), MixedTree.Call(ys))).toApplier)
+  }
+
+  def foldTransposeIntoGemvN: LiarRule = {
+    // gemvN alpha (transpose a) x beta y -> gemvT alpha a x beta y
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val K = Pattern.Var.fresh[ArrayIR]()
+    val scalarType = Pattern.Var.fresh[ArrayIR]()
+
+    val alpha = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh[ArrayIR]()
+    val x = Pattern.Var.fresh[ArrayIR]()
+    val beta = Pattern.Var.fresh[ArrayIR]()
+    val y = Pattern.Var.fresh[ArrayIR]()
+
+    Rule(
+      "gemvN alpha (transpose a) x beta y -> gemvT alpha a x beta y",
+      BlasIdioms.Gemv(false)(
+        MixedTree.Call(alpha),
+        BlasIdioms.Transpose(MixedTree.Call(a)),
+        MixedTree.Call(x),
+        MixedTree.Call(beta),
+        MixedTree.Call(y))
+        .toSearcher[LiarEGraph]
+        .requireTypes(Map(
+          alpha -> MixedTree.Call(scalarType),
+          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)), MixedTree.Call(N)),
+          x -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
+          beta -> MixedTree.Call(scalarType),
+          y -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)))),
+      BlasIdioms.Gemv(true)(
+        MixedTree.Call(alpha),
+        MixedTree.Call(a),
+        MixedTree.Call(x),
+        MixedTree.Call(beta),
+        MixedTree.Call(y)).toApplier)
+  }
+
+  def foldTransposeIntoGemvT: LiarRule = {
+    // gemvT alpha (transpose a) x beta y -> gemvN alpha a x beta y
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val K = Pattern.Var.fresh[ArrayIR]()
+    val scalarType = Pattern.Var.fresh[ArrayIR]()
+
+    val alpha = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh[ArrayIR]()
+    val x = Pattern.Var.fresh[ArrayIR]()
+    val beta = Pattern.Var.fresh[ArrayIR]()
+    val y = Pattern.Var.fresh[ArrayIR]()
+
+    Rule(
+      "gemvT alpha (transpose a) x beta y -> gemvN alpha a x beta y",
+      BlasIdioms.Gemv(true)(
+        MixedTree.Call(alpha),
+        BlasIdioms.Transpose(MixedTree.Call(a)),
+        MixedTree.Call(x),
+        MixedTree.Call(beta),
+        MixedTree.Call(y))
+        .toSearcher[LiarEGraph]
+        .requireTypes(Map(
+          alpha -> MixedTree.Call(scalarType),
+          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(K)),
+          x -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
+          beta -> MixedTree.Call(scalarType),
+          y -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)))),
+      BlasIdioms.Gemv(false)(
+        MixedTree.Call(alpha),
+        MixedTree.Call(a),
+        MixedTree.Call(x),
+        MixedTree.Call(beta),
+        MixedTree.Call(y)).toApplier)
   }
 }

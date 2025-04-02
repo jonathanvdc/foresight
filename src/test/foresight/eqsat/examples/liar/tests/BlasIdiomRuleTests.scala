@@ -359,4 +359,85 @@ class BlasIdiomRuleTests {
     assert(egraph4.contains(transpose))
     assert(egraph4.areSame(c1, egraph4.find(transpose).get))
   }
+
+  @Test
+  def hoistLhsMulFromDot(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+
+    val xs = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val ys = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val a = Var(Slot.fresh(), DoubleType.toTree)
+
+    val i = Slot.fresh()
+
+    val dotProduct = BlasIdioms.Dot(
+      Build(
+        N,
+        Lambda(
+          i,
+          Int32Type.toTree,
+          Mul(
+            a,
+            IndexAt(xs, Var(i, Int32Type.toTree))))),
+      ys)
+
+    val dotProduct2 = Mul(a, BlasIdioms.Dot(xs, ys))
+
+    val (c1, egraph2) = egraph.add(dotProduct)
+
+    val egraph4 = strategy(1)(egraph2).get
+
+    assert(egraph4.contains(dotProduct2))
+    assert(egraph4.areSame(c1, egraph4.find(dotProduct2).get))
+  }
+
+  @Test
+  def foldTransposeIntoGemvN(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val K = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), N))
+    val x = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val y = Var(Slot.fresh(), ArrayType(DoubleType.toTree, K))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemvT = BlasIdioms.Gemv(true)(alpha, a, x, beta, y)
+    val gemvN = BlasIdioms.Gemv(false)(alpha, BlasIdioms.Transpose(a), x, beta, y)
+
+    val (c1, egraph2) = egraph.add(gemvN)
+
+    val egraph4 = strategy(1)(egraph2).get
+
+    assert(egraph4.contains(gemvT))
+    assert(egraph4.areSame(c1, egraph4.find(gemvT).get))
+  }
+
+  @Test
+  def foldTransposeIntoGemvT(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val K = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val x = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val y = Var(Slot.fresh(), ArrayType(DoubleType.toTree, K))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemvT = BlasIdioms.Gemv(true)(alpha, BlasIdioms.Transpose(a), x, beta, y)
+    val gemvN = BlasIdioms.Gemv(false)(alpha, a, x, beta, y)
+
+    val (c1, egraph2) = egraph.add(gemvT)
+
+    val egraph4 = strategy(1)(egraph2).get
+
+    assert(egraph4.contains(gemvN))
+    assert(egraph4.areSame(c1, egraph4.find(gemvN).get))
+  }
 }
