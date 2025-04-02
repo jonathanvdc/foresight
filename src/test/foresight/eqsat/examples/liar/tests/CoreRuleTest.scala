@@ -8,7 +8,7 @@ import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
 import org.junit.Test
 
-class CoreRuleTests {
+class CoreRuleTest {
   private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = CoreRules.all): Strategy[EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)

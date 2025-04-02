@@ -7,7 +7,7 @@ import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
 import org.junit.{Ignore, Test}
 
-class BlasIdiomRuleTests {
+class BlasIdiomRuleTest {
   private def strategy(iterationLimit: Int,
                        rules: Seq[LiarRule] = CoreRules.all ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
