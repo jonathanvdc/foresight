@@ -91,7 +91,10 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * @return The optimized command queue.
    */
   def optimized: CommandQueue[NodeT] = {
-    CommandQueue(CommandQueue.independentGroups(flatCommands).flatMap(CommandQueue.optimizeIndependentGroup))
+    CommandQueue(
+      CommandQueue.mergeUnions(
+        flatCommands,
+        CommandQueue.independentGroups(_).flatMap(CommandQueue.optimizeIndependentGroup)))
   }
 
   /**
@@ -127,17 +130,27 @@ object CommandQueue {
    */
   def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
 
-  private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
-    // Reorder the commands to ensure that union commands are at the end of the queue.
-    val (unionCommands, otherCommands) = group.partition {
+  private def mergeUnions[NodeT](group: Seq[Command[NodeT]],
+                                 processRemaining: Seq[Command[NodeT]] => Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
+    // Partition the remaining commands into union commands and other commands.
+    val (unionCommands, remainingCommands) = group.partition {
       case _: UnionManyCommand[NodeT] => true
       case _ => false
     } match {
       case (left, right) => (left.collect { case u: UnionManyCommand[NodeT] => u }, right)
     }
 
-    // Partition the remaining commands into addition commands and other commands.
-    val (addCommands, remainingCommands) = otherCommands.partition {
+    // Merge all the union commands.
+    val unionPairs = unionCommands.flatMap(_.pairs)
+    unionPairs match {
+      case Seq() => processRemaining(remainingCommands)
+      case Seq(_*) => processRemaining(remainingCommands) :+ UnionManyCommand[NodeT](unionPairs)
+    }
+  }
+
+  private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
+    // Partition the commands into addition commands and other commands.
+    val (addCommands, remainingCommands) = group.partition {
       case _: AddManyCommand[NodeT] => true
       case _ => false
     } match {
@@ -146,12 +159,9 @@ object CommandQueue {
 
     // Merge all the addition and union commands.
     val addPairs = addCommands.flatMap(_.nodes)
-    val unionPairs = unionCommands.flatMap(_.pairs)
-    (addPairs, unionPairs) match {
-      case (Seq(), Seq()) => remainingCommands
-      case (Seq(), Seq(_*)) => remainingCommands :+ UnionManyCommand[NodeT](unionPairs)
-      case (Seq(_*), Seq()) => remainingCommands :+ AddManyCommand[NodeT](addPairs)
-      case _ => remainingCommands :+ AddManyCommand[NodeT](addPairs) :+ UnionManyCommand[NodeT](unionPairs)
+    addPairs match {
+      case Seq() => remainingCommands
+      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs)
     }
   }
 
