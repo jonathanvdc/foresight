@@ -36,7 +36,7 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
                          parallelize: ParallelMap): (Set[Set[EClassCall]], EGraphWithRecordedApplications[Node, Repr, Match]) = {
-    val (newClasses, newEgraph) = egraph.unionMany(pairs)
+    val (newClasses, newEgraph) = egraph.unionMany(pairs, parallelize)
 
     // Construct a new EGraphWithAppliedMatches with the new e-graph and the same applied matches. The applied matches
     // need to be updated because they may be affected by the union operation.
