@@ -4,7 +4,7 @@ import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EGraph, Slot}
+import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
 import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTest {
@@ -15,6 +15,7 @@ class BlasIdiomRuleTest {
       .untilFixpoint
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
+      .addAnalysis(TimeComplexity.analysis)
       .addAnalysis(TypeInferenceAnalysis)
       .closeMetadata
       .dropData

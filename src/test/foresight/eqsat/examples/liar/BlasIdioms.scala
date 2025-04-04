@@ -26,6 +26,15 @@ object BlasIdioms {
 
     def apply[A](size: MixedTree[Type, A], value: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(size, value))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                         valueArgTypes: Seq[MixedTree[Type, A]],
+                         valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(size) = typeArgs
+      val Seq(valueCost) = valueArgCosts
+      val n = ConstIntType.toNumber(size)
+      valueCost + TimeComplexity.rescale(n, 8, 10) + 1
+    }
   }
 
   /**
@@ -49,6 +58,18 @@ object BlasIdioms {
 
     def apply[A](a: MixedTree[ArrayIR, A], b: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(a, b))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                         valueArgTypes: Seq[MixedTree[Type, A]],
+                         valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(a, b) = valueArgTypes
+      require(a == b)
+      val Seq(aCost, bCost) = valueArgCosts
+      val n = TimeComplexity.rows(a)
+      val m = TimeComplexity.rows(b)
+      require(n == m)
+      aCost + bCost + TimeComplexity.rescale(n, 8, 10) + 1
+    }
   }
 
   /**
@@ -74,6 +95,16 @@ object BlasIdioms {
 
     def apply[A](a: MixedTree[ArrayIR, A], x: MixedTree[ArrayIR, A], y: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(a, x, y))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                         valueArgTypes: Seq[MixedTree[Type, A]],
+                         valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(_, x, y) = valueArgTypes
+      require(x == y)
+      val Seq(aCost, xCost, yCost) = valueArgCosts
+      val n = TimeComplexity.rows(x)
+      aCost + xCost + yCost + TimeComplexity.rescale(n, 8, 10) + 1
+    }
   }
 
   /**
@@ -122,6 +153,16 @@ object BlasIdioms {
                  beta: MixedTree[ArrayIR, A],
                  y: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(alpha, a, x, beta, y))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                         valueArgTypes: Seq[MixedTree[Type, A]],
+                         valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(_, a, _, _, _) = valueArgTypes
+      val Seq(_, aCost, xCost, _, yCost) = valueArgCosts
+      val n = TimeComplexity.rows(a)
+      val m = TimeComplexity.cols(a)
+      aCost + xCost + yCost + TimeComplexity.rescale(n * m, 7, 10) + 1
+    }
   }
 
   /**
@@ -166,6 +207,17 @@ object BlasIdioms {
                  beta: MixedTree[ArrayIR, A],
                  c: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(alpha, a, b, beta, c))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+               valueArgTypes: Seq[MixedTree[Type, A]],
+               valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(_, a, b, _, _) = valueArgTypes
+      val Seq(_, aCost, bCost, _, cCost) = valueArgCosts
+      val n = TimeComplexity.rows(a)
+      val m = TimeComplexity.cols(a)
+      val k = TimeComplexity.cols(b)
+      aCost + bCost + cCost + TimeComplexity.rescale(n * m * k, 6, 10) + 1
+    }
   }
 
   /**
@@ -188,5 +240,15 @@ object BlasIdioms {
 
     def apply[A](a: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] =
       MixedTree.unslotted(this, Seq(a))
+
+    override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+               valueArgTypes: Seq[MixedTree[Type, A]],
+               valueArgCosts: Seq[BigInt]): BigInt = {
+      val Seq(a) = valueArgTypes
+      val Seq(aCost) = valueArgCosts
+      val n = TimeComplexity.rows(a)
+      val m = TimeComplexity.cols(a)
+      aCost + TimeComplexity.rescale(n * m, 9, 10) + 1
+    }
   }
 }

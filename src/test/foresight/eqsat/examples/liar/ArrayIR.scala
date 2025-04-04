@@ -74,6 +74,15 @@ final case class ConstIntType(value: Int) extends Type {
   }
 }
 
+object ConstIntType {
+  def toNumber(tree: MixedTree[Type, _]): BigInt = {
+    tree match {
+      case MixedTree.Node(ConstIntType(n), _, _, _) => n
+      case _ => throw new IllegalArgumentException("The argument must be a constant integer type.")
+    }
+  }
+}
+
 /**
  * An array type in the minimalist array IR.
  */
@@ -142,6 +151,10 @@ sealed trait Value extends ArrayIR {
    * @return The inferred type of the value.
    */
   def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A]
+
+  def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+              valueArgTypes: Seq[MixedTree[Type, A]],
+              valueArgCosts: Seq[BigInt]): BigInt
 }
 
 /**
@@ -162,6 +175,12 @@ object Var extends Value {
       case MixedTree.Node(Var, Seq(), Seq(slot), Seq(typeArg)) => Some((slot, Type.asType(typeArg)))
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    2
   }
 }
 
@@ -187,6 +206,12 @@ object Lambda extends Value {
 
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.head
   }
 }
 
@@ -215,6 +240,12 @@ object Apply extends Value {
         Some((function, argument))
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
   }
 }
 
@@ -246,6 +277,14 @@ object Build extends Value {
       case _ => None
     }
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    val Seq(size) = typeArgs
+    val Seq(fCost) = valueArgCosts
+    ConstIntType.toNumber(size) * (fCost + 1) + 1
+  }
 }
 
 /**
@@ -273,6 +312,12 @@ object IndexAt extends Value {
       case MixedTree.Node(IndexAt, Seq(), Seq(), Seq(array, index)) => Some((array, index))
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
   }
 }
 
@@ -308,6 +353,14 @@ object Ifold extends Value {
       case _ => None
     }
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    val Seq(size) = typeArgs
+    val Seq(initCost, foldCost) = valueArgCosts
+    ConstIntType.toNumber(size) * foldCost + initCost + 1
+  }
 }
 
 /**
@@ -330,6 +383,12 @@ object Tuple extends Value {
       case MixedTree.Node(Tuple, Seq(), Seq(), Seq(fst, snd)) => Some((fst, snd))
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
   }
 }
 
@@ -358,6 +417,12 @@ object Fst extends Value {
       case _ => None
     }
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.head
+  }
 }
 
 /**
@@ -385,6 +450,12 @@ object Snd extends Value {
       case _ => None
     }
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.head
+  }
 }
 
 /**
@@ -401,6 +472,12 @@ final case class ConstDouble(value: Double) extends Value {
   def toTree: Tree[ArrayIR] = {
     Tree.unslotted(ConstDouble(value), Seq.empty)
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+             valueArgTypes: Seq[MixedTree[Type, A]],
+             valueArgCosts: Seq[BigInt]): BigInt = {
+    1
+  }
 }
 
 /**
@@ -416,6 +493,12 @@ final case class ConstInt32(value: Int) extends Value {
 
   def toTree: Tree[ArrayIR] = {
     Tree.unslotted(ConstInt32(value), Seq.empty)
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+             valueArgTypes: Seq[MixedTree[Type, A]],
+             valueArgCosts: Seq[BigInt]): BigInt = {
+    1
   }
 }
 
@@ -440,6 +523,12 @@ object Add extends Value {
       case _ => None
     }
   }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
+  }
 }
 
 /**
@@ -462,6 +551,42 @@ object Mul extends Value {
       case MixedTree.Node(Mul, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
       case _ => None
     }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
+  }
+}
+
+/**
+ * A conditional operation in the minimalist array IR.
+ */
+object IfThenElse extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 3
+
+  override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    valueArgTypes(1)
+  }
+
+  def apply[A](condition: MixedTree[ArrayIR, A], thenBranch: MixedTree[ArrayIR, A], elseBranch: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+    MixedTree.unslotted(IfThenElse, Seq(condition, thenBranch, elseBranch))
+  }
+
+  def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
+    tree match {
+      case MixedTree.Node(IfThenElse, Seq(), Seq(), Seq(condition, thenBranch, elseBranch)) =>
+        Some((condition, thenBranch, elseBranch))
+      case _ => None
+    }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
   }
 }
 

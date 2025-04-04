@@ -1,22 +1,18 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
-import foresight.eqsat.extraction.{CostFunction, ExtractionTreeCall}
+import foresight.eqsat.extraction.{CostFunction, ExtractionAnalysis, ExtractionTreeCall}
 
+/**
+ * The LIAR time complexity cost function, used for the final extraction step.
+ */
 object TimeComplexity extends CostFunction[ArrayIR, (BigInt, MixedTree[Type, EClassCall])] {
-  private def toNumber(t: MixedTree[Type, EClassCall]): BigInt = t match {
-    case MixedTree.Node(ConstIntType(n), _, _, _) => n
-    case _ => ???
-  }
-
-  private def rows(t: MixedTree[Type, EClassCall]): BigInt = t match {
-    case ArrayType(_, rows) => toNumber(rows)
-    case _ => ???
-  }
-
-  private def cols(t: MixedTree[Type, EClassCall]): BigInt = t match {
-    case ArrayType(ArrayType(_, cols), _) => toNumber(cols)
-    case _ => ???
+  def analysis: ExtractionAnalysis[ArrayIR, (BigInt, MixedTree[Type, EClassCall])] = {
+    ExtractionAnalysis("TimeComplexityExtraction", TimeComplexity)(new Ordering[(BigInt, MixedTree[Type, EClassCall])] {
+      override def compare(x: (BigInt, MixedTree[Type, EClassCall]), y: (BigInt, MixedTree[Type, EClassCall])): Int = {
+        x._1.compare(y._1)
+      }
+    }, implicitly[Ordering[ArrayIR]])
   }
 
   override def apply(nodeType: ArrayIR,
@@ -29,47 +25,25 @@ object TimeComplexity extends CostFunction[ArrayIR, (BigInt, MixedTree[Type, ECl
     val argsCosts = args.map(_.cost._1)
     val argTypes = args.map(_.cost._2)
     val c = nodeType match {
-      case BlasIdioms.Gemm(_, _) =>
-        val Seq(_, aType, bType, _, _) = argTypes
-        argsCosts.sum +
-          rescale(rows(aType) * cols(aType) * rows(bType), 6, 10) + 1
+      case v: Value =>
+        v.cost(argTypes.take(v.typeArgCount), argTypes.drop(v.typeArgCount), argsCosts.drop(v.typeArgCount))
 
-      case BlasIdioms.Gemv(_) =>
-        val Seq(_, aType, _, _) = argTypes
-        argsCosts.sum +
-          rescale(rows(aType) * cols(aType), 7, 10) + 1
-
-      case BlasIdioms.Dot =>
-        val Seq(leftType, _) = argTypes
-        argsCosts.sum +
-          rescale(rows(leftType), 8, 10) + 1
-
-      case BlasIdioms.Transpose =>
-        val Seq(aType, _) = argTypes
-        argsCosts.sum +
-          rescale(rows(aType) * cols(aType), 9, 10) + 1
-
-      case BlasIdioms.Axpy =>
-        val Seq(_, _, yType) = argTypes
-        argsCosts.sum +
-          rescale(rows(yType) * cols(yType), 8, 10) + 1
-
-      case BlasIdioms.Memset =>
-        argsCosts.sum +
-          rescale(rows(t), 8, 10) + 1
-
-      case Build =>
-        val Seq(size, _) = argTypes
-        val Seq(_, fCost) = argsCosts
-        toNumber(size) * (fCost + 1) + 1
-
-      case _ => ???
+      case _: Type => BigInt(0)
     }
-
     (c, t)
   }
 
-  private def rescale(value: BigInt, numerator: Int, denominator: Int): BigInt = {
+  def rows(t: MixedTree[Type, _]): BigInt = t match {
+    case ArrayType(_, rows) => ConstIntType.toNumber(rows)
+    case _ => ???
+  }
+
+  def cols(t: MixedTree[Type, _]): BigInt = t match {
+    case ArrayType(ArrayType(_, cols), _) => ConstIntType.toNumber(cols)
+    case _ => ???
+  }
+
+  def rescale(value: BigInt, numerator: Int, denominator: Int): BigInt = {
     val (a, b) = value * numerator /% denominator
     if (b == 0) {
       a
