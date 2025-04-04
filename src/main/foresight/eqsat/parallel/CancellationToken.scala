@@ -1,5 +1,6 @@
 package foresight.eqsat.parallel
 
+import java.util.{Timer, TimerTask}
 import scala.concurrent.duration.Duration
 
 /**
@@ -31,14 +32,14 @@ final class CancellationToken {
     if (isCanceled) {
       token
     } else {
-      new Thread(new Runnable {
+      val timer = new Timer(true)
+      timer.schedule(new TimerTask {
         override def run(): Unit = {
-          Thread.sleep(java.time.Duration.of(timeout.toNanos, java.time.temporal.ChronoUnit.NANOS))
           if (!token.isCanceled) {
             cancel()
           }
         }
-      }).start()
+      }, timeout.toMillis)
       token
     }
   }
