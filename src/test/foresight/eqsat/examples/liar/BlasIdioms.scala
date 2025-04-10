@@ -158,10 +158,9 @@ object BlasIdioms {
                          valueArgTypes: Seq[MixedTree[Type, A]],
                          valueArgCosts: Seq[BigInt]): BigInt = {
       val Seq(_, a, _, _, _) = valueArgTypes
-      val Seq(_, aCost, xCost, _, yCost) = valueArgCosts
       val n = TimeComplexity.rows(a)
       val m = TimeComplexity.cols(a)
-      aCost + xCost + yCost + TimeComplexity.rescale(n * m, 7, 10) + 1
+      valueArgCosts.sum + TimeComplexity.rescale(n * m, 7, 10) + 1
     }
   }
 
@@ -212,11 +211,10 @@ object BlasIdioms {
                valueArgTypes: Seq[MixedTree[Type, A]],
                valueArgCosts: Seq[BigInt]): BigInt = {
       val Seq(_, a, b, _, _) = valueArgTypes
-      val Seq(_, aCost, bCost, _, cCost) = valueArgCosts
       val n = TimeComplexity.rows(a)
       val m = TimeComplexity.cols(a)
       val k = TimeComplexity.cols(b)
-      aCost + bCost + cCost + TimeComplexity.rescale(n * m * k, 6, 10) + 1
+      valueArgCosts.sum + TimeComplexity.rescale(n * m * k, 6, 10) + 1
     }
   }
 
