@@ -365,6 +365,40 @@ class BlasIdiomRuleTest {
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))
   }
 
+  @Ignore("Finding idioms in the gemm kernel is slow.")
+  @Test
+  def findGemmInGemmKernel(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val M = ConstIntType(100).toTree
+    val N = ConstIntType(200).toTree
+    val K = ConstIntType(300).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), M))
+    val b = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), N))
+    val c = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), M))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemm = BlasIdioms.Gemm(aTransposed = false, bTransposed = false)(alpha, a, b, beta, c)
+
+    val build = Lib.matrixAdd(
+      Lib.matrixMatrixProduct(
+        Lib.matrixScalarProduct(a, alpha),
+        b),
+      Lib.matrixScalarProduct(c, beta))
+
+    val (c1, egraph2) = egraph.add(build)
+
+    val egraph4 = strategy(5)(egraph2).get
+
+    val best = MixedTree.fromTree(TimeComplexity.analysis(egraph4)(c1, egraph4).applied.toTree)
+
+    assert(best == gemm, s"Best: $best, expected: $gemm")
+    assert(egraph4.contains(gemm))
+    assert(egraph4.areSame(c1, egraph4.find(gemm).get))
+  }
+
   @Test
   def findTranspose(): Unit = {
     val egraph = EGraph.empty[ArrayIR]
