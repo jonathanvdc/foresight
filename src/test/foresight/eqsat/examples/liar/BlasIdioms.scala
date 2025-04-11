@@ -173,16 +173,17 @@ object BlasIdioms {
     override def typeArgCount: Int = 0
     override def valueArgCount: Int = 5
 
-    override def inferType[A](typeArgs: Seq[MixedTree[Type, A]],
-                              valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
-
-      val Seq(alpha, a, b, beta, c) = valueArgTypes
-      require(alpha == beta)
-
-      val dims = (a, b) match {
-        case (ArrayType(ArrayType(et1, m), n), ArrayType(ArrayType(et2, k), l)) =>
-          require(alpha == et1)
-          require(alpha == et2)
+    /**
+     * Returns the three unique dimensions of the input matrices.
+     * @param a The first input matrix.
+     * @param b The second input matrix.
+     * @tparam A The type of the calls in the mixed trees.
+     * @return The three unique dimensions of the input matrices.ß
+     */
+    private def dimsFromArgTypes[A](a: MixedTree[ArrayIR, A],
+                                    b: MixedTree[ArrayIR, A]): (MixedTree[Type, A], MixedTree[Type, A], MixedTree[Type, A]) = {
+      (a, b) match {
+        case (ArrayType(ArrayType(_, m), n), ArrayType(ArrayType(_, k), l)) =>
           (aTransposed, bTransposed) match {
             case (false, false) => (n, m, k)
             case (false, true) => (n, m, l)
@@ -191,8 +192,27 @@ object BlasIdioms {
           }
 
         case _ =>
+          throw new IllegalArgumentException(
+            s"gemm requires (alpha: scalar, a: matrix, b: matrix, beta: scalar, c: matrix) arguments, got a: $a, b: $b")
+      }
+    }
+
+    override def inferType[A](typeArgs: Seq[MixedTree[Type, A]],
+                              valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+
+      val Seq(alpha, a, b, beta, c) = valueArgTypes
+      require(alpha == beta)
+
+      (a, b) match {
+        case (ArrayType(ArrayType(et1, m), n), ArrayType(ArrayType(et2, k), l)) =>
+          require(alpha == et1)
+          require(alpha == et2)
+
+        case _ =>
           throw new IllegalArgumentException(s"gemm requires (scalar, matrix, matrix, scalar, matrix) arguments, got $alpha, $a, $b, $beta, $c")
       }
+
+      val dims = dimsFromArgTypes(a, b)
 
       val resultType = ArrayType(ArrayType(alpha, dims._3), dims._1)
       require(c == resultType)
@@ -211,10 +231,9 @@ object BlasIdioms {
                valueArgTypes: Seq[MixedTree[Type, A]],
                valueArgCosts: Seq[BigInt]): BigInt = {
       val Seq(_, a, b, _, _) = valueArgTypes
-      val n = TimeComplexity.rows(a)
-      val m = TimeComplexity.cols(a)
-      val k = TimeComplexity.cols(b)
-      valueArgCosts.sum + TimeComplexity.rescale(n * m * k, 6, 10) + 1
+      val (n, m, k) = dimsFromArgTypes(a, b)
+      val (numN, numM, numK) = (ConstIntType.toNumber(n), ConstIntType.toNumber(m), ConstIntType.toNumber(k))
+      valueArgCosts.sum + TimeComplexity.rescale(numN * numM * numK, 6, 10) + 1
     }
   }
 
