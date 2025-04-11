@@ -34,7 +34,10 @@ sealed trait Type extends ArrayIR
  */
 object Type {
   def asType[A](tree: MixedTree[ArrayIR, A]): MixedTree[Type, A] = {
-    tree.mapNodes(_.asInstanceOf[Type])
+    tree.mapNodes({
+      case n: Type => n
+      case _ => throw new IllegalArgumentException("Type tree contains value.")
+    })
   }
 }
 
@@ -337,7 +340,7 @@ object Ifold extends Value {
     elementType
   }
 
-  def apply[A](size: MixedTree[ArrayIR, A], init: MixedTree[ArrayIR, A], foldFunction: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+  def apply[A](size: MixedTree[Type, A], init: MixedTree[ArrayIR, A], foldFunction: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
     MixedTree.unslotted(
       Ifold,
       Seq(
@@ -348,8 +351,8 @@ object Ifold extends Value {
 
   def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
     tree match {
-      case MixedTree.Node(Ifold, Seq(), Seq(), Seq(array, init, foldFunction)) =>
-        Some((array, init, foldFunction))
+      case MixedTree.Node(Ifold, Seq(), Seq(), Seq(size, init, foldFunction)) =>
+        Some((size, init, foldFunction))
       case _ => None
     }
   }
