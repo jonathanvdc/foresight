@@ -132,14 +132,14 @@ object MixedTree {
      * Converts the pattern to a searcher.
      * @return The searcher.
      */
-    def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] =
+    def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: ReversibleSearcher[NodeT, PatternMatch[NodeT], EGraphT] =
       ReversibleSearcher(MachineSearcherPhase(compiled))
 
     /**
      * Converts the pattern to a pattern applier.
      * @return The pattern applier.
      */
-    def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Applier[NodeT, PatternMatch[NodeT], EGraphT] =
+    def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: PatternApplier[NodeT, EGraphT] =
       PatternApplier(tree)
   }
 }
