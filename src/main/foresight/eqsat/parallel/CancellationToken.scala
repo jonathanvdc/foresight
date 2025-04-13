@@ -32,8 +32,7 @@ final class CancellationToken {
     if (isCanceled) {
       token
     } else {
-      val timer = new Timer(true)
-      timer.schedule(new TimerTask {
+      CancellationToken.cancellationTimer.schedule(new TimerTask {
         override def run(): Unit = {
           if (!token.isCanceled) {
             cancel()
@@ -43,4 +42,14 @@ final class CancellationToken {
       token
     }
   }
+}
+
+/**
+ * A companion object for [[CancellationToken]].
+ */
+private object CancellationToken {
+  /**
+   * A timer that is used to schedule cancellation tasks.
+   */
+  private lazy val cancellationTimer = new Timer(true)
 }
