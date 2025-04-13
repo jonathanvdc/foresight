@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 
 /**
  * A command that can be applied to an e-graph.
@@ -54,4 +54,23 @@ trait Command[NodeT] {
    * @return The simplified command.
    */
   final def simplify(egraph: EGraph[NodeT]): Command[NodeT] = simplify(egraph, Map.empty)._1
+}
+
+/**
+ * A companion object for [[Command]].
+ */
+object Command {
+  /**
+   * Creates a command that unifies an e-class symbol with an expression tree.
+   * @param symbol The e-class symbol to unify.
+   * @param tree The expression tree to unify with the e-class symbol.
+   * @tparam NodeT The node type of the expression tree.
+   * @return The command that unifies the e-class symbol with the expression tree.
+   */
+  def addEquivalentTree[NodeT](symbol: EClassSymbol, tree: MixedTree[NodeT, EClassSymbol]): Command[NodeT] = {
+    val builder = new CommandQueueBuilder[NodeT]
+    val c = builder.add(tree)
+    builder.union(symbol, c)
+    builder.queue
+  }
 }

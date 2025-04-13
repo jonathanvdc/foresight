@@ -15,18 +15,20 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
-    val tree = instantiate(pattern, m)
-    val builder = new CommandQueueBuilder[NodeT]
-    val c = builder.add(tree)
-    builder.union(EClassSymbol.real(m.root), c)
-    builder.queue
+    Command.addEquivalentTree(EClassSymbol.real(m.root), instantiate(m))
   }
 
   override def tryReverse: Option[Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]] = {
     Some(pattern.toSearcher)
   }
 
-  private def instantiate(pattern: MixedTree[NodeT, Pattern[NodeT]], m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
+  /**
+   * Instantiates the pattern with the given match.
+   *
+   * @param m The match to use for instantiation.
+   * @return The instantiated pattern.
+   */
+  def instantiate(m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
       case MixedTree.Call(p) => p match {
         case v: Pattern.Var[NodeT] => m(v).mapCalls(EClassSymbol.real)
