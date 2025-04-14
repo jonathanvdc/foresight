@@ -114,5 +114,5 @@ object Rule {
   final case class ApplicationException[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
                                                                                                                  egraph: EGraphT,
                                                                                                                  cause: Throwable)
-    extends RuntimeException(s"Error applying rule ${rule.name} to e-graph $egraph", cause)
+    extends RuntimeException(s"Error applying rule ${rule.name} to e-graph", cause)
 }
