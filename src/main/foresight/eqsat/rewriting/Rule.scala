@@ -67,8 +67,13 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return The command that applies the matches to the e-graph.
    */
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
-    val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph).simplify(egraph)).toSeq
-    CommandQueue(commands).optimized
+    try {
+      val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph).simplify(egraph)).toSeq
+      CommandQueue(commands).optimized
+    } catch {
+      case e: Exception =>
+        throw Rule.ApplicationException(this, egraph, e)
+    }
   }
 
   /**
@@ -91,4 +96,23 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
       case _ => None
     }
   }
+}
+
+/**
+ * The companion object for the [[Rule]] class.
+ */
+object Rule {
+  /**
+   * An exception that is thrown when a rule cannot be applied to an e-graph.
+   * @param rule The rule that could not be applied.
+   * @param egraph The e-graph that the rule could not be applied to.
+   * @param cause The cause of the exception.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam MatchT The type of the match.
+   * @tparam EGraphT The type of the e-graph that the rule could not be applied to.
+   */
+  final case class ApplicationException[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
+                                                                                                                 egraph: EGraphT,
+                                                                                                                 cause: Throwable)
+    extends RuntimeException(s"Error applying rule ${rule.name} to e-graph $egraph", cause)
 }
