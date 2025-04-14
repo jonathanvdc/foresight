@@ -228,7 +228,9 @@ object Apply extends Value {
   override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
     val functionType = valueArgTypes.head
     functionType match {
-      case FunctionType(_, returnType) => returnType
+      case FunctionType(argType, returnType) =>
+        require(argType == valueArgTypes(1), "The argument type of the function must match the type of the argument.")
+        returnType
       case _ => throw new IllegalArgumentException("The first argument of an application must be a function.")
     }
   }
