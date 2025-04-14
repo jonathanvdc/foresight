@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.liar
 
-import ApplierOps.ApplierOfPatternMatchOps
+import ApplierOps._
 import SearcherOps._
 import foresight.eqsat.{EGraph, MixedTree, Slot}
 import foresight.eqsat.metadata.EGraphWithMetadata
@@ -48,7 +48,9 @@ object CoreRules {
             .bindTypes(Map(y -> yType))
             .requireNonFunctionType(yType))
         .merge,
-      Apply(Lambda(x, MixedTree.Call(yType), MixedTree.Call(e)), MixedTree.Call(y)).toApplier)
+      Apply(Lambda(x, MixedTree.Call(yType), MixedTree.Call(e)), MixedTree.Call(y))
+        .toApplier[LiarEGraph]
+        .typeChecked)
   }
 
   val introduceIndexBuild: LiarRule = {
@@ -69,7 +71,9 @@ object CoreRules {
             .toSearcher
             .requireMetadata)
         .merge,
-      IndexAt(Build(MixedTree.Call(N), MixedTree.Call(f)), MixedTree.Call(i)).toApplier)
+      IndexAt(Build(MixedTree.Call(N), MixedTree.Call(f)), MixedTree.Call(i))
+        .toApplier[LiarEGraph]
+        .typeChecked)
   }
 
   val eliminateLambda: LiarRule = {
@@ -82,7 +86,8 @@ object CoreRules {
       "(λx. e) y -> e[x/y]",
       Apply(Lambda(x, t, MixedTree.Call(e)), MixedTree.Call(y)).toSearcher,
       MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
-        .toApplier[EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]]
+        .toApplier[LiarEGraph]
+        .typeChecked
         .substitute(e, x, y, e))
   }
 
@@ -94,7 +99,9 @@ object CoreRules {
     Rule(
       "(build f N)[i] -> f i",
       IndexAt(Build(N, f), i).toSearcher,
-      Apply(f, i).toApplier)
+      Apply(f, i)
+        .toApplier[LiarEGraph]
+        .typeChecked)
   }
 
   val eliminateFstTuple: LiarRule = {
@@ -104,7 +111,8 @@ object CoreRules {
     Rule(
       "fst (tuple a b) -> a",
       Fst(Tuple(a, b)).toSearcher,
-      a.toApplier)
+      a.toApplier[LiarEGraph]
+        .typeChecked)
   }
 
   val eliminateSndTuple: LiarRule = {
@@ -114,6 +122,7 @@ object CoreRules {
     Rule(
       "snd (tuple a b) -> b",
       Snd(Tuple(a, b)).toSearcher,
-      b.toApplier)
+      b.toApplier[LiarEGraph]
+        .typeChecked)
   }
 }
