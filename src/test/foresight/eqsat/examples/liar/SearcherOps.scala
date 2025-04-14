@@ -48,49 +48,7 @@ object SearcherOps {
      * @return The searcher that filters out matches where the variables are not bound to the given type patterns.
      */
     def requireTypes(types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]]): ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
-      // Precompile the patterns.
-      val compiledPatterns = types.map {
-        case (v, t) => v -> t.compiled[EGraph[ArrayIR]]
-      }
-
-      def tryMatchVariableToTypePattern(variable: Pattern.Var[ArrayIR],
-                                        pattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]],
-                                        m: PatternMatch[ArrayIR],
-                                        egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
-        val (value, egraphWithValue) = egraph.add(m(variable))
-        val t = TypeInferenceAnalysis.get(egraphWithValue)(value, egraphWithValue)
-
-        val (typeInGraph, egraphWithType) = egraphWithValue.add(t)
-        pattern.search(typeInGraph, egraphWithType).toStream.flatMap(m.tryMerge).headOption
-      }
-
-      def checkMatch(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
-        compiledPatterns.foldLeft(Option(m)) {
-          case (Some(newMatch), (variable, pattern)) =>
-            tryMatchVariableToTypePattern(variable, pattern, newMatch, egraph)
-
-          case (None, _) => None
-        }
-      }
-
-      // For each potential match, try to iteratively construct a match that binds the variables in the type patterns.
-      // If such a match is found, then the match is kept. Otherwise, it is filtered out.
-      new ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
-        override def search(egraph: EGraphWithMetadata[ArrayIR, EGraphT], parallelize: ParallelMap): Seq[PatternMatch[ArrayIR]] = {
-          searcher.flatMap(checkMatch).search(egraph, parallelize)
-        }
-
-        override def tryReverse: Option[Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
-          searcher match {
-            case searcher: ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] =>
-              searcher.tryReverse.map(applier => {
-                applier.flatMap(checkMatch)
-              })
-
-            case _ => None
-          }
-        }
-      }
+      TypeRequirements.SearcherWithRequirements(searcher, types)
     }
   }
 

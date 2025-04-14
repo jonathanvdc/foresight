@@ -2,12 +2,13 @@ package foresight.eqsat.examples.liar
 
 import CoreRules.{LiarEGraph, LiarRule}
 import SearcherOps.SearcherOfMetadataPatternMatchOps
-import foresight.eqsat.{MixedTree, Slot}
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.rewriting.patterns.Pattern
+import foresight.eqsat.examples.liar.ApplierOps.PatternApplierOps
+import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.rewriting.{Applier, Rule}
+import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 
 object BlasIdiomRules {
-  def all: Seq[LiarRule] = oneWayRules ++ oneWayRules.map(_.tryReverse.get)
+  def all: Seq[LiarRule] = oneWayRules.map(typeChecked) ++ oneWayRules.map(_.tryReverse.get).map(typeChecked)
 
   def oneWayRules: Seq[LiarRule] = detectionRules ++ transformationRules
 
@@ -364,5 +365,25 @@ object BlasIdiomRules {
             MixedTree.Call(c))
           .toApplier[LiarEGraph])
     }
+  }
+
+  private def typeChecked(rule: LiarRule): LiarRule = {
+    def addTypeCheckingToApplier(applier: Applier[ArrayIR, PatternMatch[ArrayIR], LiarEGraph]): Applier[ArrayIR, PatternMatch[ArrayIR], LiarEGraph] = {
+      applier match {
+        case p: PatternApplier[ArrayIR, LiarEGraph] => p.typeChecked
+        case filter: Applier.Filter[ArrayIR, PatternMatch[ArrayIR], LiarEGraph] =>
+          Applier.Filter(addTypeCheckingToApplier(filter.applier), filter.filter)
+
+        case requirements: TypeRequirements.ApplierWithRequirements[EGraph[ArrayIR]] =>
+          TypeRequirements.ApplierWithRequirements(
+            addTypeCheckingToApplier(requirements.applier),
+            requirements.types)
+
+        case _ => throw new IllegalArgumentException(
+          s"Cannot add type checking to applier of type ${applier.getClass.getName}")
+      }
+    }
+
+    Rule(rule.name, rule.searcher, addTypeCheckingToApplier(rule.applier))
   }
 }
