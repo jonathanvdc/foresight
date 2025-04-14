@@ -515,6 +515,8 @@ object Add extends Value {
   override def valueArgCount: Int = 2
 
   override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    require(valueArgTypes.size == 2)
+    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of an addition must have the same type.")
     valueArgTypes.head
   }
 
@@ -544,6 +546,8 @@ object Mul extends Value {
   override def valueArgCount: Int = 2
 
   override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    require(valueArgTypes.size == 2)
+    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a multiplication must have the same type.")
     valueArgTypes.head
   }
 
@@ -573,6 +577,8 @@ object IfThenElse extends Value {
   override def valueArgCount: Int = 3
 
   override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    require(valueArgTypes.size == 3)
+    require(valueArgTypes(1) == valueArgTypes(2), "The two branches of an if must have the same type.")
     valueArgTypes(1)
   }
 
