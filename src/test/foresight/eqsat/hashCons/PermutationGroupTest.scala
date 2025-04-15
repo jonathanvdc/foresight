@@ -13,6 +13,54 @@ class PermutationGroupTest {
   }
 
   @Test
+  def testOrbit1(): Unit = {
+    val slot0 = Slot.numeric(0)
+    val slot1 = Slot.numeric(1)
+    val slot2 = Slot.numeric(2)
+
+    val perm = SlotMap(Map(slot0 -> slot1, slot1 -> slot2, slot2 -> slot0))
+
+    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val group = PermutationGroup(identity, Set(perm))
+
+    val orbit = group.orbit(slot0)
+    assert(orbit == Set(slot0, slot1, slot2))
+  }
+
+  @Test
+  def testOrbit2(): Unit = {
+    val slot0 = Slot.numeric(0)
+    val slot1 = Slot.numeric(1)
+    val slot2 = Slot.numeric(2)
+
+    // One permutation swaps 0 and 1, the other swaps 0 and 2
+    val perm1 = SlotMap(Map(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2))
+    val perm2 = SlotMap(Map(slot0 -> slot2, slot1 -> slot1, slot2 -> slot0))
+
+    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val group = PermutationGroup(identity, Set(perm1, perm2))
+
+    val orbit = group.orbit(slot0)
+    assert(orbit == Set(slot0, slot1, slot2))
+  }
+
+  @Test
+  def testOrbit3(): Unit = {
+    val slot0 = Slot.numeric(0)
+    val slot1 = Slot.numeric(1)
+    val slot2 = Slot.numeric(2)
+
+    // The permutation swaps 0 and 1
+    val perm = SlotMap(Map(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2))
+
+    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val group = PermutationGroup(identity, Set(perm))
+
+    val orbit = group.orbit(slot0)
+    assert(orbit == Set(slot0, slot1))
+  }
+
+  @Test
   def groupTest1(): Unit = {
     val perm1 = flip(4, 0, 1)
     val perm2 = flip(4, 2, 3)
