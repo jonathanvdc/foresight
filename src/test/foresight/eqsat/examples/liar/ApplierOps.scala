@@ -26,6 +26,8 @@ object ApplierOps {
 
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
+          val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor(m(source), egraph)
+
           def subst(tree: Tree[ArrayIR]): MixedTree[ArrayIR, EClassCall] = {
             tree match {
               case Tree(Var, Seq(), Seq(use), Seq(fromType)) if use == m(from) =>
@@ -36,7 +38,7 @@ object ApplierOps {
                 val toType = TypeInferenceAnalysis.get(newGraph)(toInGraph, newGraph)
                 assert(
                   toType == MixedTree.fromTree(fromType),
-                  s"Type mismatch: expected ${MixedTree.fromTree(fromType)} but got $toType")
+                  s"Type mismatch: expected ${MixedTree.fromTree(fromType)} but got $toType while substituting ${m(to)} for $use in $extracted")
 
                 result
               case Tree(nodeType, defs, uses, args) =>
@@ -44,7 +46,6 @@ object ApplierOps {
             }
           }
 
-          val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor(m(source), egraph)
           val substituted = subst(extracted)
           val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
           applier.apply(newMatch, egraph)
