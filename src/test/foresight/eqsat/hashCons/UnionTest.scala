@@ -439,7 +439,7 @@ class UnionTest {
     val (c2, egraph3) = egraph2.add(node2)
 
     // Then create a pair of nodes that take the first two nodes as arguments. The nodes are different only because
-    // c1 and c2 are current different.
+    // c1 and c2 are currently different.
     val node3 = ENode.unslotted(1, Seq(c1, c2))
     val node4 = ENode.unslotted(1, Seq(c1, c1))
     val (c3, egraph4) = egraph3.add(node3)
@@ -460,5 +460,51 @@ class UnionTest {
     assert(egraph7.classes.size == 2)
     assert(egraph7.areSame(c1, c2))
     assert(egraph7.areSame(c3, c4))
+  }
+
+  @Test
+  def eliminateRedundantSlotDueToOrbit(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    // First create two nodes that are identical except for the order of their slots. Adding and unifying these
+    // nodes will result in a single class with a permutation indicating that x and y can be swapped.
+    val node1 = ENode(0, Seq.empty, Seq(x, y), Seq.empty)
+    val node2 = ENode(0, Seq.empty, Seq(y, x), Seq.empty)
+
+    val (c1, egraph2) = egraph.add(node1)
+    val (c2, egraph3) = egraph2.add(node2)
+
+    assert(egraph3.classes.size == 1)
+    assert(!egraph3.areSame(c1, c2))
+
+    val egraph4 = egraph3.union(c1, c2).rebuilt
+
+    assert(egraph4.classes.size == 1)
+    assert(egraph4.areSame(c1, c2))
+
+    // Now create another node that takes only slot x as an argument. We will merge this node with c1/c2, which will
+    // eliminate both slots x and y from the class.
+    val node3 = ENode(1, Seq.empty, Seq(x), Seq.empty)
+
+    val (c3, egraph5) = egraph4.add(node3)
+
+    assert(egraph5.classes.size == 2)
+    assert(!egraph5.areSame(c1, c3))
+    assert(!egraph5.areSame(c2, c3))
+
+    // Now we union c1/c2 with c3. This will eliminate the slots x and y from the class, y is not used in c3 and x is
+    // in y's orbit.
+    val egraph6 = egraph5.union(c1, c3).rebuilt
+
+    assert(egraph6.classes.size == 1)
+    assert(egraph6.areSame(c1, c2))
+    assert(egraph6.areSame(c1, c3))
+    assert(egraph6.areSame(c2, c3))
+
+    // Check that the slots have been eliminated from the class.
+    val canonical = egraph6.canonicalize(c1)
+    assert(canonical.args.size == 0)
   }
 }

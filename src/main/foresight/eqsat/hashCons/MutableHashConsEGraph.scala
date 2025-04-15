@@ -185,7 +185,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We first determine the set of slots that are redundant in the e-class. These are the slots that are not in the
       // new set of slots. Additionally, if a slot is redundant, all slots that are in the same orbit as the redundant
       // slot are also redundant. We remove both categories of redundant slots from the e-class.
-      // TODO: test removing slots that are inferred to be redundant due to them being in the orbit of a redundant slot.
       val redundantSlots = data.slots -- slots
       val inferredRedundantSlots = redundantSlots.flatMap(data.permutations.orbit)
       val finalSlots = slots -- inferredRedundantSlots
