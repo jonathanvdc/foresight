@@ -27,7 +27,13 @@ object ApplierOps {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
           def subst(tree: Tree[ArrayIR]): MixedTree[ArrayIR, EClassCall] = {
             tree match {
-              case Tree(Var, Seq(), Seq(use), Seq(_)) if use == m(from) => m(to)
+              case Tree(Var, Seq(), Seq(use), Seq(fromType)) if use == m(from) =>
+                val result = m(to)
+                assert {
+                  val (toInGraph, newGraph) = egraph.add(result)
+                  TypeInferenceAnalysis.get(newGraph)(toInGraph, newGraph) == MixedTree.fromTree(fromType)
+                }
+                result
               case Tree(nodeType, defs, uses, args) =>
                 MixedTree.Node(nodeType, defs, uses, args.map(subst))
             }
