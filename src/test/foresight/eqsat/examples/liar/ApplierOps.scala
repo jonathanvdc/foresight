@@ -1,3 +1,4 @@
+
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot, Tree}
@@ -29,10 +30,14 @@ object ApplierOps {
             tree match {
               case Tree(Var, Seq(), Seq(use), Seq(fromType)) if use == m(from) =>
                 val result = m(to)
-                assert {
-                  val (toInGraph, newGraph) = egraph.add(result)
-                  TypeInferenceAnalysis.get(newGraph)(toInGraph, newGraph) == MixedTree.fromTree(fromType)
-                }
+
+                // Check result type
+                val (toInGraph, newGraph) = egraph.add(result)
+                val toType = TypeInferenceAnalysis.get(newGraph)(toInGraph, newGraph)
+                assert(
+                  toType == MixedTree.fromTree(fromType),
+                  s"Type mismatch: expected ${MixedTree.fromTree(fromType)} but got $toType")
+
                 result
               case Tree(nodeType, defs, uses, args) =>
                 MixedTree.Node(nodeType, defs, uses, args.map(subst))
