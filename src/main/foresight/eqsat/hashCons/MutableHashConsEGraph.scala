@@ -134,7 +134,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     val ref = createEmptyClass(slots)
 
     // Add the node to the empty e-class, populating it.
-    addNodeToClass(ref, ShapeCall(canonicalNode.shape, nodeSlotsToClassSlots))
+    val shapeCall = ShapeCall(shape, nodeSlotsToClassSlots)
+    addNodeToClass(ref, shapeCall)
+
+    // Propagate symmetries from the node to the e-class.
+    propagateSymmetries(ref, shapeCall)
 
     // Construct an e-class call with the node slots to e-class slots bijection.
     val publicRenaming = SlotMap(
@@ -157,6 +161,34 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         val ref = addNewUnsafe(canonicalNode)
         AddNodeResult.Added(ref)
     }
+  }
+
+  /**
+   * Propagates slot symmetries from an e-node to an e-class.
+   * @param ref The e-class reference that contains the e-node.
+   * @param shape The e-node from which symmetries are propagated.
+   * @return True if the e-class was modified; otherwise, false.
+   */
+  private def propagateSymmetries(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
+    groupCompatibleVariants(shape.asNode).map(variant => {
+      val variantShape = variant.asShapeCall
+      if (shape.shape == variantShape.shape) {
+        val data = classData(ref)
+        val permutation = shape.renaming.inverse.compose(variantShape.renaming).filterKeys(data.slots)
+
+        assert(permutation.keySet == data.slots)
+        assert(permutation.isPermutation)
+
+        data.permutations.tryAdd(permutation) match {
+          case Some(newPerms) =>
+            classData = classData + (ref -> data.copy(permutations = newPerms))
+            true
+
+          case None =>
+            false
+        }
+      }
+    }).contains(true)
   }
 
   private def isWellFormed(call: EClassCall): Boolean = {
@@ -311,30 +343,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
     }
 
-    /**
-     * Propagates slot symmetries from an e-node to an e-class.
-     * @param ref The e-class reference that contains the e-node.
-     * @param node The e-node from which symmetries are propagated.
-     */
-    def propagateSymmetries(ref: EClassRef, node: ENode[NodeT]): Unit = {
-      val shape = node.asShapeCall
-      groupCompatibleVariants(node).foreach(variant => {
-        val variantShape = variant.asShapeCall
-        if (shape.shape == variantShape.shape) {
-          val data = classData(ref)
-          val permutation = shape.renaming.inverse.compose(variantShape.renaming).filterKeys(data.slots)
-
-          data.permutations.tryAdd(permutation) match {
-            case Some(newPerms) =>
-              classData = classData + (ref -> data.copy(permutations = newPerms))
-              touchedClass(ref)
-
-            case None =>
-          }
-        }
-      })
-    }
-
     def repairNode(node: ENode[NodeT]): Unit = {
       // The first step to repairing a hashcons entry is to canonicalize the node.
       // Once canonicalized, there are three possibilities:
@@ -397,7 +405,9 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
 
             // Infer symmetries from the canonicalized node.
-            propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming))
+            if (propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
+              touchedClass(ref)
+            }
         }
       }
     }
