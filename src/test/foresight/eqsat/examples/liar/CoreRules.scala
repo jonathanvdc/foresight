@@ -13,6 +13,8 @@ object CoreRules {
 
   def all: Seq[LiarRule] = introductionRules ++ eliminationRules
 
+  def allWithConstArray: Seq[LiarRule] = introduceConstArray +: eliminationRules
+
   def introductionRules: Seq[LiarRule] = Seq(
     introduceLambda,
     introduceIndexBuild
@@ -24,6 +26,40 @@ object CoreRules {
     eliminateFstTuple,
     eliminateSndTuple
   )
+
+  val introduceConstArray: LiarRule = {
+    // e -> (build (λi. e) N)[j]
+    val e = Pattern.Var.fresh[ArrayIR]()
+    val eType = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh[ArrayIR]()
+    val j = Pattern.Var.fresh[ArrayIR]()
+
+    val i = Slot.fresh()
+
+    Rule(
+      "e -> (build (λi. e) N)[j]",
+      MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
+        .toSearcher[EGraph[ArrayIR]]
+        .requireValues(e)
+        .requireMetadata
+        .bindTypes(Map(e -> eType))
+        .requireNonFunctionType(eType)
+        .product(
+          MixedTree.Call[ArrayIR, Pattern[ArrayIR]](j)
+            .toSearcher[EGraph[ArrayIR]]
+            .requireValues(j)
+            .requireMetadata
+            .requireTypes(Map(j -> Int32Type.toTree)))
+        .merge
+        .product(
+          ArrayType(MixedTree.Call(Pattern.Var.fresh[ArrayIR]()), MixedTree.Call(N))
+            .toSearcher
+            .requireMetadata)
+        .merge,
+      IndexAt(Build(MixedTree.Call(N), Lambda(i, Int32Type.toTree, MixedTree.Call(e))), MixedTree.Call(j))
+        .toApplier[LiarEGraph]
+        .typeChecked)
+  }
 
   val introduceLambda: LiarRule = {
     // e -> (λx. e) y

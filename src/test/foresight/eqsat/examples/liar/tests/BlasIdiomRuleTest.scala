@@ -4,12 +4,12 @@ import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
+import foresight.eqsat.{EGraph, MixedTree, Slot}
 import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTest {
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = CoreRules.all ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraph[ArrayIR], Unit] =
+                       rules: Seq[LiarRule] = CoreRules.allWithConstArray ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .untilFixpoint

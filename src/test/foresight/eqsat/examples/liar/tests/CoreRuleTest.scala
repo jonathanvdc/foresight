@@ -55,16 +55,16 @@ class CoreRuleTest {
     val (c2, egraph3) = egraph2.add(one)
     val (c3, egraph4) = egraph3.add(ArrayType(DoubleType.toTree, ConstIntType(100).toTree))
 
-    val egraph5 = strategy(2)(egraph4).get
+    for (egraph5 <- Seq(strategy(2)(egraph4).get, strategy(1, CoreRules.allWithConstArray)(egraph4).get)) {
+      val x = Slot.fresh()
+      val indexedBuild = IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), one)
 
-    val x = Slot.fresh()
-    val indexedBuild = IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), one)
-
-    assert(egraph5.contains(indexedBuild))
-    assert(egraph5.areSame(c1, egraph5.find(indexedBuild).get))
-    assert(egraph5.areSame(c1, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), zero)).get))
-    assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), zero)).get))
-    assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), one)).get))
+      assert(egraph5.contains(indexedBuild))
+      assert(egraph5.areSame(c1, egraph5.find(indexedBuild).get))
+      assert(egraph5.areSame(c1, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), zero)).get))
+      assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), zero)).get))
+      assert(egraph5.areSame(c2, egraph5.find(IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, one)), one)).get))
+    }
   }
 
   @Test
