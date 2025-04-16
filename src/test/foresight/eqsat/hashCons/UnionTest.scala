@@ -509,7 +509,7 @@ class UnionTest {
   }
 
   @Test
-  def propagateSymmetries(): Unit = {
+  def propagateSymmetriesOnAdd(): Unit = {
     val egraph = HashConsEGraph.empty[Int]
 
     val x = Slot.fresh()
@@ -537,6 +537,40 @@ class UnionTest {
 
     val (c3, egraph5) = egraph4.add(node3)
     val (c4, egraph6) = egraph5.add(node4)
+
+    // Check that the permutation has been propagated to the new node.
+    assert(egraph6.classes.size == 2)
+    assert(egraph6.areSame(c3, c4))
+  }
+
+  @Test
+  def propagateSymmetriesOnUnion(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    // First create two nodes that are identical except for the order of their slots. Adding and unifying these
+    // nodes will result in a single class with a permutation indicating that x and y can be swapped.
+    val node1 = ENode(0, Seq.empty, Seq(x, y), Seq.empty)
+    val node2 = ENode(0, Seq.empty, Seq(y, x), Seq.empty)
+
+    val (c1, egraph2) = egraph.add(node1)
+    val (c2, egraph3) = egraph2.add(node2)
+
+    assert(egraph3.classes.size == 1)
+    assert(!egraph3.areSame(c1, c2))
+
+    val node3 = ENode(1, Seq.empty, Seq.empty, Seq(c1))
+    val node4 = ENode(1, Seq.empty, Seq.empty, Seq(c2))
+
+    val (c3, egraph4) = egraph3.add(node3)
+    val (c4, egraph5) = egraph4.add(node4)
+
+    assert(egraph5.classes.size == 2)
+    assert(!egraph5.areSame(c3, c4))
+
+    val egraph6 = egraph5.union(c3, c4).rebuilt
 
     // Check that the permutation has been propagated to the new node.
     assert(egraph6.classes.size == 2)
