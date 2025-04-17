@@ -576,4 +576,47 @@ class UnionTest {
     assert(egraph6.classes.size == 2)
     assert(egraph6.areSame(c3, c4))
   }
+
+  @Test
+  def propagateIntoRedundantSlots(): Unit = {
+    val egraph = HashConsEGraph.empty[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+    val z = Slot.fresh()
+
+    // First create two nodes that are identical except for the order of their slots. Adding and unifying these
+    // nodes will result in a single class with a permutation.
+    val node1 = ENode(0, Seq.empty, Seq(x, y, z), Seq.empty)
+    val node2 = ENode(0, Seq.empty, Seq(y, z, x), Seq.empty)
+
+    val (c1, egraph2) = egraph.add(node1)
+    val (c2, egraph3) = egraph2.add(node2)
+
+    // Now we create a class of two nodes that depends on c1, but in which slot y is redundant.
+    val node3 = ENode(1, Seq.empty, Seq.empty, Seq(c1))
+    val node4 = ENode(2, Seq.empty, Seq(x, z), Seq.empty)
+
+    val (c3, egraph4) = egraph3.add(node3)
+    val (c4, egraph5) = egraph4.add(node4)
+
+    assert(egraph5.classes.size == 3)
+    assert(!egraph5.areSame(c1, c2))
+    assert(!egraph5.areSame(c3, c4))
+
+    // First, union c3 and c4. This will eliminate the slot y from c3/c4.
+    val egraph6 = egraph5.union(c3, c4).rebuilt
+
+    assert(egraph6.classes.size == 2)
+    assert(egraph6.areSame(c3, c4))
+    assert(egraph6.canonicalize(c3).args.size == 2)
+
+    // Now we union c1 and c2. This will create a permutation that eliminates all slots from c3/c4.
+    val egraph7 = egraph6.union(c1, c2).rebuilt
+
+    assert(egraph7.classes.size == 2)
+    assert(egraph7.areSame(c1, c2))
+    assert(egraph7.areSame(c3, c4))
+    assert(egraph7.canonicalize(c3).args.size == 0)
+  }
 }
