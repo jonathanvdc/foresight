@@ -401,7 +401,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       val canonicalShapeCall = ShapeCall(canonicalNode.shape, newRenaming)
       val inferredPermutations = inferPermutations(canonicalShapeCall)
 
-      // Infer redundant slots from permutations.
+      // Infer redundant slots from permutations. The idea is that if an e-class slot finds itself in the orbit of a
+      // redundant slot in any permutation, the slot is redundant.
       val redundantFromPermutations = inferredPermutations.flatMap { permutation =>
         val group = PermutationGroup(SlotMap.identity(permutation.keySet), Set(permutation))
         permutation.keySet.filterNot(data.slots).flatMap(group.orbit).filter(data.slots)
