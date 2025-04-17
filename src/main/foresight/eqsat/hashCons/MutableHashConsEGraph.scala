@@ -181,21 +181,19 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
-   * Propagates slot permutations from an e-node to an e-class.
-   * @param ref The e-class reference that contains the e-node.
-   * @param shape The e-node from which permutations are propagated.
+   * Propagates slot permutations to an e-class.
+   * @param ref The e-class reference to propagate permutations to.
+   * @param permutations The set of slot permutations to propagate.
    * @return True if the e-class was modified; otherwise, false.
    */
-  private def propagatePermutations(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
-    // First, infer the permutations from the shape call.
-    val inferred = inferPermutations(shape)
-    if (inferred.isEmpty) {
+  private def propagatePermutations(ref: EClassRef, permutations: Set[SlotMap]): Boolean = {
+    if (permutations.isEmpty) {
       return false
     }
 
     // Drop redundant slots from the permutations.
     val data = classData(ref)
-    val nonRedundantPermutations = inferred.map { p =>
+    val nonRedundantPermutations = permutations.map { p =>
       val nonRedundant = p.filterKeys(data.slots)
       assert(nonRedundant.isPermutation)
       nonRedundant
@@ -209,6 +207,16 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       case None =>
         false
     }
+  }
+
+  /**
+   * Propagates slot permutations from an e-node to an e-class.
+   * @param ref The e-class reference that contains the e-node.
+   * @param shape The e-node from which permutations are propagated.
+   * @return True if the e-class was modified; otherwise, false.
+   */
+  private def propagatePermutations(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
+    propagatePermutations(ref, inferPermutations(shape))
   }
 
   private def isWellFormed(call: EClassCall): Boolean = {
@@ -389,9 +397,19 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
       val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
 
+      // Infer permutations from the canonicalized node.
+      val canonicalShapeCall = ShapeCall(canonicalNode.shape, newRenaming)
+      val inferredPermutations = inferPermutations(canonicalShapeCall)
+
+      // Infer redundant slots from permutations.
+      val redundantFromPermutations = inferredPermutations.flatMap { permutation =>
+        val group = PermutationGroup(SlotMap.identity(permutation.keySet), Set(permutation))
+        permutation.keySet.filterNot(data.slots).flatMap(group.orbit).filter(data.slots)
+      }
+
       // Shrink e-class slots if the canonical node has fewer slots
-      if (!data.slots.subsetOf(newRenaming.valueSet)) {
-        shrinkSlots(ref, data.slots.intersect(newRenaming.valueSet))
+      if (!data.slots.subsetOf(newRenaming.valueSet) || redundantFromPermutations.nonEmpty) {
+        shrinkSlots(ref, data.slots.intersect(newRenaming.valueSet).diff(redundantFromPermutations))
         repairNode(node)
         return
       }
@@ -423,15 +441,15 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
           case None =>
             // Eliminate the old node from the e-class and add the canonicalized node.
             removeNodeFromClass(ref, node)
-            addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
+            addNodeToClass(ref, canonicalShapeCall)
         }
       } else if (oldRenaming != newRenaming) {
         removeNodeFromClass(ref, node)
-        addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
+        addNodeToClass(ref, canonicalShapeCall)
       }
 
       // Infer symmetries from the canonicalized node.
-      if (propagatePermutations(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
+      if (propagatePermutations(ref, inferredPermutations)) {
         touchedClass(ref)
       }
     }
