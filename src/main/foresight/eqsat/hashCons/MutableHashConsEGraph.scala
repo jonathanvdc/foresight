@@ -164,31 +164,47 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
+   * Infers e-class slot permutations from a shape call.
+   * @param shape The shape call to infer permutations from.
+   * @return A set of slot permutations for the shape call. These permutations may contain redundant slots.
+   */
+  private def inferPermutations(shape: ShapeCall[NodeT]): Set[SlotMap] = {
+    groupCompatibleVariants(shape.asNode).flatMap(variant => {
+      val variantShape = variant.asShapeCall
+      if (shape.shape == variantShape.shape) {
+        val permutation = shape.renaming.inverse.compose(variantShape.renaming)
+        Some(permutation)
+      } else {
+        None
+      }
+    })
+  }
+
+  /**
    * Propagates slot symmetries from an e-node to an e-class.
    * @param ref The e-class reference that contains the e-node.
    * @param shape The e-node from which symmetries are propagated.
    * @return True if the e-class was modified; otherwise, false.
    */
   private def propagateSymmetries(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
-    groupCompatibleVariants(shape.asNode).map(variant => {
-      val variantShape = variant.asShapeCall
-      if (shape.shape == variantShape.shape) {
-        val data = classData(ref)
-        val permutation = shape.renaming.inverse.compose(variantShape.renaming).filterKeys(data.slots)
+    // First, infer the permutations from the shape call.
+    val inferred = inferPermutations(shape)
+    if (inferred.isEmpty) {
+      return false
+    }
 
-        assert(permutation.keySet == data.slots)
-        assert(permutation.isPermutation)
+    // Drop redundant slots from the permutations.
+    val data = classData(ref)
+    val nonRedundantPermutations = inferred.map(_.filterKeys(data.slots))
 
-        data.permutations.tryAdd(permutation) match {
-          case Some(newPerms) =>
-            classData = classData + (ref -> data.copy(permutations = newPerms))
-            true
+    data.permutations.tryAddSet(nonRedundantPermutations) match {
+      case Some(newPerms) =>
+        classData = classData + (ref -> data.copy(permutations = newPerms))
+        true
 
-          case None =>
-            false
-        }
-      }
-    }).contains(true)
+      case None =>
+        false
+    }
   }
 
   private def isWellFormed(call: EClassCall): Boolean = {
