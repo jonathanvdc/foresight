@@ -582,6 +582,37 @@ object Mul extends Value {
   }
 }
 
+/**
+ * A subtraction operation in the minimalist array IR.
+ */
+object Sub extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 2
+
+  override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    require(valueArgTypes.size == 2)
+    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a subtraction must have the same type.")
+    valueArgTypes.head
+  }
+
+  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+    MixedTree.unslotted(Sub, Seq(lhs, rhs))
+  }
+
+  def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
+    tree match {
+      case MixedTree.Node(Sub, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
+      case _ => None
+    }
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
+  }
+}
+
 trait Comparison extends Value {
   override def typeArgCount: Int = 0
   override def valueArgCount: Int = 2
