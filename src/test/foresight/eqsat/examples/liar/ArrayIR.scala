@@ -66,6 +66,19 @@ object Int32Type extends Type {
 }
 
 /**
+ * The Boolean type in the minimalist array IR.
+ */
+object BoolType extends Type {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 0
+
+  def toTree: Tree[Type] = {
+    Tree.unslotted(BoolType, Seq.empty)
+  }
+}
+
+
+/**
  * An integer constant type in the minimalist array IR.
  */
 final case class ConstIntType(value: Int) extends Type {
@@ -566,6 +579,39 @@ object Mul extends Value {
                        valueArgTypes: Seq[MixedTree[Type, A]],
                        valueArgCosts: Seq[BigInt]): BigInt = {
     1 + valueArgCosts.sum
+  }
+}
+
+trait Comparison extends Value {
+  override def typeArgCount: Int = 0
+  override def valueArgCount: Int = 2
+
+  override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
+    require(valueArgTypes.size == 2)
+    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a comparison must have the same type.")
+    BoolType.toTree
+  }
+
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
+  }
+}
+
+/**
+ * A less-than operation in the minimalist array IR.
+ */
+object LessThan extends Comparison {
+  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+    MixedTree.unslotted(LessThan, Seq(lhs, rhs))
+  }
+
+  def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
+    tree match {
+      case MixedTree.Node(LessThan, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
+      case _ => None
+    }
   }
 }
 
