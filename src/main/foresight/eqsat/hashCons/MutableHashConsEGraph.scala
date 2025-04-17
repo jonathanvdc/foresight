@@ -138,7 +138,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     addNodeToClass(ref, shapeCall)
 
     // Propagate symmetries from the node to the e-class.
-    propagateSymmetries(ref, shapeCall)
+    propagatePermutations(ref, shapeCall)
 
     // Construct an e-class call with the node slots to e-class slots bijection.
     val publicRenaming = SlotMap(
@@ -181,12 +181,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
-   * Propagates slot symmetries from an e-node to an e-class.
+   * Propagates slot permutations from an e-node to an e-class.
    * @param ref The e-class reference that contains the e-node.
-   * @param shape The e-node from which symmetries are propagated.
+   * @param shape The e-node from which permutations are propagated.
    * @return True if the e-class was modified; otherwise, false.
    */
-  private def propagateSymmetries(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
+  private def propagatePermutations(ref: EClassRef, shape: ShapeCall[NodeT]): Boolean = {
     // First, infer the permutations from the shape call.
     val inferred = inferPermutations(shape)
     if (inferred.isEmpty) {
@@ -431,7 +431,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       }
 
       // Infer symmetries from the canonicalized node.
-      if (propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
+      if (propagatePermutations(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
         touchedClass(ref)
       }
     }
