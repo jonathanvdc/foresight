@@ -195,7 +195,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
     // Drop redundant slots from the permutations.
     val data = classData(ref)
-    val nonRedundantPermutations = inferred.map(_.filterKeys(data.slots))
+    val nonRedundantPermutations = inferred.map { p =>
+      val nonRedundant = p.filterKeys(data.slots)
+      assert(nonRedundant.isPermutation)
+      nonRedundant
+    }
 
     data.permutations.tryAddSet(nonRedundantPermutations) match {
       case Some(newPerms) =>
