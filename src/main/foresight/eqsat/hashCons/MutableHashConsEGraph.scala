@@ -353,13 +353,30 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       //      hash-cons map. In this case, we add the canonicalized node to the hash-cons and queue its arguments
       //      for parent set repair.
       val ref = hashCons(node)
+      val data = classData(ref)
       val canonicalNode = canonicalize(node)
+
+      // oldRenaming : old node slot -> old e-class slot.
+      val oldRenaming = data.nodes(node)
+
+      // newRenaming : canonical node slot -> old e-class slot,
+      // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
+      // We use composePartial here because the canonical node may have fewer slots than the original node due to
+      // slot shrinking in one of the canonical node's argument e-classes. We'll check that the old renaming's
+      // keys is a superset of the values of the canonical node renaming.
+      if (MutableHashConsEGraph.debug) {
+        assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
+      }
+      val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
+
+      // Shrink e-class slots if the canonical node has fewer slots
+      if (!data.slots.subsetOf(newRenaming.valueSet)) {
+        shrinkSlots(ref, data.slots.intersect(newRenaming.valueSet))
+        repairNode(node)
+        return
+      }
+
       if (canonicalNode.shape != node) {
-        val data = classData(ref)
-
-        // oldRenaming : old node slot -> old e-class slot.
-        val oldRenaming = data.nodes(node)
-
         hashCons.get(canonicalNode.shape) match {
           case Some(other) =>
             // canonicalNodeRenaming : canonical node slot -> canonical e-class slot.
@@ -381,34 +398,21 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
               assert(isWellFormed(rightCall), "Right call is not well-formed.")
             }
             unify(leftCall, rightCall)
+            return
 
           case None =>
-            // newRenaming : canonical node slot -> old e-class slot,
-            // is obtained by composing canonicalNode.renaming (canonical node slot -> old node slot) with oldRenaming.
-            // We use composePartial here because the canonical node may have fewer slots than the original node due to
-            // slot shrinking in one of the canonical node's argument e-classes. We'll check that the old renaming's
-            // keys is a superset of the values of the canonical node renaming.
-            if (MutableHashConsEGraph.debug) {
-              assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
-            }
-            val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
-
-            // Shrink e-class slots if the canonical node has fewer slots
-            if (!data.slots.subsetOf(newRenaming.valueSet)) {
-              shrinkSlots(ref, data.slots.intersect(newRenaming.valueSet))
-              repairNode(node)
-              return
-            }
-
             // Eliminate the old node from the e-class and add the canonicalized node.
             removeNodeFromClass(ref, node)
             addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
-
-            // Infer symmetries from the canonicalized node.
-            if (propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
-              touchedClass(ref)
-            }
         }
+      } else if (oldRenaming != newRenaming) {
+        removeNodeFromClass(ref, node)
+        addNodeToClass(ref, ShapeCall(canonicalNode.shape, newRenaming))
+      }
+
+      // Infer symmetries from the canonicalized node.
+      if (propagateSymmetries(ref, canonicalNode.shape.rename(newRenaming).asShapeCall)) {
+        touchedClass(ref)
       }
     }
 
