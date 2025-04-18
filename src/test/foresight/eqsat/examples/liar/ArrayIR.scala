@@ -521,95 +521,86 @@ final case class ConstInt32(value: Int) extends Value {
 }
 
 /**
- * An addition operation in the minimalist array IR.
+ * A binary arithmetic operation in the minimalist array IR.
  */
-object Add extends Value {
+trait BinaryArith extends Value {
   override def typeArgCount: Int = 0
   override def valueArgCount: Int = 2
 
+  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
+    MixedTree.unslotted(this, Seq(lhs, rhs))
+  }
+
   override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
     require(valueArgTypes.size == 2)
-    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of an addition must have the same type.")
+    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a binary operation must have the same type.")
     valueArgTypes.head
   }
 
-  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
-    MixedTree.unslotted(Add, Seq(lhs, rhs))
+  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
+                       valueArgTypes: Seq[MixedTree[Type, A]],
+                       valueArgCosts: Seq[BigInt]): BigInt = {
+    1 + valueArgCosts.sum
   }
+}
 
+/**
+ * An addition operation in the minimalist array IR.
+ */
+object Add extends BinaryArith {
   def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
     tree match {
       case MixedTree.Node(Add, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
       case _ => None
     }
   }
-
-  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
-                       valueArgTypes: Seq[MixedTree[Type, A]],
-                       valueArgCosts: Seq[BigInt]): BigInt = {
-    1 + valueArgCosts.sum
-  }
 }
 
 /**
  * A multiplication operation in the minimalist array IR.
  */
-object Mul extends Value {
-  override def typeArgCount: Int = 0
-  override def valueArgCount: Int = 2
-
-  override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
-    require(valueArgTypes.size == 2)
-    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a multiplication must have the same type.")
-    valueArgTypes.head
-  }
-
-  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
-    MixedTree.unslotted(Mul, Seq(lhs, rhs))
-  }
-
+object Mul extends BinaryArith {
   def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
     tree match {
       case MixedTree.Node(Mul, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
       case _ => None
     }
   }
-
-  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
-                       valueArgTypes: Seq[MixedTree[Type, A]],
-                       valueArgCosts: Seq[BigInt]): BigInt = {
-    1 + valueArgCosts.sum
-  }
 }
 
 /**
  * A subtraction operation in the minimalist array IR.
  */
-object Sub extends Value {
-  override def typeArgCount: Int = 0
-  override def valueArgCount: Int = 2
-
-  override def inferType[A](typeArgs: Seq[MixedTree[Type, A]], valueArgTypes: Seq[MixedTree[Type, A]]): MixedTree[Type, A] = {
-    require(valueArgTypes.size == 2)
-    require(valueArgTypes.head == valueArgTypes(1), "The two arguments of a subtraction must have the same type.")
-    valueArgTypes.head
-  }
-
-  def apply[A](lhs: MixedTree[ArrayIR, A], rhs: MixedTree[ArrayIR, A]): MixedTree[ArrayIR, A] = {
-    MixedTree.unslotted(Sub, Seq(lhs, rhs))
-  }
-
+object Sub extends BinaryArith {
   def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
     tree match {
       case MixedTree.Node(Sub, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
       case _ => None
     }
   }
+}
 
-  override def cost[A](typeArgs: Seq[MixedTree[Type, A]],
-                       valueArgTypes: Seq[MixedTree[Type, A]],
-                       valueArgCosts: Seq[BigInt]): BigInt = {
-    1 + valueArgCosts.sum
+/**
+ * A division operation in the minimalist array IR.
+ */
+object Div extends BinaryArith {
+  def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
+    tree match {
+      case MixedTree.Node(Div, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
+      case _ => None
+    }
+  }
+}
+
+/**
+ * A modulo operation in the minimalist array IR.
+ */
+object Mod extends BinaryArith {
+  def unapply[A](tree: MixedTree[ArrayIR, A]): Option[(MixedTree[ArrayIR, A], MixedTree[ArrayIR, A])] = {
+    tree match {
+      case MixedTree.Node(Mod, Seq(), Seq(), Seq(lhs, rhs)) => Some((lhs, rhs))
+      case _ => None
+    }
   }
 }
 
