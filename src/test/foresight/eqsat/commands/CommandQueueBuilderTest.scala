@@ -175,4 +175,29 @@ class CommandQueueBuilderTest {
       assert(egraph.areSame(c.reify(reification), d.reify(reification)))
     }
   }
+
+  @Test
+  def constructTreeWithSlots(): Unit = {
+    val builder = new CommandQueueBuilder[Int]
+
+    val x = Slot.fresh()
+    val y = Slot.fresh()
+
+    val tree1 = builder.add(MixedTree.Node(2, Seq.empty, Seq(y), Seq.empty))
+    val tree2 = builder.add(
+      MixedTree.Node(0, Seq(x), Seq.empty, Seq(MixedTree.Node(1, Seq.empty, Seq(x), Seq(MixedTree.Call(tree1))))))
+
+    for (queue <- Seq(builder.queue, builder.queue.optimized)) {
+      val (Some(egraph), reification) = queue(EGraph.empty[Int], Map.empty, ParallelMap.sequential)
+
+      assert(egraph.classes.size == 3)
+      assert(tree1.reify(reification).args.valueSet == Set(y))
+      assert(tree2.reify(reification).args.valueSet == Set(y))
+
+      assert(!egraph.contains(
+        MixedTree.Node(0, Seq(x), Seq.empty, Seq(
+          MixedTree.Node(1, Seq.empty, Seq(y), Seq(MixedTree.Call(tree1.reify(reification))))))))
+    }
+  }
 }
+
