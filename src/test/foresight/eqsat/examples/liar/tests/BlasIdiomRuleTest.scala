@@ -552,4 +552,55 @@ class BlasIdiomRuleTest {
     assert(egraph3.contains(gemmTT))
     assert(egraph3.areSame(c1, egraph3.find(gemmTT).get))
   }
+
+  /**
+   * Tests that, even after saturating, gemv is the best form of the idiom.
+   */
+  @Test
+  def gemvIsOptimal(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val K = ConstIntType(200).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), K))
+    val x = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
+    val y = Var(Slot.fresh(), ArrayType(DoubleType.toTree, K))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemv = BlasIdioms.Gemv(aTransposed = false)(alpha, a, x, beta, y)
+
+    val (c1, egraph2) = egraph.add(gemv)
+
+    val egraph4 = strategy(7)(egraph2).get
+
+    assert(MixedTree.fromTree(TimeComplexity.analysis(egraph4)(c1, egraph4).applied.toTree) == gemv)
+  }
+
+  /**
+   * Tests that, even after saturating, gemm is the best form of the idiom.
+   */
+  @Test
+  def gemmIsOptimal(): Unit = {
+    val egraph = EGraph.empty[ArrayIR]
+
+    val N = ConstIntType(100).toTree
+    val M = ConstIntType(200).toTree
+    val K = ConstIntType(300).toTree
+
+    val a = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, N), M))
+    val b = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), N))
+    val c = Var(Slot.fresh(), ArrayType(ArrayType(DoubleType.toTree, K), M))
+    val alpha = Var(Slot.fresh(), DoubleType.toTree)
+    val beta = Var(Slot.fresh(), DoubleType.toTree)
+
+    val gemm = BlasIdioms.Gemm(aTransposed = false, bTransposed = false)(alpha, a, b, beta, c)
+
+    val (c1, egraph2) = egraph.add(gemm)
+
+    val egraph4 = strategy(6)(egraph2).get
+
+    assert(MixedTree.fromTree(TimeComplexity.analysis(egraph4)(c1, egraph4).applied.toTree) == gemm)
+  }
 }
