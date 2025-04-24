@@ -470,6 +470,13 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     // Unlink all emptied e-classes from the class data.
     classData = classData.filterNot(_._2.nodes.isEmpty)
 
+    // Check that all nodes in the class data map are canonicalized.
+    if (MutableHashConsEGraph.debug) {
+      assert(classData.keys.forall(k => canonicalize(k).ref == k), "All e-class references must be canonicalized.")
+      assert(toImmutable.nodeCount >= toImmutable.classCount,
+        "The number of nodes in the class data must be greater than or equal to the number of e-classes.")
+    }
+
     val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).map(_.ref).toSet
     touched.map(c => (canonicalize(c), c)).groupBy(_._1.ref).values.map(_.map {
       case (canonical, original) =>

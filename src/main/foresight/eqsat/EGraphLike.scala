@@ -90,6 +90,22 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   // Helper methods:
 
   /**
+   * Gets the number of unique e-classes in this e-graph.
+   * @return The number of unique e-classes in the e-graph.
+   */
+  final def classCount: Int = {
+    classes.size
+  }
+
+  /**
+   * Gets the number of unique e-nodes in this e-graph.
+   * @return The number of e-nodes in the e-graph.
+   */
+  final def nodeCount: Int = {
+    classes.toSeq.map(ref => nodes(canonicalize(ref)).size).sum
+  }
+
+  /**
    * Gets the current canonical reference to an e-class.
    * @param ref The reference to canonicalize.
    * @return The canonical reference to the e-class pointed to by ref.
