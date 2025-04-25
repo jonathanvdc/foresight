@@ -33,6 +33,14 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
     ownNanos + namedChildren.map(_.totalNanos).sum
   }
 
+  /**
+   * A timing report of the operations performed by this parallel map and its children.
+   * @return The timing report.
+   */
+  def report: TimingReport = locked {
+    TimingReport.simplify(TimingReport(name, ownNanos, namedChildren.map(_.report)))
+  }
+
   private def locked[A](f: => A): A = {
     lock.lock()
     try {
