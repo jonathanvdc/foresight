@@ -69,7 +69,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     // then perform the lookups and additions sequentially.
 
     val mutable = toMutable
-    val results = parallelize(nodes, canonicalize).map { node =>
+    val results = parallelize.child("add nodes")(nodes, canonicalize).map { node =>
       mutable.tryAddUnsafe(node)
     }
     (results.toSeq, mutable.toImmutable)

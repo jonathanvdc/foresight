@@ -5,6 +5,13 @@ package foresight.eqsat.parallel
  */
 trait ParallelMap {
   /**
+   * Creates a child parallel mapping strategy, tagged with a name.
+   * @param name The name of the child parallel mapping strategy.
+   * @return The child parallel mapping strategy.
+   */
+  def child(name: String): ParallelMap
+
+  /**
    * Applies a function to each element of an iterable.
    * @param inputs The iterable to apply the function to.
    * @param f The function to apply to each element of the iterable.
@@ -21,6 +28,8 @@ trait ParallelMap {
    */
   @throws[OperationCanceledException.type]
   final def cancelable(token: CancellationToken): ParallelMap = new ParallelMap {
+    override def child(name: String): ParallelMap = ParallelMap.this.child(name).cancelable(token)
+
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
       if (token.isCanceled) {
         throw OperationCanceledException
@@ -43,6 +52,7 @@ object ParallelMap {
    * A parallel map that processes elements sequentially using the Scala collections library.
    */
   val sequential: ParallelMap = new ParallelMap {
+    override def child(name: String): ParallelMap = this
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.map(f)
   }
 
@@ -50,6 +60,7 @@ object ParallelMap {
    * A parallel map that processes elements in parallel using the Scala parallel collections library.
    */
   val parallel: ParallelMap = new ParallelMap {
+    override def child(name: String): ParallelMap = this
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.par.map(f).seq
   }
 

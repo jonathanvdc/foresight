@@ -45,7 +45,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return The matches found in the e-graph.
    */
   def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
-    searcher.search(egraph, parallelize)
+    searcher.search(egraph, parallelize.child("rule matching"))
   }
 
   /**
@@ -68,7 +68,8 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    */
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
     try {
-      val commands = parallelize[MatchT, Command[NodeT]](matches, applier.apply(_, egraph).simplify(egraph)).toSeq
+      val commands = parallelize.child("rule application")[MatchT, Command[NodeT]](
+        matches, applier.apply(_, egraph).simplify(egraph)).toSeq
       CommandQueue(commands).optimized
     } catch {
       case e: Exception =>

@@ -71,8 +71,9 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
         (node, call)
     }
 
-    val newMetadata = parallelize[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
-      case (key, metadata) => key -> metadata.onAddMany(newNodes, newEgraph, parallelize)
+    val p = parallelize.child("metadata for new nodes")
+    val newMetadata = p[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
+      case (key, metadata) => key -> metadata.onAddMany(newNodes, newEgraph, p.child(s"metadata for new nodes - $key"))
     }).toMap
     (results, EGraphWithMetadata(newEgraph, newMetadata))
   }
@@ -82,7 +83,7 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
     val (equivalences, newEgraph) = egraph.unionMany(pairs, parallelize)
     val newEGraph = EGraphWithMetadata(
       newEgraph,
-      parallelize[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
+      parallelize.child("metadata unification")[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
         case (key, metadata) => key -> metadata.onUnionMany(equivalences, newEgraph)
       }).toMap)
     (equivalences, newEGraph)
