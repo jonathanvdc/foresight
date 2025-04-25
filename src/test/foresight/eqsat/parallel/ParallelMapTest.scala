@@ -98,7 +98,6 @@ class ParallelMapTest {
     })
     assert(outputs == inputs)
     assert(impl.nanos > 0)
-    assert(impl.totalNanos == impl.nanos)
     assert(impl.children.isEmpty)
   }
 
@@ -115,7 +114,6 @@ class ParallelMapTest {
     })
     assert(outputs == inputs)
     assert(impl.nanos > 0)
-    assert(impl.totalNanos == impl.nanos)
     assert(impl.children.isEmpty)
   }
 
@@ -131,10 +129,8 @@ class ParallelMapTest {
       i
     })
     assert(outputs == inputs)
-    assert(impl.nanos == 0)
-    assert(impl.totalNanos > impl.nanos)
     assert(impl.children.size == 1)
-    assert(impl.children.head.nanos == impl.totalNanos)
+    assert(impl.nanos == impl.children.head.nanos)
   }
 
   /**
@@ -150,9 +146,7 @@ class ParallelMapTest {
     }).flatten
     assert(outputs == inputs.flatMap(i => inputs.map(j => i * j)))
     assert(impl.nanos > 0)
-    assert(impl.totalNanos > impl.nanos)
     assert(impl.children.size == inputs.size)
     assert(impl.children.forall(_.nanos > 0))
-    assert(impl.totalNanos == impl.nanos + impl.children.map(_.totalNanos).sum)
   }
 }

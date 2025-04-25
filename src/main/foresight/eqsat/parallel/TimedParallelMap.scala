@@ -11,7 +11,6 @@ import scala.collection.mutable.ArrayBuffer
 final class TimedParallelMap(val name: String, inner: ParallelMap) extends ParallelMap {
   private val namedChildren: ArrayBuffer[TimedParallelMap] = ArrayBuffer()
   private val lock: Lock = new java.util.concurrent.locks.ReentrantLock()
-  private var ownNanos: Long = 0
   private var startTime: Option[Long] = None
   private var endTime: Option[Long] = None
 
@@ -22,17 +21,14 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
   def children: Seq[TimedParallelMap] = locked(namedChildren.view.force)
 
   /**
-   * The total time taken to process elements in this parallel map, excluding the time taken by child parallel maps.
-   * @return The time taken in nanoseconds.
+   * The wall clock time taken to process elements in this parallel map, including the time taken by child parallel maps.
+   * @return The wall clock time in nanoseconds.
    */
-  def nanos: Long = locked(ownNanos)
-
-  /**
-   * The total time taken to process elements in this parallel map, including the time taken by child parallel maps.
-   * @return The time taken in nanoseconds.
-   */
-  def totalNanos: Long = locked {
-    ownNanos + namedChildren.map(_.totalNanos).sum
+  def nanos: Long = locked {
+    (maxEndTime, minStartTime) match {
+      case (Some(end), Some(start)) => end - start
+      case _ => 0
+    }
   }
 
   private def minStartTime: Option[Long] = {
@@ -50,23 +46,12 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
   }
 
   /**
-   * The wall clock time taken to process elements in this parallel map, including the time taken by child parallel maps.
-   * @return The wall clock time in nanoseconds.
-   */
-  def wallClockNanos: Long = locked {
-    (maxEndTime, minStartTime) match {
-      case (Some(end), Some(start)) => end - start
-      case _ => 0
-    }
-  }
-
-  /**
    * A timing report of the operations performed by this parallel map and its children.
    * @return The timing report.
    */
   def report: TimingReport = locked {
     val childReports = namedChildren.map(_.report)
-    TimingReport.simplify(TimingReport(name, ownNanos, wallClockNanos, childReports))
+    TimingReport.simplify(TimingReport(name, nanos, childReports))
   }
 
   private def locked[A](f: => A): A = {
@@ -92,7 +77,6 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
     val end = System.nanoTime()
     locked {
       startTime = startTime.orElse(Some(start))
-      ownNanos += end - start
       endTime = Some(end)
     }
     result

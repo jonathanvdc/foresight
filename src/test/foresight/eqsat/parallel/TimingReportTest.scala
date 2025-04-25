@@ -8,8 +8,8 @@ class TimingReportTest {
    */
   @Test
   def mergeLeafReports(): Unit = {
-    val report1 = TimingReport("task", 100, 100, Seq.empty)
-    val report2 = TimingReport("task", 200, 200, Seq.empty)
+    val report1 = TimingReport("task", 100, Seq.empty)
+    val report2 = TimingReport("task", 200, Seq.empty)
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -17,7 +17,7 @@ class TimingReportTest {
     assert(merged.nanos == 300)
     assert(merged.children.isEmpty)
 
-    assert(report1.totalDuration + report2.totalDuration == merged.totalDuration)
+    assert(report1.duration + report2.duration == merged.duration)
   }
 
   /**
@@ -25,8 +25,8 @@ class TimingReportTest {
    */
   @Test
   def mergeChildReports(): Unit = {
-    val report1 = TimingReport("task", 100, 100, Seq(TimingReport("child", 50, 50, Seq.empty)))
-    val report2 = TimingReport("task", 200, 200, Seq(TimingReport("child", 100, 100, Seq.empty)))
+    val report1 = TimingReport("task", 100, Seq(TimingReport("child", 50, Seq.empty)))
+    val report2 = TimingReport("task", 200, Seq(TimingReport("child", 100, Seq.empty)))
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -36,7 +36,7 @@ class TimingReportTest {
     assert(merged.children.head.name == "child")
     assert(merged.children.head.nanos == 150)
 
-    assert(report1.totalDuration + report2.totalDuration == merged.totalDuration)
+    assert(report1.duration + report2.duration == merged.duration)
   }
 
   /**
@@ -45,11 +45,11 @@ class TimingReportTest {
   @Test
   def mergeAsymmetricChildReports(): Unit = {
     val report1 = TimingReport(
-      "task", 100, 100,
-      Seq(TimingReport("child1", 50, 50, Seq.empty), TimingReport("child3", 500, 500, Seq.empty)))
+      "task", 100,
+      Seq(TimingReport("child1", 50, Seq.empty), TimingReport("child3", 500, Seq.empty)))
     val report2 = TimingReport(
-      "task", 200, 200,
-      Seq(TimingReport("child1", 100, 100, Seq.empty), TimingReport("child2", 1000, 1000, Seq.empty)))
+      "task", 200,
+      Seq(TimingReport("child1", 100, Seq.empty), TimingReport("child2", 1000, Seq.empty)))
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -63,7 +63,7 @@ class TimingReportTest {
     assert(merged.children.find(_.name == "child2").get.nanos == 1000)
     assert(merged.children.find(_.name == "child3").get.nanos == 500)
 
-    assert(report1.totalDuration + report2.totalDuration == merged.totalDuration)
+    assert(report1.duration + report2.duration == merged.duration)
   }
 
   /**
@@ -72,8 +72,8 @@ class TimingReportTest {
   @Test
   def simplifyReport(): Unit = {
     val report = TimingReport(
-      "task", 100, 100,
-      Seq(TimingReport("child", 50, 50, Seq.empty), TimingReport("child", 200, 200, Seq.empty)))
+      "task", 100,
+      Seq(TimingReport("child", 50, Seq.empty), TimingReport("child", 200, Seq.empty)))
 
     val simplified = TimingReport.simplify(report)
 
@@ -83,6 +83,6 @@ class TimingReportTest {
     assert(simplified.children.head.name == "child")
     assert(simplified.children.head.nanos == 250)
 
-    assert(report.totalDuration == simplified.totalDuration)
+    assert(report.duration == simplified.duration)
   }
 }

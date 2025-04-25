@@ -6,41 +6,20 @@ import scala.concurrent.duration.Duration
  * A report of the time taken for a hierarchy of operations.
  *
  * @param name The name of the operation.
- * @param nanos The computation time taken for this operation in nanoseconds, excluding child operations.
- * @param wallClockNanos The wall clock time taken for this operation in nanoseconds, including child operations.
+ * @param nanos The wall clock time taken for this operation in nanoseconds, including child operations.
  * @param children The timing reports of child operations.
  */
-final case class TimingReport(name: String, nanos: Long, wallClockNanos: Long, children: Seq[TimingReport]) {
+final case class TimingReport(name: String, nanos: Long, children: Seq[TimingReport]) {
   /**
-   * The total time taken for this operation and all child operations in nanoseconds.
-   * @return The total time taken in nanoseconds.
-   */
-  lazy val totalNanos: Long = nanos + children.map(_.totalNanos).sum
-
-  /**
-   * The time taken for this operation, excluding child operations, as a Duration.
+   * The time taken for this operation, including child operations, as a Duration.
    * @return The time taken as a Duration.
    */
   def duration: Duration = Duration.fromNanos(nanos)
 
-  /**
-   * The total time taken for this operation and all child operations as a Duration.
-   * @return The total time taken as a Duration.
-   */
-  def totalDuration: Duration = Duration.fromNanos(totalNanos)
-
-  /**
-   * The wall clock duration of this operation, which is the time taken from start to end, including all child
-   * operations.
-   * @return The wall clock duration as a Duration.
-   */
-  def wallClockDuration: Duration = Duration.fromNanos(wallClockNanos)
-
-  private def toLines(grandTotal: Long, wallClockTotal: Long): Seq[String] = {
-    val childLines = children.flatMap(_.toLines(grandTotal, wallClockTotal)).map("  " + _)
-    val percentage = "%.2f".format(100 * totalNanos.toDouble / grandTotal.toDouble)
-    val wallClockPercentage = "%.2f".format(100 * wallClockNanos.toDouble / wallClockTotal.toDouble)
-    val ownLine = s"$name: $duration - total: $totalDuration ($percentage%), wall clock: $wallClockDuration ($wallClockPercentage%)"
+  private def toLines(total: Long): Seq[String] = {
+    val childLines = children.flatMap(_.toLines(total)).map("  " + _)
+    val percentage = "%.2f".format(100 * nanos.toDouble / total.toDouble)
+    val ownLine = s"$name: $duration - $duration ($percentage%)"
     Seq(ownLine) ++ childLines
   }
 
@@ -49,7 +28,7 @@ final case class TimingReport(name: String, nanos: Long, wallClockNanos: Long, c
    * @return The string representation of the timing report.
    */
   override def toString: String = {
-    toLines(totalNanos, wallClockNanos).mkString("\n")
+    toLines(nanos).mkString("\n")
   }
 }
 
@@ -66,12 +45,11 @@ object TimingReport {
   def merge(name: String, reports: Seq[TimingReport]): TimingReport = {
     require(reports.nonEmpty, "Cannot merge empty reports")
 
-    val ownNanos = reports.map(_.nanos).sum
-    val totalWallClockNanos = reports.map(_.wallClockNanos).sum
+    val totalNanos = reports.map(_.nanos).sum
     val childReports = reports.flatMap(_.children).groupBy(_.name).map {
       case (name, reports) => merge(name, reports)
     }.toSeq.sortBy(_.name)
-    TimingReport(name, ownNanos, totalWallClockNanos, childReports)
+    TimingReport(name, totalNanos, childReports)
   }
 
   /**
