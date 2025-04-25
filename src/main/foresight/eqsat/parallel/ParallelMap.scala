@@ -44,6 +44,14 @@ trait ParallelMap {
   }
 
   /**
+   * Runs a function and returns the result.
+   * @param f The function to run.
+   * @tparam A The type of the result of the function.
+   * @return The result of the function.
+   */
+  def run[A](f: => A): A = apply[Int, A](Seq(0), _ => f).head
+
+  /**
    * Creates a new parallel mapping strategy that measures the time taken to process elements.
    * @return The new parallel mapping strategy.
    */

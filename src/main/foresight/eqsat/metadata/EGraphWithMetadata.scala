@@ -81,10 +81,11 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
                          parallelize: ParallelMap): (Set[Set[EClassCall]], EGraphWithMetadata[NodeT, Repr]) = {
     val (equivalences, newEgraph) = egraph.unionMany(pairs, parallelize)
+    val p = parallelize.child("metadata unification")
     val newEGraph = EGraphWithMetadata(
       newEgraph,
-      parallelize.child("metadata unification")[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
-        case (key, metadata) => key -> metadata.onUnionMany(equivalences, newEgraph)
+      p[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
+        case (key, metadata) => key -> p.child(s"metadata unification - $key").run(metadata.onUnionMany(equivalences, newEgraph))
       }).toMap)
     (equivalences, newEGraph)
   }

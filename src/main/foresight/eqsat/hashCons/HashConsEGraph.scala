@@ -68,9 +68,14 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     // of nodes that can safely be looked up in parallel. Instead, we just parallelize the canonicalization step and
     // then perform the lookups and additions sequentially.
 
+    val p = parallelize.child("add nodes")
+
     val mutable = toMutable
-    val results = parallelize.child("add nodes")(nodes, canonicalize).map { node =>
-      mutable.tryAddUnsafe(node)
+    val canonicalized = p(nodes, canonicalize)
+    val results = p.run {
+      canonicalized.map { node =>
+        mutable.tryAddUnsafe(node)
+      }
     }
     (results.toSeq, mutable.toImmutable)
   }
@@ -81,9 +86,11 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
       pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
       "All e-class applications must be well-formed.")
 
-    val mutable = toMutable
-    val equivalences = mutable.unionMany(pairs)
-    (equivalences, mutable.toImmutable)
+    parallelize.child("union").run {
+      val mutable = toMutable
+      val equivalences = mutable.unionMany(pairs)
+      (equivalences, mutable.toImmutable)
+    }
   }
 
   /**
