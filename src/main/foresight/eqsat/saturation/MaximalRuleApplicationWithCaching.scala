@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.{EGraph, EGraphLike}
-import foresight.eqsat.commands.CommandQueue
+import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 
@@ -24,18 +24,26 @@ final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[
                      parallelize: ParallelMap): (Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]], Unit) = {
 
     // Find all matches for each rule, then remove the matches that have already been applied.
-    val newMatches = rules.map { rule =>
-      val matches = rule.search(egraph.egraph, parallelize)
-      val oldMatches = egraph.applications(rule.name)
-      val newMatches = matches.filterNot(oldMatches.contains)
-      (rule.name, newMatches.toSet, rule.delayed(newMatches, egraph.egraph, parallelize))
-    }
+    val ruleMatchingParallelize = parallelize.child("rule matching")
+    val newMatchesByRule = ruleMatchingParallelize(
+      rules, { rule: Rule[NodeT, MatchT, EGraphT] => {
+        val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
+        val oldMatches = egraph.applications(rule.name)
+        val newMatches = matches.filterNot(oldMatches.contains)
+        rule.name -> newMatches
+      } }).toMap
+
+    val ruleApplicationParallelize = parallelize.child("rule application")
+    val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+      val newMatches = newMatchesByRule(rule.name)
+      rule.delayed(newMatches, egraph.egraph, ruleApplicationParallelize)
+    }).toSeq
 
     // Construct a command that applies the new matches to the e-graph.
-    val update = CommandQueue(newMatches.map(_._3)).optimized
+    val update = CommandQueue(updateCommands).optimized
 
     // Apply the new matches to the e-graph.
-    val recorded = newMatches.map { case (ruleName, newMatches, _) => ruleName -> newMatches }.toMap
+    val recorded = newMatchesByRule.mapValues(_.toSet)
     val (newEGraph, _) = update(egraph.record(recorded), Map.empty, parallelize)
     (newEGraph, ())
   }
