@@ -20,17 +20,18 @@ final case class TimingReport(name: String, nanos: Long, children: Seq[TimingRep
    * The time taken for this operation, excluding child operations, as a Duration.
    * @return The time taken as a Duration.
    */
-  def duration: Duration = Duration(nanos, "nanoseconds")
+  def duration: Duration = Duration.fromNanos(nanos)
 
   /**
    * The total time taken for this operation and all child operations as a Duration.
    * @return The total time taken as a Duration.
    */
-  def totalDuration: Duration = Duration(totalNanos, "nanoseconds")
+  def totalDuration: Duration = Duration.fromNanos(totalNanos)
 
-  private def toLines: Seq[String] = {
-    val childLines = children.flatMap(_.toLines).map("  " + _)
-    val ownLine = s"$name: $duration (total: $totalDuration)"
+  private def toLines(grandTotal: Long): Seq[String] = {
+    val childLines = children.flatMap(_.toLines(grandTotal)).map("  " + _)
+    val percentage = "%.2f".format(100 * totalNanos.toDouble / grandTotal.toDouble)
+    val ownLine = s"$name: $duration ($percentage%, total: $totalDuration)"
     Seq(ownLine) ++ childLines
   }
 
@@ -39,7 +40,7 @@ final case class TimingReport(name: String, nanos: Long, children: Seq[TimingRep
    * @return The string representation of the timing report.
    */
   override def toString: String = {
-    toLines.mkString("\n")
+    toLines(totalNanos).mkString("\n")
   }
 }
 
