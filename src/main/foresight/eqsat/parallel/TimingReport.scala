@@ -6,12 +6,11 @@ import scala.concurrent.duration.Duration
  * A report of the time taken for a hierarchy of operations.
  *
  * @param name The name of the operation.
- * @param nanos The computation time taken for this operation in nanoseconds.
- * @param start The start time of the operation in nanoseconds since the epoch.
- * @param end The end time of the operation in nanoseconds since the epoch.
+ * @param nanos The computation time taken for this operation in nanoseconds, excluding child operations.
+ * @param wallClockNanos The wall clock time taken for this operation in nanoseconds, including child operations.
  * @param children The timing reports of child operations.
  */
-final case class TimingReport(name: String, nanos: Long, start: Long, end: Long, children: Seq[TimingReport]) {
+final case class TimingReport(name: String, nanos: Long, wallClockNanos: Long, children: Seq[TimingReport]) {
   /**
    * The total time taken for this operation and all child operations in nanoseconds.
    * @return The total time taken in nanoseconds.
@@ -35,12 +34,12 @@ final case class TimingReport(name: String, nanos: Long, start: Long, end: Long,
    * operations.
    * @return The wall clock duration as a Duration.
    */
-  def wallClockDuration: Duration = Duration.fromNanos(end - start)
+  def wallClockDuration: Duration = Duration.fromNanos(wallClockNanos)
 
   private def toLines(grandTotal: Long, wallClockTotal: Long): Seq[String] = {
     val childLines = children.flatMap(_.toLines(grandTotal, wallClockTotal)).map("  " + _)
     val percentage = "%.2f".format(100 * totalNanos.toDouble / grandTotal.toDouble)
-    val wallClockPercentage = "%.2f".format(100 * wallClockDuration.toNanos.toDouble / wallClockTotal.toDouble)
+    val wallClockPercentage = "%.2f".format(100 * wallClockNanos.toDouble / wallClockTotal.toDouble)
     val ownLine = s"$name: $duration - total: $totalDuration ($percentage%), wall clock: $wallClockDuration ($wallClockPercentage%)"
     Seq(ownLine) ++ childLines
   }
@@ -50,7 +49,7 @@ final case class TimingReport(name: String, nanos: Long, start: Long, end: Long,
    * @return The string representation of the timing report.
    */
   override def toString: String = {
-    toLines(totalNanos, end - start).mkString("\n")
+    toLines(totalNanos, wallClockNanos).mkString("\n")
   }
 }
 
@@ -68,10 +67,11 @@ object TimingReport {
     require(reports.nonEmpty, "Cannot merge empty reports")
 
     val ownNanos = reports.map(_.nanos).sum
+    val totalWallClockNanos = reports.map(_.wallClockNanos).sum
     val childReports = reports.flatMap(_.children).groupBy(_.name).map {
       case (name, reports) => merge(name, reports)
     }.toSeq.sortBy(_.name)
-    TimingReport(name, ownNanos, reports.map(_.start).min, reports.map(_.end).max, childReports)
+    TimingReport(name, ownNanos, totalWallClockNanos, childReports)
   }
 
   /**

@@ -8,8 +8,8 @@ class TimingReportTest {
    */
   @Test
   def mergeLeafReports(): Unit = {
-    val report1 = TimingReport("task", 100, 0, 100, Seq.empty)
-    val report2 = TimingReport("task", 200, 0, 200, Seq.empty)
+    val report1 = TimingReport("task", 100, 100, Seq.empty)
+    val report2 = TimingReport("task", 200, 200, Seq.empty)
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -25,8 +25,8 @@ class TimingReportTest {
    */
   @Test
   def mergeChildReports(): Unit = {
-    val report1 = TimingReport("task", 100, 0, 100, Seq(TimingReport("child", 50, 0, 50, Seq.empty)))
-    val report2 = TimingReport("task", 200, 0, 200, Seq(TimingReport("child", 100, 0, 100, Seq.empty)))
+    val report1 = TimingReport("task", 100, 100, Seq(TimingReport("child", 50, 50, Seq.empty)))
+    val report2 = TimingReport("task", 200, 200, Seq(TimingReport("child", 100, 100, Seq.empty)))
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -45,11 +45,11 @@ class TimingReportTest {
   @Test
   def mergeAsymmetricChildReports(): Unit = {
     val report1 = TimingReport(
-      "task", 100, 0, 100,
-      Seq(TimingReport("child1", 50, 0, 50, Seq.empty), TimingReport("child3", 500, 0, 500, Seq.empty)))
+      "task", 100, 100,
+      Seq(TimingReport("child1", 50, 50, Seq.empty), TimingReport("child3", 500, 500, Seq.empty)))
     val report2 = TimingReport(
-      "task", 200, 0, 200,
-      Seq(TimingReport("child1", 100, 0, 100, Seq.empty), TimingReport("child2", 1000, 0, 1000, Seq.empty)))
+      "task", 200, 200,
+      Seq(TimingReport("child1", 100, 100, Seq.empty), TimingReport("child2", 1000, 1000, Seq.empty)))
 
     val merged = TimingReport.merge("task", Seq(report1, report2))
 
@@ -72,8 +72,8 @@ class TimingReportTest {
   @Test
   def simplifyReport(): Unit = {
     val report = TimingReport(
-      "task", 100, 0, 100,
-      Seq(TimingReport("child", 50, 0, 50, Seq.empty), TimingReport("child", 200, 0, 200, Seq.empty)))
+      "task", 100, 100,
+      Seq(TimingReport("child", 50, 50, Seq.empty), TimingReport("child", 200, 200, Seq.empty)))
 
     val simplified = TimingReport.simplify(report)
 
