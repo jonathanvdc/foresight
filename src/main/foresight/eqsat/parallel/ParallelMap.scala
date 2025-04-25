@@ -83,15 +83,22 @@ object ParallelMap {
    * @param n The number of threads to use for parallel processing.
    * @return The parallel map that uses a fixed number of threads.
    */
-  def fixedThreadParallel(n: Int): ParallelMap = new ParallelMap {
-    private val taskSupport = new scala.collection.parallel.ForkJoinTaskSupport(
-      new scala.concurrent.forkjoin.ForkJoinPool(n))
+  def fixedThreadParallel(n: Int): ParallelMap = {
+    if (n == 1) {
+      return sequential
+    }
 
-    override def child(name: String): ParallelMap = this
-    override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
-      val parInputs = inputs.par
-      parInputs.tasksupport = taskSupport
-      parInputs.map(f).seq
+    new ParallelMap {
+      private val taskSupport = new scala.collection.parallel.ForkJoinTaskSupport(
+        new scala.concurrent.forkjoin.ForkJoinPool(n))
+
+      override def child(name: String): ParallelMap = this
+
+      override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
+        val parInputs = inputs.par
+        parInputs.tasksupport = taskSupport
+        parInputs.map(f).seq
+      }
     }
   }
 
