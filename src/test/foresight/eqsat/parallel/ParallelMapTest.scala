@@ -6,7 +6,7 @@ import org.junit.Test
  * Tests for parallel maps and their cancellation.
  */
 class ParallelMapTest {
-  private val implementations = Seq(ParallelMap.sequential, ParallelMap.parallel)
+  private val implementations = Seq(ParallelMap.sequential, ParallelMap.parallel, ParallelMap.fixedThreadParallel(2))
 
   /**
    * Tests that the parallel map preserves the order of the elements.
