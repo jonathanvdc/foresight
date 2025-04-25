@@ -84,4 +84,75 @@ class ParallelMapTest {
       }
     }
   }
+
+  /**
+   * Tests that a sequential task can be timed.
+   */
+  @Test
+  def timeSequentialTask(): Unit = {
+    val impl = ParallelMap.sequential.timed
+    val inputs = 0 until 10
+    val outputs = impl.apply[Int, Int](inputs, i => {
+      Thread.sleep(1)
+      i
+    })
+    assert(outputs == inputs)
+    assert(impl.nanos > 0)
+    assert(impl.totalNanos == impl.nanos)
+    assert(impl.children.isEmpty)
+  }
+
+  /**
+   * Tests that a parallel task can be timed.
+   */
+  @Test
+  def timeParallelTask(): Unit = {
+    val impl = ParallelMap.parallel.timed
+    val inputs = 0 until 10
+    val outputs = impl.apply[Int, Int](inputs, i => {
+      Thread.sleep(1)
+      i
+    })
+    assert(outputs == inputs)
+    assert(impl.nanos > 0)
+    assert(impl.totalNanos == impl.nanos)
+    assert(impl.children.isEmpty)
+  }
+
+  /**
+   * Tests that a child task can be timed.
+   */
+  @Test
+  def timeChildTask(): Unit = {
+    val impl = ParallelMap.parallel.timed
+    val inputs = 0 until 10
+    val outputs = impl.child("child").apply[Int, Int](inputs, i => {
+      Thread.sleep(1)
+      i
+    })
+    assert(outputs == inputs)
+    assert(impl.nanos == 0)
+    assert(impl.totalNanos > impl.nanos)
+    assert(impl.children.size == 1)
+    assert(impl.children.head.nanos == impl.totalNanos)
+  }
+
+  /**
+   * Tests that child tasks can be timed, even if they are generated in parallel from within the parent task.
+   */
+  @Test
+  def timeParallelChildTasks(): Unit = {
+    val impl = ParallelMap.parallel.timed
+    val inputs = 0 until 10
+    val outputs = impl.apply[Int, Seq[Int]](inputs, i => {
+      Thread.sleep(1)
+      impl.child(s"child$i").apply[Int, Int](inputs, j => i * j).toSeq
+    }).flatten
+    assert(outputs == inputs.flatMap(i => inputs.map(j => i * j)))
+    assert(impl.nanos > 0)
+    assert(impl.totalNanos > impl.nanos)
+    assert(impl.children.size == inputs.size)
+    assert(impl.children.forall(_.nanos > 0))
+    assert(impl.totalNanos == impl.nanos + impl.children.map(_.totalNanos).sum)
+  }
 }

@@ -42,6 +42,12 @@ trait ParallelMap {
       })
     }
   }
+
+  /**
+   * Creates a new parallel mapping strategy that measures the time taken to process elements.
+   * @return The new parallel mapping strategy.
+   */
+  final def timed: TimedParallelMap = new TimedParallelMap("root", this)
 }
 
 /**
