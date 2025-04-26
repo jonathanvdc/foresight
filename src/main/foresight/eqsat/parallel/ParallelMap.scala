@@ -41,6 +41,13 @@ trait ParallelMap {
         f(a)
       })
     }
+
+    override def run[A](f: => A): A = {
+      if (token.isCanceled) {
+        throw OperationCanceledException
+      }
+      ParallelMap.this.run(f)
+    }
   }
 
   /**
