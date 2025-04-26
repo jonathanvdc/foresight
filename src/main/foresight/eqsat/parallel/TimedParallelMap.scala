@@ -71,14 +71,22 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
     c
   }
 
-  override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
+  private def timed[A](f: => A): A = {
     val start = System.nanoTime()
-    val result = inner(inputs, f)
+    val result = f
     val end = System.nanoTime()
     locked {
       startTime = startTime.orElse(Some(start))
       endTime = Some(end)
     }
     result
+  }
+
+  override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = timed {
+    inner.apply(inputs, f)
+  }
+
+  override def run[A](f: => A): A = timed {
+    inner.run(f)
   }
 }
