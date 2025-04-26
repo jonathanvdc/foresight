@@ -76,6 +76,7 @@ object ParallelMap {
   val parallel: ParallelMap = new ParallelMap {
     override def child(name: String): ParallelMap = this
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.par.map(f).seq
+    override def run[A](f: => A): A = f
   }
 
   /**
@@ -93,6 +94,8 @@ object ParallelMap {
         new scala.concurrent.forkjoin.ForkJoinPool(n))
 
       override def child(name: String): ParallelMap = this
+
+      override def run[A](f: => A): A = f
 
       override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
         val parInputs = inputs.par
