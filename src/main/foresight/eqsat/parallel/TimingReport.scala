@@ -19,7 +19,7 @@ final case class TimingReport(name: String, nanos: Long, children: Seq[TimingRep
   private def toLines(total: Long): Seq[String] = {
     val childLines = children.flatMap(_.toLines(total)).map("  " + _)
     val percentage = "%.2f".format(100 * nanos.toDouble / total.toDouble)
-    val ownLine = s"$name: $duration - $duration ($percentage%)"
+    val ownLine = s"$name: $duration ($percentage%)"
     Seq(ownLine) ++ childLines
   }
 
