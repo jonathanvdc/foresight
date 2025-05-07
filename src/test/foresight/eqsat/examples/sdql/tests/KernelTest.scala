@@ -2,7 +2,7 @@ package foresight.eqsat.examples.sdql.tests
 
 import foresight.eqsat.examples.sdql.SdqlRules.SdqlRule
 import foresight.eqsat.EGraph
-import foresight.eqsat.examples.sdql.{Add, Get, Kernels, KindAnalysis, Lam, Mult, Num, SdqlIR, SdqlRules, Sing, Sub, SubArray, Sum, Var}
+import foresight.eqsat.examples.sdql.{Kernels, KindAnalysis, SdqlIR, SdqlRules}
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import org.junit.Test
