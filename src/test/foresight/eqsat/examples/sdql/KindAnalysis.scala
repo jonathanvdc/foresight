@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.sdql
 
-import foresight.eqsat.{ENode, SlotMap}
+import foresight.eqsat.{ENode, Slot, SlotMap}
 import foresight.eqsat.metadata.Analysis
 
 /**
@@ -11,8 +11,8 @@ object KindAnalysis extends Analysis[SdqlIR, SdqlKind] {
 
   override def rename(result: SdqlKind, renaming: SlotMap): SdqlKind = result
 
-  override def make(node: ENode[SdqlIR], args: Seq[SdqlKind]): SdqlKind = {
-    node.nodeType match {
+  override def make(node: SdqlIR, defs: Seq[Slot], uses: Seq[Slot], args: Seq[SdqlKind]): SdqlKind = {
+    node match {
       case SubArray | Range => SdqlKind.vector
       case Equality => SdqlKind.bool
       case Num(_) => SdqlKind.scalar

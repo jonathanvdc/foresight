@@ -21,6 +21,23 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
   def apply(call: EClassCall, egraph: EGraph[NodeT]): A = applyPrecanonicalized(egraph.canonicalize(call))
 
   /**
+   * Computes the analysis result for a mixed tree of e-class applications and nodes.
+   * @param tree The mixed tree of e-class applications and nodes.
+   * @param egraph The e-graph that the mixed tree is in.
+   * @return The analysis result for the mixed tree.
+   */
+  def apply(tree: MixedTree[NodeT, EClassCall],
+            egraph: EGraph[NodeT]): A = {
+    tree match {
+      case MixedTree.Call(call: EClassCall) => apply(call, egraph)
+
+      case MixedTree.Node(node, defs, uses, args) =>
+        val argsResults = args.map(apply(_, egraph))
+        analysis.make(node, defs, uses, argsResults)
+    }
+  }
+
+  /**
    * Computes the analysis result for an e-class application, assuming that the e-class application has already been
    * canonicalized.
    * @param call The e-class application.

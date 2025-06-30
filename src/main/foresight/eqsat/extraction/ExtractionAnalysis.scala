@@ -1,7 +1,7 @@
 package foresight.eqsat.extraction
 
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, Slot, SlotMap, Tree}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Slot, SlotMap, Tree}
 
 /**
  * An analysis that produces extraction trees with minimal cost.
@@ -45,16 +45,9 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
     ExtractionTreeCall(result.tree, result.renaming.composeRetain(renaming))
   }
 
-  /**
-   * Makes an analysis result for a node.
-   *
-   * @param node The node to make the analysis result for.
-   * @param args The analysis results for the arguments to the node.
-   * @return The analysis result for the node.
-   */
-  override def make(node: ENode[NodeT], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
-    val treeCost = cost(node.nodeType, node.definitions, node.uses, args)
-    val tree = ExtractionTree(treeCost, node.nodeType, node.definitions, node.uses, args)
+  override def make(node: NodeT, defs: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
+    val treeCost = cost(node, defs, uses, args)
+    val tree = ExtractionTree(treeCost, node, defs, uses, args)
     // assert(node.slots.toSet.subsetOf(tree.slotSet))
     ExtractionTreeCall(
       tree,

@@ -3,6 +3,7 @@ package foresight.eqsat.examples.arith
 import foresight.eqsat.{ENode, MixedTree, Slot}
 
 import scala.language.implicitConversions
+import scala.math.Ordered.orderingToOrdered
 
 // Define a language for arithmetic expressions involving variable references, addition, multiplication, integer
 // literals, lambdas and function applications.
@@ -107,7 +108,7 @@ object Mul extends ArithIR {
  *
  * @param value The integer value of the number.
  */
-final case class Number(value: Int) extends ArithIR
+final case class Number(value: BigInt) extends ArithIR
 
 /**
  * Companion object for the Number class, providing implicit conversions to MixedTree and ENode.

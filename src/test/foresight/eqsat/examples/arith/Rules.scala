@@ -1,8 +1,9 @@
 package foresight.eqsat.examples.arith
 
 import ApplierOps._
+import foresight.eqsat.commands.Command
 import foresight.eqsat.metadata.EGraphWithMetadata
-import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.{Applier, Rule}
 import foresight.eqsat.{EGraph, MixedTree, Slot}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 
@@ -18,6 +19,7 @@ object Rules {
    */
   def all: Seq[ArithRule] = Seq(
     beta,
+    constantPropagation,
     addCommutativity,
     addAssociativity1,
     addAssociativity2,
@@ -48,6 +50,24 @@ object Rules {
       "eta-expansion",
       b.toSearcher,
       Lam(x, App(b, Var(x))).toApplier
+    )
+  }
+
+  val constantPropagation: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
+    val x = Pattern.Var.fresh[ArithIR]()
+    Rule(
+      "constant-propagation",
+      MixedTree.Call[ArithIR, Pattern[ArithIR]](x).toSearcher[ArithEGraph].flatMap({
+        case (subst, egraph) =>
+          // Use the ConstantAnalysis to find the constant value of the expression, if available.
+          val result = ConstantAnalysis.get(egraph)(subst(x), egraph)
+          result.toSeq.map { value =>
+            // If a constant value is found, create a new Number node and bind it to the variable, overwriting the
+            // original binding.
+            subst.bind(x, Number(value))
+          }
+      }),
+      MixedTree.Call[ArithIR, Pattern[ArithIR]](x).toApplier
     )
   }
 

@@ -1,6 +1,6 @@
 package foresight.eqsat.metadata
 
-import foresight.eqsat.{EGraph, ENode, SlotMap}
+import foresight.eqsat.{EGraph, ENode, Slot, SlotMap}
 
 /**
  * An analysis that can be performed on an e-graph.
@@ -25,11 +25,23 @@ trait Analysis[NodeT, A] {
 
   /**
    * Makes an analysis result for a node.
-   * @param node The node to make the analysis result for.
+   * @param node The type of node to make the analysis result for.
+   * @param defs The slots that are defined by the node.
+   * @param uses The slots that are used by the node and are defined elsewhere.
    * @param args The analysis results for the arguments to the node.
    * @return The analysis result for the node.
    */
-  def make(node: ENode[NodeT], args: Seq[A]): A
+  def make(node: NodeT, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A]): A
+
+  /**
+   * Makes an analysis result for an e-node.
+   * @param node The e-node to make the analysis result for.
+   * @param args The analysis results for the arguments to the e-node.
+   * @return The analysis result for the e-node.
+   */
+  final def make(node: ENode[NodeT], args: Seq[A]): A = {
+    make(node.nodeType, node.definitions, node.uses, args)
+  }
 
   /**
    * Joins two analysis results.
