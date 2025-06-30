@@ -12,7 +12,7 @@ import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
  */
 object Rules {
   type ArithEGraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]]
-  type ArithRule = foresight.eqsat.rewriting.Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph]
+  type ArithRule = Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph]
 
   /**
    * Returns all arithmetic rules.
