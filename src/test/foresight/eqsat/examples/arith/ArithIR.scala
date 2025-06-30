@@ -5,12 +5,25 @@ import foresight.eqsat.{ENode, MixedTree, Slot}
 import scala.language.implicitConversions
 
 // Define a language for arithmetic expressions involving variable references, addition, multiplication, integer
-// literals, lambdas and let bindings.
+// literals, lambdas and function applications.
 
 /**
  * A trait representing arithmetic expressions in the e-graph.
  */
-sealed trait ArithIR
+sealed trait ArithIR extends Ordered[ArithIR] {
+  /**
+   * Compares two arithmetic expressions.
+   *
+   * @param that The other arithmetic expression to compare with.
+   * @return An integer indicating the comparison result.
+   */
+  override def compare(that: ArithIR): Int = {
+    (this, that) match {
+      case (Number(v1), Number(v2)) => v1.compareTo(v2)
+      case (left, right) => left.toString.compareTo(right.toString)
+    }
+  }
+}
 
 /**
  * A variable reference in an arithmetic expression.
@@ -55,23 +68,6 @@ object App extends ArithIR {
    */
   def apply[A](lambda: MixedTree[ArithIR, A], arg: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
     MixedTree.Node[ArithIR, A](this, Seq.empty, Seq.empty, Seq(lambda, arg))
-}
-
-/**
- * A let binding in an arithmetic expression.
- */
-object Let extends ArithIR {
-  /**
-   * Creates a let binding in an arithmetic expression.
-   *
-   * @param param The parameter of the let binding.
-   * @param value The value to bind to the parameter.
-   * @param body  The body of the let binding.
-   * @tparam A The type of the MixedTree.
-   * @return A MixedTree representing the let binding.
-   */
-  def apply[A](param: Slot, value: MixedTree[ArithIR, A], body: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
-    MixedTree.Node[ArithIR, A](this, Seq(param), Seq.empty, Seq(value, body))
 }
 
 /**
