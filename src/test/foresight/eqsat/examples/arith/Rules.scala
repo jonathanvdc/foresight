@@ -6,10 +6,16 @@ import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, MixedTree, Slot}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 
+/**
+ * This object contains a collection of rules for rewriting arithmetic expressions.
+ */
 object Rules {
   type ArithEGraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]]
   type ArithRule = foresight.eqsat.rewriting.Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph]
 
+  /**
+   * Returns all arithmetic rules.
+   */
   def all: Seq[ArithRule] = Seq(
     beta,
     addCommutativity,
