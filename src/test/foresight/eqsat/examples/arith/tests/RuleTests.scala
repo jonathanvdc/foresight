@@ -22,7 +22,7 @@ class RuleTests {
     Seq(strategy(10))
 
   /**
-   * Test that addition is commutative.
+   * Test that addition is associative.
    */
   @Test
   def additionIsAssociative(): Unit = {
