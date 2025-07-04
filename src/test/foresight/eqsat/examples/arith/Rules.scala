@@ -1,9 +1,8 @@
 package foresight.eqsat.examples.arith
 
 import ApplierOps._
-import foresight.eqsat.commands.Command
 import foresight.eqsat.metadata.EGraphWithMetadata
-import foresight.eqsat.rewriting.{Applier, Rule}
+import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, MixedTree, Slot}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 
