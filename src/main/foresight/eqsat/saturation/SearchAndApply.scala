@@ -53,7 +53,7 @@ object SearchAndApply {
    */
   def withoutCaching[NodeT,
                      EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                     MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+                     MatchT]: SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
       override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
                           egraph: EGraphT,
