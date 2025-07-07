@@ -19,32 +19,29 @@ final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[
 
   override def initialData: Unit = ()
 
-  override def apply(egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
-                     data: Unit,
-                     parallelize: ParallelMap): (Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]], Unit) = {
-
-    // Find all matches for each rule, then remove the matches that have already been applied.
+  private def findNewMatchesByRule(egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
+                                   parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
     val ruleMatchingParallelize = parallelize.child("rule matching")
-    val newMatchesByRule = ruleMatchingParallelize(
-      rules, { rule: Rule[NodeT, MatchT, EGraphT] => {
+    ruleMatchingParallelize(
+      rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
         val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
         val oldMatches = egraph.applications(rule.name)
         val newMatches = matches.filterNot(oldMatches.contains)
         rule.name -> newMatches
-      } }).toMap
+      }
+    ).toMap
+  }
 
-    val ruleApplicationParallelize = parallelize.child("rule application")
-    val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
-      val newMatches = newMatchesByRule(rule.name)
-      rule.delayed(newMatches, egraph.egraph, ruleApplicationParallelize)
-    }).toSeq
+  override def apply(egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
+                     data: Unit,
+                     parallelize: ParallelMap): (Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]], Unit) = {
 
-    // Construct a command that applies the new matches to the e-graph.
-    val update = CommandQueue(updateCommands).optimized
+    val newEGraph = SearchAndApply.withCaching.apply(
+      rules,
+      SearchAndApply.withCaching.search(rules, egraph, parallelize),
+      egraph,
+      parallelize)
 
-    // Apply the new matches to the e-graph.
-    val recorded = newMatchesByRule.mapValues(_.toSet)
-    val (newEGraph, _) = update(egraph.record(recorded), Map.empty, parallelize)
     (newEGraph, ())
   }
 }
