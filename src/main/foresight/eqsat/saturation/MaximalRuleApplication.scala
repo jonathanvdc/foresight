@@ -18,11 +18,12 @@ final case class MaximalRuleApplication[NodeT, EGraphT <: EGraphLike[NodeT, EGra
   override def initialData: Unit = ()
 
   override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
-    // Find all matches for each rule and construct a command that applies each match to the e-graph.
-    val update = CommandQueue(rules.map(_.delayed(egraph, parallelize))).optimized
+    val newEGraph = SearchAndApply.withoutCaching.apply(
+      rules,
+      SearchAndApply.withoutCaching.search(rules, egraph, parallelize),
+      egraph,
+      parallelize)
 
-    // Apply the command to the e-graph.
-    val (newEGraph, _) = update(egraph, Map.empty, parallelize)
     (newEGraph, ())
   }
 }

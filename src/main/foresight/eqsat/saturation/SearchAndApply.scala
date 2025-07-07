@@ -45,6 +45,48 @@ trait SearchAndApply[RuleT <: Rule[_, MatchT, _], EGraphT <: EGraphLike[_, EGrap
  */
 object SearchAndApply {
   /**
+   * Creates a [[SearchAndApply]] instance that does not cache matches.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph.
+   * @tparam MatchT The type of the matches produced by the rules.
+   * @return A [[SearchAndApply]] instance that does not cache matches.
+   */
+  def withoutCaching[NodeT,
+                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                     MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+    new SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
+      override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+                          egraph: EGraphT,
+                          parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
+        val ruleMatchingParallelize = parallelize.child("rule matching")
+        ruleMatchingParallelize(
+          rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+            rule.name -> rule.search(egraph, ruleMatchingParallelize)
+          }
+        ).toMap
+      }
+
+      override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+                         matches: Map[String, Seq[MatchT]],
+                         egraph: EGraphT,
+                         parallelize: ParallelMap): Option[EGraphT] = {
+        val ruleApplicationParallelize = parallelize.child("rule application")
+        val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+          val newMatches = matches(rule.name)
+          rule.delayed(newMatches, egraph, ruleApplicationParallelize)
+        }).toSeq
+
+        // Construct a command that applies the new matches to the e-graph.
+        val update = CommandQueue(updateCommands).optimized
+
+        // Apply the new matches to the e-graph.
+        val (newEGraph, _) = update(egraph, Map.empty, parallelize)
+        newEGraph
+      }
+    }
+  }
+
+  /**
    * Creates a [[SearchAndApply]] instance that caches the matches that have already been applied to the e-graph.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
@@ -60,7 +102,7 @@ object SearchAndApply {
                           parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
         val ruleMatchingParallelize = parallelize.child("rule matching")
         ruleMatchingParallelize(
-          rules, { rule: Rule[_, MatchT, EGraphT] =>
+          rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
             val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
             val oldMatches = egraph.applications(rule.name)
             val newMatches = matches.filterNot(oldMatches.contains)
