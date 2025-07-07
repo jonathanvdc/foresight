@@ -10,7 +10,9 @@ import foresight.eqsat.rewriting.Rule
  *
  * @param rules The rules to apply.
  * @tparam NodeT The type of the nodes in the e-graph.
+ * @tparam RuleT The type of the rules to apply.
  * @tparam EGraphT The type of the e-graph.
+ * @tparam MatchT The type of the matches produced by the rules.
  */
 final case class MaximalRuleApplication[NodeT,
                                         RuleT <: Rule[NodeT, MatchT, _],
