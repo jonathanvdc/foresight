@@ -19,19 +19,6 @@ final case class MaximalRuleApplicationWithCaching[NodeT, EGraphT <: EGraphLike[
 
   override def initialData: Unit = ()
 
-  private def findNewMatchesByRule(egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
-                                   parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
-    val ruleMatchingParallelize = parallelize.child("rule matching")
-    ruleMatchingParallelize(
-      rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
-        val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
-        val oldMatches = egraph.applications(rule.name)
-        val newMatches = matches.filterNot(oldMatches.contains)
-        rule.name -> newMatches
-      }
-    ).toMap
-  }
-
   override def apply(egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                      data: Unit,
                      parallelize: ParallelMap): (Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]], Unit) = {
