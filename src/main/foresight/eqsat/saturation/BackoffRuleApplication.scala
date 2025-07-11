@@ -117,9 +117,11 @@ final case class BackoffRuleApplication[NodeT,
     val selectedMatches = matches.map { case (rule, matches) =>
       val ruleStats = mutableStats(rule)
       val limit = ruleStats.remainingMatches min matches.length
-      ruleStats.remainingMatches -= limit
+      val remainingMatches = ruleStats.remainingMatches - limit
       if (ruleStats.remainingMatches == 0) {
         mutableStats(rule) = ruleStats.copy(bannedUntil = Some(iteration + ruleStats.banLength))
+      } else {
+        mutableStats(rule) = ruleStats.copy(remainingMatches = remainingMatches)
       }
       (rule, data.random.shuffle(matches).take(limit))
     }
