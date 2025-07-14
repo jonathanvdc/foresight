@@ -64,6 +64,10 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
       case (ruleName, newApplications) => ruleName -> (applications(ruleName) ++ newApplications)
     })
   }
+
+  override def emptied: EGraphWithRecordedApplications[Node, Repr, Match] = {
+    EGraphWithRecordedApplications(egraph.emptied)
+  }
 }
 
 /**

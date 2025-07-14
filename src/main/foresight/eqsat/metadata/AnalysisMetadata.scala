@@ -78,4 +78,8 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
 
     AnalysisMetadata(analysis, updater.results)
   }
+
+  override def emptied: Metadata[NodeT, AnalysisMetadata[NodeT, A]] = {
+    AnalysisMetadata(analysis, Map.empty)
+  }
 }

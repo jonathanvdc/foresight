@@ -28,4 +28,10 @@ trait Metadata[NodeT, MetadataT] {
    * @return The update metadata.
    */
   def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): Metadata[NodeT, MetadataT]
+
+  /**
+   * Creates new metadata of the same type, but for an empty e-graph.
+   * @return An empty metadata instance.
+   */
+  def emptied: Metadata[NodeT, MetadataT]
 }

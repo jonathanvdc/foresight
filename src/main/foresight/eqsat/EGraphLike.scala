@@ -87,6 +87,13 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    */
   def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): (Set[Set[EClassCall]], This)
 
+  /**
+   * Creates a new e-graph of this type that is empty, i.e., it contains no e-classes or e-nodes. While the contents
+   * of the e-graph are discard, its configuration (e.g., registered metadata) is preserved.
+   * @return An empty e-graph of this type.
+   */
+  def emptied: This
+
   // Helper methods:
 
   /**

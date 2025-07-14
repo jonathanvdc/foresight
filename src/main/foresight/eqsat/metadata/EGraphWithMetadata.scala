@@ -89,6 +89,10 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
       }).toMap)
     (equivalences, newEGraph)
   }
+
+  override def emptied: EGraphWithMetadata[NodeT, Repr] = {
+    EGraphWithMetadata(egraph.emptied, metadata.mapValues(_.emptied).view.force)
+  }
 }
 
 /**

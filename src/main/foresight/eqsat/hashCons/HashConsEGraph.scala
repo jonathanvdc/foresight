@@ -16,6 +16,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
                                                                         private val classData: Map[EClassRef, EClassData[NodeT]])
   extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] {
 
+  override def emptied: HashConsEGraph[NodeT] = HashConsEGraph.empty
+
   // We guarantee the following invariants:
   //   1. All nodes in hashCons and classData are kept canonical with regard to the current state of unionFind.
   //   2. The e-nodes in the hash-cons map are always kept in sync with the e-nodes in classData. That is,
