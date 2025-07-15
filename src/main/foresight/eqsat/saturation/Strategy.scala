@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
 import foresight.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
 import foresight.eqsat.rewriting.{PortableMatch, Searcher}
 
@@ -229,6 +229,37 @@ object Strategy {
                            parallelize: ParallelMap): (Option[EGraphT], Data) = {
           val (newEGraph, newData) = strategy(EGraphWithRecordedApplications(egraph), data, parallelize)
           (newEGraph.map(_.egraph), newData)
+        }
+      }
+    }
+  }
+
+  /**
+   * An implicit class that adds operations to the [[Strategy]] trait for strategies that operate on an e-graph with a root.
+   * @param strategy The strategy to add operations to.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
+   * @tparam Data The type of the data carried by the strategy.
+   */
+  implicit class WithRoot[NodeT,
+                          EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                          Data](private val strategy: Strategy[EGraphWithRoot[NodeT, EGraphT], Data]) extends AnyVal {
+
+    /**
+     * Creates a strategy that operates on an e-graph with a root. The root is typically used to extract trees from the
+     * e-graph. Roots are introduced at the beginning of the strategy and are closed at the end of the strategy.
+     * @param findRoot A function that finds the root of the e-graph.
+     * @return A new strategy that operates on an [[EGraphWithRoot]].
+     */
+    def closeRoot(findRoot: EGraphT => EClassCall): Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
+        override def initialData: Data = strategy.initialData
+
+        override def apply(egraph: EGraphT,
+                           data: Data,
+                           parallelize: ParallelMap): (Option[EGraphT], Data) = {
+          val (newEGraph, newData) = strategy(EGraphWithRoot(egraph, Some(findRoot(egraph))), data, parallelize)
+          (newEGraph.map(_.graph), newData)
         }
       }
     }
