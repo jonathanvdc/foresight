@@ -2,7 +2,9 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.{EGraph, EGraphLike, Tree}
+
+import scala.concurrent.duration.Duration
 
 /**
  * A collection of strategies that involve rebasing an e-graph after applying a sequence of rules.
@@ -67,5 +69,14 @@ object RebasingStrategies {
       .withIterationLimit(cycles)
       .untilFixpoint
       .dropData
+  }
+
+  def isaria[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](
+      recurrentPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
+      finalPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Unit],
+      recurrentPhaseTimeout: Option[Duration] = None,
+      areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
+
+    ???
   }
 }
