@@ -27,7 +27,7 @@ final case class Rebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph
     val emptyGraph = egraph.emptied
     val (newRoot, newGraph) = emptyGraph.add(tree)
 
-    Some(withRoot(newGraph, newRoot)) -> ()
+    (Some(withRoot(newGraph, newRoot)), ())
   }
 }
 

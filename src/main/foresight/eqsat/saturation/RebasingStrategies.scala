@@ -9,6 +9,34 @@ import foresight.eqsat.{EGraph, EGraphLike}
  */
 object RebasingStrategies {
   /**
+   * A trait that defines a method for building a cycle strategy. The cycle strategy applies a given strategy
+   * repeatedly until a fixpoint is reached or a specified iteration limit is reached.
+   */
+  trait CycleBuilder {
+    def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
+        strategy: Strategy[EGraphT, _]
+    ): Strategy[EGraphT, Unit]
+  }
+
+  /**
+   * A companion object for the [[CycleBuilder]] trait that provides a default implementation of the cycle strategy.
+   * This implementation applies the given strategy until a fixpoint is reached, dropping any data after each iteration.
+   */
+  object CycleBuilder {
+    /**
+     * Creates a cycle builder that applies the given strategy until a fixpoint is reached, dropping any data after
+     * each iteration. The cycle will continue until the specified limit is reached.
+     * @param limit The maximum number of iterations to perform.
+     * @return A cycle builder that applies the strategy with the specified iteration limit.
+     */
+    def iterate(limit: Int): CycleBuilder = new CycleBuilder {
+      override def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
+          strategy: Strategy[EGraphT, _]
+      ): Strategy[EGraphT, Unit] = strategy.withIterationLimit(limit).untilFixpoint.dropData
+    }
+  }
+
+  /**
    * A strategy that applies a sequence of rules to an e-graph, extracts a tree from the e-graph using the provided
    * extractor, and then rebases the e-graph with that tree. This strategy is designed to be used in a
    * SymPy-like context where the e-graph is repeatedly transformed and rebased to extract new information.
@@ -24,17 +52,17 @@ object RebasingStrategies {
    * @tparam EGraphT The type of the e-graph, which must be a subtype of `EGraphLike` and `EGraph`.
    * @return A strategy that applies the rules, extracts a tree, and rebases the e-graph.
    */
-  def sympy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](rules: Seq[Rule[NodeT, _, EGraphT]],
-                                                                             extractor: Extractor[NodeT, EGraphT],
-                                                                             cycles: Int = 2,
-                                                                             buildCycle: Strategy[EGraphWithRoot[NodeT, EGraphT], _] => Strategy[EGraphWithRoot[NodeT, EGraphT], _] = _.withIterationLimit(30).untilFixpoint,
-                                                                             ruleApplicationLimit: Int = 2500,
-                                                                             ruleBanLength: Int = 5): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
+  def sympy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT](rules: Seq[Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]]],
+                                                                                     extractor: Extractor[NodeT, EGraphT],
+                                                                                     cycles: Int = 2,
+                                                                                     buildCycle: CycleBuilder = CycleBuilder.iterate(30),
+                                                                                     ruleApplicationLimit: Int = 2500,
+                                                                                     ruleBanLength: Int = 5): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
     val baseStrategy = BackoffRuleApplication(
-      rules.map(BackoffRule(_, ruleApplicationLimit, ruleBanLength)),
-      SearchAndApply.withoutCaching[NodeT, EGraphWithRoot[NodeT, EGraphT], _])
+      rules.map(BackoffRule[NodeT, Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]], MatchT](_, ruleApplicationLimit, ruleBanLength)),
+      SearchAndApply.withoutCaching[NodeT, EGraphWithRoot[NodeT, EGraphT], MatchT])
 
-    buildCycle(baseStrategy)
+    buildCycle[NodeT, EGraphWithRoot[NodeT, EGraphT]](baseStrategy)
       .chain(Rebase(extractor))
       .withIterationLimit(cycles)
       .untilFixpoint
