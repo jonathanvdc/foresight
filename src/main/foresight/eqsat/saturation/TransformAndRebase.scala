@@ -45,7 +45,7 @@ final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
 
         if (oldTree.isDefined && areEquivalent(oldTree.get, newTree)) {
           // If the tree is equivalent to the previously extracted tree, we can skip rebasing.
-          return (None, (newInnerData, data._2))
+          return (None, (newInnerData, oldTree))
         }
 
         val emptyGraph = newEGraph.emptied
