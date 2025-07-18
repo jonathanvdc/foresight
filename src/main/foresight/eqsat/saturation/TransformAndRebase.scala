@@ -40,10 +40,10 @@ final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
         // we can skip rebasing and determine that the e-graph has not changed. Otherwise, we add the new tree to an
         // empty e-graph and return the new e-graph with the new root.
         val oldRoot = findRoot(egraph)
-        val oldTree = data._2.getOrElse(extractor(oldRoot, egraph))
+        val oldTree = data._2
         val newTree = extractor(oldRoot, newEGraph)
 
-        if (areEquivalent(oldTree, newTree)) {
+        if (oldTree.isDefined && areEquivalent(oldTree.get, newTree)) {
           // If the tree is equivalent to the previously extracted tree, we can skip rebasing.
           return (None, (newInnerData, data._2))
         }
