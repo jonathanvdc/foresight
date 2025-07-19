@@ -96,6 +96,8 @@ object RebasingStrategies {
       recurrentPhaseTimeout: Option[Duration] = None,
       areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
 
+    // Logic based on Figure 3 of the Isaria paper: Automatic Generation of Vectorizing Compilers for
+    // Customizable Digital Signal Processors by Thomas and Bornholt.
     TransformAndRebase(recurrentPhase, extractor, areEquivalent)
       .withTimeout(recurrentPhaseTimeout)
       .untilFixpoint
