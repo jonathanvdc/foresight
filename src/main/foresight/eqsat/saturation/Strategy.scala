@@ -148,6 +148,28 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
+   * Creates a strategy that runs this strategy with an optional timeout.
+   * @param timeout An optional timeout for the strategy. If the timeout is defined, the strategy will run with the specified
+   *                timeout. If the timeout is not defined, the strategy will run without a timeout.
+   * @return A new strategy that applies this strategy with an optional timeout.
+   */
+  final def withTimeout(timeout: Option[Duration]): Strategy[EGraphT, (Data, Duration)] = {
+    timeout match {
+      case Some(t) => withTimeout(t)
+      case None => new Strategy[EGraphT, (Data, Duration)] {
+        override def initialData: (Data, Duration) = (Strategy.this.initialData, Duration.Zero)
+        override def apply(egraph: EGraphT,
+                           data: (Data, Duration),
+                           parallelize: ParallelMap): (Option[EGraphT], (Data, Duration)) = {
+          val (innerData, duration) = data
+          val newEgraph = Strategy.this(egraph, innerData, parallelize)
+          (newEgraph._1, (newEgraph._2, duration))
+        }
+      }
+    }
+  }
+
+  /**
    * Creates a strategy that drops the data carried by this strategy, running each iteration with the initial data.
    * @return A new strategy that applies this strategy without carrying any data.
    */
