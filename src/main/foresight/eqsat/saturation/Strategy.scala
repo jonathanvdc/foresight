@@ -39,7 +39,8 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
-   * Chains this strategy with another strategy.
+   * Chains another strategy to this strategy. The resulting strategy applies this strategy first, and then applies
+   * the other strategy to the result of this strategy.
    * @param other The other strategy to chain with this strategy.
    * @tparam Data2 The type of the data carried by the other strategy.
    * @return A new strategy that applies this strategy followed by the other strategy.
