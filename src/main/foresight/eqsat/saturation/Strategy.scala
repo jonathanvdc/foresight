@@ -1,7 +1,8 @@
 package foresight.eqsat.saturation
 
+import foresight.eqsat.extraction.Extractor
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
 import foresight.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
 import foresight.eqsat.rewriting.{PortableMatch, Searcher}
 
@@ -43,7 +44,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
    * @tparam Data2 The type of the data carried by the other strategy.
    * @return A new strategy that applies this strategy followed by the other strategy.
    */
-  final def chain[Data2](other: Strategy[EGraphT, Data2]): Strategy[EGraphT, (Data, Data2)] = {
+  final def thenApply[Data2](other: Strategy[EGraphT, Data2]): Strategy[EGraphT, (Data, Data2)] = {
     new Strategy[EGraphT, (Data, Data2)] {
       override def initialData: (Data, Data2) = (Strategy.this.initialData, other.initialData)
       override def apply(egraph: EGraphT, data: (Data, Data2), parallelize: ParallelMap): (Option[EGraphT], (Data, Data2)) = {
@@ -284,6 +285,20 @@ object Strategy {
           (newEGraph.map(_.graph), newData)
         }
       }
+    }
+
+    /**
+     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
+     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
+     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
+     * extracted tree, the rebasing operation is also skipped.
+     * @param extractor The extractor to use for extracting a tree from the e-graph.
+     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
+     * @return A new strategy that applies the rebasing operation after the original strategy.
+     */
+    def thenRebase(extractor: Extractor[NodeT, EGraphT],
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
+      TransformAndRebase(strategy, extractor, areEquivalent)
     }
   }
 }

@@ -65,7 +65,7 @@ object RebasingStrategies {
       SearchAndApply.withoutCaching[NodeT, EGraphWithRoot[NodeT, EGraphT], MatchT])
 
     buildCycle[NodeT, EGraphWithRoot[NodeT, EGraphT]](baseStrategy)
-      .chain(Rebase(extractor))
+      .thenRebase(extractor)
       .withIterationLimit(cycles)
       .untilFixpoint
       .dropData
@@ -98,10 +98,11 @@ object RebasingStrategies {
 
     // Logic based on Figure 3 of the Isaria paper: Automatic Generation of Vectorizing Compilers for
     // Customizable Digital Signal Processors by Thomas and Bornholt.
-    TransformAndRebase(recurrentPhase, extractor, areEquivalent)
+    recurrentPhase
+      .thenRebase(extractor, areEquivalent)
       .withTimeout(recurrentPhaseTimeout)
       .untilFixpoint
-      .chain(finalPhase)
+      .thenApply(finalPhase)
       .dropData
   }
 }
