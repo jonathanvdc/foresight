@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.extraction.Extractor
+import foresight.eqsat.extraction.{CostFunction, Extractor}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike, Tree}
 
@@ -71,12 +71,35 @@ object RebasingStrategies {
       .dropData
   }
 
+  /**
+   * A strategy that operates in two phases: a recurrent phase and a final phase. In the recurrent phase, it applies a
+   * transformation strategy to the e-graph, extracts a tree using the provided extractor, and rebases the e-graph
+   * repeatedly until either a fixpoint is reached or the specified timeout is exceeded. In the final phase, it applies
+   * a final transformation to the e-graph, which does not involve rebasing.
+   * @param extractor The extractor to use for extracting a tree from the e-graph.
+   * @param recurrentPhase The strategy to apply in the recurrent phase, which is applied repeatedly until a fixpoint is
+   *                       reached or the timeout is exceeded.
+   * @param finalPhase The strategy to apply in the final phase, which is applied after the recurrent phase.
+   * @param recurrentPhaseTimeout An optional timeout for the recurrent phase. If provided, the recurrent phase will
+   *                              stop applying the recurrent strategy after the specified duration.
+   * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph, which must be a subtype of `EGraphLike` and `EGraph`.
+   * @tparam Data The type of data that the recurrent phase operates on. This can be used to carry additional
+   *              information during the transformation process.
+   * @return A strategy that applies the recurrent phase until a fixpoint is reached, followed by the final phase.
+   */
   def isaria[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](
+      extractor: Extractor[NodeT, EGraphT],
       recurrentPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
       finalPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Unit],
       recurrentPhaseTimeout: Option[Duration] = None,
       areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
 
-    ???
+    TransformAndRebase(recurrentPhase, extractor, areEquivalent)
+      .withTimeout(recurrentPhaseTimeout)
+      .untilFixpoint
+      .chain(finalPhase)
+      .dropData
   }
 }
