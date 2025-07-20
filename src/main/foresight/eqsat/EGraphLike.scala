@@ -6,11 +6,19 @@ import foresight.eqsat.rewriting.PortableMatch
 import foresight.eqsat.saturation.EGraphWithRecordedApplications
 
 /**
- * An immutable e-graph. An e-graph is a data structure that represents a set of expressions. Each expression is
- * represented by an e-node, which is a node in the e-graph. E-nodes are grouped into e-classes, which are sets of
- * equivalent e-nodes.
+ * An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.
  *
- * @tparam NodeT The node type of the expressions that the e-graph represents.
+ * E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling
+ * efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding,
+ * and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable
+ * style.
+ *
+ * The split between [[EGraphLike]] and [[EGraph]] allows [[EGraph]] to be a simpler trait parameterized only by
+ * [[NodeT]], while [[EGraphLike]] is parameterized by both [[NodeT]] and the most derived type ([[This]]). This design
+ * ensures that methods in [[EGraphLike]] can always return the most precise type of the implementing e-graph.
+ *
+ * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
+ * @tparam This The type of the e-graph that this trait is mixed into, which must be a subtype of [[EGraphLike]].
  */
 trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   // Core API:

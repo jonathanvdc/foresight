@@ -3,9 +3,12 @@ package foresight.eqsat
 import foresight.eqsat.hashCons.HashConsEGraph
 
 /**
- * An immutable e-graph. An e-graph is a data structure that represents a set of expressions. Each expression is
- * represented by an e-node, which is a node in the e-graph. E-nodes are grouped into e-classes, which are sets of
- * equivalent e-nodes.
+ * An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.
+ *
+ * E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling
+ * efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding,
+ * and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable
+ * style.
  *
  * @tparam NodeT The node type of the expressions that the e-graph represents.
  */
