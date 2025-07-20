@@ -51,7 +51,7 @@ object RebasingStrategies {
    * @param ruleApplicationLimit The maximum number of matches that can be applied for each rule before it is banned.
    * @param ruleBanLength The number of iterations a rule is banned for after reaching the rule application limit.
    * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam EGraphT The type of the e-graph, which must be a subtype of `EGraphLike` and `EGraph`.
+   * @tparam EGraphT The type of the e-graph, which must be a subtype of [[EGraphLike]] and [[EGraph]].
    * @return A strategy that applies the rules, extracts a tree, and rebases the e-graph.
    */
   def sympy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT](rules: Seq[Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]]],
