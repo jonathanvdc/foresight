@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.extraction.{CostFunction, Extractor}
+import foresight.eqsat.extraction.Extractor
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike, Tree}
 
