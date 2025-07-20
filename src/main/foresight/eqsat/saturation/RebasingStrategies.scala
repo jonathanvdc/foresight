@@ -87,7 +87,8 @@ object RebasingStrategies {
    * @tparam EGraphT The type of the e-graph, which must be a subtype of `EGraphLike` and `EGraph`.
    * @tparam Data The type of data that the recurrent phase operates on. This can be used to carry additional
    *              information during the transformation process.
-   * @return A strategy that applies the recurrent phase until a fixpoint is reached, followed by the final phase.
+   * @return A strategy that applies the recurrent phase and rebases until a fixpoint is reached, followed by the final
+   *         phase.
    */
   def isaria[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](
       extractor: Extractor[NodeT, EGraphT],
