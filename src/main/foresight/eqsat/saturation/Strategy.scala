@@ -107,6 +107,19 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
+   * Creates a strategy that runs this strategy with an optional limit on the number of iterations.
+   * @param limit An optional limit on the number of iterations. If the limit is defined, the strategy will run with
+   *              the specified limit. If the limit is not defined, the strategy will run without a limit.
+   * @return A new strategy that applies this strategy with an optional limit on the number of iterations.
+   */
+  final def withIterationLimit(limit: Option[Int]): Strategy[EGraphT, (Data, Int)] = {
+    limit match {
+      case Some(l) => withIterationLimit(l)
+      case None => extendData(0)
+    }
+  }
+
+  /**
    * Creates a strategy that runs this strategy with a timeout.
    * @param timeout The timeout for the strategy. If the strategy does not complete within the timeout, it is canceled.
    *                The timeout is a time budget that is shared across all iterations of the strategy.
@@ -158,16 +171,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   final def withTimeout(timeout: Option[Duration]): Strategy[EGraphT, (Data, Duration)] = {
     timeout match {
       case Some(t) => withTimeout(t)
-      case None => new Strategy[EGraphT, (Data, Duration)] {
-        override def initialData: (Data, Duration) = (Strategy.this.initialData, Duration.Zero)
-        override def apply(egraph: EGraphT,
-                           data: (Data, Duration),
-                           parallelize: ParallelMap): (Option[EGraphT], (Data, Duration)) = {
-          val (innerData, duration) = data
-          val newEgraph = Strategy.this(egraph, innerData, parallelize)
-          (newEgraph._1, (newEgraph._2, duration))
-        }
-      }
+      case None => extendData(Duration.Zero)
     }
   }
 
@@ -181,6 +185,25 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
         val (newEGraph, _) = Strategy.this(egraph, Strategy.this.initialData, parallelize)
         (newEGraph, ())
+      }
+    }
+  }
+
+  /**
+   * Creates a strategy that extends the data carried by this strategy with additional data.
+   * @param data2 The additional data to extend the data carried by this strategy.
+   * @tparam Data2 The type of the additional data.
+   * @return A new strategy that extends the data carried by this strategy with the additional data.
+   */
+  private final def extendData[Data2](data2: Data2): Strategy[EGraphT, (Data, Data2)] = {
+    new Strategy[EGraphT, (Data, Data2)] {
+      override def initialData: (Data, Data2) = (Strategy.this.initialData, data2)
+
+      override def apply(egraph: EGraphT,
+                         data: (Data, Data2),
+                         parallelize: ParallelMap): (Option[EGraphT], (Data, Data2)) = {
+        val (newEGraph, newData) = Strategy.this(egraph, data._1, parallelize)
+        (newEGraph, (newData, data._2))
       }
     }
   }
