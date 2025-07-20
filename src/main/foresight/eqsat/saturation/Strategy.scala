@@ -2,9 +2,9 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
 import foresight.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
-import foresight.eqsat.rewriting.{PortableMatch, Searcher}
+import foresight.eqsat.rewriting.PortableMatch
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
 
 import scala.concurrent.duration.Duration
 
