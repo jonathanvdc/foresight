@@ -84,7 +84,7 @@ object RebasingStrategies {
    *                              stop applying the recurrent strategy after the specified duration.
    * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
    * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam EGraphT The type of the e-graph, which must be a subtype of `EGraphLike` and `EGraph`.
+   * @tparam EGraphT The type of the e-graph, which must be a subtype of [[EGraphLike]] and [[EGraph]].
    * @tparam Data The type of data that the recurrent phase operates on. This can be used to carry additional
    *              information during the transformation process.
    * @return A strategy that applies the recurrent phase and rebases until a fixpoint is reached, followed by the final
