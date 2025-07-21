@@ -221,7 +221,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
                          data: Data,
                          parallelize: ParallelMap): (Option[EGraphWithRoot[_, EGraphT]], Data) = {
         val (newEGraph, newData) = Strategy.this(egraph.graph, data, parallelize)
-        (newEGraph.map(egraph.withGraph), newData)
+        (newEGraph.map(egraph.migrateTo), newData)
       }
     }
   }
@@ -340,6 +340,33 @@ object Strategy {
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphT],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
+      TransformAndRebase(strategy, extractor, areEquivalent)
+    }
+  }
+
+  /**
+   * An implicit class that adds operations to the [[Strategy]] trait for strategies that operate on an e-graph with
+   * metadata and a root.
+   * @param strategy The strategy to add operations to.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
+   * @tparam Data The type of the data carried by the strategy.
+   */
+  implicit class WithMetadataAndRoot[NodeT,
+                                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                                     Data](private val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data]) extends AnyVal {
+
+    /**
+     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
+     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
+     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
+     * extracted tree, the rebasing operation is also skipped.
+     * @param extractor The extractor to use for extracting a tree from the e-graph.
+     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
+     * @return A new strategy that applies the rebasing operation after the original strategy.
+     */
+    def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase(strategy, extractor, areEquivalent)
     }
   }
