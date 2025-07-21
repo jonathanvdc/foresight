@@ -207,6 +207,24 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       }
     }
   }
+
+  /**
+   * Lifts this strategy to operate on an e-graph with a root. The root is typically used to extract trees from the
+   * e-graph.
+   * @return A new strategy that operates on an [[EGraphWithRoot]].
+   */
+  final def withRoot: Strategy[EGraphWithRoot[_, EGraphT], Data] = {
+    new Strategy[EGraphWithRoot[_, EGraphT], Data] {
+      override def initialData: Data = Strategy.this.initialData
+
+      override def apply(egraph: EGraphWithRoot[_, EGraphT],
+                         data: Data,
+                         parallelize: ParallelMap): (Option[EGraphWithRoot[_, EGraphT]], Data) = {
+        val (newEGraph, newData) = Strategy.this(egraph.graph, data, parallelize)
+        (newEGraph.map(EGraphWithRoot(_, egraph.root)), newData)
+      }
+    }
+  }
 }
 
 /**
