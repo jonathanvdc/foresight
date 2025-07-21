@@ -9,25 +9,25 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
  * e-graph.
  *
  * @param extractor The extractor to use for extracting the tree.
- * @param findRoot A function to find the root of the e-graph.
- * @param withRoot A function to create a new e-graph with the specified root.
+ * @param getRoot A function to find the root of the e-graph.
+ * @param setRoot A function to create a new e-graph with the specified root.
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the strategy operates on.
  */
 final case class Rebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](extractor: Extractor[NodeT, EGraphT],
-                                                                                         findRoot: EGraphT => EClassCall,
-                                                                                         withRoot: (EGraphT, EClassCall) => EGraphT) extends Strategy[EGraphT, Unit] {
+                                                                                         getRoot: EGraphT => EClassCall,
+                                                                                         setRoot: (EGraphT, EClassCall) => EGraphT) extends Strategy[EGraphT, Unit] {
   override def initialData: Unit = ()
 
   override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
-    val oldRoot = findRoot(egraph)
+    val oldRoot = getRoot(egraph)
 
     val tree = extractor(oldRoot, egraph)
 
     val emptyGraph = egraph.emptied
     val (newRoot, newGraph) = emptyGraph.add(tree)
 
-    (Some(withRoot(newGraph, newRoot)), ())
+    (Some(setRoot(newGraph, newRoot)), ())
   }
 }
 

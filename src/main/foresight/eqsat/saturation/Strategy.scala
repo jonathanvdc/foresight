@@ -221,7 +221,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
                          data: Data,
                          parallelize: ParallelMap): (Option[EGraphWithRoot[_, EGraphT]], Data) = {
         val (newEGraph, newData) = Strategy.this(egraph.graph, data, parallelize)
-        (newEGraph.map(EGraphWithRoot(_, egraph.root)), newData)
+        (newEGraph.map(egraph.withGraph), newData)
       }
     }
   }

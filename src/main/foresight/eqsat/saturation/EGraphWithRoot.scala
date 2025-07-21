@@ -28,6 +28,15 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
     EGraphWithRoot(graph, Some(root))
   }
 
+  /**
+   * Creates a new [[EGraphWithRoot]] that retains the current root but uses a new underlying e-graph.
+   * @param newGraph The new underlying e-graph.
+   * @return A new [[EGraphWithRoot]] with the specified e-graph and the current root.
+   */
+  def withGraph(newGraph: Repr): EGraphWithRoot[Node, Repr] = {
+    EGraphWithRoot(newGraph, root)
+  }
+
   override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = graph.tryCanonicalize(ref)
   override def canonicalize(node: ENode[Node]): ShapeCall[Node] = graph.canonicalize(node)
   override def classes: Iterable[EClassRef] = graph.classes

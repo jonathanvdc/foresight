@@ -13,16 +13,16 @@ import foresight.eqsat.parallel.ParallelMap
  *
  * @param transform The strategy to apply to the e-graph before rebasing.
  * @param extractor The extractor to use for extracting the tree.
- * @param findRoot A function to find the root of the e-graph.
- * @param withRoot A function to create a new e-graph with the specified root.
+ * @param getRoot A function to find the root of the e-graph.
+ * @param setRoot A function to create a new e-graph with the specified root.
  * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the strategy operates on.
  */
 final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphT, Data],
                                                                                                            extractor: Extractor[NodeT, EGraphT],
-                                                                                                           findRoot: EGraphT => EClassCall,
-                                                                                                           withRoot: (EGraphT, EClassCall) => EGraphT,
+                                                                                                           getRoot: EGraphT => EClassCall,
+                                                                                                           setRoot: (EGraphT, EClassCall) => EGraphT,
                                                                                                            areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean) extends Strategy[EGraphT, (Data, Option[Tree[NodeT]])] {
   override def initialData: (Data, Option[Tree[NodeT]]) = (transform.initialData, None)
 
@@ -39,7 +39,7 @@ final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
         // tree. Then, we extract the new tree from the new e-graph. If the new tree is equivalent to the old tree,
         // we can skip rebasing and determine that the e-graph has not changed. Otherwise, we add the new tree to an
         // empty e-graph and return the new e-graph with the new root.
-        val oldRoot = findRoot(egraph)
+        val oldRoot = getRoot(egraph)
         val oldTree = data._2
         val newTree = extractor(oldRoot, newEGraph)
 
@@ -50,7 +50,7 @@ final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
 
         val emptyGraph = newEGraph.emptied
         val (newRoot, newGraph) = emptyGraph.add(newTree)
-        (Some(withRoot(newGraph, newRoot)), (newInnerData, Some(newTree)))
+        (Some(setRoot(newGraph, newRoot)), (newInnerData, Some(newTree)))
     }
   }
 }
