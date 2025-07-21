@@ -1,6 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
+import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike, Tree}
 
@@ -91,11 +92,11 @@ object RebasingStrategies {
    *         phase.
    */
   def isaria[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](
-      extractor: Extractor[NodeT, EGraphT],
-      recurrentPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
-      finalPhase: Strategy[EGraphWithRoot[NodeT, EGraphT], Unit],
+      extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
+      recurrentPhase: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+      finalPhase: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Unit],
       recurrentPhaseTimeout: Option[Duration] = None,
-      areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
+      areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Unit] = {
 
     // Logic based on Figure 3 of the Isaria paper: Automatic Generation of Vectorizing Compilers for
     // Customizable Digital Signal Processors by Thomas and Bornholt.
