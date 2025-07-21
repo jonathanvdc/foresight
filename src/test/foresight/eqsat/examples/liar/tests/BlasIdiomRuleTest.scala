@@ -3,8 +3,8 @@ package foresight.eqsat.examples.liar.tests
 import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplicationWithCaching, RebasingStrategies, Strategy}
+import foresight.eqsat.{EGraph, MixedTree, Slot, Tree}
 import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTest {
@@ -19,6 +19,20 @@ class BlasIdiomRuleTest {
       .addAnalysis(TypeInferenceAnalysis)
       .closeMetadata
       .dropData
+
+  private def isariaStrategy(rules: Seq[LiarRule] = CoreRules.allWithConstArray ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraphWithRoot[ArrayIR, EGraph[ArrayIR]], Unit] = {
+    RebasingStrategies.isaria(
+      TimeComplexity.analysis.extractor[EGraphWithRoot[ArrayIR, EGraph[ArrayIR]]],
+      ???,
+      ???,
+      ???,
+      (left: Tree[ArrayIR], right: Tree[ArrayIR]) => TimeComplexity(left) == TimeComplexity(right))
+      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
+      .addAnalysis(TimeComplexity.analysis)
+      .addAnalysis(TypeInferenceAnalysis)
+      .closeMetadata
+      .dropData
+  }
 
   @Test
   def findMemsetZero(): Unit = {
