@@ -16,6 +16,16 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   extends EGraphLike[NodeT, EGraphWithMetadata[NodeT, Repr]] with EGraph[NodeT] {
 
   /**
+   * Creates a new e-graph with the same metadata but an underlying e-graph of a different type. The underlying e-graph
+   * must contain the same nodes and classes as the current e-graph.
+   * @param newRepr The new underlying e-graph.
+   * @return A new e-graph with the same metadata.
+   */
+  def migrateTo[Repr2 <: EGraphLike[NodeT, Repr2] with EGraph[NodeT]](newRepr: Repr2): EGraphWithMetadata[NodeT, Repr2] = {
+    EGraphWithMetadata(newRepr, metadata)
+  }
+
+  /**
    * Registers metadata with the e-graph.
    * @param name The name of the metadata.
    * @param metadata The metadata to add.
