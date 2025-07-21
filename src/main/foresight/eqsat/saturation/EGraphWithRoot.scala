@@ -33,7 +33,7 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
    * @param newGraph The new underlying e-graph.
    * @return A new [[EGraphWithRoot]] with the specified e-graph and the current root.
    */
-  def withGraph(newGraph: Repr): EGraphWithRoot[Node, Repr] = {
+  def migrateTo[Repr2 <: EGraphLike[Node, Repr2] with EGraph[Node]](newGraph: Repr2): EGraphWithRoot[Node, Repr2] = {
     EGraphWithRoot(newGraph, root)
   }
 
