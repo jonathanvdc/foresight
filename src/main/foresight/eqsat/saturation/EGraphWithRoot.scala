@@ -14,6 +14,11 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
                                                                                         root: Option[EClassCall])
   extends EGraphLike[Node, EGraphWithRoot[Node, Repr]] with EGraph[Node] {
 
+  assert(
+    root.forall(r => graph.contains(r.ref)),
+    "The root must be an e-class call in the underlying e-graph."
+  )
+
   /**
    * Creates a new [[EGraphWithRoot]] that retains the current graph but sets a new root.
    * @param root The new root of the e-graph.
