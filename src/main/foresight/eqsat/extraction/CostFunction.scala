@@ -1,6 +1,6 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.Slot
+import foresight.eqsat.{Slot, SlotMap, Tree}
 
 /**
  * A cost function for extraction analyses.
@@ -20,4 +20,30 @@ trait CostFunction[NodeT, C] {
             definitions: Seq[Slot],
             uses: Seq[Slot],
             args: Seq[ExtractionTreeCall[NodeT, C]]): C
+
+  /**
+   * Applies the cost function to a tree.
+   * @param tree The tree to which the cost function is applied.
+   * @return The cost of the tree.
+   */
+  final def apply(tree: Tree[NodeT]): C = {
+    toExtractionTree(tree).cost
+  }
+
+  private final def toExtractionTreeCall(tree: Tree[NodeT]): ExtractionTreeCall[NodeT, C] = {
+    val extractionTree = toExtractionTree(tree)
+    ExtractionTreeCall(
+      extractionTree,
+      SlotMap.identity(extractionTree.slotSet))
+  }
+
+  private final def toExtractionTree(tree: Tree[NodeT]): ExtractionTree[NodeT, C] = {
+    val args = tree.args.map(toExtractionTreeCall)
+    ExtractionTree(
+      apply(tree.nodeType, tree.definitions, tree.uses, args),
+      tree.nodeType,
+      tree.definitions,
+      tree.uses,
+      args)
+  }
 }
