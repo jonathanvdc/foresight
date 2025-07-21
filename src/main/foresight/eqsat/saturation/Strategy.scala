@@ -367,7 +367,7 @@ object Strategy {
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
-      TransformAndRebase(strategy, extractor, areEquivalent)
+      TransformAndRebase.withMetadata(strategy, extractor, areEquivalent)
     }
   }
 }
