@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.extraction.Extractor
+import foresight.eqsat.extraction.{CostFunction, ExtractionAnalysis, Extractor}
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike, Tree}
@@ -106,5 +106,41 @@ object RebasingStrategies {
       .untilFixpoint
       .thenApply(finalPhase)
       .dropData
+  }
+
+  /**
+   * A strategy that operates in two phases: a recurrent phase and a final phase. In the recurrent phase, it applies a
+   * transformation strategy to the e-graph, extracts a tree using the provided extractor, and rebases the e-graph
+   * repeatedly until either a fixpoint is reached or the specified timeout is exceeded. In the final phase, it applies
+   * a final transformation to the e-graph, which does not involve rebasing.
+   *
+   * This version of the strategy uses an [[ExtractionAnalysis]] to determine the cost of trees and whether two trees
+   * are equivalent based on their costs.
+   *
+   * @param analysis The extraction analysis that provides the extractor and cost function for the e-graph.
+   * @param recurrentPhase The strategy to apply in the recurrent phase, which is applied repeatedly until a fixpoint is
+   *                       reached or the timeout is exceeded.
+   * @param finalPhase The strategy to apply in the final phase, which is applied after the recurrent phase.
+   * @param recurrentPhaseTimeout An optional timeout for the recurrent phase. If provided, the recurrent phase will
+   *                              stop applying the recurrent strategy after the specified duration.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph, which must be a subtype of [[EGraphLike]] and [[EGraph]].
+   * @tparam Data The type of data that the recurrent phase operates on. This can be used to carry additional
+   *              information during the transformation process.
+   * @return A strategy that applies the recurrent phase and rebases until a fixpoint is reached, followed by the final
+   *         phase.
+   */
+  def isaria[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data, C](
+      analysis: ExtractionAnalysis[NodeT, C],
+      recurrentPhase: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+      finalPhase: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Unit],
+      recurrentPhaseTimeout: Option[Duration]): Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Unit] = {
+
+    isaria(
+      analysis.extractor,
+      recurrentPhase,
+      finalPhase,
+      recurrentPhaseTimeout,
+      (x: Tree[NodeT], y: Tree[NodeT]) => analysis.cost(x) == analysis.cost(y))
   }
 }

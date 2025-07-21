@@ -22,11 +22,10 @@ class BlasIdiomRuleTest {
 
   private def isariaStrategy(rules: Seq[LiarRule] = CoreRules.allWithConstArray ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraphWithRoot[ArrayIR, EGraph[ArrayIR]], Unit] = {
     RebasingStrategies.isaria(
-      TimeComplexity.analysis.extractor[EGraphWithRoot[ArrayIR, EGraph[ArrayIR]]],
+      TimeComplexity.analysis,
       ???,
       ???,
-      ???,
-      (left: Tree[ArrayIR], right: Tree[ArrayIR]) => TimeComplexity(left) == TimeComplexity(right))
+      None)
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TimeComplexity.analysis)
       .addAnalysis(TypeInferenceAnalysis)
