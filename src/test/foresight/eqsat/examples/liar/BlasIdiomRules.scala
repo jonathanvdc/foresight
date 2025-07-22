@@ -1,13 +1,16 @@
 package foresight.eqsat.examples.liar
 
-import CoreRules.{LiarEGraph, LiarRule}
 import SearcherOps.SearcherOfMetadataPatternMatchOps
 import foresight.eqsat.examples.liar.ApplierOps.PatternApplierOps
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 import foresight.eqsat.rewriting.{Applier, Rule}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 
-object BlasIdiomRules {
+final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EGraph[ArrayIR]]() {
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
+
   def all: Seq[LiarRule] = oneWayRules.map(typeChecked) ++ oneWayRules.map(_.tryReverse.get).map(typeChecked)
 
   def oneWayRules: Seq[LiarRule] = detectionRules ++ transformationRules
@@ -39,7 +42,7 @@ object BlasIdiomRules {
           i,
           Int32Type.toTree,
           ConstDouble(0.0).toTree))
-        .toSearcher[LiarEGraph],
+        .toSearcher[MetadataEGraph],
       BlasIdioms.Memset(MixedTree.Call(N), zero).toApplier)
   }
 
@@ -69,7 +72,7 @@ object BlasIdiomRules {
                 IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree)),
                 IndexAt(MixedTree.Call(ys), Var(i, Int32Type.toTree))),
               Var(acc, MixedTree.Call(scalarType))))))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(xs, i, acc)
         .requireIndependent(ys, i, acc)
         .requireTypes(Map(
@@ -100,7 +103,7 @@ object BlasIdiomRules {
               MixedTree.Call(a),
               IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree))),
             IndexAt(MixedTree.Call(ys), Var(i, Int32Type.toTree)))))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(a, i)
         .requireIndependent(xs, i)
         .requireIndependent(ys, i)
@@ -139,7 +142,7 @@ object BlasIdiomRules {
             Mul(
               MixedTree.Call(beta),
               IndexAt(MixedTree.Call(y), Var(i, Int32Type.toTree))))))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(alpha, i)
         .requireIndependent(a, i)
         .requireIndependent(x, i)
@@ -187,7 +190,7 @@ object BlasIdiomRules {
             IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)),
             MixedTree.Call(beta),
             IndexAt(MixedTree.Call(c), Var(i, Int32Type.toTree)))))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(alpha, i)
         .requireIndependent(a, i)
         .requireIndependent(b, i)
@@ -231,7 +234,7 @@ object BlasIdiomRules {
               j,
               Int32Type.toTree,
               IndexAt(IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)), Var(j, Int32Type.toTree))))))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(a, i, j)
         .requireTypes(Map(
           a -> ArrayType(ArrayType(DoubleType.toTree, MixedTree.Call(N)), MixedTree.Call(M)))),
@@ -261,7 +264,7 @@ object BlasIdiomRules {
               MixedTree.Call(a),
               IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree))))),
         MixedTree.Call(ys))
-        .toSearcher[LiarEGraph]
+        .toSearcher[MetadataEGraph]
         .requireIndependent(a, i)
         .requireIndependent(xs, i)
         .requireTypes(Map(
@@ -292,14 +295,14 @@ object BlasIdiomRules {
             MixedTree.Call(x),
             MixedTree.Call(beta),
             MixedTree.Call(y))
-          .toSearcher[LiarEGraph],
+          .toSearcher[MetadataEGraph],
         BlasIdioms.Gemv(!transposition)(
           MixedTree.Call(alpha),
           MixedTree.Call(a),
           MixedTree.Call(x),
           MixedTree.Call(beta),
           MixedTree.Call(y))
-          .toApplier[LiarEGraph])
+          .toApplier[MetadataEGraph])
     }
   }
 
@@ -324,14 +327,14 @@ object BlasIdiomRules {
           MixedTree.Call(b),
           MixedTree.Call(beta),
           MixedTree.Call(c))
-          .toSearcher[LiarEGraph],
+          .toSearcher[MetadataEGraph],
         BlasIdioms.Gemm(!aTransposed, bTransposed)(
           MixedTree.Call(alpha),
           MixedTree.Call(a),
           MixedTree.Call(b),
           MixedTree.Call(beta),
           MixedTree.Call(c))
-          .toApplier[LiarEGraph])
+          .toApplier[MetadataEGraph])
     }
   }
 
@@ -356,25 +359,25 @@ object BlasIdiomRules {
             BlasIdioms.Transpose(MixedTree.Call(b)),
             MixedTree.Call(beta),
             MixedTree.Call(c))
-          .toSearcher[LiarEGraph],
+          .toSearcher[MetadataEGraph],
         BlasIdioms.Gemm(aTransposed, !bTransposed)(
             MixedTree.Call(alpha),
             MixedTree.Call(a),
             MixedTree.Call(b),
             MixedTree.Call(beta),
             MixedTree.Call(c))
-          .toApplier[LiarEGraph])
+          .toApplier[MetadataEGraph])
     }
   }
 
   private def typeChecked(rule: LiarRule): LiarRule = {
-    def addTypeCheckingToApplier(applier: Applier[ArrayIR, PatternMatch[ArrayIR], LiarEGraph]): Applier[ArrayIR, PatternMatch[ArrayIR], LiarEGraph] = {
+    def addTypeCheckingToApplier(applier: Applier[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]): Applier[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph] = {
       applier match {
-        case p: PatternApplier[ArrayIR, LiarEGraph] => p.typeChecked
-        case filter: Applier.Filter[ArrayIR, PatternMatch[ArrayIR], LiarEGraph] =>
+        case p: PatternApplier[ArrayIR, MetadataEGraph] => p.typeChecked
+        case filter: Applier.Filter[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph] =>
           Applier.Filter(addTypeCheckingToApplier(filter.applier), filter.filter)
 
-        case requirements: TypeRequirements.ApplierWithRequirements[EGraph[ArrayIR]] =>
+        case requirements: TypeRequirements.ApplierWithRequirements[BaseEGraph] =>
           TypeRequirements.ApplierWithRequirements(
             addTypeCheckingToApplier(requirements.applier),
             requirements.types)

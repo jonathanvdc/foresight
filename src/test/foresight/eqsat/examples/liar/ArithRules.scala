@@ -2,12 +2,14 @@ package foresight.eqsat.examples.liar
 
 import SearcherOps._
 import ApplierOps._
-import foresight.eqsat.MixedTree
+import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.rewriting.patterns.Pattern
+import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 
-object ArithRules {
-  import CoreRules.{LiarRule,LiarEGraph}
+final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EGraph[ArrayIR]]() {
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
 
   def all: Seq[LiarRule] = Seq(
     simplifyAddZeroRight,
@@ -28,7 +30,7 @@ object ArithRules {
     Rule(
       "x + 0 -> x",
       Add(x, ConstDouble(0.0).toTree).toSearcher,
-      x.toApplier[LiarEGraph].typeChecked)
+      x.toApplier[MetadataEGraph].typeChecked)
   }
 
   val simplifyMulOneRight: LiarRule = {
@@ -37,7 +39,7 @@ object ArithRules {
     Rule(
       "x * 1 -> x",
       Mul(x, ConstDouble(1.0).toTree).toSearcher,
-      x.toApplier[LiarEGraph].typeChecked)
+      x.toApplier[MetadataEGraph].typeChecked)
   }
 
   val simplifyMulOneLeft: LiarRule = {
@@ -46,7 +48,7 @@ object ArithRules {
     Rule(
       "1 * x -> x",
       Mul(ConstInt32(1).toTree, x).toSearcher,
-      x.toApplier[LiarEGraph].typeChecked)
+      x.toApplier[MetadataEGraph].typeChecked)
   }
 
   val simplifyMulZeroLeft: LiarRule = {
@@ -56,7 +58,7 @@ object ArithRules {
       "0 * x -> 0",
       Mul(ConstDouble(0.0).toTree, x).toSearcher,
       MixedTree.fromTree(ConstDouble(0.0).toTree)
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -71,7 +73,7 @@ object ArithRules {
         .requireMetadata
         .bindTypes(Map(x -> xType)).requireDoubleType(xType),
       Add(MixedTree.Call(x), ConstDouble(0.0).toTree)
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -87,7 +89,7 @@ object ArithRules {
         .bindTypes(Map(x -> xType))
         .requireDoubleType(xType),
       Mul(ConstDouble(1.0).toTree, MixedTree.Call(x))
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -103,7 +105,7 @@ object ArithRules {
         .bindTypes(Map(x -> xType))
         .requireInt32Type(xType),
       Mul(MixedTree.Call(x), ConstInt32(1).toTree)
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -114,7 +116,7 @@ object ArithRules {
     Rule(
       "x * y -> y * x",
       Mul(x, y).toSearcher,
-      Mul(y, x).toApplier[LiarEGraph].typeChecked)
+      Mul(y, x).toApplier[MetadataEGraph].typeChecked)
   }
 
   val mulAssociativity1: LiarRule = {
@@ -125,7 +127,7 @@ object ArithRules {
     Rule(
       "x * (y * z) -> (x * y) * z",
       Mul(x, Mul(y, z)).toSearcher,
-      Mul(Mul(x, y), z).toApplier[LiarEGraph].typeChecked)
+      Mul(Mul(x, y), z).toApplier[MetadataEGraph].typeChecked)
   }
 
   val mulAssociativity2: LiarRule = {
@@ -136,6 +138,6 @@ object ArithRules {
     Rule(
       "(x * y) * z -> x * (y * z)",
       Mul(Mul(x, y), z).toSearcher,
-      Mul(x, Mul(y, z)).toApplier[LiarEGraph].typeChecked)
+      Mul(x, Mul(y, z)).toApplier[MetadataEGraph].typeChecked)
   }
 }

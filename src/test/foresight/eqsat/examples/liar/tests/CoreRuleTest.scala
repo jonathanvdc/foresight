@@ -1,15 +1,23 @@
 package foresight.eqsat.examples.liar.tests
 
-import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
+import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
 import org.junit.Test
 
 class CoreRuleTest {
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = CoreRules.all): Strategy[EGraph[ArrayIR], Unit] =
+  type BaseEGraph = EGraph[ArrayIR]
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
+
+  private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
+
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all): Strategy[BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .untilFixpoint
@@ -55,7 +63,7 @@ class CoreRuleTest {
     val (c2, egraph3) = egraph2.add(one)
     val (c3, egraph4) = egraph3.add(ArrayType(DoubleType.toTree, ConstIntType(100).toTree))
 
-    for (egraph5 <- Seq(strategy(2)(egraph4).get, strategy(1, CoreRules.allWithConstArray)(egraph4).get)) {
+    for (egraph5 <- Seq(strategy(2)(egraph4).get, strategy(1, coreRules.allWithConstArray)(egraph4).get)) {
       val x = Slot.fresh()
       val indexedBuild = IndexAt(Build(ConstIntType(100).toTree, Lambda(x, Int32Type.toTree, zero)), one)
 
@@ -79,7 +87,7 @@ class CoreRuleTest {
 
     val (c1, egraph2) = egraph.add(application)
 
-    val egraph3 = strategy(1, rules = CoreRules.eliminationRules)(egraph2).get
+    val egraph3 = strategy(1, rules = coreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
   }
@@ -97,7 +105,7 @@ class CoreRuleTest {
 
     val (c1, egraph2) = egraph.add(application)
 
-    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+    val egraph3 = strategy(2, rules = coreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
   }
@@ -115,7 +123,7 @@ class CoreRuleTest {
 
     val (c1, egraph2) = egraph.add(application)
 
-    val egraph3 = strategy(2, rules = Seq(CoreRules.eliminateLambda))(egraph2, ParallelMap.sequential).get
+    val egraph3 = strategy(2, rules = Seq(coreRules.eliminateLambda))(egraph2, ParallelMap.sequential).get
 
     assert(egraph3.areSame(c1, egraph3.find(Add(zero, zero)).get))
   }
@@ -133,7 +141,7 @@ class CoreRuleTest {
 
     assert(!egraph2.areSame(c1, egraph2.find(zero).get))
 
-    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+    val egraph3 = strategy(2, rules = coreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
   }
@@ -152,7 +160,7 @@ class CoreRuleTest {
 
     assert(!egraph2.areSame(c1, egraph2.find(zero).get))
 
-    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+    val egraph3 = strategy(2, rules = coreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(zero).get))
   }
@@ -171,7 +179,7 @@ class CoreRuleTest {
 
     assert(!egraph2.areSame(c1, egraph2.find(one).get))
 
-    val egraph3 = strategy(2, rules = CoreRules.eliminationRules)(egraph2).get
+    val egraph3 = strategy(2, rules = coreRules.eliminationRules)(egraph2).get
 
     assert(egraph3.areSame(c1, egraph3.find(one).get))
   }

@@ -1,14 +1,22 @@
 package foresight.eqsat.examples.liar.tests
 
-import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
+import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.patterns.PatternMatch
+import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
 import org.junit.Test
 
 class ArithRuleTest {
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = ArithRules.all): Strategy[EGraph[ArrayIR], Unit] =
+  type BaseEGraph = EGraphWithRoot[ArrayIR, EGraph[ArrayIR]]
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
+
+  private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
+
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = arithRules.all): Strategy[BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .untilFixpoint
@@ -20,13 +28,11 @@ class ArithRuleTest {
 
   @Test
   def simplifyAddZeroRight(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), DoubleType.toTree)
     val zero = ConstDouble(0.0).toTree
     val sum = Add(x, zero)
 
-    val (_, egraph2) = egraph.add(sum)
+    val (_, egraph2) = EGraphWithRoot.from(sum)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -35,13 +41,11 @@ class ArithRuleTest {
 
   @Test
   def simplifyMulOneRight(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), DoubleType.toTree)
     val one = ConstDouble(1.0).toTree
     val product = Mul(x, one)
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -50,13 +54,11 @@ class ArithRuleTest {
 
   @Test
   def simplifyMulOneLeft(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), Int32Type.toTree)
     val one = ConstInt32(1).toTree
     val product = Mul(one, x)
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -65,13 +67,11 @@ class ArithRuleTest {
 
   @Test
   def simplifyMulZeroLeft(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), DoubleType.toTree)
     val zero = ConstDouble(0.0).toTree
     val product = Mul(zero, x)
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -80,12 +80,10 @@ class ArithRuleTest {
 
   @Test
   def introduceAddZero(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), DoubleType.toTree)
     val sum = x
 
-    val (_, egraph2) = egraph.add(sum)
+    val (_, egraph2) = EGraphWithRoot.from(sum)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -94,12 +92,10 @@ class ArithRuleTest {
 
   @Test
   def introduceMulOneLeft(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), DoubleType.toTree)
     val product = x
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -108,12 +104,10 @@ class ArithRuleTest {
 
   @Test
   def introduceMulOneRight(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), Int32Type.toTree)
     val product = x
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -122,13 +116,11 @@ class ArithRuleTest {
 
   @Test
   def mulCommutes(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), Int32Type.toTree)
     val y = Var(Slot.fresh(), Int32Type.toTree)
     val product = Mul(x, y)
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -137,14 +129,12 @@ class ArithRuleTest {
 
   @Test
   def mulAssociates(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), Int32Type.toTree)
     val y = Var(Slot.fresh(), Int32Type.toTree)
     val z = Var(Slot.fresh(), Int32Type.toTree)
     val product = Mul(Mul(x, y), z)
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 
@@ -153,14 +143,12 @@ class ArithRuleTest {
 
   @Test
   def mulAssociates2(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val x = Var(Slot.fresh(), Int32Type.toTree)
     val y = Var(Slot.fresh(), Int32Type.toTree)
     val z = Var(Slot.fresh(), Int32Type.toTree)
     val product = Mul(x, Mul(y, z))
 
-    val (_, egraph2) = egraph.add(product)
+    val (_, egraph2) = EGraphWithRoot.from(product)
 
     val egraph3 = strategy(1)(egraph2).get
 

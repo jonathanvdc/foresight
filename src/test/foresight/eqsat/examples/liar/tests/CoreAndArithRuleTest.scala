@@ -1,14 +1,23 @@
 package foresight.eqsat.examples.liar.tests
 
-import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
+import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EGraph, Slot}
 import org.junit.Test
 
 class CoreAndArithRuleTest {
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = CoreRules.all ++ ArithRules.all): Strategy[EGraph[ArrayIR], Unit] =
+  type BaseEGraph = EGraph[ArrayIR]
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
+
+  private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
+  private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
+
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all ++ arithRules.all): Strategy[EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .untilFixpoint
@@ -32,7 +41,7 @@ class CoreAndArithRuleTest {
     val (c2, egraph3) = egraph2.add(zero)
     val (c3, egraph4) = egraph3.add(ArrayType(DoubleType.toTree, ConstIntType(100).toTree))
 
-    val egraph5 = strategy(2, rules = CoreRules.all)(egraph4).get
+    val egraph5 = strategy(2, rules = coreRules.all)(egraph4).get
 
     assert(egraph5.contains(vector))
     assert(egraph5.areSame(c, egraph5.find(vector).get))

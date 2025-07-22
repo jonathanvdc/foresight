@@ -1,15 +1,25 @@
 package foresight.eqsat.examples.liar.tests
 
-import foresight.eqsat.examples.liar.CoreRules.LiarRule
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplicationWithCaching, RebasingStrategies, Strategy}
-import foresight.eqsat.{EGraph, MixedTree, Slot, Tree}
+import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.patterns.PatternMatch
+import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, RebasingStrategies, Strategy}
+import foresight.eqsat.{EGraph, MixedTree, Slot}
 import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTest {
+  type BaseEGraph = EGraphWithRoot[ArrayIR, EGraph[ArrayIR]]
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
+
+  private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
+  private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
+  private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
+
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = CoreRules.allWithConstArray ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraph[ArrayIR], Unit] =
+                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .untilFixpoint
@@ -20,11 +30,11 @@ class BlasIdiomRuleTest {
       .closeMetadata
       .dropData
 
-  private def isariaStrategy(rules: Seq[LiarRule] = CoreRules.allWithConstArray ++ ArithRules.all ++ BlasIdiomRules.all): Strategy[EGraphWithRoot[ArrayIR, EGraph[ArrayIR]], Unit] = {
+  private def isariaStrategy(rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     RebasingStrategies.isaria(
       TimeComplexity.analysis,
-      ???,
-      ???,
+      MaximalRuleApplication(rules),
+      MaximalRuleApplication(rules),
       None)
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TimeComplexity.analysis)
@@ -35,8 +45,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def findMemsetZero(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
 
     val zeroArray = {
@@ -51,7 +59,7 @@ class BlasIdiomRuleTest {
 
     val memsetZero = BlasIdioms.Memset(N, ConstDouble(0.0).toTree)
 
-    val (c1, egraph2) = egraph.add(zeroArray)
+    val (c1, egraph2) = EGraphWithRoot.from(zeroArray)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -64,8 +72,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def findDDot(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
 
     val xs = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
@@ -92,7 +98,7 @@ class BlasIdiomRuleTest {
 
     val ddot = BlasIdioms.Dot(xs, ys)
 
-    val (c1, egraph2) = egraph.add(dotProduct)
+    val (c1, egraph2) = EGraphWithRoot.from(dotProduct)
 
     val egraph4 = strategy(2)(egraph2).get
 
@@ -106,8 +112,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def doNotFindDDot(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
 
     val i = Slot.fresh()
@@ -134,7 +138,7 @@ class BlasIdiomRuleTest {
 
     val ddot = BlasIdioms.Dot(xs, ys)
 
-    val (_, egraph2) = egraph.add(dotProduct)
+    val (_, egraph2) = EGraphWithRoot.from(dotProduct)
 
     val egraph4 = strategy(2)(egraph2).get
 
@@ -146,8 +150,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def findAxpy(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
 
     val a = Var(Slot.fresh(), DoubleType.toTree)
@@ -170,7 +172,7 @@ class BlasIdiomRuleTest {
             IndexAt(ys, Var(i, Int32Type.toTree)))))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
     val egraph4 = strategy(2)(egraph2).get
 
@@ -180,8 +182,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def findGemv(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val K = ConstIntType(200).toTree
 
@@ -209,9 +209,9 @@ class BlasIdiomRuleTest {
               IndexAt(y, Var(i, Int32Type.toTree))))))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
-    val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemv))(egraph2).get
+    val egraph4 = strategy(1, rules = Seq(blasIdiomRules.detectGemv))(egraph2).get
 
     assert(egraph4.contains(gemv))
     assert(egraph4.areSame(c1, egraph4.find(gemv).get))
@@ -222,8 +222,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def findGemvInMv(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val K = ConstIntType(200).toTree
 
@@ -245,7 +243,7 @@ class BlasIdiomRuleTest {
           BlasIdioms.Dot(IndexAt(a, Var(i, Int32Type.toTree)), x)))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
     val egraph4 = strategy(4)(egraph2).get
 
@@ -258,8 +256,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def findGemm(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val M = ConstIntType(100).toTree
     val N = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -287,9 +283,9 @@ class BlasIdiomRuleTest {
             IndexAt(c, Var(i, Int32Type.toTree)))))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
-    val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemm))(egraph2).get
+    val egraph4 = strategy(1, rules = Seq(blasIdiomRules.detectGemm))(egraph2).get
 
     assert(egraph4.contains(gemm))
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))
@@ -297,8 +293,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def expandGemm(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val M = ConstIntType(100).toTree
     val N = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -326,9 +320,9 @@ class BlasIdiomRuleTest {
             IndexAt(c, Var(i, Int32Type.toTree)))))
     }
 
-    val (c1, egraph2) = egraph.add(gemm)
+    val (c1, egraph2) = EGraphWithRoot.from(gemm)
 
-    val egraph4 = strategy(1, rules = Seq(BlasIdiomRules.detectGemm.tryReverse.get))(egraph2).get
+    val egraph4 = strategy(1, rules = Seq(blasIdiomRules.detectGemm.tryReverse.get))(egraph2).get
 
     assert(egraph4.contains(build))
     assert(egraph4.areSame(c1, egraph4.find(build).get))
@@ -340,8 +334,6 @@ class BlasIdiomRuleTest {
   @Ignore("Finding gemm in a matrix-matrix multiplication is slow.")
   @Test
   def findGemmInMm(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val M = ConstIntType(100).toTree
     val N = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -370,7 +362,7 @@ class BlasIdiomRuleTest {
               BlasIdioms.Dot(IndexAt(b, Var(j, Int32Type.toTree)), IndexAt(a, Var(i, Int32Type.toTree)))))))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
     val egraph4 = strategy(6)(egraph2).get
 
@@ -381,8 +373,6 @@ class BlasIdiomRuleTest {
   @Ignore("Finding idioms in the gemm kernel is slow.")
   @Test
   def findGemmInGemmKernel(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val M = ConstIntType(100).toTree
     val N = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -401,7 +391,7 @@ class BlasIdiomRuleTest {
         b),
       Lib.matrixScalarProduct(c, beta))
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
     val egraph4 = strategy(5)(egraph2).get
 
@@ -414,8 +404,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def findTranspose(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val M = ConstIntType(200).toTree
 
@@ -439,7 +427,7 @@ class BlasIdiomRuleTest {
               IndexAt(IndexAt(a, Var(j, Int32Type.toTree)), Var(i, Int32Type.toTree))))))
     }
 
-    val (c1, egraph2) = egraph.add(build)
+    val (c1, egraph2) = EGraphWithRoot.from(build)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -449,8 +437,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def hoistLhsMulFromDot(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
 
     val xs = Var(Slot.fresh(), ArrayType(DoubleType.toTree, N))
@@ -472,7 +458,7 @@ class BlasIdiomRuleTest {
 
     val dotProduct2 = Mul(a, BlasIdioms.Dot(xs, ys))
 
-    val (c1, egraph2) = egraph.add(dotProduct)
+    val (c1, egraph2) = EGraphWithRoot.from(dotProduct)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -482,8 +468,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def foldTransposeIntoGemvF(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val K = ConstIntType(200).toTree
 
@@ -496,7 +480,7 @@ class BlasIdiomRuleTest {
     val gemvT = BlasIdioms.Gemv(true)(alpha, a, x, beta, y)
     val gemvF = BlasIdioms.Gemv(false)(alpha, BlasIdioms.Transpose(a), x, beta, y)
 
-    val (c1, egraph2) = egraph.add(gemvF)
+    val (c1, egraph2) = EGraphWithRoot.from(gemvF)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -506,8 +490,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def foldTransposeIntoGemvT(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val K = ConstIntType(200).toTree
 
@@ -520,7 +502,7 @@ class BlasIdiomRuleTest {
     val gemvT = BlasIdioms.Gemv(true)(alpha, BlasIdioms.Transpose(a), x, beta, y)
     val gemvF = BlasIdioms.Gemv(false)(alpha, a, x, beta, y)
 
-    val (c1, egraph2) = egraph.add(gemvT)
+    val (c1, egraph2) = EGraphWithRoot.from(gemvT)
 
     val egraph4 = strategy(1)(egraph2).get
 
@@ -530,8 +512,6 @@ class BlasIdiomRuleTest {
 
   @Test
   def foldTransposeABIntoGemmFF(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val M = ConstIntType(100).toTree
     val N = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -553,7 +533,7 @@ class BlasIdiomRuleTest {
 
     val gemmTT = BlasIdioms.Gemm(aTransposed = true, bTransposed = true)(alpha, a, b, beta, c)
 
-    val (c1, egraph2) = egraph.add(gemmFF)
+    val (c1, egraph2) = EGraphWithRoot.from(gemmFF)
 
     val egraph3 = strategy(2)(egraph2).get
 
@@ -571,8 +551,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def gemvIsOptimal(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val K = ConstIntType(200).toTree
 
@@ -584,7 +562,7 @@ class BlasIdiomRuleTest {
 
     val gemv = BlasIdioms.Gemv(aTransposed = false)(alpha, a, x, beta, y)
 
-    val (c1, egraph2) = egraph.add(gemv)
+    val (c1, egraph2) = EGraphWithRoot.from(gemv)
 
     val egraph4 = strategy(7)(egraph2).get
 
@@ -596,8 +574,6 @@ class BlasIdiomRuleTest {
    */
   @Test
   def gemmIsOptimal(): Unit = {
-    val egraph = EGraph.empty[ArrayIR]
-
     val N = ConstIntType(100).toTree
     val M = ConstIntType(200).toTree
     val K = ConstIntType(300).toTree
@@ -610,7 +586,7 @@ class BlasIdiomRuleTest {
 
     val gemm = BlasIdioms.Gemm(aTransposed = false, bTransposed = false)(alpha, a, b, beta, c)
 
-    val (c1, egraph2) = egraph.add(gemm)
+    val (c1, egraph2) = EGraphWithRoot.from(gemm)
 
     val egraph4 = strategy(6)(egraph2).get
 

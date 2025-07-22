@@ -2,14 +2,14 @@ package foresight.eqsat.examples.liar
 
 import ApplierOps._
 import SearcherOps._
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 
-object CoreRules {
-  type LiarEGraph = EGraphWithMetadata[ArrayIR, EGraph[ArrayIR]]
-  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], LiarEGraph]
+final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EGraph[ArrayIR]]() {
+  type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
 
   def all: Seq[LiarRule] = introductionRules ++ eliminationRules
 
@@ -39,14 +39,14 @@ object CoreRules {
     Rule(
       "e -> (build (λi. e) N)[j]",
       MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
-        .toSearcher[EGraph[ArrayIR]]
+        .toSearcher[BaseEGraph]
         .requireValues(e)
         .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
           MixedTree.Call[ArrayIR, Pattern[ArrayIR]](j)
-            .toSearcher[EGraph[ArrayIR]]
+            .toSearcher[BaseEGraph]
             .requireValues(j)
             .requireMetadata
             .requireTypes(Map(j -> Int32Type.toTree)))
@@ -57,7 +57,7 @@ object CoreRules {
             .requireMetadata)
         .merge,
       IndexAt(Build(MixedTree.Call(N), Lambda(i, Int32Type.toTree, MixedTree.Call(e))), MixedTree.Call(j))
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -71,21 +71,21 @@ object CoreRules {
     Rule(
       "e -> (λx. e) y",
       MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
-        .toSearcher[EGraph[ArrayIR]]
+        .toSearcher[BaseEGraph]
         .requireValues(e)
         .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
           MixedTree.Call[ArrayIR, Pattern[ArrayIR]](y)
-            .toSearcher[EGraph[ArrayIR]]
+            .toSearcher[BaseEGraph]
             .requireValues(y)
             .requireMetadata
             .bindTypes(Map(y -> yType))
             .requireNonFunctionType(yType))
         .merge,
       Apply(Lambda(x, MixedTree.Call(yType), MixedTree.Call(e)), MixedTree.Call(y))
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -98,7 +98,7 @@ object CoreRules {
     Rule(
       "f i -> (build f N)[i]",
       Apply(MixedTree.Call(f), MixedTree.Call(i))
-        .toSearcher[EGraph[ArrayIR]]
+        .toSearcher[BaseEGraph]
         .requireMetadata
         .bindTypes(Map(i -> iType))
         .requireInt32Type(iType)
@@ -108,7 +108,7 @@ object CoreRules {
             .requireMetadata)
         .merge,
       IndexAt(Build(MixedTree.Call(N), MixedTree.Call(f)), MixedTree.Call(i))
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -122,7 +122,7 @@ object CoreRules {
       "(λx. e) y -> e[x/y]",
       Apply(Lambda(x, t, MixedTree.Call(e)), MixedTree.Call(y)).toSearcher,
       MixedTree.Call[ArrayIR, Pattern[ArrayIR]](e)
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked
         .substitute(e, x, y, e))
   }
@@ -136,7 +136,7 @@ object CoreRules {
       "(build f N)[i] -> f i",
       IndexAt(Build(N, f), i).toSearcher,
       Apply(f, i)
-        .toApplier[LiarEGraph]
+        .toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -147,7 +147,7 @@ object CoreRules {
     Rule(
       "fst (tuple a b) -> a",
       Fst(Tuple(a, b)).toSearcher,
-      a.toApplier[LiarEGraph]
+      a.toApplier[MetadataEGraph]
         .typeChecked)
   }
 
@@ -158,7 +158,7 @@ object CoreRules {
     Rule(
       "snd (tuple a b) -> b",
       Snd(Tuple(a, b)).toSearcher,
-      b.toApplier[LiarEGraph]
+      b.toApplier[MetadataEGraph]
         .typeChecked)
   }
 }
