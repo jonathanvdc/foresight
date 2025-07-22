@@ -24,4 +24,15 @@ object EGraph {
    * @return An empty e-graph.
    */
   def empty[NodeT]: EGraph[NodeT] = HashConsEGraph.empty[NodeT]
+
+  /**
+   * Creates an e-graph from a tree.
+   * @param tree The tree to be added to the e-graph.
+   * @tparam NodeT The type of the nodes in the tree.
+   * @return
+   */
+  def from[NodeT](tree: MixedTree[NodeT, Nothing]): (EClassCall, EGraph[NodeT]) = {
+    val egraph = empty[NodeT]
+    egraph.add(tree)
+  }
 }

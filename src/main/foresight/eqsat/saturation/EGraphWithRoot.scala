@@ -76,8 +76,7 @@ object EGraphWithRoot {
    * @return A tuple containing the root e-class call and a new [[EGraphWithRoot]] with the tree added.
    */
   def from[NodeT](tree: MixedTree[NodeT, Nothing]): (EClassCall, EGraphWithRoot[NodeT, EGraph[NodeT]]) = {
-    val egraph = EGraph.empty[NodeT]
-    val (root, newGraph) = egraph.add(tree)
+    val (root, newGraph) = EGraph.from(tree)
     (root, EGraphWithRoot(newGraph, Some(root)))
   }
 }
