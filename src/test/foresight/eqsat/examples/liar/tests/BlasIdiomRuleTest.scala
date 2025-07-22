@@ -30,11 +30,13 @@ class BlasIdiomRuleTest {
       .closeMetadata
       .dropData
 
-  private def isariaStrategy(rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
+  private def isariaStrategy(expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
+                             simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
+                             idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     RebasingStrategies.isaria(
       TimeComplexity.analysis,
-      MaximalRuleApplication(rules),
-      MaximalRuleApplication(rules),
+      MaximalRuleApplication(expansionRules).thenApply(MaximalRuleApplication(simplificationRules)),
+      MaximalRuleApplication(idiomRules),
       None)
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TimeComplexity.analysis)

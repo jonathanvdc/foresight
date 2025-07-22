@@ -11,17 +11,22 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
   type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
   type LiarRule = Rule[ArrayIR, PatternMatch[ArrayIR], MetadataEGraph]
 
-  def all: Seq[LiarRule] = Seq(
-    simplifyAddZeroRight,
-    simplifyMulOneRight,
-    simplifyMulOneLeft,
-    simplifyMulZeroLeft,
+  def all: Seq[LiarRule] = introductionRules ++ simplificationRules
+
+  def introductionRules: Seq[LiarRule] = Seq(
     introduceAddZero,
     introduceMulOneLeft,
     introduceMulOneRight,
     mulCommutativity,
     mulAssociativity1,
     mulAssociativity2
+  )
+
+  def simplificationRules: Seq[LiarRule] = Seq(
+    simplifyAddZeroRight,
+    simplifyMulOneRight,
+    simplifyMulOneLeft,
+    simplifyMulZeroLeft
   )
 
   val simplifyAddZeroRight: LiarRule = {
