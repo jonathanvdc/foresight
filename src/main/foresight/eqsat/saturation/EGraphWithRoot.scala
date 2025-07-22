@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, MixedTree, ShapeCall}
 
 /**
  * An e-graph that has a root e-class.
@@ -61,5 +61,23 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
 
   override def emptied: EGraphWithRoot[Node, Repr] = {
     EGraphWithRoot(graph.emptied, None)
+  }
+}
+
+/**
+ * A companion object for the [[EGraphWithRoot]] that provides a convenient way to create an e-graph with a root from a
+ * mixed tree of e-class applications and nodes.
+ */
+object EGraphWithRoot {
+  /**
+   * Creates an [[EGraphWithRoot]] from a mixed tree of e-class applications and nodes.
+   * @param tree The mixed tree of e-class applications and nodes to be added to the e-graph.
+   * @tparam NodeT The type of the nodes in the mixed tree.
+   * @return A tuple containing the root e-class call and a new [[EGraphWithRoot]] with the tree added.
+   */
+  def from[NodeT](tree: MixedTree[NodeT, Nothing]): (EClassCall, EGraphWithRoot[NodeT, EGraph[NodeT]]) = {
+    val egraph = EGraph.empty[NodeT]
+    val (root, newGraph) = egraph.add(tree)
+    (root, EGraphWithRoot(newGraph, Some(root)))
   }
 }
