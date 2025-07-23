@@ -370,4 +370,33 @@ object Strategy {
       TransformAndRebase.withMetadata(strategy, extractor, areEquivalent)
     }
   }
+
+  /**
+   * An implicit class that adds operations to the [[Strategy]] trait for strategies that operate on an e-graph with
+   * recorded applications, metadata, and a root.
+   * @param strategy The strategy to add operations to.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
+   * @tparam Match The type of the matches produced by the strategy.
+   * @tparam Data The type of the data carried by the strategy.
+   */
+  implicit class WithRecordingMetadataAndRoot[NodeT,
+                                              EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                                              Match <: PortableMatch[NodeT, Match],
+                                              Data](private val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data]) extends AnyVal {
+
+    /**
+     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
+     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
+     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
+     * extracted tree, the rebasing operation is also skipped.
+     * @param extractor The extractor to use for extracting a tree from the e-graph.
+     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
+     * @return A new strategy that applies the rebasing operation after the original strategy.
+     */
+    def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], (Data, Option[Tree[NodeT]])] = {
+      TransformAndRebase.withRecording(strategy, extractor, areEquivalent)
+    }
+  }
 }
