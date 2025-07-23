@@ -17,6 +17,17 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
                                                                                                                                              applied: Map[String, Set[Match]])
   extends EGraphLike[Node, EGraphWithRecordedApplications[Node, Repr, Match]] with EGraph[Node] {
 
+  /**
+   * Migrates this e-graph to a new representation, preserving the recorded match applications.
+   *
+   * @param newEgraph The new e-graph representation to migrate to.
+   * @tparam NewRepr The type of the new e-graph representation.
+   * @return A new e-graph with the same recorded applications.
+   */
+  def migrateTo[NewRepr <: EGraphLike[Node, NewRepr] with EGraph[Node]](newEgraph: NewRepr): EGraphWithRecordedApplications[Node, NewRepr, Match] = {
+    EGraphWithRecordedApplications(newEgraph, applied)
+  }
+
   override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = egraph.tryCanonicalize(ref)
   override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = egraph.classes
