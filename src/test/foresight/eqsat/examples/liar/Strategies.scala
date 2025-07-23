@@ -5,7 +5,7 @@ import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
+import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, RebasingStrategies, Strategy}
 
 import scala.concurrent.duration.Duration
 
@@ -47,6 +47,7 @@ object Strategies {
    * A strategy based on the Isaria system, which first applies cycles of expansion and simplification followed by
    * rebasing the e-graph, until a timeout is reached or a fixpoint is achieved. Then, it applies idiom rules.
    * @param timeout An optional timeout for the strategy.
+   * @param phaseTimeout An optional timeout for each phase of the strategy.
    * @param expansionRules A sequence of rules to apply for expanding the e-graph, defaults to introducing constant
    *                       arrays and arithmetic introduction rules.
    * @param simplificationRules A sequence of rules to apply for simplifying the e-graph, defaults to core elimination rules
@@ -54,7 +55,8 @@ object Strategies {
    * @param idiomRules A sequence of rules to apply for recognizing idioms, defaults to all BLAS idiom rules.
    * @return A strategy that applies the Isaria approach to e-graph rewriting.
    */
-  def isaria(timeout: Option[Duration],
+  def isaria(timeout: Option[Duration] = None,
+             phaseTimeout: Option[Duration] = None,
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
              idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
@@ -65,10 +67,12 @@ object Strategies {
 
     MaximalRuleApplicationWithCaching(expansionRules)
       .thenApply(MaximalRuleApplicationWithCaching(simplificationRules))
+      .withTimeout(phaseTimeout)
+      .untilFixpoint
+      .closeRecording
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
       .untilFixpoint
-      .closeRecording
       .thenApply(MaximalRuleApplication(idiomRules))
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(extractionAnalysis)
