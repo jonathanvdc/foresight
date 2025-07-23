@@ -155,7 +155,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
             (newEgraph, (newData, remainingTime - Duration.fromNanos(elapsedNanos)))
           }
         } catch {
-          case OperationCanceledException =>
+          case OperationCanceledException(exceptionToken) if exceptionToken == token =>
             (None, (innerData, Duration.Zero))
         }
       }

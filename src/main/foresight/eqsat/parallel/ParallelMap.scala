@@ -26,17 +26,17 @@ trait ParallelMap {
    * @param token The cancellation token to use.
    * @return The new parallel mapping strategy.
    */
-  @throws[OperationCanceledException.type]
+  @throws[OperationCanceledException]
   final def cancelable(token: CancellationToken): ParallelMap = new ParallelMap {
     override def child(name: String): ParallelMap = ParallelMap.this.child(name).cancelable(token)
 
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
       if (token.isCanceled) {
-        throw OperationCanceledException
+        throw OperationCanceledException(token)
       }
       ParallelMap.this.apply(inputs, (a: A) => {
         if (token.isCanceled) {
-          throw OperationCanceledException
+          throw OperationCanceledException(token)
         }
         f(a)
       })
@@ -44,7 +44,7 @@ trait ParallelMap {
 
     override def run[A](f: => A): A = {
       if (token.isCanceled) {
-        throw OperationCanceledException
+        throw OperationCanceledException(token)
       }
       ParallelMap.this.run(f)
     }

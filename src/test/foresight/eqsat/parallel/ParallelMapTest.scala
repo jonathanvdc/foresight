@@ -32,7 +32,7 @@ class ParallelMapTest {
         impl.cancelable(token).apply[Int, Int](0 until 100, identity)
         assert(false)
       } catch {
-        case OperationCanceledException =>
+        case OperationCanceledException(_) =>
       }
     }
   }
@@ -54,7 +54,7 @@ class ParallelMapTest {
         })
         assert(false)
       } catch {
-        case OperationCanceledException =>
+        case OperationCanceledException(_) =>
       }
     }
   }
@@ -80,7 +80,7 @@ class ParallelMapTest {
         })
         assert(false)
       } catch {
-        case OperationCanceledException =>
+        case OperationCanceledException(_) =>
       }
     }
   }
