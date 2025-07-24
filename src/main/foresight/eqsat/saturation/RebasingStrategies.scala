@@ -35,7 +35,7 @@ object RebasingStrategies {
     def iterate(limit: Int): CycleBuilder = new CycleBuilder {
       override def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
           strategy: Strategy[EGraphT, _]
-      ): Strategy[EGraphT, Unit] = strategy.withIterationLimit(limit).untilFixpoint.dropData
+      ): Strategy[EGraphT, Unit] = strategy.withIterationLimit(limit).repeatUntilStable.dropData
     }
   }
 
@@ -70,7 +70,7 @@ object RebasingStrategies {
     buildCycle[NodeT, EGraphWithRoot[NodeT, EGraphT]](baseStrategy)
       .thenRebase(extractor)
       .withIterationLimit(cycles)
-      .untilFixpoint
+      .repeatUntilStable
       .dropData
   }
 
@@ -105,7 +105,7 @@ object RebasingStrategies {
     recurrentPhase
       .thenRebase(extractor, areEquivalent)
       .withTimeout(recurrentPhaseTimeout)
-      .untilFixpoint
+      .repeatUntilStable
       .thenApply(finalPhase)
       .dropData
   }

@@ -57,10 +57,12 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   }
 
   /**
-   * Creates a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached.
+   * Creates a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached. State is
+   * carried forward from one iteration to the next, allowing the strategy to accumulate changes from one repetition to
+   * the next.
    * @return A new strategy that applies this strategy until a fixpoint is reached.
    */
-  final def untilFixpoint: Strategy[EGraphT, Data] = {
+  final def repeatUntilStableWithState: Strategy[EGraphT, Data] = {
     new Strategy[EGraphT, Data] {
       override def initialData: Data = Strategy.this.initialData
       override def apply(egraph: EGraphT, data: Data, parallelize: ParallelMap): (Option[EGraphT], Data) = {
@@ -77,6 +79,14 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       }
     }
   }
+
+  /**
+   * Creates a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached. The data
+   * carried by the strategy is initialized at the start of the repetition, carried forward through each iteration, and
+   * dropped at the end of the repetition.
+   * @return A new strategy that applies this strategy until a fixpoint is reached.
+   */
+  final def repeatUntilStable: Strategy[EGraphT, Unit] = repeatUntilStableWithState.dropData
 
   /**
    * Creates a strategy that runs this strategy with a limit on the number of iterations. The limit is the maximum

@@ -40,7 +40,7 @@ object Strategies {
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .withTimeout(timeout)
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(extractionAnalysis)
@@ -72,11 +72,11 @@ object Strategies {
              idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     MaximalRuleApplicationWithCaching(expansionRules).withTimeout(phaseTimeout)
       .thenApply(MaximalRuleApplicationWithCaching(simplificationRules).withTimeout(phaseTimeout))
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
-      .untilFixpoint
+      .repeatUntilStable
       .thenApply(MaximalRuleApplication(idiomRules))
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(extractionAnalysis)
@@ -115,11 +115,11 @@ object Strategies {
     baseStrategy
       .withIterationLimit(iterationLimit)
       .withTimeout(timeout.map(_ / cycles))
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .thenRebase(extractionAnalysis.extractor)
       .withIterationLimit(cycles)
-      .untilFixpoint
+      .repeatUntilStable
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(extractionAnalysis)
       .addAnalysis(TypeInferenceAnalysis)

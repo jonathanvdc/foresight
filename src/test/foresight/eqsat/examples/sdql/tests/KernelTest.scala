@@ -26,7 +26,7 @@ class KernelTest {
                        rules: Seq[SdqlRule] = SdqlRules.allNew): Strategy[EGraph[SdqlIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[SdqlIR])
       .addAnalysis(KindAnalysis)

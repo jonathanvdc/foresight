@@ -20,7 +20,7 @@ class CoreRuleTest {
   private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all): Strategy[BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TypeInferenceAnalysis)

@@ -22,7 +22,7 @@ class BlasIdiomRuleTest {
                        rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
       .addAnalysis(TimeComplexity.analysis)

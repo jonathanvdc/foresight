@@ -11,7 +11,7 @@ class RuleTests {
   private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = Rules.all): Strategy[EGraph[ArithIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
-      .untilFixpoint
+      .repeatUntilStable
       .closeRecording
       .addAnalysis(ExtractionAnalysis.smallest[ArithIR])
       .addAnalysis(ConstantAnalysis)

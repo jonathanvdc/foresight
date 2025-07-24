@@ -40,8 +40,8 @@ class SaturateArithTest {
       distributivity1,
       distributivity2)
 
-    def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).untilFixpoint
-    def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).untilFixpoint.closeRecording
+    def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
+    def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
 
     def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(simpleStrategy, cachingStrategy)
 
