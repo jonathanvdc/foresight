@@ -70,9 +70,8 @@ object Strategies {
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
              idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
-    MaximalRuleApplicationWithCaching(expansionRules)
-      .thenApply(MaximalRuleApplicationWithCaching(simplificationRules))
-      .withTimeout(phaseTimeout)
+    MaximalRuleApplicationWithCaching(expansionRules).withTimeout(phaseTimeout)
+      .thenApply(MaximalRuleApplicationWithCaching(simplificationRules).withTimeout(phaseTimeout))
       .untilFixpoint
       .closeRecording
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
