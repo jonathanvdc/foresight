@@ -118,7 +118,7 @@ object Strategies {
       .withTimeout(timeout.map(_ / cycles))
       .untilFixpoint
       .closeRecording
-      .thenRebase(extractionAnalysis.extractor, areEquivalent)
+      .thenRebase(extractionAnalysis.extractor)
       .withIterationLimit(cycles)
       .untilFixpoint
       .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
