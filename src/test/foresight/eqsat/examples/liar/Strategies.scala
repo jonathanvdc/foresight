@@ -5,7 +5,7 @@ import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRecordedApplications, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, RebasingStrategies, SearchAndApply, Strategy}
+import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, SearchAndApply, Strategy}
 
 import scala.concurrent.duration.Duration
 

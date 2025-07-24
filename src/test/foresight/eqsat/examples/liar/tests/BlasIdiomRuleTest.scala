@@ -1,11 +1,10 @@
 package foresight.eqsat.examples.liar.tests
 
 import foresight.eqsat.examples.liar._
-import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, RebasingStrategies, Strategy}
+import foresight.eqsat.saturation.{EGraphWithRoot, Strategy}
 import foresight.eqsat.{EGraph, MixedTree, Slot}
 import org.junit.{Ignore, Test}
 
