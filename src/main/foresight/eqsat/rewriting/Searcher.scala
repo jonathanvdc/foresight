@@ -72,7 +72,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
   final def requireRoot: Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] = {
     new Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] {
       override def search(egraph: EGraphWithRoot[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
-        Searcher.this.search(egraph.graph, parallelize)
+        Searcher.this.search(egraph.egraph, parallelize)
       }
     }
   }

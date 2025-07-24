@@ -47,7 +47,7 @@ object Rebase {
     new Rebase(
       new Extractor[NodeT, EGraphWithRoot[NodeT, EGraphT]] {
         override def apply(call: EClassCall, egraph: EGraphWithRoot[NodeT, EGraphT]): Tree[NodeT] = {
-          extractor(call, egraph.graph)
+          extractor(call, egraph.egraph)
         }
       },
       (egraph: EGraphWithRoot[NodeT, EGraphT]) =>

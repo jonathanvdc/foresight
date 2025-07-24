@@ -220,7 +220,7 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       override def apply(egraph: EGraphWithRoot[_, EGraphT],
                          data: Data,
                          parallelize: ParallelMap): (Option[EGraphWithRoot[_, EGraphT]], Data) = {
-        val (newEGraph, newData) = Strategy.this(egraph.graph, data, parallelize)
+        val (newEGraph, newData) = Strategy.this(egraph.egraph, data, parallelize)
         (newEGraph.map(egraph.migrateTo), newData)
       }
     }
@@ -324,7 +324,7 @@ object Strategy {
                            data: Data,
                            parallelize: ParallelMap): (Option[EGraphT], Data) = {
           val (newEGraph, newData) = strategy(EGraphWithRoot(egraph, Some(findRoot(egraph))), data, parallelize)
-          (newEGraph.map(_.graph), newData)
+          (newEGraph.map(_.egraph), newData)
         }
       }
     }

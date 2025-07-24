@@ -28,7 +28,7 @@ trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[
   final def requireRoot: Applier[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] = {
     new Applier[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] {
       override def apply(m: MatchT, egraph: EGraphWithRoot[NodeT, EGraphT]): Command[NodeT] = {
-        Applier.this.apply(m, egraph.graph)
+        Applier.this.apply(m, egraph.egraph)
       }
     }
   }
