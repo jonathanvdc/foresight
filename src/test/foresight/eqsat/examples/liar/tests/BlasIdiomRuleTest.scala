@@ -19,30 +19,8 @@ class BlasIdiomRuleTest {
   private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] =
-    MaximalRuleApplicationWithCaching(rules)
-      .withIterationLimit(iterationLimit)
-      .repeatUntilStable
-      .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(TimeComplexity.analysis)
-      .addAnalysis(TypeInferenceAnalysis)
-      .closeMetadata
-      .dropData
-
-  private def isariaStrategy(expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
-                             simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
-                             idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
-    RebasingStrategies.isaria(
-      TimeComplexity.analysis,
-      MaximalRuleApplication(expansionRules).thenApply(MaximalRuleApplication(simplificationRules)),
-      MaximalRuleApplication(idiomRules),
-      None)
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(TimeComplexity.analysis)
-      .addAnalysis(TypeInferenceAnalysis)
-      .closeMetadata
-      .dropData
+                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
+    Strategies.naive(iterationLimit = Some(iterationLimit), rules = rules)
   }
 
   @Test
