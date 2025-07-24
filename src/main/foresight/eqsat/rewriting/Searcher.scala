@@ -1,9 +1,10 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.{EGraph, EGraphLike, Slot}
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.patterns.{CompiledPattern, MachineSearcherPhase, Pattern, PatternMatch}
+import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
+import foresight.eqsat.saturation.EGraphWithRoot
 
 /**
  * A searcher that searches for matches in an e-graph.
@@ -60,6 +61,18 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
     new Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] {
       override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
         Searcher.this.search(egraph.egraph, parallelize)
+      }
+    }
+  }
+
+  /**
+   * Creates a new searcher that takes an e-graph with a root node as input and runs this searcher on that e-graph.
+   * @return A searcher that takes an e-graph with a root node as input.
+   */
+  final def requireRoot: Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] = {
+    new Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] {
+      override def search(egraph: EGraphWithRoot[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
+        Searcher.this.search(egraph.graph, parallelize)
       }
     }
   }

@@ -3,6 +3,7 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.saturation.EGraphWithRoot
 
 /**
  * A rule that can be applied to an e-graph.
@@ -96,6 +97,15 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
       case (Some(ap), Some(sr)) => Some(Rule(s"$name (reversed)", sr, ap))
       case _ => None
     }
+  }
+
+  /**
+   * Creates a rule that requires the e-graph to have a root node.
+   * This is useful for rules that need to operate on an [[EGraphWithRoot]].
+   * @return A rule that requires the e-graph to have a root node.
+   */
+  def requireRoot: Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] = {
+    Rule(name, searcher.requireRoot, applier.requireRoot)
   }
 }
 
