@@ -55,14 +55,16 @@ object RebasingStrategies {
    * @tparam EGraphT The type of the e-graph, which must be a subtype of [[EGraphLike]] and [[EGraph]].
    * @return A strategy that applies the rules, extracts a tree, and rebases the e-graph.
    */
-  def sympy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT](rules: Seq[Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]]],
+  def sympy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT](rules: Seq[Rule[NodeT, MatchT, EGraphT]],
                                                                                      extractor: Extractor[NodeT, EGraphT],
                                                                                      cycles: Int = 2,
                                                                                      buildCycle: CycleBuilder = CycleBuilder.iterate(30),
                                                                                      ruleApplicationLimit: Int = 2500,
                                                                                      ruleBanLength: Int = 5): Strategy[EGraphWithRoot[NodeT, EGraphT], Unit] = {
     val baseStrategy = BackoffRuleApplication(
-      rules.map(BackoffRule[NodeT, Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]], MatchT](_, ruleApplicationLimit, ruleBanLength)),
+      rules.map(rule =>
+        BackoffRule[NodeT, Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]], MatchT](
+          rule.requireRoot, ruleApplicationLimit, ruleBanLength)),
       SearchAndApply.withoutCaching[NodeT, EGraphWithRoot[NodeT, EGraphT], MatchT])
 
     buildCycle[NodeT, EGraphWithRoot[NodeT, EGraphT]](baseStrategy)
