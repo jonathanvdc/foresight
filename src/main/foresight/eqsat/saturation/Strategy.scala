@@ -89,8 +89,8 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   final def repeatUntilStable: Strategy[EGraphT, Unit] = repeatUntilStableWithState.dropData
 
   /**
-   * Creates a strategy that runs this strategy with a limit on the number of iterations. The limit is the maximum
-   * number of iterations that the strategy will run. Once the limit is reached, the strategy will make no further
+   * Creates a strategy that places a limit on the number of iterations. The limit is the maximum number of iterations
+   * that the strategy will run. Once the limit is reached, additional applications of the strategy will make no further
    * changes to the e-graph.
    * @param limit The maximum number of iterations to run the strategy. If the limit is zero, the strategy will never
    *              change the e-graph.
