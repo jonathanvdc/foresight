@@ -18,9 +18,23 @@ object Strategies {
   type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
   type LiarRule = Rule[ArrayIR, Match, MetadataEGraph]
 
-  private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
-  private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
-  private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
+  /**
+   * Returns the core rules for the LIAR example.
+   * @return A set of core rules for the LIAR example.
+   */
+  def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
+
+  /**
+   * Returns the arithmetic rules for the LIAR example.
+   * @return A set of arithmetic rules for the LIAR example.
+   */
+  def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
+
+  /**
+   * Returns the BLAS idiom rules for the LIAR example.
+   * @return A set of BLAS idiom rules for the LIAR example.
+   */
+  def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
 
   private val extractionAnalysis = TimeComplexity.analysis
   private def areEquivalent(left: Tree[ArrayIR], right: Tree[ArrayIR]): Boolean = {
