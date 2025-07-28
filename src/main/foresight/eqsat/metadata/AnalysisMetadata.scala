@@ -1,7 +1,7 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, ENode, MixedTree}
+import foresight.eqsat.{EClassCall, EClassRef, EGraph, ENode, MixedTree, SlotMap}
 
 /**
  * Analysis results for an e-graph's classes. This metadata can respond to changes in the e-graph.
@@ -52,7 +52,9 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
 
     val resultsPerNode = parallelize[(ENode[NodeT], EClassCall), (EClassRef, A)](added, {
       case (node, call) =>
-        val genericNode = after.canonicalize(node).renamePartial(call.args.inverse).asNode
+        val canonicalizedNode = after.canonicalize(node)
+        val renaming = SlotMap(call.args.inverse.map ++ SlotMap.bijectionFromSetToFresh(canonicalizedNode.definitions.toSet).map)
+        val genericNode = canonicalizedNode.rename(renaming).asNode
         val args = genericNode.args.map(applyPrecanonicalized)
         call.ref -> analysis.make(genericNode, args)
     })
