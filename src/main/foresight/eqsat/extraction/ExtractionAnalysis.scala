@@ -48,6 +48,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
   override def make(node: NodeT, defs: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
     val treeCost = cost(node, defs, uses, args)
     val tree = ExtractionTree(treeCost, node, defs, uses, args)
+    assert(tree.slotSet.forall(_.isUnique))
     // assert(node.slots.toSet.subsetOf(tree.slotSet))
     ExtractionTreeCall(
       tree,

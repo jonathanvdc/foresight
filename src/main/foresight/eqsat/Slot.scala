@@ -14,6 +14,14 @@ sealed trait Slot extends Ordered[Slot] {
     case Slot.NumberedSlot(_) => true
     case _: Slot.UniqueSlot => false
   }
+
+  /**
+   * Tests whether this slot is a unique slot.
+   * Unique slots are distinct from all other slots, including other unique slots.
+   * Numbered slots are equivalent if they have the same number.
+   * @return True if this slot is a unique slot, false otherwise.
+   */
+  final def isUnique: Boolean = !isNumbered
 }
 
 /**
