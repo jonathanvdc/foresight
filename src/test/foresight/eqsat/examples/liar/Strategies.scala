@@ -1,11 +1,11 @@
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.{EGraph, EGraphLike, Tree}
+import foresight.eqsat.{EGraph, Tree}
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, SearchAndApply, Strategy}
+import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRecordedApplications, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, SearchAndApply, Strategy}
 
 import scala.concurrent.duration.Duration
 
@@ -16,6 +16,7 @@ object Strategies {
   type Match = PatternMatch[ArrayIR]
   type BaseEGraph = EGraphWithRoot[ArrayIR, EGraph[ArrayIR]]
   type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]
+  type RecordedEGraph = EGraphWithRecordedApplications[ArrayIR, MetadataEGraph, Match]
   type LiarRule = Rule[ArrayIR, Match, MetadataEGraph]
 
   /**
@@ -46,19 +47,21 @@ object Strategies {
    * @param iterationLimit An optional limit on the number of iterations to perform.
    * @param timeout An optional timeout for the strategy.
    * @param rules A sequence of rules to apply. Defaults to all core, arithmetic, and BLAS idiom rules.
-   * @return
+   * @param onChange A callback that is invoked whenever a change is made to the e-graph, providing the old and new
+   *                 e-graphs. This can be used for logging or debugging purposes.
+   * @return A strategy that applies the rules until a fixpoint is reached.
    */
   def naive(iterationLimit: Option[Int] = None,
             timeout: Option[Duration] = None,
-            rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
+            rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
     MaximalRuleApplicationWithCaching(rules)
+      .withChangeLogger(onChange)
       .withIterationLimit(iterationLimit)
       .withTimeout(timeout)
       .repeatUntilStable
       .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(extractionAnalysis)
-      .addAnalysis(TypeInferenceAnalysis)
+      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }
@@ -77,24 +80,32 @@ object Strategies {
    * @param simplificationRules A sequence of rules to apply for simplifying the e-graph, defaults to core elimination rules
    *                            and arithmetic simplification rules.
    * @param idiomRules A sequence of rules to apply for recognizing idioms, defaults to all BLAS idiom rules.
+   * @param onChange A callback that is invoked whenever a change is made to the e-graph, providing the old and new
+   *                 e-graphs. This can be used for logging or debugging purposes.
    * @return A strategy that applies the Isaria approach to e-graph rewriting.
    */
   def isaria(timeout: Option[Duration] = None,
              phaseTimeout: Option[Duration] = None,
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
-             idiomRules: Seq[LiarRule] = blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
-    MaximalRuleApplicationWithCaching(expansionRules).withTimeout(phaseTimeout)
-      .thenApply(MaximalRuleApplicationWithCaching(simplificationRules).withTimeout(phaseTimeout))
+             idiomRules: Seq[LiarRule] = blasIdiomRules.all,
+             onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
+
+    def phase(rules: Seq[LiarRule]) = {
+      MaximalRuleApplicationWithCaching(rules)
+        .withChangeLogger(onChange)
+        .withTimeout(phaseTimeout)
+    }
+
+    phase(expansionRules)
+      .thenApply(phase(simplificationRules))
       .repeatUntilStable
       .closeRecording
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
       .repeatUntilStable
       .thenApply(MaximalRuleApplication(idiomRules))
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(extractionAnalysis)
-      .addAnalysis(TypeInferenceAnalysis)
+      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }
@@ -110,12 +121,15 @@ object Strategies {
    * @param timeout An optional timeout for the strategy.
    * @param cycles The number of cycles to run the strategy for.
    * @param rules A sequence of rules to apply. Defaults to all core, arithmetic, and BLAS idiom rules.
+   * @param onChange A callback that is invoked whenever a change is made to the e-graph, providing the old and new
+   *                 e-graphs. This can be used for logging or debugging purposes.
    * @return A strategy that applies the rules, extracts a tree, and rebases the e-graph.
    */
   def sympy(iterationLimit: Option[Int] = None,
             timeout: Option[Duration] = None,
             cycles: Int = 2,
-            rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
+            rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
 
     val ruleApplicationLimit = 2500
     val ruleBanLength = 5
@@ -127,6 +141,7 @@ object Strategies {
       SearchAndApply.withCaching[ArrayIR, MetadataEGraph, Match])
 
     baseStrategy
+      .withChangeLogger(onChange)
       .withIterationLimit(iterationLimit)
       .withTimeout(timeout.map(_ / cycles))
       .repeatUntilStable
@@ -134,9 +149,7 @@ object Strategies {
       .thenRebase(extractionAnalysis.extractor)
       .withIterationLimit(cycles)
       .repeatUntilStable
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(extractionAnalysis)
-      .addAnalysis(TypeInferenceAnalysis)
+      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }
