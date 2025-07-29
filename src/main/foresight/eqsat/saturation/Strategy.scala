@@ -246,12 +246,13 @@ object Strategy {
                               Data](private val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
 
     /**
-     * Adds an analysis to the e-graph metadata. The analysis is carried over from one iteration to the next.
-     * @param analysis The analysis to add to the e-graph.
-     * @tparam A The type of the analysis.
-     * @return A new strategy that enhances the e-graph with an analysis.
+     * Adds analyses to the e-graph within each iteration of the strategy. Analyses are added to the e-graph during the
+     * strategy's first iteration and are carried forward through each iteration.
+     * @param analyses The analyses to add to the e-graph. Each analysis is an instance of [[Analysis]] that computes
+     *                 some lattice-valued fact about each e-class.
+     * @return A new strategy that enhances the e-graph with analyses.
      */
-    def addAnalysis[A](analysis: Analysis[NodeT, A]): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
+    def addAnalysis(analyses: Analysis[NodeT, _]*): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
       new Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] {
         override def initialData: (Data, Boolean) = (strategy.initialData, false)
 
@@ -259,7 +260,9 @@ object Strategy {
                            data: (Data, Boolean),
                            parallelize: ParallelMap): (Option[EGraphWithMetadata[NodeT, EGraphT]], (Data, Boolean)) = {
           val (innerData, hasAddedAnalysis) = data
-          val updatedGraph = if (hasAddedAnalysis) egraph else egraph.addAnalysis(analysis)
+          val updatedGraph =
+            if (hasAddedAnalysis) egraph
+            else analyses.foldLeft(egraph)((g, a) => g.addAnalysis(a))
           val (newEGraph, newData) = strategy(updatedGraph, innerData, parallelize)
           (newEGraph, (newData, hasAddedAnalysis || newEGraph.isDefined))
         }
