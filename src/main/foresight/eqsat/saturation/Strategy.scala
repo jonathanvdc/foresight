@@ -10,6 +10,17 @@ import scala.concurrent.duration.Duration
 
 /**
  * A strategy for saturating an e-graph.
+ *
+ * Strategies define a sequence of transformations or operations that are applied to an e-graph in order to explore,
+ * optimize, or rewrite its structure.
+ * Each strategy encapsulates the logic for a single iteration, including how state is carried forward and how changes
+ * are detected.
+ * Strategies can be composed, chained, repeated until a fixpoint, or limited by iteration count or timeout.
+ * They provide a flexible mechanism for controlling the saturation process, allowing for customization of
+ * parallelization, metadata management, and extraction of results.
+ * The generic type parameters allow strategies to operate on different e-graph implementations and to carry arbitrary
+ * state between iterations.
+ *
  * @tparam EGraphT The type of the e-graph.
  */
 trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
