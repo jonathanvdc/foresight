@@ -247,6 +247,32 @@ trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
       }
     }
   }
+
+  /**
+   * Wraps this strategy with a logger that observes and logs changes to the e-graph after each iteration.
+   *
+   * This is useful for debugging or analysis purposes, as it provides visibility into the differences between
+   * successive versions of the e-graph produced by the strategy. If the strategy does not modify the e-graph
+   * during an iteration, the logger is not invoked.
+   *
+   * @param logChange A function that takes the previous and updated e-graphs and performs logging or inspection.
+   * @return A new strategy that behaves identically to this one, but logs changes whenever they occur.
+   */
+  final def withChangeLogger(logChange: (EGraphT, EGraphT) => Unit): Strategy[EGraphT, Data] = {
+    new Strategy[EGraphT, Data] {
+      override def initialData: Data = Strategy.this.initialData
+
+      override def apply(egraph: EGraphT,
+                         data: Data,
+                         parallelize: ParallelMap): (Option[EGraphT], Data) = {
+        val (newEGraph, newData) = Strategy.this(egraph, data, parallelize)
+        newEGraph.foreach { newEgraph =>
+          logChange(egraph, newEgraph)
+        }
+        (newEGraph, newData)
+      }
+    }
+  }
 }
 
 /**
