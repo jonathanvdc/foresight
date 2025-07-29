@@ -61,7 +61,7 @@ object Strategies {
       .withTimeout(timeout)
       .repeatUntilStable
       .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
+      .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }
@@ -105,7 +105,7 @@ object Strategies {
       .withTimeout(timeout)
       .repeatUntilStable
       .thenApply(MaximalRuleApplication(idiomRules))
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
+      .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }
@@ -149,7 +149,7 @@ object Strategies {
       .thenRebase(extractionAnalysis.extractor)
       .withIterationLimit(cycles)
       .repeatUntilStable
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
+      .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
   }

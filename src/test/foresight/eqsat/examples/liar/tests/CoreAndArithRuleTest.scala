@@ -22,8 +22,8 @@ class CoreAndArithRuleTest {
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
       .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[ArrayIR])
-      .addAnalysis(TypeInferenceAnalysis)
+      .addAnalyses(ExtractionAnalysis.smallest[ArrayIR])
+      .addAnalyses(TypeInferenceAnalysis)
       .closeMetadata
       .dropData
 

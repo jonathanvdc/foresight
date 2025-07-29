@@ -290,7 +290,7 @@ object Strategy {
      *                 some lattice-valued fact about each e-class.
      * @return A new strategy that enhances the e-graph with analyses.
      */
-    def addAnalysis(analyses: Analysis[NodeT, _]*): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
+    def addAnalyses(analyses: Analysis[NodeT, _]*): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
       new Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] {
         override def initialData: (Data, Boolean) = (strategy.initialData, false)
 

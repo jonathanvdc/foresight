@@ -28,8 +28,8 @@ class KernelTest {
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
       .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[SdqlIR])
-      .addAnalysis(KindAnalysis)
+      .addAnalyses(ExtractionAnalysis.smallest[SdqlIR])
+      .addAnalyses(KindAnalysis)
       .closeMetadata
       .dropData
 }
