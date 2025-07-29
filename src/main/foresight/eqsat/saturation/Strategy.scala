@@ -22,6 +22,7 @@ import scala.concurrent.duration.Duration
  * state between iterations.
  *
  * @tparam EGraphT The type of the e-graph.
+ * @tparam Data The type of the data carried by the strategy. This data is used to carry state between iterations.
  */
 trait Strategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], Data] {
   /**
