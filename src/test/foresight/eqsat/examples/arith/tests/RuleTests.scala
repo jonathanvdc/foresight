@@ -13,8 +13,7 @@ class RuleTests {
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
       .closeRecording
-      .addAnalysis(ExtractionAnalysis.smallest[ArithIR])
-      .addAnalysis(ConstantAnalysis)
+      .addAnalysis(ExtractionAnalysis.smallest[ArithIR], ConstantAnalysis)
       .closeMetadata
       .dropData
 
