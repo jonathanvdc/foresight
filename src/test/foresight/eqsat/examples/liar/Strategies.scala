@@ -100,11 +100,11 @@ object Strategies {
     phase(expansionRules)
       .thenApply(phase(simplificationRules))
       .repeatUntilStable
-      .closeRecording
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
       .repeatUntilStable
-      .thenApply(MaximalRuleApplication(idiomRules))
+      .thenApply(MaximalRuleApplicationWithCaching(idiomRules).withChangeLogger(onChange))
+      .closeRecording
       .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
       .dropData
