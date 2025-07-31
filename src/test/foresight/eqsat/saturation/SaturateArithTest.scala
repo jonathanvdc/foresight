@@ -44,11 +44,20 @@ class SaturateArithTest {
     def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
     def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
     def uniformStochasticStrategy: Strategy[EGraph[Arith], Unit] = {
-      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](10)
+      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
+      StochasticRuleApplication(all, prioritizer).repeatUntilStable
+    }
+    def uniformStochasticCachingStrategy: Strategy[EGraph[Arith], Unit] = {
+      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 
-    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(simpleStrategy, cachingStrategy, uniformStochasticStrategy)
+    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(
+      simpleStrategy,
+      cachingStrategy,
+      uniformStochasticStrategy,
+      uniformStochasticCachingStrategy
+    )
 
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
       val x = MixedTree.Call(Pattern.Var.fresh[Arith]())
