@@ -31,8 +31,8 @@ object StochasticRuleApplicationWithCaching {
      rules: Seq[Rule[NodeT, MatchT, EGraphT]],
      priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT],
      random: Random
-   ): Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
-    StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT](
+   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+    StochasticRuleApplication(
       rules, SearchAndApply.withCaching[NodeT, EGraphT, MatchT], priorities, random)
   }
 
@@ -54,7 +54,7 @@ object StochasticRuleApplicationWithCaching {
   ](
     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
-  ): Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
+  ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     apply(rules, priorities, new Random(0))
   }
 }
