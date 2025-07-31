@@ -49,9 +49,10 @@ final case class StochasticRuleApplication[
     val batchSize = prioritizer.batchSize(prioritizedMatches)
 
     val selectedMatches = selectMatches(prioritizedMatches, batchSize)
-    val groupedSelectedMatches = selectedMatches.groupBy(_._1.name).map {
-      case (ruleName, matches) => ruleName -> matches.map(_._2)
-    }
+    val selectedByRule = selectedMatches.groupBy { case (r, _) => r.name }
+    val groupedSelectedMatches = rules.map { rule =>
+      rule.name -> selectedByRule.getOrElse(rule.name, Seq.empty).map(_._2)
+    }.toMap
 
     val newEGraph = searchAndApply.apply(
       rules,
