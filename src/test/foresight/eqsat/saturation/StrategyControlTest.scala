@@ -78,4 +78,22 @@ class StrategyControlTest {
 
     assert(strategy.applicationCount == 3, "Strategy is applied three times due to retained state.")
   }
+
+  @Test
+  def changeLoggerFiresEveryIteration(): Unit = {
+    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
+
+    var counter = 0
+
+    // Apply the strategy with an iteration limit of 3, using change logging
+    strategy
+      .withChangeLogger((_, _) => counter += 1)
+      .withIterationLimit(3)
+      .repeatUntilStableWithState
+      .apply(EGraph.empty)
+
+    assert(strategy.applicationCount == 3, "Strategy is applied three times due to iteration limit.")
+    assert(counter == 3, "Change logger fires three times, once for each iteration.")
+  }
 }
