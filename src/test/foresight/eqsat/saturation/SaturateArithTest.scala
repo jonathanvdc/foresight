@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.saturation.priorities.UniformPrioritizer
+import foresight.eqsat.saturation.priorities.UniformPriorities
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -44,11 +44,11 @@ class SaturateArithTest {
     def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
     def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
     def uniformStochasticStrategy: Strategy[EGraph[Arith], Unit] = {
-      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
+      val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplication(all, prioritizer).repeatUntilStable
     }
     def uniformStochasticCachingStrategy: Strategy[EGraph[Arith], Unit] = {
-      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
+      val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 

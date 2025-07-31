@@ -3,13 +3,13 @@ package foresight.eqsat.saturation.priorities
 import foresight.eqsat.rewriting.Rule
 
 /**
- * A trait that defines a prioritization strategy for matches found during rule application.
+ * A trait that defines a prioritization for matches found during rule application.
  *
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam RuleT The type of the rule.
  * @tparam MatchT The type of the matches produced by the rule.
  */
-trait MatchPrioritizer[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
+trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
   /**
    * Prioritizes matches based on some criteria.
    *

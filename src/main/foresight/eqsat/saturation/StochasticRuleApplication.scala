@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.saturation.priorities.MatchPrioritizer
+import foresight.eqsat.saturation.priorities.MatchPriorities
 import foresight.eqsat.util.RandomSampling
 
 import scala.util.Random
@@ -15,7 +15,7 @@ import scala.util.Random
  *
  * @param rules The rules to apply.
  * @param searchAndApply The search and apply strategy to find and apply matches.
- * @param prioritizer The prioritizer that determines the priority of matches and the batch size to apply.
+ * @param priorities The prioritizer that determines the priority of matches and the batch size to apply.
  * @param random A random number generator used for selecting matches randomly.
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam RuleT The type of the rules to apply.
@@ -28,7 +28,7 @@ final case class StochasticRuleApplication[
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
-          prioritizer: MatchPrioritizer[NodeT, RuleT, MatchT],
+          priorities: MatchPriorities[NodeT, RuleT, MatchT],
           random: Random) extends Strategy[EGraphT, Unit] {
 
   /**
@@ -45,8 +45,8 @@ final case class StochasticRuleApplication[
         matches.map(m => (rule, m))
     }
 
-    val prioritizedMatches = prioritizer.prioritize(matches)
-    val batchSize = prioritizer.batchSize(prioritizedMatches)
+    val prioritizedMatches = priorities.prioritize(matches)
+    val batchSize = priorities.batchSize(prioritizedMatches)
 
     val selectedMatches = selectMatches(prioritizedMatches, batchSize)
     val selectedByRule = selectedMatches.groupBy { case (r, _) => r.name }
@@ -84,7 +84,7 @@ object StochasticRuleApplication {
    *
    * @param rules The rules to apply.
    * @param searchAndApply The search and apply strategy to find and apply matches.
-   * @param prioritizer The prioritizer that determines the priority of matches and the batch size to apply.
+   * @param priorities The prioritizer that determines the priority of matches and the batch size to apply.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam RuleT The type of the rules to apply.
    * @tparam EGraphT The type of the e-graph.
@@ -98,9 +98,9 @@ object StochasticRuleApplication {
   ](
     rules: Seq[RuleT],
     searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
-    prioritizer: MatchPrioritizer[NodeT, RuleT, MatchT]
+    priorities: MatchPriorities[NodeT, RuleT, MatchT]
   ): StochasticRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
-    new StochasticRuleApplication(rules, searchAndApply, prioritizer, new Random(0))
+    new StochasticRuleApplication(rules, searchAndApply, priorities, new Random(0))
   }
 
   /**
@@ -108,7 +108,7 @@ object StochasticRuleApplication {
    * that does not cache results, along with a prioritizer.
    *
    * @param rules The rules to apply.
-   * @param prioritizer The prioritizer that determines the priority of matches and the batch size to apply.
+   * @param priorities The prioritizer that determines the priority of matches and the batch size to apply.
    * @param random A random number generator used for selecting matches randomly.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
@@ -119,11 +119,11 @@ object StochasticRuleApplication {
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT
   ](
-    rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-    prioritizer: MatchPrioritizer[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT],
-    random: Random
+     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT],
+     random: Random
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT], prioritizer)
+    apply(rules, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT], priorities)
   }
 
   /**
@@ -131,7 +131,7 @@ object StochasticRuleApplication {
    * that does not cache results, along with a prioritizer. Uses a default random number generator with seed 0.
    *
    * @param rules The rules to apply.
-   * @param prioritizer The prioritizer that determines the priority of matches and the batch size to apply.
+   * @param priorities The prioritizer that determines the priority of matches and the batch size to apply.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    * @tparam MatchT The type of the matches produced by the rules.
@@ -142,8 +142,8 @@ object StochasticRuleApplication {
     MatchT
   ](
     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-    prioritizer: MatchPrioritizer[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
+    priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, prioritizer, new Random(0))
+    apply(rules, priorities, new Random(0))
   }
 }
