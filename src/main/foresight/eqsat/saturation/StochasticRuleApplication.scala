@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.saturation.prioritization.MatchPrioritizer
+import foresight.eqsat.saturation.priorities.MatchPrioritizer
 import foresight.eqsat.util.RandomSampling
 
 import scala.util.Random

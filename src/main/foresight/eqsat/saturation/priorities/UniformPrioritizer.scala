@@ -1,4 +1,4 @@
-package foresight.eqsat.saturation.prioritization
+package foresight.eqsat.saturation.priorities
 
 import foresight.eqsat.rewriting.Rule
 
