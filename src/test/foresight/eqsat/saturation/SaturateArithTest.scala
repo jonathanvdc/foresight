@@ -3,6 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
+import foresight.eqsat.saturation.priorities.UniformPrioritizer
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -42,8 +43,12 @@ class SaturateArithTest {
 
     def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
     def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
+    def uniformStochasticStrategy: Strategy[EGraph[Arith], Unit] = {
+      val prioritizer = UniformPrioritizer[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](10)
+      StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
+    }
 
-    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(simpleStrategy, cachingStrategy)
+    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(simpleStrategy, cachingStrategy, uniformStochasticStrategy)
 
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
       val x = MixedTree.Call(Pattern.Var.fresh[Arith]())
