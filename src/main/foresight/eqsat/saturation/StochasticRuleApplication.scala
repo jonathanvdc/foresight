@@ -3,6 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.saturation.prioritization.MatchPrioritizer
 import foresight.eqsat.util.RandomSampling
 
 import scala.util.Random
@@ -14,8 +15,7 @@ import scala.util.Random
  *
  * @param rules The rules to apply.
  * @param searchAndApply The search and apply strategy to find and apply matches.
- * @param prioritize A function that takes a sequence of matches and returns a prioritized sequence.
- * @param batchSize A function that determines the number of matches to apply based on the prioritized matches.
+ * @param prioritizer The prioritizer that determines the priority of matches and the batch size to apply.
  * @param random A random number generator used for selecting matches randomly.
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam RuleT The type of the rules to apply.
@@ -28,8 +28,7 @@ final case class StochasticRuleApplication[
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
-          prioritize: Seq[(RuleT, MatchT)] => Seq[(RuleT, MatchT, Double)],
-          batchSize: Seq[(RuleT, MatchT, Double)] => Int,
+          prioritizer: MatchPrioritizer[NodeT, RuleT, MatchT],
           random: Random = new Random(0)) extends Strategy[EGraphT, Unit] {
 
   /**
@@ -46,10 +45,10 @@ final case class StochasticRuleApplication[
         matches.map(m => (rule, m))
     }
 
-    val prioritizedMatches = prioritize(matches)
-    val matchesToApply = batchSize(prioritizedMatches)
+    val prioritizedMatches = prioritizer.prioritize(matches)
+    val batchSize = prioritizer.batchSize(prioritizedMatches)
 
-    val selectedMatches = selectMatches(prioritizedMatches, matchesToApply)
+    val selectedMatches = selectMatches(prioritizedMatches, batchSize)
     val groupedSelectedMatches = selectedMatches.groupBy(_._1.name).map {
       case (ruleName, matches) => ruleName -> matches.map(_._2)
     }
