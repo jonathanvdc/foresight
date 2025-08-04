@@ -245,7 +245,7 @@ object Searcher {
   }
 
   /**
-   * Searcher extension methods for searchers that produce pairs of [[PatternMatch]] sequences.
+   * Searcher extension methods for searchers that produce pairs of pattern match sequences.
    * @param searcher The searcher to extend.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
