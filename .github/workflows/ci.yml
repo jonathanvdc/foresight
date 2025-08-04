@@ -23,17 +23,9 @@ jobs:
       - name: Show project version
         run: sbt 'show version'
 
-      - name: Check credentials are present
-        run: |
-          echo "Actor: $GITHUB_ACTOR"
-          curl -u "$GITHUB_ACTOR:$GITHUB_TOKEN" \
-               -I https://maven.pkg.github.com/jonathanvdc/foresight/
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-
       - name: Publish to GitHub Packages
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         run: sbt +publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
