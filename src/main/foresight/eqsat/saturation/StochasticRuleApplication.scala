@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.saturation.priorities.MatchPriorities
+import foresight.eqsat.saturation.priorities.{MatchPriorities, PrioritizedMatch}
 import foresight.util.random.{Random, Sample}
 
 /**
@@ -62,11 +62,11 @@ final case class StochasticRuleApplication[
   }
 
   private def selectMatches(
-    prioritizedMatches: Seq[(RuleT, MatchT, Double)],
+    prioritizedMatches: Seq[PrioritizedMatch[RuleT, MatchT]],
     batchSize: Int
   ): (Seq[(RuleT, MatchT)], Random) = {
     Sample.withoutReplacement(
-      prioritizedMatches.map { case (rule, matchT, priority) => ((rule, matchT), priority) },
+      prioritizedMatches.map { case PrioritizedMatch(rule, matchT, priority) => ((rule, matchT), priority) },
       batchSize,
       random)
   }

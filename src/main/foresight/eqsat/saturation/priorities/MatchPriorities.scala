@@ -16,7 +16,7 @@ trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
    * @param matches A sequence of pairs, each containing a rule and a match.
    * @return A sequence of triples, each containing a rule, a match, and a priority score.
    */
-  def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[(RuleT, MatchT, Double)]
+  def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[PrioritizedMatch[RuleT, MatchT]]
 
   /**
    * Determines the batch size based on the prioritized matches.
@@ -24,5 +24,5 @@ trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
    * @param matches A sequence of triples, each containing a rule, a match, and a priority score.
    * @return The number of matches to apply in this batch.
    */
-  def batchSize(matches: Seq[(RuleT, MatchT, Double)]): Int
+  def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Int
 }

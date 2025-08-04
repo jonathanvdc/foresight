@@ -13,11 +13,11 @@ import foresight.eqsat.rewriting.Rule
 final case class UniformPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT](maxBatchSize: Int)
     extends MatchPriorities[NodeT, RuleT, MatchT] {
 
-  override def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[(RuleT, MatchT, Double)] = {
-    matches.map { case (rule, match_) => (rule, match_, 1.0) }
+  override def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[PrioritizedMatch[RuleT, MatchT]] = {
+    matches.map { case (rule, match_) => PrioritizedMatch(rule, match_, 1.0) }
   }
 
-  override def batchSize(matches: Seq[(RuleT, MatchT, Double)]): Int = {
+  override def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Int = {
     math.min(maxBatchSize, matches.size)
   }
 }
