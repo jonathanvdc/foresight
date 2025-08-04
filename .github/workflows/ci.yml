@@ -1,5 +1,5 @@
 name: Continuous integration
-on: push
+on: [push, pull_request]
 
 jobs:
   ci:
@@ -18,3 +18,9 @@ jobs:
 
       - name: Show project version
         run: sbt 'show version'
+
+      - name: Publish to GitHub Packages
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        run: sbt +publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
