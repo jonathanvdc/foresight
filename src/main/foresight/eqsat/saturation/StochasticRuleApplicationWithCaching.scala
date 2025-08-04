@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.saturation.priorities.MatchPriorities
-import foresight.eqsat.util.random.Random
+import foresight.util.random.Random
 
 /**
  * A strategy that applies a sequence of rules in a stochastic manner, caching the matches that have already

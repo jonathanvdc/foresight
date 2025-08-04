@@ -1,4 +1,4 @@
-package foresight.eqsat.util.random
+package foresight.util.random
 
 /**
  * Utility object for performing random sampling operations.

@@ -1,4 +1,4 @@
-package foresight.eqsat.util.random
+package foresight.util.random
 
 /**
  * A random number generator based on the SplitMix64 algorithm.

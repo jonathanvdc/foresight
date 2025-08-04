@@ -4,7 +4,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.priorities.MatchPriorities
-import foresight.eqsat.util.random.{Random, Sample}
+import foresight.util.random.{Random, Sample}
 
 /**
  * A strategy that applies a sequence of rules in a stochastic manner. It searches for matches of the rules in an e-graph,

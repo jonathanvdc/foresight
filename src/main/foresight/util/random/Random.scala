@@ -1,4 +1,4 @@
-package foresight.eqsat.util.random
+package foresight.util.random
 
 /**
  * A trait that defines an immutable random number generator interface.

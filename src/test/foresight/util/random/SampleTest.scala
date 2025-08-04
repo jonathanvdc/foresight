@@ -1,4 +1,4 @@
-package foresight.eqsat.util.random
+package foresight.util.random
 
 import org.junit.Assert._
 import org.junit.Test
