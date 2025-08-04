@@ -1,11 +1,11 @@
-package foresight.eqsat.util
+package foresight.eqsat.util.random
 
 import scala.util.Random
 
 /**
  * Utility object for performing random sampling operations.
  */
-object RandomSampling {
+object Sample {
   /**
    * Weighted random sampling without replacement using the Efraimidis–Spirakis algorithm.
    *
@@ -28,9 +28,9 @@ object RandomSampling {
    * @tparam A Type of the elements to sample
    * @return A sequence of `n` elements sampled without replacement
    */
-  def sampleWithoutReplacement[A](elements: Seq[(A, Double)],
-                                  n: Int,
-                                  rng: Random = new Random(0)): Seq[A] = {
+  def withoutReplacement[A](elements: Seq[(A, Double)],
+                            n: Int,
+                            rng: Random = new Random(0)): Seq[A] = {
     require(n <= elements.size, "Cannot sample more elements than exist in the input")
     require(elements.forall(_._2 > 0), "All weights must be positive")
 

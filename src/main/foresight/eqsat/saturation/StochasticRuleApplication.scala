@@ -4,7 +4,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.priorities.MatchPriorities
-import foresight.eqsat.util.RandomSampling
+import foresight.eqsat.util.random.Sample
 
 import scala.util.Random
 
@@ -67,7 +67,7 @@ final case class StochasticRuleApplication[
     prioritizedMatches: Seq[(RuleT, MatchT, Double)],
     batchSize: Int
   ): Seq[(RuleT, MatchT)] = {
-    RandomSampling.sampleWithoutReplacement(
+    Sample.withoutReplacement(
       prioritizedMatches.map { case (rule, matchT, priority) => ((rule, matchT), priority) },
       batchSize,
       random)

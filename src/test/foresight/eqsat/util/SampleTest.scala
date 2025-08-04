@@ -4,20 +4,20 @@ import org.junit.Test
 import org.junit.Assert._
 import java.util.Random
 import scala.collection.mutable
-import RandomSampling.sampleWithoutReplacement
+import foresight.eqsat.util.random.Sample.withoutReplacement
 
-class RandomSamplingTest {
+class SampleTest {
   @Test
   def testSampleZeroElementsReturnsEmpty(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 1.0))
-    val result = sampleWithoutReplacement(elems, 0)
+    val result = withoutReplacement(elems, 0)
     assertTrue(result.isEmpty)
   }
 
   @Test
   def testSamplingAllElementsReturnsFullSet(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 2.0), ("z", 3.0))
-    val result = sampleWithoutReplacement(elems, 3)
+    val result = withoutReplacement(elems, 3)
     assertEquals(3, result.size)
     assertEquals(Set("x", "y", "z"), result.toSet)
   }
@@ -25,13 +25,13 @@ class RandomSamplingTest {
   @Test(expected = classOf[IllegalArgumentException])
   def testThrowsWhenSampleSizeTooLarge(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 2.0))
-    sampleWithoutReplacement(elems, 3)
+    withoutReplacement(elems, 3)
   }
 
   @Test(expected = classOf[IllegalArgumentException])
   def testThrowsOnNonPositiveWeights(): Unit = {
     val elems = Seq(("a", 0.0), ("b", 2.0))
-    sampleWithoutReplacement(elems, 1)
+    withoutReplacement(elems, 1)
   }
 
   @Test
@@ -42,7 +42,7 @@ class RandomSamplingTest {
     val counts = mutable.Map("a" -> 0, "b" -> 0)
 
     for (_ <- 1 to trials) {
-      val selected = sampleWithoutReplacement(elems, 1, rng).head
+      val selected = withoutReplacement(elems, 1, rng).head
       counts(selected) += 1
     }
 
@@ -63,7 +63,7 @@ class RandomSamplingTest {
     val counts = mutable.Map("a" -> 0, "b" -> 0, "c" -> 0)
 
     for (_ <- 1 to trials) {
-      val selected = sampleWithoutReplacement(elems, 2, rng)
+      val selected = withoutReplacement(elems, 2, rng)
       selected.foreach { x => counts(x) += 1 }
     }
 
