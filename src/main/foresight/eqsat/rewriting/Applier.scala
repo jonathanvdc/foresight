@@ -22,7 +22,7 @@ trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[
 
   /**
    * Creates a new applier that requires the e-graph to have a root node.
-   * This is useful for appliers that need to operate on an [[EGraphWithRoot]].
+   * This is useful for appliers that need to operate on a rooted e-graph.
    * @return An applier that requires the e-graph to have a root node.
    */
   final def requireRoot: Applier[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] = {
