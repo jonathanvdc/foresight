@@ -59,5 +59,5 @@ lazy val foresight = (project in file("."))
   )
 
 // Publish to GitHub Pages
-enablePlugins(GhpagesPlugin)
+enablePlugins(GhpagesPlugin, SitePlugin, SiteScaladocPlugin)
 git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
