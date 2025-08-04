@@ -58,6 +58,6 @@ lazy val foresight = (project in file("."))
     fork := true
   )
 
+// Publish to GitHub Pages
 enablePlugins(GhpagesPlugin)
-
 git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
