@@ -38,7 +38,7 @@ lazy val foresight = (project in file("."))
     name := "foresight",
 
     scalacOptions ++= Seq("-Xmax-classfile-name", "100", "-unchecked", "-deprecation", "-feature"),
-    scalacOptions in(Compile, doc) := Seq("-implicits", "-diagrams"),
+    scalacOptions in(Compile, doc) := Seq("-implicits"), //, "-diagrams"),
 
     // Source locations
     scalaSource in Compile := baseDirectory(_ / "src/main").value,
