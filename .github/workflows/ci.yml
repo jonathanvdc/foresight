@@ -4,6 +4,10 @@ on: [push, pull_request]
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@v4
