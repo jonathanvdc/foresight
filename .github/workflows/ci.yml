@@ -44,6 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
+      - name: Generate Scaladoc
+        run: sbt doc
+
       - name: Set up git config for gh-pages
         run: |
           git config --global user.name "GitHub Actions"
