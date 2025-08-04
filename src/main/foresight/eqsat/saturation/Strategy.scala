@@ -286,8 +286,8 @@ object Strategy {
     /**
      * Adds analyses to the e-graph within each iteration of the strategy. Analyses are added to the e-graph during the
      * strategy's first iteration and are carried forward through each iteration.
-     * @param analyses The analyses to add to the e-graph. Each analysis is an instance of [[Analysis]] that computes
-     *                 some lattice-valued fact about each e-class.
+     * @param analyses The analyses to add to the e-graph. Each analysis computes some lattice-valued fact about each
+     *                 e-class.
      * @return A new strategy that enhances the e-graph with analyses.
      */
     def addAnalyses(analyses: Analysis[NodeT, _]*): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
