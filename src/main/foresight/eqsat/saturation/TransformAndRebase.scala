@@ -120,7 +120,8 @@ object TransformAndRebase {
   }
 
   /**
-   * Creates a [[TransformAndRebase]] strategy that operates on an [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   * Creates a [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
+   * an [[EGraphWithRoot]].
    * A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree
    * from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change
    * the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree
@@ -135,7 +136,8 @@ object TransformAndRebase {
    * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
    * @tparam Data The type of data that the transformation strategy operates on. This can be used to carry additional
    *              information during the transformation process.
-   * @return A [[TransformAndRebase]] strategy that operates on an [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   * @return A [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
+   *         an [[EGraphWithRoot]].
    */
   def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
@@ -150,7 +152,8 @@ object TransformAndRebase {
   }
 
   /**
-   * Creates a [[TransformAndRebase]] strategy that operates on an [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   * Creates a [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
+   * an [[EGraphWithRoot]].
    * A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree
    * from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change
    * the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree
@@ -163,8 +166,10 @@ object TransformAndRebase {
    * @param transform The strategy to apply to the e-graph before rebasing.
    * @param extractor The extractor to use for extracting trees from e-class calls in the e-graph.
    * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
-   * @return A [[TransformAndRebase]] strategy that operates on an [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both
+   *                 [[EGraphLike]] and [[EGraph]].
+   * @return A [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
+   *         an [[EGraphWithRoot]].
    */
   def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]]): TransformAndRebase[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data] = {
@@ -173,7 +178,7 @@ object TransformAndRebase {
 
   /**
    * Creates a [[TransformAndRebase]] strategy that operates on an [[EGraphWithRecordedApplications]] of an
-   * [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   * [[foresight.eqsat.metadata.EGraphWithMetadata]] of an [[EGraphWithRoot]].
    * A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree
    * from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change
    * the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree
@@ -190,7 +195,7 @@ object TransformAndRebase {
    * @tparam Data The type of data that the transformation strategy operates on. This can be used to carry additional
    *              information during the transformation process.
    * @return A [[TransformAndRebase]] strategy that operates on an [[EGraphWithRecordedApplications]] of an
-   *         [[EGraphWithMetadata]] of an [[EGraphWithRoot]].
+   *         [[foresight.eqsat.metadata.EGraphWithMetadata]] of an [[EGraphWithRoot]].
    */
   def withRecording[NodeT,
                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
