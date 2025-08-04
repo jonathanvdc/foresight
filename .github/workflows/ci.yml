@@ -44,9 +44,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Publish Scaladoc to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        run: sbt ghpagesPushSite
+      - name: Set up git config for gh-pages
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Set up GitHub authentication for gh-pages
+        run: |
+          git config --global credential.helper store
+          echo "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Publish API docs to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        run: sbt ghpagesPushSite
