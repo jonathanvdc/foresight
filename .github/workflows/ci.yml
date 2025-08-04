@@ -12,5 +12,9 @@ jobs:
           java-version: 21
           cache: sbt # Cache the artifacts downloaded by sbt across CI runs
       - uses: sbt/setup-sbt@v1
+
       - name: unit tests
         run: sbt +test
+
+      - name: Show project version
+        run: sbt 'show version'
