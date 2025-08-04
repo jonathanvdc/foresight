@@ -3,8 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.saturation.priorities.MatchPriorities
-
-import scala.util.Random
+import foresight.eqsat.util.random.Random
 
 /**
  * A strategy that applies a sequence of rules in a stochastic manner, caching the matches that have already
@@ -55,6 +54,6 @@ object StochasticRuleApplicationWithCaching {
     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
-    apply(rules, priorities, new Random(0))
+    apply(rules, priorities, Random(0))
   }
 }

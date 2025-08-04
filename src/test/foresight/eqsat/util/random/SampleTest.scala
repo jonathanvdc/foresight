@@ -1,23 +1,22 @@
-package foresight.eqsat.util
+package foresight.eqsat.util.random
 
-import org.junit.Test
 import org.junit.Assert._
-import java.util.Random
+import org.junit.Test
+
 import scala.collection.mutable
-import foresight.eqsat.util.random.Sample.withoutReplacement
 
 class SampleTest {
   @Test
   def testSampleZeroElementsReturnsEmpty(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 1.0))
-    val result = withoutReplacement(elems, 0)
+    val (result, _) = Sample.withoutReplacement(elems, 0, Random(0))
     assertTrue(result.isEmpty)
   }
 
   @Test
   def testSamplingAllElementsReturnsFullSet(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 2.0), ("z", 3.0))
-    val result = withoutReplacement(elems, 3)
+    val (result, _) = Sample.withoutReplacement(elems, 3, Random(0))
     assertEquals(3, result.size)
     assertEquals(Set("x", "y", "z"), result.toSet)
   }
@@ -25,25 +24,26 @@ class SampleTest {
   @Test(expected = classOf[IllegalArgumentException])
   def testThrowsWhenSampleSizeTooLarge(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 2.0))
-    withoutReplacement(elems, 3)
+    Sample.withoutReplacement(elems, 3, Random(0))
   }
 
   @Test(expected = classOf[IllegalArgumentException])
   def testThrowsOnNonPositiveWeights(): Unit = {
     val elems = Seq(("a", 0.0), ("b", 2.0))
-    withoutReplacement(elems, 1)
+    Sample.withoutReplacement(elems, 1, Random(0))
   }
 
   @Test
   def testWeightBiasAppearsStatistically(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 3.0))
-    val rng = new Random(123)
+    var rng = Random(123)
     val trials = 10000
     val counts = mutable.Map("a" -> 0, "b" -> 0)
 
     for (_ <- 1 to trials) {
-      val selected = withoutReplacement(elems, 1, rng).head
-      counts(selected) += 1
+      val (selected, newRng) = Sample.withoutReplacement(elems, 1, rng)
+      rng = newRng
+      counts(selected.head) += 1
     }
 
     val freqA = counts("a").toDouble / trials
@@ -56,15 +56,16 @@ class SampleTest {
   @Test
   def testWeightBiasAppearsStatisticallyInTwoOutOfThree(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 2.0), ("c", 3.0))
-    val rng = new Random(123)
+    var rng = Random(123)
     val trials = 10000
 
     // Track how often each element is included in the 2-element sample
     val counts = mutable.Map("a" -> 0, "b" -> 0, "c" -> 0)
 
     for (_ <- 1 to trials) {
-      val selected = withoutReplacement(elems, 2, rng)
+      val (selected, newRng) = Sample.withoutReplacement(elems, 2, rng)
       selected.foreach { x => counts(x) += 1 }
+      rng = newRng
     }
 
     // Convert to frequency

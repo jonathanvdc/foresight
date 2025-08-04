@@ -4,9 +4,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.priorities.MatchPriorities
-import foresight.eqsat.util.random.Sample
-
-import scala.util.Random
+import foresight.eqsat.util.random.{Random, Sample}
 
 /**
  * A strategy that applies a sequence of rules in a stochastic manner. It searches for matches of the rules in an e-graph,
@@ -29,16 +27,16 @@ final case class StochasticRuleApplication[
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
           priorities: MatchPriorities[NodeT, RuleT, MatchT],
-          random: Random) extends Strategy[EGraphT, Unit] {
+          random: Random) extends Strategy[EGraphT, Random] {
 
   /**
    * A map from rule names to the rules themselves. This is used to quickly look up a rule by its name.
    */
   private val rulesByName = rules.map(rule => rule.name -> rule).toMap
 
-  override def initialData: Unit = ()
+  override def initialData: Random = random
 
-  override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
+  override def apply(egraph: EGraphT, data: Random, parallelize: ParallelMap): (Option[EGraphT], Random) = {
     val matches = searchAndApply.search(rules, egraph, parallelize).toSeq.flatMap {
       case (ruleName, matches) =>
         val rule = rulesByName(ruleName)
@@ -48,7 +46,7 @@ final case class StochasticRuleApplication[
     val prioritizedMatches = priorities.prioritize(matches)
     val batchSize = priorities.batchSize(prioritizedMatches)
 
-    val selectedMatches = selectMatches(prioritizedMatches, batchSize)
+    val (selectedMatches, newRng) = selectMatches(prioritizedMatches, batchSize)
     val selectedByRule = selectedMatches.groupBy { case (r, _) => r.name }
     val groupedSelectedMatches = rules.map { rule =>
       rule.name -> selectedByRule.getOrElse(rule.name, Seq.empty).map(_._2)
@@ -60,13 +58,13 @@ final case class StochasticRuleApplication[
       egraph,
       parallelize)
 
-    (newEGraph, ())
+    (newEGraph, newRng)
   }
 
   private def selectMatches(
     prioritizedMatches: Seq[(RuleT, MatchT, Double)],
     batchSize: Int
-  ): Seq[(RuleT, MatchT)] = {
+  ): (Seq[(RuleT, MatchT)], Random) = {
     Sample.withoutReplacement(
       prioritizedMatches.map { case (rule, matchT, priority) => ((rule, matchT), priority) },
       batchSize,
@@ -100,7 +98,7 @@ object StochasticRuleApplication {
     searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
     priorities: MatchPriorities[NodeT, RuleT, MatchT]
   ): StochasticRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
-    new StochasticRuleApplication(rules, searchAndApply, priorities, new Random(0))
+    new StochasticRuleApplication(rules, searchAndApply, priorities, Random(0))
   }
 
   /**
@@ -144,6 +142,6 @@ object StochasticRuleApplication {
     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, priorities, new Random(0))
+    apply(rules, priorities, Random(0))
   }
 }

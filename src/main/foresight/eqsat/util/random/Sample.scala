@@ -1,7 +1,5 @@
 package foresight.eqsat.util.random
 
-import scala.util.Random
-
 /**
  * Utility object for performing random sampling operations.
  */
@@ -24,31 +22,34 @@ object Sample {
    *
    * @param elements Sequence of elements paired with their weights (must be > 0)
    * @param n Number of elements to sample (must be ≤ elements.size)
-   * @param rng Optional Random instance for reproducibility
+   * @param rng Random number generator that extends `RandomLike` and `Random`
    * @tparam A Type of the elements to sample
    * @return A sequence of `n` elements sampled without replacement
    */
   def withoutReplacement[A](elements: Seq[(A, Double)],
                             n: Int,
-                            rng: Random = new Random(0)): Seq[A] = {
+                            rng: Random): (Seq[A], Random) = {
     require(n <= elements.size, "Cannot sample more elements than exist in the input")
     require(elements.forall(_._2 > 0), "All weights must be positive")
 
     if (n == 0) {
-      return Seq.empty[A]
+      return (Seq.empty[A], rng)
     } else if (n == elements.size) {
-      return elements.map(_._1)
+      return (elements.map(_._1), rng)
     }
 
-    val keyed = elements.map { case (value, weight) =>
-      val u = rng.nextDouble()
+    val (randomVals, newRng) = rng.nextDoubles(elements.size)
+
+    val keyed = elements.zip(randomVals).map { case ((value, weight), u) =>
       val key = math.pow(u, 1.0 / weight)
       (value, key)
     }
 
-    keyed
+    val selected = keyed
       .sortBy { case (_, key) => -key }
       .take(n)
       .map { case (value, _) => value }
+
+    (selected, newRng)
   }
 }
