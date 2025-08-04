@@ -22,7 +22,7 @@ object Sample {
    *
    * @param elements Sequence of elements paired with their weights (must be > 0)
    * @param n Number of elements to sample (must be ≤ elements.size)
-   * @param rng Random number generator that extends `RandomLike` and `Random`
+   * @param rng Random number generator to use for sampling
    * @tparam A Type of the elements to sample
    * @return A sequence of `n` elements sampled without replacement
    */
