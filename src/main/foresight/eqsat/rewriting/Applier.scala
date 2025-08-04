@@ -19,19 +19,6 @@ trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[
    * @return The command that represents the application of the match.
    */
   def apply(m: MatchT, egraph: EGraphT): Command[NodeT]
-
-  /**
-   * Creates a new applier that requires the e-graph to have a root node.
-   * This is useful for appliers that need to operate on a rooted e-graph.
-   * @return An applier that requires the e-graph to have a root node.
-   */
-  final def requireRoot: Applier[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] = {
-    new Applier[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] {
-      override def apply(m: MatchT, egraph: EGraphWithRoot[NodeT, EGraphT]): Command[NodeT] = {
-        Applier.this.apply(m, egraph.egraph)
-      }
-    }
-  }
 }
 
 /**
