@@ -1,0 +1,334 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>rewriting - foresight.eqsat.rewriting</title>
+          <meta name="description" content="rewriting - foresight.eqsat.rewriting" />
+          <meta name="keywords" content="rewriting foresight.eqsat.rewriting" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'foresight.eqsat.rewriting.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../lib/package_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="foresight">foresight</a>.<a href="../package.html" class="extype" name="foresight.eqsat">eqsat</a></p>
+        <h1>rewriting</h1><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rewriting</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="foresight.eqsat.rewriting.Applier" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Applier[NodeT,-MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef"></a>
+      <a id="Applier[NodeT,-MatchT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:Applier[NodeT,MatchT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Applier.html"><span class="name">Applier</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="MatchT">-MatchT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Applier.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Applier.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Applier.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Applier[NodeT,-MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An applier that applies a match to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>An applier that applies a match to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">MatchT</dt><dd class="cmt"><p>The type of the match.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the applier applies the match to.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.PortableMatch" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="PortableMatch[NodeT,This&lt;:foresight.eqsat.rewriting.PortableMatch[NodeT,This]]extendsAnyRef"></a>
+      <a id="PortableMatch[NodeT,This&lt;:PortableMatch[NodeT,This]]:PortableMatch[NodeT,This]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="PortableMatch.html"><span class="name">PortableMatch</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="This">This &lt;: <a href="PortableMatch.html" class="extype" name="foresight.eqsat.rewriting.PortableMatch">PortableMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.PortableMatch.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.PortableMatch.This">This</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@PortableMatch[NodeT,This&lt;:foresight.eqsat.rewriting.PortableMatch[NodeT,This]]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A match that can be updated to be portable to e-graphs derived from the original e-graph in which the match was
+found.</p><div class="fullcomment"><div class="comment cmt"><p>A match that can be updated to be portable to e-graphs derived from the original e-graph in which the match was
+found.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">This</dt><dd class="cmt"><p>The type of the match.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.ReversibleApplier" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReversibleApplier[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsApplier[NodeT,MatchT,EGraphT]"></a>
+      <a id="ReversibleApplier[NodeT,MatchT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:ReversibleApplier[NodeT,MatchT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ReversibleApplier.html"><span class="name">ReversibleApplier</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="MatchT">MatchT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <a href="Applier.html" class="extype" name="foresight.eqsat.rewriting.Applier">Applier</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleApplier.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@ReversibleApplier[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsApplier[NodeT,MatchT,EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An applier that can be reversed into a searcher.</p><div class="fullcomment"><div class="comment cmt"><p>An applier that can be reversed into a searcher.</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">MatchT</dt><dd class="cmt"><p>The type of the match.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the applier applies the match to.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.ReversibleSearcher" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReversibleSearcher[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsSearcher[NodeT,Seq[MatchT],EGraphT]"></a>
+      <a id="ReversibleSearcher[NodeT,MatchT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:ReversibleSearcher[NodeT,MatchT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ReversibleSearcher.html"><span class="name">ReversibleSearcher</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="MatchT">MatchT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <a href="Searcher.html" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.MatchT">MatchT</span>], <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@ReversibleSearcher[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsSearcher[NodeT,Seq[MatchT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A searcher that can be reversed into an applier.</p><div class="fullcomment"><div class="comment cmt"><p>A searcher that can be reversed into an applier.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">MatchT</dt><dd class="cmt"><p>The type of the match.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the searcher searches in.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.ReversibleSearcherPhase" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReversibleSearcherPhase[NodeT,InputT,IntermediateT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsSearcherPhase[NodeT,InputT,IntermediateT,Seq[MatchT],EGraphT]"></a>
+      <a id="ReversibleSearcherPhase[NodeT,InputT,IntermediateT,MatchT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:ReversibleSearcherPhase[NodeT,InputT,IntermediateT,MatchT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ReversibleSearcherPhase.html"><span class="name">ReversibleSearcherPhase</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="InputT">InputT</span>, <span name="IntermediateT">IntermediateT</span>, <span name="MatchT">MatchT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <a href="SearcherPhase.html" class="extype" name="foresight.eqsat.rewriting.SearcherPhase">SearcherPhase</a>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.InputT">InputT</span>, <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.IntermediateT">IntermediateT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.MatchT">MatchT</span>], <span class="extype" name="foresight.eqsat.rewriting.ReversibleSearcherPhase.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@ReversibleSearcherPhase[NodeT,InputT,IntermediateT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsSearcherPhase[NodeT,InputT,IntermediateT,Seq[MatchT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A phase of a searcher that can be reversed into an applier.</p><div class="fullcomment"><div class="comment cmt"><p>A phase of a searcher that can be reversed into an applier.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">InputT</dt><dd class="cmt"><p>The type of the input that the searcher consumes from the previous phase.</p></dd><dt class="tparam">IntermediateT</dt><dd class="cmt"><p>The type of the output that the searcher produces for a single e-class.</p></dd><dt class="tparam">MatchT</dt><dd class="cmt"><p>The type of the output that the searcher produces.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the searcher searches in.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Rule" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Rule[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsProductwithSerializable"></a>
+      <a id="Rule[NodeT,MatchT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:Rule[NodeT,MatchT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Rule.html"><span class="name">Rule</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="MatchT">MatchT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Rule.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Rule.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Rule.NodeT">NodeT</span>]</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="searcher">searcher: <a href="Searcher.html" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Rule.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Rule.MatchT">MatchT</span>], <span class="extype" name="foresight.eqsat.rewriting.Rule.EGraphT">EGraphT</span>]</span>, <span name="applier">applier: <a href="Applier.html" class="extype" name="foresight.eqsat.rewriting.Applier">Applier</a>[<span class="extype" name="foresight.eqsat.rewriting.Rule.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Rule.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Rule.EGraphT">EGraphT</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Rule[NodeT,MatchT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A rule that can be applied to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A rule that can be applied to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">MatchT</dt><dd class="cmt"><p>The type of the match.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the rule can be applied to.</p></dd><dt class="param">name</dt><dd class="cmt"><p>The name of the rule.</p></dd><dt class="param">searcher</dt><dd class="cmt"><p>The searcher that finds matches of the rule in an e-graph.</p></dd><dt class="param">applier</dt><dd class="cmt"><p>The applier that applies a match to an e-graph.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Searcher[NodeT,+OutputT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef"></a>
+      <a id="Searcher[NodeT,+OutputT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:Searcher[NodeT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Searcher.html"><span class="name">Searcher</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="OutputT">+OutputT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Searcher[NodeT,+OutputT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A searcher that searches for matches in an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A searcher that searches for matches in an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">OutputT</dt><dd class="cmt"><p>The type of the output that the searcher produces.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the searcher searches in.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.SearcherPhase" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SearcherPhase[NodeT,-InputT,IntermediateT,+OutputT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef"></a>
+      <a id="SearcherPhase[NodeT,-InputT,IntermediateT,+OutputT,EGraphT&lt;:EGraphLike[NodeT,EGraphT]withEGraph[NodeT]]:SearcherPhase[NodeT,InputT,IntermediateT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SearcherPhase.html"><span class="name">SearcherPhase</span></a><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="InputT">-InputT</span>, <span name="IntermediateT">IntermediateT</span>, <span name="OutputT">+OutputT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.SearcherPhase.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.SearcherPhase.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.SearcherPhase.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@SearcherPhase[NodeT,-InputT,IntermediateT,+OutputT,EGraphT&lt;:foresight.eqsat.EGraphLike[NodeT,EGraphT]withforesight.eqsat.EGraph[NodeT]]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A phase of a searcher that searches for matches in an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A phase of a searcher that searches for matches in an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">InputT</dt><dd class="cmt"><p>The type of the input that the searcher consumes from the previous phase.</p></dd><dt class="tparam">IntermediateT</dt><dd class="cmt"><p>The type of the output that the searcher produces for a single e-class.</p></dd><dt class="tparam">OutputT</dt><dd class="cmt"><p>The type of the output that the searcher produces for the entire e-graph.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the searcher searches in.</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="foresight.eqsat.rewriting.Applier" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Applier"></a>
+      <a id="Applier:Applier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Applier$.html"><span class="name">Applier</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Applier" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The companion object for the <a href="Applier.html" class="extype" name="foresight.eqsat.rewriting.Applier">Applier</a> trait.</p>
+    </li><li name="foresight.eqsat.rewriting.ReversibleSearcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReversibleSearcher"></a>
+      <a id="ReversibleSearcher:ReversibleSearcher"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ReversibleSearcher$.html"><span class="name">ReversibleSearcher</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@ReversibleSearcher" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The companion object for <a href="ReversibleSearcher.html" class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher">ReversibleSearcher</a>.</p>
+    </li><li name="foresight.eqsat.rewriting.Rule" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Rule"></a>
+      <a id="Rule:Rule"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Rule$.html"><span class="name">Rule</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Rule" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The companion object for the <a href="Rule.html" class="extype" name="foresight.eqsat.rewriting.Rule">Rule</a> class.</p>
+    </li><li name="foresight.eqsat.rewriting.Searcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Searcher"></a>
+      <a id="Searcher:Searcher"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Searcher$.html"><span class="name">Searcher</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@Searcher" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for Searcher.</p>
+    </li><li name="foresight.eqsat.rewriting.patterns" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="patterns"></a>
+      <a id="patterns:patterns"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="patterns/package.html"><span class="name">patterns</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.package@patterns" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

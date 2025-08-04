@@ -1,0 +1,833 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>ExtractionAnalysis - foresight.eqsat.extraction.ExtractionAnalysis</title>
+          <meta name="description" content="ExtractionAnalysis - foresight.eqsat.extraction.ExtractionAnalysis" />
+          <meta name="keywords" content="ExtractionAnalysis foresight.eqsat.extraction.ExtractionAnalysis" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'foresight.eqsat.extraction.ExtractionAnalysis';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <a href="ExtractionAnalysis$.html" title="See companion object"><img alt="Class/Object" src="../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="../../package.html" class="extype" name="foresight">foresight</a>.<a href="../package.html" class="extype" name="foresight.eqsat">eqsat</a>.<a href="package.html" class="extype" name="foresight.eqsat.extraction">extraction</a></p>
+        <h1><a href="ExtractionAnalysis$.html" title="See companion object">ExtractionAnalysis</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="ExtractionAnalysis$.html" title="See companion object">object ExtractionAnalysis</a>
+            | <a href="package.html" class="extype" name="foresight.eqsat.extraction">package extraction</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ExtractionAnalysis</span><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="C">C</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cost">cost: <a href="CostFunction.html" class="extype" name="foresight.eqsat.extraction.CostFunction">CostFunction</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="costOrdering">costOrdering: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>, <span name="nodeOrdering">nodeOrdering: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>]</span>)</span><span class="result"> extends <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An analysis that produces extraction trees with minimal cost.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">C</dt><dd class="cmt"><p>The type of the cost.</p></dd><dt class="param">name</dt><dd class="cmt"><p>The name of the analysis.</p></dd><dt class="param">cost</dt><dd class="cmt"><p>The cost function for the analysis.</p></dd><dt class="param">costOrdering</dt><dd class="cmt"><p>The ordering for the cost.</p></dd><dt class="param">nodeOrdering</dt><dd class="cmt"><p>An ordering for the nodes.</p></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="foresight.eqsat.extraction.ExtractionAnalysis"><span>ExtractionAnalysis</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="foresight.eqsat.metadata.Analysis"><span>Analysis</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+                <span class="filtertype">Implicitly<br />
+                </span>
+                <ol id="implicits"> <li class="in" name="scala.Predef.any2stringadd" data-hidden="true"><span>by any2stringadd</span></li><li class="in" name="scala.Predef.StringFormat" data-hidden="true"><span>by StringFormat</span></li><li class="in" name="scala.Predef.Ensuring" data-hidden="true"><span>by Ensuring</span></li><li class="in" name="scala.Predef.ArrowAssoc" data-hidden="true"><span>by ArrowAssoc</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="foresight.eqsat.extraction.ExtractionAnalysis#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(name:String,cost:foresight.eqsat.extraction.CostFunction[NodeT,C])(implicitcostOrdering:Ordering[C],implicitnodeOrdering:Ordering[NodeT]):foresight.eqsat.extraction.ExtractionAnalysis[NodeT,C]"></a>
+      <a id="&lt;init&gt;:ExtractionAnalysis[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ExtractionAnalysis</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cost">cost: <a href="CostFunction.html" class="extype" name="foresight.eqsat.extraction.CostFunction">CostFunction</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="costOrdering">costOrdering: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>, <span name="nodeOrdering">nodeOrdering: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@&lt;init&gt;(name:String,cost:foresight.eqsat.extraction.CostFunction[NodeT,C])(implicitcostOrdering:Ordering[C],implicitnodeOrdering:Ordering[NodeT]):foresight.eqsat.extraction.ExtractionAnalysis[NodeT,C]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The name of the analysis.</p></dd><dt class="param">cost</dt><dd class="cmt"><p>The cost function for the analysis.</p></dd><dt class="param">costOrdering</dt><dd class="cmt"><p>The ordering for the cost.</p></dd><dt class="param">nodeOrdering</dt><dd class="cmt"><p>An ordering for the nodes.</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Predef.any2stringadd#+" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="+(other:String):String"></a>
+      <a id="+(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus" class="implicit">+</span><span class="params">(<span name="other">other: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@+(other:String):String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method any2stringadd in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>any2stringadd</dd></dl></div>
+    </li><li name="scala.Predef.ArrowAssoc#-&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="-&gt;[B](y:B):(A,B)"></a>
+      <a id="-&gt;[B](B):(ExtractionAnalysis[NodeT,C],B)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $minus$greater" class="implicit">-&gt;</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>], <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@-&gt;[B](y:B):(A,B)" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method ArrowAssoc in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="foresight.eqsat.metadata.Analysis#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(egraph:foresight.eqsat.EGraph[NodeT]):foresight.eqsat.metadata.AnalysisMetadata[NodeT,A]"></a>
+      <a id="apply(EGraph[NodeT]):AnalysisMetadata[NodeT,ExtractionTreeCall[NodeT,C]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="egraph">egraph: <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>]</span>)</span><span class="result">: <a href="../metadata/AnalysisMetadata.html" class="extype" name="foresight.eqsat.metadata.AnalysisMetadata">AnalysisMetadata</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@apply(egraph:foresight.eqsat.EGraph[NodeT]):foresight.eqsat.metadata.AnalysisMetadata[NodeT,A]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Analyzes an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Analyzes an e-graph.</p></div><dl class="paramcmts block"><dt class="param">egraph</dt><dd class="cmt"><p>The e-graph to analyze.</p></dd><dt>returns</dt><dd class="cmt"><p>The analysis metadata for the e-graph.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#cost" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="cost:foresight.eqsat.extraction.CostFunction[NodeT,C]"></a>
+      <a id="cost:CostFunction[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cost</span><span class="result">: <a href="CostFunction.html" class="extype" name="foresight.eqsat.extraction.CostFunction">CostFunction</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@cost:foresight.eqsat.extraction.CostFunction[NodeT,C]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The cost function for the analysis.</p>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A"></a>
+      <a id="ensuring((ExtractionAnalysis[NodeT,C])⇒Boolean,⇒Any):ExtractionAnalysis[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:A=&gt;Boolean):A"></a>
+      <a id="ensuring((ExtractionAnalysis[NodeT,C])⇒Boolean):ExtractionAnalysis[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@ensuring(cond:A=&gt;Boolean):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:Boolean,msg:=&gt;Any):A"></a>
+      <a id="ensuring(Boolean,⇒Any):ExtractionAnalysis[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@ensuring(cond:Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:Boolean):A"></a>
+      <a id="ensuring(Boolean):ExtractionAnalysis[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@ensuring(cond:Boolean):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#extractor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="extractor[Repr&lt;:foresight.eqsat.EGraphLike[NodeT,Repr]withforesight.eqsat.EGraph[NodeT]]:foresight.eqsat.extraction.Extractor[NodeT,foresight.eqsat.metadata.EGraphWithMetadata[NodeT,Repr]]"></a>
+      <a id="extractor[Repr&lt;:EGraphLike[NodeT,Repr]withEGraph[NodeT]]:Extractor[NodeT,EGraphWithMetadata[NodeT,Repr]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">extractor</span><span class="tparams">[<span name="Repr">Repr &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.extractor.Repr">Repr</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>]</span>]</span><span class="result">: <a href="Extractor.html" class="extype" name="foresight.eqsat.extraction.Extractor">Extractor</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="../metadata/EGraphWithMetadata.html" class="extype" name="foresight.eqsat.metadata.EGraphWithMetadata">EGraphWithMetadata</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.extractor.Repr">Repr</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@extractor[Repr&lt;:foresight.eqsat.EGraphLike[NodeT,Repr]withforesight.eqsat.EGraph[NodeT]]:foresight.eqsat.extraction.Extractor[NodeT,foresight.eqsat.metadata.EGraphWithMetadata[NodeT,Repr]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The extractor corresponding to this extraction analysis.</p><div class="fullcomment"><div class="comment cmt"><p>The extractor corresponding to this extraction analysis.</p></div><dl class="paramcmts block"><dt class="tparam">Repr</dt><dd class="cmt"><p>The type of the underlying e-graph.</p></dd><dt>returns</dt><dd class="cmt"><p>The extractor for the analysis.</p></dd></dl></div>
+    </li><li name="scala.Predef.StringFormat#formatted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="formatted(fmtstr:String):String"></a>
+      <a id="formatted(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">formatted</span><span class="params">(<span name="fmtstr">fmtstr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@formatted(fmtstr:String):String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method StringFormat in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>StringFormat</dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="foresight.eqsat.metadata.Analysis#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get(egraph:foresight.eqsat.metadata.EGraphWithMetadata[NodeT,_]):foresight.eqsat.metadata.AnalysisMetadata[NodeT,A]"></a>
+      <a id="get(EGraphWithMetadata[NodeT,_]):AnalysisMetadata[NodeT,ExtractionTreeCall[NodeT,C]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="egraph">egraph: <a href="../metadata/EGraphWithMetadata.html" class="extype" name="foresight.eqsat.metadata.EGraphWithMetadata">EGraphWithMetadata</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, _]</span>)</span><span class="result">: <a href="../metadata/AnalysisMetadata.html" class="extype" name="foresight.eqsat.metadata.AnalysisMetadata">AnalysisMetadata</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@get(egraph:foresight.eqsat.metadata.EGraphWithMetadata[NodeT,_]):foresight.eqsat.metadata.AnalysisMetadata[NodeT,A]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Gets the analysis metadata from an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the analysis metadata from an e-graph.</p></div><dl class="paramcmts block"><dt class="param">egraph</dt><dd class="cmt"><p>The e-graph to get the metadata from.</p></dd><dt>returns</dt><dd class="cmt"><p>The analysis metadata.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#join" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="join(left:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C],right:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]"></a>
+      <a id="join(ExtractionTreeCall[NodeT,C],ExtractionTreeCall[NodeT,C]):ExtractionTreeCall[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">join</span><span class="params">(<span name="left">left: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>, <span name="right">right: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>)</span><span class="result">: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@join(left:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C],right:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Joins two analysis results.</p><div class="fullcomment"><div class="comment cmt"><p>Joins two analysis results.
+</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>The left analysis result.</p></dd><dt class="param">right</dt><dd class="cmt"><p>The right analysis result.</p></dd><dt>returns</dt><dd class="cmt"><p>The joined analysis result.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a> → <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#make" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="make(node:NodeT,defs:Seq[foresight.eqsat.Slot],uses:Seq[foresight.eqsat.Slot],args:Seq[foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]]):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]"></a>
+      <a id="make(NodeT,Seq[Slot],Seq[Slot],Seq[ExtractionTreeCall[NodeT,C]]):ExtractionTreeCall[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="params">(<span name="node">node: <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span></span>, <span name="defs">defs: <span class="extype" name="scala.Seq">Seq</span>[<a href="../Slot.html" class="extype" name="foresight.eqsat.Slot">Slot</a>]</span>, <span name="uses">uses: <span class="extype" name="scala.Seq">Seq</span>[<a href="../Slot.html" class="extype" name="foresight.eqsat.Slot">Slot</a>]</span>, <span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]</span>)</span><span class="result">: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@make(node:NodeT,defs:Seq[foresight.eqsat.Slot],uses:Seq[foresight.eqsat.Slot],args:Seq[foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]]):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Makes an analysis result for a node.</p><div class="fullcomment"><div class="comment cmt"><p>Makes an analysis result for a node.</p></div><dl class="paramcmts block"><dt class="param">node</dt><dd class="cmt"><p>The type of node to make the analysis result for.</p></dd><dt class="param">defs</dt><dd class="cmt"><p>The slots that are defined by the node.</p></dd><dt class="param">uses</dt><dd class="cmt"><p>The slots that are used by the node and are defined elsewhere.</p></dd><dt class="param">args</dt><dd class="cmt"><p>The analysis results for the arguments to the node.</p></dd><dt>returns</dt><dd class="cmt"><p>The analysis result for the node.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a> → <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="foresight.eqsat.metadata.Analysis#make" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="make(node:foresight.eqsat.ENode[NodeT],args:Seq[A]):A"></a>
+      <a id="make(ENode[NodeT],Seq[ExtractionTreeCall[NodeT,C]]):ExtractionTreeCall[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="params">(<span name="node">node: <a href="../ENode.html" class="extype" name="foresight.eqsat.ENode">ENode</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>]</span>, <span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]</span>)</span><span class="result">: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@make(node:foresight.eqsat.ENode[NodeT],args:Seq[A]):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Makes an analysis result for an e-node.</p><div class="fullcomment"><div class="comment cmt"><p>Makes an analysis result for an e-node.</p></div><dl class="paramcmts block"><dt class="param">node</dt><dd class="cmt"><p>The e-node to make the analysis result for.</p></dd><dt class="param">args</dt><dd class="cmt"><p>The analysis results for the arguments to the e-node.</p></dd><dt>returns</dt><dd class="cmt"><p>The analysis result for the e-node.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="name:String"></a>
+      <a id="name:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@name:String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The name of the analysis.</p><div class="fullcomment"><div class="comment cmt"><p>The name of the analysis.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a> → <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="foresight.eqsat.extraction.ExtractionAnalysis#rename" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rename(result:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C],renaming:foresight.eqsat.SlotMap):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]"></a>
+      <a id="rename(ExtractionTreeCall[NodeT,C],SlotMap):ExtractionTreeCall[NodeT,C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rename</span><span class="params">(<span name="result">result: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>, <span name="renaming">renaming: <a href="../SlotMap.html" class="extype" name="foresight.eqsat.SlotMap">SlotMap</a></span>)</span><span class="result">: <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@rename(result:foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C],renaming:foresight.eqsat.SlotMap):foresight.eqsat.extraction.ExtractionTreeCall[NodeT,C]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Renames the slots in an analysis result.</p><div class="fullcomment"><div class="comment cmt"><p>Renames the slots in an analysis result.
+</p></div><dl class="paramcmts block"><dt class="param">result</dt><dd class="cmt"><p>The analysis result to rename.</p></dd><dt class="param">renaming</dt><dd class="cmt"><p>The renaming to apply to the slots. The keys of the map are the slots as they appear in the result,
+                and the values are the slots to which they are renamed.</p></dd><dt>returns</dt><dd class="cmt"><p>The analysis result with the slots renamed.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a> → <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Predef.ArrowAssoc#→" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="→[B](y:B):(A,B)"></a>
+      <a id="→[B](B):(ExtractionAnalysis[NodeT,C],B)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $u2192" class="implicit">→</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>], <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@→[B](y:B):(A,B)" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]] performed by method ArrowAssoc in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.extraction.ExtractionAnalysis@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@deprecated</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="foresight.eqsat.metadata.Analysis">
+              <h3>Inherited from <a href="../metadata/Analysis.html" class="extype" name="foresight.eqsat.metadata.Analysis">Analysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <a href="ExtractionTreeCall.html" class="extype" name="foresight.eqsat.extraction.ExtractionTreeCall">ExtractionTreeCall</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]</h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        <div class="conversion" name="scala.Predef.any2stringadd">
+              <h3>Inherited by implicit conversion any2stringadd from
+                <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.StringFormat">
+              <h3>Inherited by implicit conversion StringFormat from
+                <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.Ensuring">
+              <h3>Inherited by implicit conversion Ensuring from
+                <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.ArrowAssoc">
+              <h3>Inherited by implicit conversion ArrowAssoc from
+                <a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>] to <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis">ExtractionAnalysis</a>[<span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.extraction.ExtractionAnalysis.C">C</span>]]
+              </h3>
+            </div>
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

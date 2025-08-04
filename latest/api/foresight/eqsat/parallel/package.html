@@ -1,0 +1,224 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>parallel - foresight.eqsat.parallel</title>
+          <meta name="description" content="parallel - foresight.eqsat.parallel" />
+          <meta name="keywords" content="parallel foresight.eqsat.parallel" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'foresight.eqsat.parallel.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../lib/package_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="foresight">foresight</a>.<a href="../package.html" class="extype" name="foresight.eqsat">eqsat</a></p>
+        <h1>parallel</h1><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parallel</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="foresight.eqsat.parallel.CancellationToken" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CancellationTokenextendsAnyRef"></a>
+      <a id="CancellationToken:CancellationToken"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CancellationToken.html"><span class="name">CancellationToken</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@CancellationTokenextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A token that can be used to cancel an operation.</p>
+    </li><li name="foresight.eqsat.parallel.OperationCanceledException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="OperationCanceledExceptionextendsRuntimeExceptionwithProductwithSerializable"></a>
+      <a id="OperationCanceledException:OperationCanceledException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="OperationCanceledException.html"><span class="name">OperationCanceledException</span></a><span class="params">(<span name="token">token: <a href="CancellationToken.html" class="extype" name="foresight.eqsat.parallel.CancellationToken">CancellationToken</a></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@OperationCanceledExceptionextendsRuntimeExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An exception that is thrown when an operation is cancelled.</p><div class="fullcomment"><div class="comment cmt"><p>An exception that is thrown when an operation is cancelled.</p></div><dl class="paramcmts block"><dt class="param">token</dt><dd class="cmt"><p>The cancellation token that was used to cancel the operation.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.parallel.ParallelMap" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParallelMapextendsAnyRef"></a>
+      <a id="ParallelMap:ParallelMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ParallelMap.html"><span class="name">ParallelMap</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@ParallelMapextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A trait that provides a method to apply a function to each element of an iterable.</p>
+    </li><li name="foresight.eqsat.parallel.TimedParallelMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimedParallelMapextendsParallelMap"></a>
+      <a id="TimedParallelMap:TimedParallelMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TimedParallelMap.html"><span class="name">TimedParallelMap</span></a><span class="result"> extends <a href="ParallelMap.html" class="extype" name="foresight.eqsat.parallel.ParallelMap">ParallelMap</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@TimedParallelMapextendsParallelMap" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A parallel map that measures the time taken to process elements.</p>
+    </li><li name="foresight.eqsat.parallel.TimingReport" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TimingReportextendsProductwithSerializable"></a>
+      <a id="TimingReport:TimingReport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TimingReport.html"><span class="name">TimingReport</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="nanos">nanos: <span class="extype" name="scala.Long">Long</span></span>, <span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<a href="TimingReport.html" class="extype" name="foresight.eqsat.parallel.TimingReport">TimingReport</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@TimingReportextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A report of the time taken for a hierarchy of operations.</p><div class="fullcomment"><div class="comment cmt"><p>A report of the time taken for a hierarchy of operations.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The name of the operation.</p></dd><dt class="param">nanos</dt><dd class="cmt"><p>The wall clock time taken for this operation in nanoseconds, including child operations.</p></dd><dt class="param">children</dt><dd class="cmt"><p>The timing reports of child operations.</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="foresight.eqsat.parallel.ParallelMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParallelMap"></a>
+      <a id="ParallelMap:ParallelMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ParallelMap$.html"><span class="name">ParallelMap</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@ParallelMap" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for the <code>ParallelMap</code> trait.</p>
+    </li><li name="foresight.eqsat.parallel.TimingReport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimingReport"></a>
+      <a id="TimingReport:TimingReport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TimingReport$.html"><span class="name">TimingReport</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.parallel.package@TimingReport" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for the <a href="TimingReport.html" class="extype" name="foresight.eqsat.parallel.TimingReport">TimingReport</a> class.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

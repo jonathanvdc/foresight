@@ -1,0 +1,282 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>commands - foresight.eqsat.commands</title>
+          <meta name="description" content="commands - foresight.eqsat.commands" />
+          <meta name="keywords" content="commands foresight.eqsat.commands" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'foresight.eqsat.commands.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../lib/package_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="foresight">foresight</a>.<a href="../package.html" class="extype" name="foresight.eqsat">eqsat</a></p>
+        <h1>commands</h1><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commands</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="foresight.eqsat.commands.AddManyCommand" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AddManyCommand[NodeT]extendsCommand[NodeT]withProductwithSerializable"></a>
+      <a id="AddManyCommand[NodeT]:AddManyCommand[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AddManyCommand.html"><span class="name">AddManyCommand</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="params">(<span name="nodes">nodes: <span class="extype" name="scala.Seq">Seq</span>[(<a href="EClassSymbol$$Virtual.html" class="extype" name="foresight.eqsat.commands.EClassSymbol.Virtual">Virtual</a>, <a href="ENodeSymbol.html" class="extype" name="foresight.eqsat.commands.ENodeSymbol">ENodeSymbol</a>[<span class="extype" name="foresight.eqsat.commands.AddManyCommand.NodeT">NodeT</span>])]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="foresight.eqsat.commands.Command">Command</a>[<span class="extype" name="foresight.eqsat.commands.AddManyCommand.NodeT">NodeT</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@AddManyCommand[NodeT]extendsCommand[NodeT]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A command that adds e-nodes to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A command that adds e-nodes to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The node type of the expressions that the e-graph represents.</p></dd><dt class="param">nodes</dt><dd class="cmt"><p>The e-nodes to add to the e-graph, along with the symbols that represent their e-classes. These nodes
+             are independently reifiable, so they can be added in parallel. Reification information is not carried
+             over from one node addition to another.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.commands.Command" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Command[NodeT]extendsAnyRef"></a>
+      <a id="Command[NodeT]:Command[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Command.html"><span class="name">Command</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@Command[NodeT]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A command that can be applied to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A command that can be applied to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The node type of the expressions that the e-graph represents.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.commands.CommandQueue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CommandQueue[NodeT]extendsCommand[NodeT]withProductwithSerializable"></a>
+      <a id="CommandQueue[NodeT]:CommandQueue[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CommandQueue.html"><span class="name">CommandQueue</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="params">(<span name="commands">commands: <span class="extype" name="scala.Seq">Seq</span>[<a href="Command.html" class="extype" name="foresight.eqsat.commands.Command">Command</a>[<span class="extype" name="foresight.eqsat.commands.CommandQueue.NodeT">NodeT</span>]]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="foresight.eqsat.commands.Command">Command</a>[<span class="extype" name="foresight.eqsat.commands.CommandQueue.NodeT">NodeT</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@CommandQueue[NodeT]extendsCommand[NodeT]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A queue of commands to be applied to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The node type of the expressions that the e-graph represents.</p></dd><dt class="param">commands</dt><dd class="cmt"><p>The commands to be applied to the e-graph.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.commands.CommandQueueBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CommandQueueBuilder[NodeT]extendsAnyRef"></a>
+      <a id="CommandQueueBuilder[NodeT]:CommandQueueBuilder[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CommandQueueBuilder.html"><span class="name">CommandQueueBuilder</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@CommandQueueBuilder[NodeT]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Constructs a queue of commands that can be applied to an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a queue of commands that can be applied to an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The node type of the expressions that the e-graph represents.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.commands.EClassSymbol" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EClassSymbolextendsAnyRef"></a>
+      <a id="EClassSymbol:EClassSymbol"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="EClassSymbol.html"><span class="name">EClassSymbol</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@EClassSymbolextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A symbolic e-class application.</p>
+    </li><li name="foresight.eqsat.commands.ENodeSymbol" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ENodeSymbol[NodeT]extendsProductwithSerializable"></a>
+      <a id="ENodeSymbol[NodeT]:ENodeSymbol[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ENodeSymbol.html"><span class="name">ENodeSymbol</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="params">(<span name="nodeType">nodeType: <span class="extype" name="foresight.eqsat.commands.ENodeSymbol.NodeT">NodeT</span></span>, <span name="definitions">definitions: <span class="extype" name="scala.Seq">Seq</span>[<a href="../Slot.html" class="extype" name="foresight.eqsat.Slot">Slot</a>]</span>, <span name="uses">uses: <span class="extype" name="scala.Seq">Seq</span>[<a href="../Slot.html" class="extype" name="foresight.eqsat.Slot">Slot</a>]</span>, <span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<a href="EClassSymbol.html" class="extype" name="foresight.eqsat.commands.EClassSymbol">EClassSymbol</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@ENodeSymbol[NodeT]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A symbolic e-node that may or may not yet be in the e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A symbolic e-node that may or may not yet be in the e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the e-node.</p></dd><dt class="param">nodeType</dt><dd class="cmt"><p>The type of the e-node.</p></dd><dt class="param">definitions</dt><dd class="cmt"><p>The slots that are defined directly by the e-node.</p></dd><dt class="param">uses</dt><dd class="cmt"><p>The slots that are used directly by the e-node.</p></dd><dt class="param">args</dt><dd class="cmt"><p>The arguments of the e-node, represented as e-class symbols.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.commands.UnionManyCommand" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="UnionManyCommand[NodeT]extendsCommand[NodeT]withProductwithSerializable"></a>
+      <a id="UnionManyCommand[NodeT]:UnionManyCommand[NodeT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UnionManyCommand.html"><span class="name">UnionManyCommand</span></a><span class="tparams">[<span name="NodeT">NodeT</span>]</span><span class="params">(<span name="pairs">pairs: <span class="extype" name="scala.Seq">Seq</span>[(<a href="EClassSymbol.html" class="extype" name="foresight.eqsat.commands.EClassSymbol">EClassSymbol</a>, <a href="EClassSymbol.html" class="extype" name="foresight.eqsat.commands.EClassSymbol">EClassSymbol</a>)]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="foresight.eqsat.commands.Command">Command</a>[<span class="extype" name="foresight.eqsat.commands.UnionManyCommand.NodeT">NodeT</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@UnionManyCommand[NodeT]extendsCommand[NodeT]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A command that unions many e-classes in an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>A command that unions many e-classes in an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The node type of the expressions that the e-graph represents.</p></dd><dt class="param">pairs</dt><dd class="cmt"><p>The pairs of e-class symbols to union.</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="foresight.eqsat.commands.Command" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Command"></a>
+      <a id="Command:Command"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Command$.html"><span class="name">Command</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@Command" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for <a href="Command.html" class="extype" name="foresight.eqsat.commands.Command">Command</a>.</p>
+    </li><li name="foresight.eqsat.commands.CommandQueue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CommandQueue"></a>
+      <a id="CommandQueue:CommandQueue"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CommandQueue$.html"><span class="name">CommandQueue</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@CommandQueue" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for command queues.</p>
+    </li><li name="foresight.eqsat.commands.EClassSymbol" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EClassSymbol"></a>
+      <a id="EClassSymbol:EClassSymbol"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EClassSymbol$.html"><span class="name">EClassSymbol</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.commands.package@EClassSymbol" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A companion object for e-class symbols.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

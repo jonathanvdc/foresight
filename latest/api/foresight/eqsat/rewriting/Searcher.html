@@ -1,0 +1,943 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>Searcher - foresight.eqsat.rewriting.Searcher</title>
+          <meta name="description" content="Searcher - foresight.eqsat.rewriting.Searcher" />
+          <meta name="keywords" content="Searcher foresight.eqsat.rewriting.Searcher" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'foresight.eqsat.rewriting.Searcher';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <a href="Searcher$.html" title="See companion object"><img alt="Trait/Object" src="../../../lib/trait_to_object_big.png" /></a>
+        <p id="owner"><a href="../../package.html" class="extype" name="foresight">foresight</a>.<a href="../package.html" class="extype" name="foresight.eqsat">eqsat</a>.<a href="package.html" class="extype" name="foresight.eqsat.rewriting">rewriting</a></p>
+        <h1><a href="Searcher$.html" title="See companion object">Searcher</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Searcher$.html" title="See companion object">object Searcher</a>
+            | <a href="package.html" class="extype" name="foresight.eqsat.rewriting">package rewriting</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Searcher</span><span class="tparams">[<span name="NodeT">NodeT</span>, <span name="OutputT">+OutputT</span>, <span name="EGraphT">EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A searcher that searches for matches in an e-graph.
+</p></div><dl class="paramcmts block"><dt class="tparam">NodeT</dt><dd class="cmt"><p>The type of the nodes in the e-graph.</p></dd><dt class="tparam">OutputT</dt><dd class="cmt"><p>The type of the output that the searcher produces.</p></dd><dt class="tparam">EGraphT</dt><dd class="cmt"><p>The type of the e-graph that the searcher searches in.</p></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="Searcher$$Filter.html" class="extype" name="foresight.eqsat.rewriting.Searcher.Filter">Filter</a>, <a href="Searcher$$Flatten.html" class="extype" name="foresight.eqsat.rewriting.Searcher.Flatten">Flatten</a>, <a href="Searcher$$Map.html" class="extype" name="foresight.eqsat.rewriting.Searcher.Map">Map</a>, <a href="ReversibleSearcher.html" class="extype" name="foresight.eqsat.rewriting.ReversibleSearcher">ReversibleSearcher</a></div>
+          </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="foresight.eqsat.rewriting.Searcher"><span>Searcher</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+                <span class="filtertype">Implicitly<br />
+                </span>
+                <ol id="implicits"> <li class="in" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps" data-hidden="false"><span>by SearcherOfPatternMatchProductOps</span></li><li class="in" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch" data-hidden="false"><span>by SearcherOfPatternMatch</span></li><li class="in" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps" data-hidden="false"><span>by SearcherOfSeqOfTraversableOps</span></li><li class="in" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps" data-hidden="false"><span>by SearcherOfSeqOps</span></li><li class="in" name="scala.Predef.any2stringadd" data-hidden="true"><span>by any2stringadd</span></li><li class="in" name="scala.Predef.StringFormat" data-hidden="true"><span>by StringFormat</span></li><li class="in" name="scala.Predef.Ensuring" data-hidden="true"><span>by Ensuring</span></li><li class="in" name="scala.Predef.ArrowAssoc" data-hidden="true"><span>by ArrowAssoc</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="foresight.eqsat.rewriting.Searcher#search" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="search(egraph:EGraphT,parallelize:foresight.eqsat.parallel.ParallelMap):OutputT"></a>
+      <a id="search(EGraphT,ParallelMap):OutputT"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">search</span><span class="params">(<span name="egraph">egraph: <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span></span>, <span name="parallelize">parallelize: <a href="../parallel/ParallelMap.html" class="extype" name="foresight.eqsat.parallel.ParallelMap">ParallelMap</a> = <span class="symbol"><span class="name"><a href="../../package.html">ParallelMap.default</a></span></span></span>)</span><span class="result">: <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@search(egraph:EGraphT,parallelize:foresight.eqsat.parallel.ParallelMap):OutputT" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Searches for matches in an e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Searches for matches in an e-graph.</p></div><dl class="paramcmts block"><dt class="param">egraph</dt><dd class="cmt"><p>The e-graph to search in.</p></dd><dt class="param">parallelize</dt><dd class="cmt"><p>The parallelization strategy to use.</p></dd><dt>returns</dt><dd class="cmt"><p>The output of the searcher.</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Predef.any2stringadd#+" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="+(other:String):String"></a>
+      <a id="+(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus" class="implicit">+</span><span class="params">(<span name="other">other: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@+(other:String):String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method any2stringadd in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>any2stringadd</dd></dl></div>
+    </li><li name="scala.Predef.ArrowAssoc#-&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="-&gt;[B](y:B):(A,B)"></a>
+      <a id="-&gt;[B](B):(Searcher[NodeT,OutputT,EGraphT],B)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $minus$greater" class="implicit">-&gt;</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>], <span class="extype" name="scala.Predef.ArrowAssoc.-&gt;.B">B</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@-&gt;[B](y:B):(A,B)" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method ArrowAssoc in scala.Predef.
+            This conversion will take place only if OutputT is a subclass of Seq[Nothing] with (Seq[PatternMatch[Nothing]], Seq[PatternMatch[Nothing]]) (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Nothing">Nothing</span>] with (<span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="scala.Nothing">Nothing</span>]], <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="scala.Nothing">Nothing</span>]])).
+          </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher#chain" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="chain[IntermediateT,OutputT2](phase:foresight.eqsat.rewriting.SearcherPhase[NodeT,OutputT,IntermediateT,OutputT2,EGraphT]):foresight.eqsat.rewriting.Searcher[NodeT,OutputT2,EGraphT]"></a>
+      <a id="chain[IntermediateT,OutputT2](SearcherPhase[NodeT,OutputT,IntermediateT,OutputT2,EGraphT]):Searcher[NodeT,OutputT2,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">chain</span><span class="tparams">[<span name="IntermediateT">IntermediateT</span>, <span name="OutputT2">OutputT2</span>]</span><span class="params">(<span name="phase">phase: <a href="SearcherPhase.html" class="extype" name="foresight.eqsat.rewriting.SearcherPhase">SearcherPhase</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.chain.IntermediateT">IntermediateT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.chain.OutputT2">OutputT2</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.chain.OutputT2">OutputT2</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@chain[IntermediateT,OutputT2](phase:foresight.eqsat.rewriting.SearcherPhase[NodeT,OutputT,IntermediateT,OutputT2,EGraphT]):foresight.eqsat.rewriting.Searcher[NodeT,OutputT2,EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Chains this searcher with another searcher phase.</p><div class="fullcomment"><div class="comment cmt"><p>Chains this searcher with another searcher phase.
+</p></div><dl class="paramcmts block"><dt class="tparam">IntermediateT</dt><dd class="cmt"><p>The type of the intermediate output of the phase.</p></dd><dt class="tparam">OutputT2</dt><dd class="cmt"><p>The type of the output of the phase.</p></dd><dt class="param">phase</dt><dd class="cmt"><p>The phase to chain with.</p></dd><dt>returns</dt><dd class="cmt"><p>The chained searcher.</p></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A"></a>
+      <a id="ensuring((Searcher[NodeT,OutputT,EGraphT])⇒Boolean,⇒Any):Searcher[NodeT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@ensuring(cond:A=&gt;Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:A=&gt;Boolean):A"></a>
+      <a id="ensuring((Searcher[NodeT,OutputT,EGraphT])⇒Boolean):Searcher[NodeT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: (<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@ensuring(cond:A=&gt;Boolean):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:Boolean,msg:=&gt;Any):A"></a>
+      <a id="ensuring(Boolean,⇒Any):Searcher[NodeT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="msg">msg: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@ensuring(cond:Boolean,msg:=&gt;Any):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.Predef.Ensuring#ensuring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ensuring(cond:Boolean):A"></a>
+      <a id="ensuring(Boolean):Searcher[NodeT,OutputT,EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">ensuring</span><span class="params">(<span name="cond">cond: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@ensuring(cond:Boolean):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method Ensuring in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>Ensuring</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps#filter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filter(f:(MatchT,EGraphT)=&gt;Boolean):foresight.eqsat.rewriting.Searcher[NodeT,Seq[MatchT],EGraphT]"></a>
+      <a id="filter((MatchT,EGraphT)⇒Boolean):Searcher[NodeT,Seq[MatchT],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">filter</span><span class="params">(<span name="f">f: (<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@filter(f:(MatchT,EGraphT)=&gt;Boolean):foresight.eqsat.rewriting.Searcher[NodeT,Seq[MatchT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Filters the output of the searcher, retaining only the elements that satisfy the predicate.</p><div class="fullcomment"><div class="comment cmt"><p>Filters the output of the searcher, retaining only the elements that satisfy the predicate. The predicate
+receives the e-graph as an argument.
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The predicate to filter the output.</p></dd><dt>returns</dt><dd class="cmt"><p>A searcher that filters the output.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfSeqOps in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of Seq[MatchT] (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>]) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps#flatMap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flatMap[OutputT](f:(MatchT,EGraphT)=&gt;Traversable[OutputT]):foresight.eqsat.rewriting.Searcher[NodeT,Seq[OutputT],EGraphT]"></a>
+      <a id="flatMap[OutputT]((MatchT,EGraphT)⇒Traversable[OutputT]):Searcher[NodeT,Seq[OutputT],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">flatMap</span><span class="tparams">[<span name="OutputT">OutputT</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>) ⇒ <span class="extype" name="scala.Traversable">Traversable</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.flatMap.OutputT">OutputT</span>]</span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.flatMap.OutputT">OutputT</span>], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@flatMap[OutputT](f:(MatchT,EGraphT)=&gt;Traversable[OutputT]):foresight.eqsat.rewriting.Searcher[NodeT,Seq[OutputT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Applies a mapping to each element of the searcher's output, using the e-graph as an argument, and flattens the
+result into a single sequence.</p><div class="fullcomment"><div class="comment cmt"><p>Applies a mapping to each element of the searcher's output, using the e-graph as an argument, and flattens the
+result into a single sequence.
+</p></div><dl class="paramcmts block"><dt class="tparam">OutputT</dt><dd class="cmt"><p>The type of the output.</p></dd><dt class="param">f</dt><dd class="cmt"><p>The function to apply to each output.</p></dd><dt>returns</dt><dd class="cmt"><p>A searcher that applies the function and flattens the result.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfSeqOps in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of Seq[MatchT] (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>]) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps#flatten" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flatten:foresight.eqsat.rewriting.Searcher[NodeT,Seq[MatchT],EGraphT]"></a>
+      <a id="flatten:Searcher[NodeT,Seq[MatchT],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">flatten</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps.MatchT">MatchT</span>], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@flatten:foresight.eqsat.rewriting.Searcher[NodeT,Seq[MatchT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Flattens the output of the searcher into a single sequence.</p><div class="fullcomment"><div class="comment cmt"><p>Flattens the output of the searcher into a single sequence.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A searcher that flattens the output.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfSeqOfTraversableOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps">SearcherOfSeqOfTraversableOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfSeqOfTraversableOps in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of Seq[Traversable[MatchT]] (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Traversable">Traversable</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps.MatchT">MatchT</span>]]) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfSeqOfTraversableOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps">SearcherOfSeqOfTraversableOps</a></dd></dl></div>
+    </li><li name="scala.Predef.StringFormat#formatted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="formatted(fmtstr:String):String"></a>
+      <a id="formatted(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">formatted</span><span class="params">(<span name="fmtstr">fmtstr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@formatted(fmtstr:String):String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method StringFormat in scala.Predef.
+            
+          </dd><dt>Definition Classes</dt><dd>StringFormat</dd><dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="map[OutputT](f:(MatchT,EGraphT)=&gt;OutputT):foresight.eqsat.rewriting.Searcher[NodeT,Seq[OutputT],EGraphT]"></a>
+      <a id="map[OutputT]((MatchT,EGraphT)⇒OutputT):Searcher[NodeT,Seq[OutputT],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">map</span><span class="tparams">[<span name="OutputT">OutputT</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>) ⇒ <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.map.OutputT">OutputT</span></span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.map.OutputT">OutputT</span>], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@map[OutputT](f:(MatchT,EGraphT)=&gt;OutputT):foresight.eqsat.rewriting.Searcher[NodeT,Seq[OutputT],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Applies a mapping to each element of the searcher's output, using the e-graph as an argument.</p><div class="fullcomment"><div class="comment cmt"><p>Applies a mapping to each element of the searcher's output, using the e-graph as an argument.
+</p></div><dl class="paramcmts block"><dt class="tparam">OutputT</dt><dd class="cmt"><p>The type of the output.</p></dd><dt class="param">f</dt><dd class="cmt"><p>The function to apply to each output.</p></dd><dt>returns</dt><dd class="cmt"><p>A searcher that applies the function to each output.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfSeqOps in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of Seq[MatchT] (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>]) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps#merge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="merge:foresight.eqsat.rewriting.Searcher[NodeT,Seq[foresight.eqsat.rewriting.patterns.PatternMatch[NodeT]],EGraphT]"></a>
+      <a id="merge:Searcher[NodeT,Seq[PatternMatch[NodeT]],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">merge</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@merge:foresight.eqsat.rewriting.Searcher[NodeT,Seq[foresight.eqsat.rewriting.patterns.PatternMatch[NodeT]],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Merges the two pattern matches produced by the searcher.</p><div class="fullcomment"><div class="comment cmt"><p>Merges the two pattern matches produced by the searcher.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A searcher that merges the two pattern matches.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfPatternMatchProductOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps">SearcherOfPatternMatchProductOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfPatternMatchProductOps in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]) (OutputT &lt;: (<span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]], <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]])) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfPatternMatchProductOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps">SearcherOfPatternMatchProductOps</a></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@IntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher#product" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="product[OutputT2](other:foresight.eqsat.rewriting.Searcher[NodeT,OutputT2,EGraphT]):foresight.eqsat.rewriting.Searcher[NodeT,(OutputT,OutputT2),EGraphT]"></a>
+      <a id="product[OutputT2](Searcher[NodeT,OutputT2,EGraphT]):Searcher[NodeT,(OutputT,OutputT2),EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">product</span><span class="tparams">[<span name="OutputT2">OutputT2</span>]</span><span class="params">(<span name="other">other: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.product.OutputT2">OutputT2</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, (<span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.product.OutputT2">OutputT2</span>), <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@product[OutputT2](other:foresight.eqsat.rewriting.Searcher[NodeT,OutputT2,EGraphT]):foresight.eqsat.rewriting.Searcher[NodeT,(OutputT,OutputT2),EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates a new searcher that applies both this searcher and another searcher, and returns a pair of the results.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new searcher that applies both this searcher and another searcher, and returns a pair of the results.
+</p></div><dl class="paramcmts block"><dt class="tparam">OutputT2</dt><dd class="cmt"><p>The type of the output of the other searcher.</p></dd><dt class="param">other</dt><dd class="cmt"><p>The other searcher to apply.</p></dd><dt>returns</dt><dd class="cmt"><p>A searcher that applies both this searcher and the other searcher.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch#requireIndependent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requireIndependent(expr:foresight.eqsat.rewriting.patterns.Pattern.Var[NodeT],slots:foresight.eqsat.Slot*):foresight.eqsat.rewriting.Searcher[NodeT,Seq[foresight.eqsat.rewriting.patterns.PatternMatch[NodeT]],EGraphT]"></a>
+      <a id="requireIndependent(Var[NodeT],Slot*):Searcher[NodeT,Seq[PatternMatch[NodeT]],EGraphT]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="implicit">requireIndependent</span><span class="params">(<span name="expr">expr: <a href="patterns/Pattern$$Var.html" class="extype" name="foresight.eqsat.rewriting.patterns.Pattern.Var">Var</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]</span>, <span name="slots">slots: <a href="../Slot.html" class="extype" name="foresight.eqsat.Slot">Slot</a>*</span>)</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]], <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@requireIndependent(expr:foresight.eqsat.rewriting.patterns.Pattern.Var[NodeT],slots:foresight.eqsat.Slot*):foresight.eqsat.rewriting.Searcher[NodeT,Seq[foresight.eqsat.rewriting.patterns.PatternMatch[NodeT]],EGraphT]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Requires that the expression bound to a variable is independent of a set of slots.</p><div class="fullcomment"><div class="comment cmt"><p>Requires that the expression bound to a variable is independent of a set of slots. That is, the expression may
+not contain any of the slots in the set. Potential matches that do not satisfy this condition are filtered out.</p></div><dl class="paramcmts block"><dt class="param">expr</dt><dd class="cmt"><p>The variable to check.</p></dd><dt class="param">slots</dt><dd class="cmt"><p>The slots to check.</p></dd><dt>returns</dt><dd class="cmt"><p>A searcher that filters out matches that do not satisfy the condition.</p></dd></dl><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <a href="Searcher$$SearcherOfPatternMatch.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch">SearcherOfPatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] performed by method SearcherOfPatternMatch in <a href="Searcher$.html" class="extype" name="foresight.eqsat.rewriting.Searcher">foresight.eqsat.rewriting.Searcher</a>.
+            This conversion will take place only if OutputT is a subclass of Seq[PatternMatch[NodeT]] (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]]) and at the same time EGraphT is a subclass of EGraphLike[NodeT, EGraphT] with EGraph[NodeT] (EGraphT &lt;: <a href="../EGraphLike.html" class="extype" name="foresight.eqsat.EGraphLike">EGraphLike</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] with <a href="../EGraph.html" class="extype" name="foresight.eqsat.EGraph">EGraph</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>]).
+          </dd><dt>Definition Classes</dt><dd><a href="Searcher$$SearcherOfPatternMatch.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch">SearcherOfPatternMatch</a></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher#requireMetadata" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requireMetadata:foresight.eqsat.rewriting.Searcher[NodeT,OutputT,foresight.eqsat.metadata.EGraphWithMetadata[NodeT,EGraphT]]"></a>
+      <a id="requireMetadata:Searcher[NodeT,OutputT,EGraphWithMetadata[NodeT,EGraphT]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requireMetadata</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <a href="../metadata/EGraphWithMetadata.html" class="extype" name="foresight.eqsat.metadata.EGraphWithMetadata">EGraphWithMetadata</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@requireMetadata:foresight.eqsat.rewriting.Searcher[NodeT,OutputT,foresight.eqsat.metadata.EGraphWithMetadata[NodeT,EGraphT]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates a new searcher that takes an e-graph with metadata as input and runs this searcher on that e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new searcher that takes an e-graph with metadata as input and runs this searcher on that e-graph.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A searcher that takes an e-graph with metadata as input.</p></dd></dl></div>
+    </li><li name="foresight.eqsat.rewriting.Searcher#requireRoot" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requireRoot:foresight.eqsat.rewriting.Searcher[NodeT,OutputT,foresight.eqsat.saturation.EGraphWithRoot[NodeT,EGraphT]]"></a>
+      <a id="requireRoot:Searcher[NodeT,OutputT,EGraphWithRoot[NodeT,EGraphT]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requireRoot</span><span class="result">: <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <a href="../saturation/EGraphWithRoot.html" class="extype" name="foresight.eqsat.saturation.EGraphWithRoot">EGraphWithRoot</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@requireRoot:foresight.eqsat.rewriting.Searcher[NodeT,OutputT,foresight.eqsat.saturation.EGraphWithRoot[NodeT,EGraphT]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates a new searcher that takes an e-graph with a root node as input and runs this searcher on that e-graph.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new searcher that takes an e-graph with a root node as input and runs this searcher on that e-graph.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A searcher that takes an e-graph with a root node as input.</p></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@toString():String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Predef.ArrowAssoc#→" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="→[B](y:B):(A,B)"></a>
+      <a id="→[B](B):(Searcher[NodeT,OutputT,EGraphT],B)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $u2192" class="implicit">→</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="y">y: <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span></span>)</span><span class="result">: (<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>], <span class="extype" name="scala.Predef.ArrowAssoc.→.B">B</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@→[B](y:B):(A,B)" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt class="implicit">Implicit information</dt><dd>
+            This member is added by an implicit conversion from <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to
+            <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]] performed by method ArrowAssoc in scala.Predef.
+            This conversion will take place only if OutputT is a subclass of Seq[Nothing] with (Seq[PatternMatch[Nothing]], Seq[PatternMatch[Nothing]]) (OutputT &lt;: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Nothing">Nothing</span>] with (<span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="scala.Nothing">Nothing</span>]], <span class="extype" name="scala.Seq">Seq</span>[<a href="patterns/PatternMatch.html" class="extype" name="foresight.eqsat.rewriting.patterns.PatternMatch">PatternMatch</a>[<span class="extype" name="scala.Nothing">Nothing</span>]])).
+          </dd><dt>Definition Classes</dt><dd>ArrowAssoc</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#foresight.eqsat.rewriting.Searcher@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@deprecated</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        <div class="conversion" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps">
+              <h3>Inherited by implicit conversion SearcherOfPatternMatchProductOps from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <a href="Searcher$$SearcherOfPatternMatchProductOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatchProductOps">SearcherOfPatternMatchProductOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]
+              </h3>
+            </div><div class="conversion" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch">
+              <h3>Inherited by implicit conversion SearcherOfPatternMatch from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <a href="Searcher$$SearcherOfPatternMatch.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfPatternMatch">SearcherOfPatternMatch</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]
+              </h3>
+            </div><div class="conversion" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps">
+              <h3>Inherited by implicit conversion SearcherOfSeqOfTraversableOps from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <a href="Searcher$$SearcherOfSeqOfTraversableOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps">SearcherOfSeqOfTraversableOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOfTraversableOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]
+              </h3>
+            </div><div class="conversion" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">
+              <h3>Inherited by implicit conversion SearcherOfSeqOps from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <a href="Searcher$$SearcherOfSeqOps.html" class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps">SearcherOfSeqOps</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.SearcherOfSeqOps.MatchT">MatchT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.any2stringadd">
+              <h3>Inherited by implicit conversion any2stringadd from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <span class="extype" name="scala.Predef.any2stringadd">any2stringadd</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.StringFormat">
+              <h3>Inherited by implicit conversion StringFormat from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <span class="extype" name="scala.Predef.StringFormat">StringFormat</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.Ensuring">
+              <h3>Inherited by implicit conversion Ensuring from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <span class="extype" name="scala.Predef.Ensuring">Ensuring</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]
+              </h3>
+            </div><div class="conversion" name="scala.Predef.ArrowAssoc">
+              <h3>Inherited by implicit conversion ArrowAssoc from
+                <a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>] to <span class="extype" name="scala.Predef.ArrowAssoc">ArrowAssoc</span>[<a href="" class="extype" name="foresight.eqsat.rewriting.Searcher">Searcher</a>[<span class="extype" name="foresight.eqsat.rewriting.Searcher.NodeT">NodeT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.OutputT">OutputT</span>, <span class="extype" name="foresight.eqsat.rewriting.Searcher.EGraphT">EGraphT</span>]]
+              </h3>
+            </div>
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
