@@ -14,7 +14,7 @@ import foresight.eqsat.saturation.EGraphWithRecordedApplications
  * style.
  *
  * The split between [[EGraphLike]] and [[EGraph]] allows [[EGraph]] to be a simpler trait parameterized only by
- * [[NodeT]], while [[EGraphLike]] is parameterized by both [[NodeT]] and the most derived type ([[This]]). This design
+ * `NodeT`, while [[EGraphLike]] is parameterized by both `NodeT` and the most derived type (`This`). This design
  * ensures that methods in [[EGraphLike]] can always return the most precise type of the implementing e-graph.
  *
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
