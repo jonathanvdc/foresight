@@ -98,15 +98,6 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
       case _ => None
     }
   }
-
-  /**
-   * Creates a rule that requires the e-graph to have a root node.
-   * This is useful for rules that need to operate on an [[EGraphWithRoot]].
-   * @return A rule that requires the e-graph to have a root node.
-   */
-  def requireRoot: Rule[NodeT, MatchT, EGraphWithRoot[NodeT, EGraphT]] = {
-    Rule(name, searcher.requireRoot, applier.requireRoot)
-  }
 }
 
 /**
