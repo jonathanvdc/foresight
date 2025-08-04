@@ -7,14 +7,14 @@ import scala.collection.mutable
 
 class SampleTest {
   @Test
-  def testSampleZeroElementsReturnsEmpty(): Unit = {
+  def sampleZeroElementsReturnsEmpty(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 1.0))
     val (result, _) = Sample.withoutReplacement(elems, 0, Random(0))
     assertTrue(result.isEmpty)
   }
 
   @Test
-  def testSamplingAllElementsReturnsFullSet(): Unit = {
+  def samplingAllElementsReturnsFullSet(): Unit = {
     val elems = Seq(("x", 1.0), ("y", 2.0), ("z", 3.0))
     val (result, _) = Sample.withoutReplacement(elems, 3, Random(0))
     assertEquals(3, result.size)
@@ -22,19 +22,19 @@ class SampleTest {
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def testThrowsWhenSampleSizeTooLarge(): Unit = {
+  def throwsWhenSampleSizeTooLarge(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 2.0))
     Sample.withoutReplacement(elems, 3, Random(0))
   }
 
   @Test(expected = classOf[IllegalArgumentException])
-  def testThrowsOnNonPositiveWeights(): Unit = {
+  def throwsOnNonPositiveWeights(): Unit = {
     val elems = Seq(("a", 0.0), ("b", 2.0))
     Sample.withoutReplacement(elems, 1, Random(0))
   }
 
   @Test
-  def testWeightBiasAppearsStatistically(): Unit = {
+  def weightBiasAppearsStatistically(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 3.0))
     var rng = Random(123)
     val trials = 10000
@@ -54,7 +54,7 @@ class SampleTest {
   }
 
   @Test
-  def testWeightBiasAppearsStatisticallyInTwoOutOfThree(): Unit = {
+  def weightBiasAppearsStatisticallyInTwoOutOfThree(): Unit = {
     val elems = Seq(("a", 1.0), ("b", 2.0), ("c", 3.0))
     var rng = Random(123)
     val trials = 10000
