@@ -1,11 +1,21 @@
 name: Continuous integration
-on: [push, pull_request]
+
+# This workflow builds the project, runs tests, and publishes artifacts to GitHub Packages.
+# It also publishes Scaladoc to GitHub Pages when changes are pushed to the main branch
+# or when a new tag is created.
+
+# This workflow is triggered on pushes to the main branch and on pull requests.
+on:
+  push:
+    branches-ignore:
+      - gh-pages
+  pull_request:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -30,6 +40,13 @@ jobs:
       - name: Publish to GitHub Packages
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         run: sbt +publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Publish Scaladoc to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        run: sbt ghpagesPushSite
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}

@@ -20,6 +20,7 @@ ThisBuild / version := {
   version
 }
 
+ThisBuild / versionScheme := Some("early-semver")
 
 ThisBuild / publishTo := {
   val repo = "https://maven.pkg.github.com/jonathanvdc/foresight"
@@ -56,3 +57,7 @@ lazy val foresight = (project in file("."))
 
     fork := true
   )
+
+enablePlugins(GhpagesPlugin)
+
+git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
