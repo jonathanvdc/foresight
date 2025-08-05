@@ -263,7 +263,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
   final def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[NodeT, This] =
-    EGraphWithPendingUnions(this.asInstanceOf[This]).union(left, right)
+    EGraphWithPendingUnions[NodeT, This](this.asInstanceOf[This]).union(left, right)
 
   /**
    * Enhances this e-graph with the ability to store metadata.
