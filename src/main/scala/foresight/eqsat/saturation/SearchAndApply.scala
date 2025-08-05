@@ -61,7 +61,7 @@ object SearchAndApply {
                           parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
         val ruleMatchingParallelize = parallelize.child("rule matching")
         ruleMatchingParallelize(
-          rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+          rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
             rule.name -> rule.search(egraph, ruleMatchingParallelize)
           }
         ).toMap
@@ -72,7 +72,7 @@ object SearchAndApply {
                          egraph: EGraphT,
                          parallelize: ParallelMap): Option[EGraphT] = {
         val ruleApplicationParallelize = parallelize.child("rule application")
-        val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+        val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
           val newMatches = matches(rule.name)
           rule.delayed(newMatches, egraph, ruleApplicationParallelize)
         }).toSeq
@@ -103,7 +103,7 @@ object SearchAndApply {
                           parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
         val ruleMatchingParallelize = parallelize.child("rule matching")
         ruleMatchingParallelize(
-          rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+          rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
             val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
             val oldMatches = egraph.applications(rule.name)
             val newMatches = matches.filterNot(oldMatches.contains)
@@ -117,7 +117,7 @@ object SearchAndApply {
                          egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                          parallelize: ParallelMap): Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]] = {
         val ruleApplicationParallelize = parallelize.child("rule application")
-        val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, { rule: Rule[NodeT, MatchT, EGraphT] =>
+        val updateCommands = ruleApplicationParallelize[Rule[NodeT, MatchT, EGraphT], Command[NodeT]](rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
           val newMatches = matches(rule.name)
           rule.delayed(newMatches, egraph.egraph, ruleApplicationParallelize)
         }).toSeq
