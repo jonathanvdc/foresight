@@ -182,7 +182,7 @@ object CommandQueue {
     }
 
     // Merge all the addition commands in each batch.
-    batches.map(AddManyCommand[NodeT])
+    batches.map(_.toSeq).map(AddManyCommand[NodeT]).toSeq
   }
 
   private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
@@ -198,7 +198,7 @@ object CommandQueue {
     val addPairs = addCommands.flatMap(_.nodes)
     addPairs match {
       case Seq() => remainingCommands
-      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs)
+      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs.toSeq)
     }
   }
 
@@ -258,7 +258,7 @@ object CommandQueue {
     for (command <- sortedCommands) {
       val cmd = commands(command)
       if (currentBatch.nonEmpty && cmd.uses.toSet.intersect(currentBatchDefs).nonEmpty) {
-        groups += currentBatch
+        groups += currentBatch.toSeq
         currentBatch = mutable.ArrayBuffer.empty
         currentBatchDefs = Set.empty
       }
@@ -268,9 +268,9 @@ object CommandQueue {
     }
 
     if (currentBatch.nonEmpty) {
-      groups += currentBatch
+      groups += currentBatch.toSeq
     }
 
-    groups
+    groups.toSeq
   }
 }

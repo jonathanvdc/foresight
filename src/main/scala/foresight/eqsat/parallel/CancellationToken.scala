@@ -35,7 +35,7 @@ final class CancellationToken {
       CancellationToken.cancellationTimer.schedule(new TimerTask {
         override def run(): Unit = {
           if (!token.isCanceled) {
-            cancel()
+            CancellationToken.this.cancel()
           }
         }
       }, timeout.toMillis)

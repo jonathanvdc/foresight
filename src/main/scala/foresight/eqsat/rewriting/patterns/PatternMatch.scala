@@ -2,6 +2,7 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
 import foresight.eqsat.rewriting.PortableMatch
+import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
  * A match of a pattern.
@@ -72,7 +73,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
 
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
-    val newVarMapping = varMapping.mapValues(_.mapCalls(egraph.canonicalize)).view.force
+    val newVarMapping = varMapping.mapValuesStrict(_.mapCalls(egraph.canonicalize))
     val newSlotMapping = slotMapping
     PatternMatch(newRoot, newVarMapping, newSlotMapping)
   }

@@ -27,12 +27,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
-    import scala.math.Ordering.Implicits.seqDerivedOrdering
+    import foresight.util.ordering.SeqOrdering
 
     val canonicalizedArgs = node.copy(args = node.args.map(canonicalize))
     groupCompatibleVariants(canonicalizedArgs).toSeq
       .map(_.asShapeCall)
-      .minBy(_.shape.slots)
+      .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
 
   private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {

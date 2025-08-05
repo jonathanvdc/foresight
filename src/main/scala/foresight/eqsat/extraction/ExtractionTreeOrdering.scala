@@ -1,7 +1,6 @@
 package foresight.eqsat.extraction
 
 import foresight.eqsat.Slot
-import scala.math.Ordering.Implicits.seqDerivedOrdering
 
 /**
  * An ordering for extraction trees.
@@ -10,9 +9,11 @@ import scala.math.Ordering.Implicits.seqDerivedOrdering
  * @tparam NodeT The type of the nodes.
  * @tparam C The type of the cost.
  */
-final case class ExtractionTreeOrdering[NodeT, C](implicit costOrdering: Ordering[C],
-                                                  nodeOrdering: Ordering[NodeT]) extends Ordering[ExtractionTree[NodeT, C]] {
+final case class ExtractionTreeOrdering[NodeT, C]()(implicit costOrdering: Ordering[C],
+                                                    nodeOrdering: Ordering[NodeT]) extends Ordering[ExtractionTree[NodeT, C]] {
   override def compare(x: ExtractionTree[NodeT, C], y: ExtractionTree[NodeT, C]): Int = {
+    import foresight.util.ordering.SeqOrdering.lexOrdering
+
     Ordering.Tuple7[C, Int, Int, NodeT, Seq[Slot], Seq[Slot], Seq[ExtractionTreeCall[NodeT, C]]].compare(
       (x.cost, x.size, x.depth, x.nodeType, x.definitions, x.uses, x.args),
       (y.cost, y.size, y.depth, y.nodeType, y.definitions, y.uses, y.args))

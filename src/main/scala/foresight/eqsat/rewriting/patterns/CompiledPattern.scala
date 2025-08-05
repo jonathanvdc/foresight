@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
+import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
  * A compiled pattern.
@@ -20,7 +21,8 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wi
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
     val state = MachineState[NodeT](call)
     Machine.run(egraph, state, instructions).map { state =>
-      PatternMatch(call, state.boundVars.mapValues(MixedTree.Call[NodeT, EClassCall]), state.boundSlots)
+      val newVars = state.boundVars.mapValuesStrict(MixedTree.Call[NodeT, EClassCall])
+      PatternMatch(call, newVars, state.boundSlots)
     }.toSeq
   }
 

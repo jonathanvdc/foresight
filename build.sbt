@@ -1,4 +1,6 @@
-ThisBuild / scalaVersion := "2.11.12"
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.13.14") //, "3.4.1")
+ThisBuild / scalaVersion := "2.13.14"
+
 ThisBuild / organization := "com.github.jonathanvdc"
 ThisBuild / version := {
   def gitDescribe: Option[String] =
@@ -38,21 +40,40 @@ lazy val foresight = (project in file("."))
   .settings(
     name := "foresight",
 
-    scalacOptions ++= Seq("-Xmax-classfile-name", "100", "-unchecked", "-deprecation", "-feature"),
-    scalacOptions in(Compile, doc) := Seq("-implicits"), //, "-diagrams"),
+    scalacOptions ++= {
+      val v = scalaVersion.value
+      val common = Seq("-unchecked", "-deprecation", "-feature")
+      val legacyOpts = if (v.startsWith("2.11")) Seq("-Xmax-classfile-name", "100") else Nil
+      common ++ legacyOpts
+    },
+
+    scalacOptions in(Compile, doc) := Seq("-implicits"),
 
     // Source locations
-    scalaSource in Compile := baseDirectory(_ / "src/main").value,
-    scalaSource in Test := baseDirectory(_ / "src/test").value,
-    javaSource in Compile := baseDirectory(_ / "src/main").value,
-    javaSource in Test := baseDirectory(_ / "src/test").value,
+//    scalaSource in Compile := baseDirectory(_ / "src/main").value,
+//    scalaSource in Test := baseDirectory(_ / "src/test").value,
+//    javaSource in Compile := baseDirectory(_ / "src/main").value,
+//    javaSource in Test := baseDirectory(_ / "src/test").value,
 
-    // dependencies specified in project/Dependencies.scala
-    libraryDependencies ++= Dependencies.libraryDependencies,
+    // Version-specific support directories
+    Compile / unmanagedSourceDirectories ++= {
+      val base = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) => Seq(base / "scala-2.11")
+        case Some((2, 13)) => Seq(base / "scala-2.13+")
+        case Some((3, _))  => Seq(base / "scala-2.13+")
+        case _             => Nil
+      }
+    },
 
+    // Dependencies
+    libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
+
+    // Testing
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
     testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "5"),
 
+    // Code coverage
     scoverage.ScoverageKeys.coverageExcludedPackages := "<empty>;.*Test.*;.*testing.*",
 
     fork := true

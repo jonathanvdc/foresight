@@ -70,7 +70,7 @@ trait ParallelMap {
  */
 object ParallelMap {
   /**
-   * A parallel map that processes elements sequentially using the Scala collections library.
+   * A parallel map that processes elements sequentially.
    */
   val sequential: ParallelMap = new ParallelMap {
     override def child(name: String): ParallelMap = this
@@ -78,13 +78,9 @@ object ParallelMap {
   }
 
   /**
-   * A parallel map that processes elements in parallel using the Scala parallel collections library.
+   * A parallel map that processes elements in parallel.
    */
-  val parallel: ParallelMap = new ParallelMap {
-    override def child(name: String): ParallelMap = this
-    override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.par.map(f).seq
-    override def run[A](f: => A): A = f
-  }
+  val parallel: ParallelMap = ParallelMapImpl.parallel
 
   /**
    * A parallel map that processes elements in parallel using a fixed number of threads.
@@ -93,22 +89,9 @@ object ParallelMap {
    */
   def fixedThreadParallel(n: Int): ParallelMap = {
     if (n == 1) {
-      return sequential
-    }
-
-    new ParallelMap {
-      private val taskSupport = new scala.collection.parallel.ForkJoinTaskSupport(
-        new scala.concurrent.forkjoin.ForkJoinPool(n))
-
-      override def child(name: String): ParallelMap = this
-
-      override def run[A](f: => A): A = f
-
-      override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
-        val parInputs = inputs.par
-        parInputs.tasksupport = taskSupport
-        parInputs.map(f).seq
-      }
+      sequential
+    } else {
+      ParallelMapImpl.fixedThreadParallel(n)
     }
   }
 

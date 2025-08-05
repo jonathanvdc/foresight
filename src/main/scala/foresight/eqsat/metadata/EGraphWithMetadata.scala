@@ -2,6 +2,7 @@ package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, EGraph, EGraphLike, ENode, ShapeCall}
+import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
  * An e-graph with associated metadata. Metadata is kept in sync with the e-graph upon every change.
@@ -101,7 +102,7 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   }
 
   override def emptied: EGraphWithMetadata[NodeT, Repr] = {
-    EGraphWithMetadata(egraph.emptied, metadata.mapValues(_.emptied).view.force)
+    EGraphWithMetadata(egraph.emptied, metadata.mapValuesStrict(_.emptied))
   }
 }
 

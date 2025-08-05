@@ -1,8 +1,9 @@
 package foresight.eqsat
 
+import foresight.util.ordering.SeqOrdering
+import foresight.util.collections.StrictMapOps.toStrictMapOps
+
 import scala.collection.mutable
-import scala.math.Ordered.orderingToOrdered
-import scala.math.Ordering.Implicits.seqDerivedOrdering
 
 /**
  * A mapping of parameter slots to argument slots.
@@ -165,7 +166,9 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
     val leftSortedKeys = keys
     val rightSortedKeys = that.keys
 
-    val keyComparison = leftSortedKeys.compare(rightSortedKeys)
+    val ordering = SeqOrdering.lexOrdering(Ordering.by(identity[Slot]))
+
+    val keyComparison = ordering.compare(leftSortedKeys, rightSortedKeys)
     if (keyComparison != 0) {
       return keyComparison
     }
@@ -173,7 +176,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
     val leftSortedValues = leftSortedKeys.map(map)
     val rightSortedValues = rightSortedKeys.map(that.map)
 
-    leftSortedValues.compare(rightSortedValues)
+    ordering.compare(leftSortedValues, rightSortedValues)
   }
 
   /**
@@ -182,7 +185,7 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * @return A new slot map with only the keys that satisfy the predicate.
    */
   def filterKeys(p: Slot => Boolean): SlotMap = {
-    SlotMap(map.filterKeys(p))
+    SlotMap(map.filterKeysStrict(p))
   }
 }
 

@@ -4,6 +4,7 @@ import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
  * A strategy that searches for matches of a set of rules in an e-graph and applies them.
@@ -125,7 +126,7 @@ object SearchAndApply {
         val update = CommandQueue(updateCommands).optimized
 
         // Apply the new matches to the e-graph.
-        val recorded = matches.mapValues(_.toSet)
+        val recorded = matches.mapValuesStrict(_.toSet)
         val (newEGraph, _) = update(egraph.record(recorded), Map.empty, parallelize)
         newEGraph
       }
