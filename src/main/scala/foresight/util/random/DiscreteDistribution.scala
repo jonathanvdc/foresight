@@ -1,5 +1,7 @@
 package foresight.util.random
 
+import foresight.util.collections.StrictMapOps.toStrictMapOps
+
 import scala.annotation.tailrec
 
 /**
@@ -24,7 +26,7 @@ trait DiscreteDistribution {
    */
   final def prioritiesToProbabilities[K, Priority](mapping: Seq[(K, Priority)])(implicit ord: Ordering[Priority]): Seq[(K, Double)] = {
     // Group keys by priority.
-    val groupedByPriority = mapping.groupBy(_._2).mapValues(_.map(_._1)).toSeq
+    val groupedByPriority = mapping.groupBy(_._2).mapValuesStrict(_.map(_._1)).toSeq
 
     // Sort grouped keys by descending priority.
     val sorted = groupedByPriority.sortBy(_._1).reverse.toList
