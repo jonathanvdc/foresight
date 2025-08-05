@@ -164,7 +164,7 @@ object Searcher {
    * @tparam EGraphT The type of the e-graph that the searcher searches in.
    */
   final case class Flatten[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](
-    searcher: Searcher[NodeT, Seq[Traversable[MatchT]], EGraphT]) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
+    searcher: Searcher[NodeT, Seq[Iterable[MatchT]], EGraphT]) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
 
     override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
       searcher.search(egraph, parallelize).flatten
@@ -208,7 +208,7 @@ object Searcher {
      * @tparam OutputT The type of the output.
      * @return A searcher that applies the function and flattens the result.
      */
-    def flatMap[OutputT](f: (MatchT, EGraphT) => Traversable[OutputT]): Searcher[NodeT, Seq[OutputT], EGraphT] = map(f).flatten
+    def flatMap[OutputT](f: (MatchT, EGraphT) => Iterable[OutputT]): Searcher[NodeT, Seq[OutputT], EGraphT] = map(f).flatten
   }
 
   /**
@@ -220,7 +220,7 @@ object Searcher {
    */
   implicit class SearcherOfSeqOfTraversableOps[NodeT,
                                                MatchT,
-                                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[Traversable[MatchT]], EGraphT]) extends AnyVal {
+                                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val searcher: Searcher[NodeT, Seq[Iterable[MatchT]], EGraphT]) extends AnyVal {
     /**
      * Flattens the output of the searcher into a single sequence.
      * @return A searcher that flattens the output.

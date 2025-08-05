@@ -96,7 +96,7 @@ object Applier {
                            MatchT1,
                            MatchT2,
                            EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](applier: Applier[NodeT, MatchT2, EGraphT],
-                                                                                      f: (MatchT1, EGraphT) => Traversable[MatchT2])
+                                                                                      f: (MatchT1, EGraphT) => Iterable[MatchT2])
     extends Applier[NodeT, MatchT1, EGraphT] {
 
     override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] = {
@@ -140,7 +140,7 @@ object Applier {
      * @tparam MatchT2 The type of the match to apply.
      * @return The new applier that flattens a sequence of matches and applies them to an e-graph.
      */
-    def flatMap[MatchT2](f: (MatchT2, EGraphT) => Traversable[MatchT]): Applier[NodeT, MatchT2, EGraphT] = {
+    def flatMap[MatchT2](f: (MatchT2, EGraphT) => Iterable[MatchT]): Applier[NodeT, MatchT2, EGraphT] = {
       FlatMap(applier, f)
     }
   }
