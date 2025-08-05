@@ -7,10 +7,11 @@ import foresight.eqsat.parallel.ParallelMap
  *
  * @param egraph The e-graph.
  * @param pending The pending unions.
+ * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam Repr The type of the e-graph.
  */
-final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr,
-                                                                                      pending: List[(EClassCall, EClassCall)]) {
+final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
+                                                                                                     pending: List[(EClassCall, EClassCall)]) {
   /**
    * Determines whether the e-graph requires a rebuild.
    * @return True if the e-graph requires a rebuild, otherwise false.
@@ -25,7 +26,7 @@ final case class EGraphWithPendingUnions[+Repr <: EGraphLike[_, Repr] with EGrap
    * @param right The reference to the second e-class to union.
    * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
    */
-  def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[Repr] = {
+  def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[NodeT, Repr] = {
     if (egraph.areSame(left, right)) {
       this
     } else {
@@ -60,9 +61,10 @@ object EGraphWithPendingUnions {
   /**
    * Creates a new e-graph with pending unions.
    * @param egraph The e-graph.
+   * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam Repr The type of the e-graph.
    * @return An e-graph with pending unions.
    */
-  def apply[Repr <: EGraphLike[_, Repr] with EGraph[_]](egraph: Repr): EGraphWithPendingUnions[Repr] =
+  def apply[NodeT, Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr): EGraphWithPendingUnions[NodeT, Repr] =
     EGraphWithPendingUnions(egraph, Nil)
 }
