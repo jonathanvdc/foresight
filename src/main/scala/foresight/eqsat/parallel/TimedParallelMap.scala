@@ -18,7 +18,7 @@ final class TimedParallelMap(val name: String, inner: ParallelMap) extends Paral
    * The name of the parallel mapping strategy.
    * @return The name of the parallel mapping strategy.
    */
-  def children: Seq[TimedParallelMap] = locked(namedChildren.view.force.toSeq)
+  def children: Seq[TimedParallelMap] = locked(namedChildren.toVector)
 
   /**
    * The wall clock time taken to process elements in this parallel map, including the time taken by child parallel maps.
