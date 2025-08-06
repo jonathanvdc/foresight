@@ -12,7 +12,7 @@ By separating the application of rewrite rules from the decision‑making proces
 Whereas existing equality saturation frameworks such as [egg](https://egraphs‑good.github.io/egg/) rely on mutable state and sequential rule execution, Foresight introduces a new architectural model built around **immutability**, **parallelism**, and **extensibility**.
 Its purely functional design makes it well‑suited to modern compiler infrastructure, particularly in the context of functional languages.
 
-Foresight’s architecture includes an immutable, slotted e‑graph representation with native support for bound variables, a parallel rewriting pipeline, and a modular strategy interface.
+Foresight’s architecture includes an immutable e‑graph representation with native support for bound variables, a parallel rewriting pipeline, and a modular strategy interface.
 These innovations enable safe speculative rewriting, efficient parallel execution, and flexible rewrite control.
 
 ---
