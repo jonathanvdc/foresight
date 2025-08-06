@@ -88,8 +88,9 @@ lazy val foresight = (project in file("."))
     libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
 
     // Testing
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
-    testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "5"),
+    Test / logBuffered := false,
+    Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "5"),
 
     // Code coverage
     scoverage.ScoverageKeys.coverageExcludedPackages := "<empty>;.*Test.*;.*testing.*",
