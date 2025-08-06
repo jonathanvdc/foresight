@@ -1,5 +1,11 @@
 # Foresight
 
+![Build](https://github.com/jonathanvdc/foresight/actions/workflows/ci.yml/badge.svg)
+![Scala](https://img.shields.io/badge/scala-2.11%20|%202.13%20|%203-red?logo=scala)
+![License](https://img.shields.io/github/license/jonathanvdc/foresight)
+[![Docs](https://img.shields.io/badge/docs-latest-blue)](https://jonathanvdc.github.io/foresight/latest/api)
+![GitHub package](https://img.shields.io/badge/GitHub%20Packages-published-blue?logo=github)
+
 Foresight is a Scala library for **equality saturation**, a technique that enables compilers and program transformers to explore many semantically equivalent rewrites of a program simultaneously.
 By separating the application of rewrite rules from the decision‑making process, equality saturation allows for more principled and comprehensive optimization.
 
