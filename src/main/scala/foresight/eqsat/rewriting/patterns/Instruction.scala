@@ -56,7 +56,7 @@ object Instruction {
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
       val call = machine.registers(register)
       findInEClass(graph, call, machine) match {
-        case Seq() => Right(MachineError.NoMatchingNode(this, call))
+        case nodes if nodes.isEmpty => Right(MachineError.NoMatchingNode(this, call))
         case nodes => Left(nodes.map(machine.bindNode(_, definitions, uses)))
       }
     }
