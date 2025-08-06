@@ -22,7 +22,7 @@ E‑classes are parameterized by [slots](https://dl.acm.org/doi/10.1145/3729326)
 ### Parallel Rule Matching and Application
 Rewriting in Foresight is divided into four fine‑grained stages: pattern matching, command generation, simplification, and graph mutation. The first three stages are embarrassingly parallel, and the final mutation stage benefits from deferred command batching and optimized application.
 
-### Metadata‑Aware Analyses
+### Metadata and Analyses
 Users can attach domain‑specific metadata (such as types, constants, or cost estimates) to e‑classes. Metadata is updated in parallel and remains consistent with the evolving graph. This enables type‑safe rewriting, cost‑guided extraction, and analysis‑informed rule application.
 
 ### Composable Strategy Interface
