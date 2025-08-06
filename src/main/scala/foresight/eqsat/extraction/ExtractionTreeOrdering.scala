@@ -30,7 +30,7 @@ final case class ExtractionTreeOrdering[NodeT, C]()(implicit costOrdering: Order
 
     override def compare(x: ExtractionTreeCall[NodeT, C], y: ExtractionTreeCall[NodeT, C]): Int = {
       treeOrdering.compare(x.tree, y.tree) match {
-        case 0 => x.renaming compare y.renaming
+        case 0 => x.renaming.compare(y.renaming)
         case c => c
       }
     }
