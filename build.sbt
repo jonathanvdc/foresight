@@ -41,10 +41,24 @@ lazy val foresight = (project in file("."))
     name := "foresight",
 
     scalacOptions ++= {
-      val v = scalaVersion.value
-      val common = Seq("-unchecked", "-deprecation", "-feature")
-      val legacyOpts = if (v.startsWith("2.11")) Seq("-Xmax-classfile-name", "100") else Nil
-      common ++ legacyOpts
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) =>
+          Seq("-unchecked", "-deprecation", "-feature", "-Xmax-classfile-name", "100")
+        case Some((2, _)) =>
+          Seq("-unchecked", "-deprecation", "-feature")
+        case Some((3, 4)) =>
+          Seq(
+            "-unchecked",
+            "-deprecation",
+            "-feature",
+            "-Wconf:msg=with.*is deprecated:silent",
+            "-Wconf:msg=The syntax `x: _\\*`.*no longer supported:silent"
+          )
+        case Some((3, _)) =>
+          Seq("-unchecked", "-deprecation", "-feature")
+        case _ =>
+          Seq.empty
+      }
     },
 
     scalacOptions in(Compile, doc) := Seq("-implicits"),
