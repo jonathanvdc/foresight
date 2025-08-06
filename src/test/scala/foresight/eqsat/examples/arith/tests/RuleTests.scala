@@ -18,7 +18,7 @@ class RuleTests {
       .dropData
 
   private def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] =
-    Seq(strategy(10))
+    Seq(strategy(12))
 
   /**
    * Test that addition is associative.
