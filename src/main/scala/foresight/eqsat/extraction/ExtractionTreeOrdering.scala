@@ -26,7 +26,7 @@ final case class ExtractionTreeOrdering[NodeT, C]()(implicit costOrdering: Order
    */
   implicit val callOrdering: Ordering[ExtractionTreeCall[NodeT, C]] = ExtractionTreeCallOrdering
 
-  private final object ExtractionTreeCallOrdering extends Ordering[ExtractionTreeCall[NodeT, C]] {
+  private object ExtractionTreeCallOrdering extends Ordering[ExtractionTreeCall[NodeT, C]] {
 
     override def compare(x: ExtractionTreeCall[NodeT, C], y: ExtractionTreeCall[NodeT, C]): Int = {
       treeOrdering.compare(x.tree, y.tree) match {
