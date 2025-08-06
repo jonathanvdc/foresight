@@ -41,18 +41,18 @@ class SaturateArithTest {
       distributivity1,
       distributivity2)
 
-    def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
-    def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
-    def uniformStochasticStrategy: Strategy[EGraph[Arith], Unit] = {
+    def simpleStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
+    def cachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
+    def uniformStochasticStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
       val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplication(all, prioritizer).repeatUntilStable
     }
-    def uniformStochasticCachingStrategy: Strategy[EGraph[Arith], Unit] = {
+    def uniformStochasticCachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
       val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 
-    def strategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(
+    def strategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
       simpleStrategy,
       cachingStrategy,
       uniformStochasticStrategy,

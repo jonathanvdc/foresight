@@ -73,7 +73,7 @@ final case class BackoffRuleApplication[NodeT,
                                         MatchT](
   rules: Seq[BackoffRule[NodeT, RuleT, MatchT]],
   searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
-) extends Strategy[EGraphT, BackoffRuleStats[NodeT, RuleT, MatchT]] {
+) extends Strategy[NodeT, EGraphT, BackoffRuleStats[NodeT, RuleT, MatchT]] {
 
   override def initialData: BackoffRuleStats[NodeT, RuleT, MatchT] = {
     BackoffRuleStats(

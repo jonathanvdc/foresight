@@ -21,11 +21,11 @@ import foresight.eqsat.rewriting.PortableMatch
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the strategy operates on.
  */
-final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphT, Data],
+final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphT, Data],
                                                                                                            extractor: Extractor[NodeT, EGraphT],
                                                                                                            getRoot: EGraphT => EClassCall,
                                                                                                            setRoot: (EGraphT, EClassCall) => EGraphT,
-                                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean) extends Strategy[EGraphT, (Data, Option[Tree[NodeT]])] {
+                                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean) extends Strategy[NodeT, EGraphT, (Data, Option[Tree[NodeT]])] {
   override def initialData: (Data, Option[Tree[NodeT]]) = (transform.initialData, None)
 
   override def apply(egraph: EGraphT, data: (Data, Option[Tree[NodeT]]), parallelize: ParallelMap): (Option[EGraphT], (Data, Option[Tree[NodeT]])) = {
@@ -81,7 +81,7 @@ object TransformAndRebase {
    *              information during the transformation process.
    * @return A [[TransformAndRebase]] strategy that operates on an [[EGraphWithRoot]].
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
+  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data],
                                                                                    extractor: Extractor[NodeT, EGraphT],
                                                                                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
     new TransformAndRebase(
@@ -114,7 +114,7 @@ object TransformAndRebase {
    * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
    * @return A [[TransformAndRebase]] strategy that operates on an [[EGraphWithRoot]].
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
+  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data],
                                                                                    extractor: Extractor[NodeT, EGraphT]): TransformAndRebase[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
     apply(transform, extractor, (x: Tree[NodeT], y: Tree[NodeT]) => x == y)
   }
@@ -139,7 +139,7 @@ object TransformAndRebase {
    * @return A [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
    *         an [[EGraphWithRoot]].
    */
-  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data] = {
       new TransformAndRebase(
@@ -171,7 +171,7 @@ object TransformAndRebase {
    * @return A [[TransformAndRebase]] strategy that operates on an [[foresight.eqsat.metadata.EGraphWithMetadata]] of
    *         an [[EGraphWithRoot]].
    */
-  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]]): TransformAndRebase[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data] = {
     withMetadata(transform, extractor, (x: Tree[NodeT], y: Tree[NodeT]) => x == y)
   }
@@ -200,7 +200,7 @@ object TransformAndRebase {
   def withRecording[NodeT,
                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                     Match <: PortableMatch[NodeT, Match],
-                    Data](transform: Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data],
+                    Data](transform: Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data],
                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data] = {
     new TransformAndRebase(

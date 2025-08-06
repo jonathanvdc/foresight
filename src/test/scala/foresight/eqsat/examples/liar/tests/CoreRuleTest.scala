@@ -17,7 +17,7 @@ class CoreRuleTest {
 
   private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
 
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all): Strategy[BaseEGraph, Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all): Strategy[ArrayIR, BaseEGraph, Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable

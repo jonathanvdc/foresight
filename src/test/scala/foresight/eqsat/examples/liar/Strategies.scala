@@ -54,7 +54,7 @@ object Strategies {
   def naive(iterationLimit: Option[Int] = None,
             timeout: Option[Duration] = None,
             rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
-            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
     MaximalRuleApplicationWithCaching(rules)
       .withChangeLogger(onChange)
       .withIterationLimit(iterationLimit)
@@ -89,7 +89,7 @@ object Strategies {
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
              idiomRules: Seq[LiarRule] = blasIdiomRules.all,
-             onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
+             onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
 
     def phase(rules: Seq[LiarRule]) = {
       MaximalRuleApplicationWithCaching(rules)
@@ -129,7 +129,7 @@ object Strategies {
             timeout: Option[Duration] = None,
             cycles: Int = 2,
             rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
-            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
 
     val ruleApplicationLimit = 2500
     val ruleBanLength = 5

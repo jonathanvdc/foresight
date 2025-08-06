@@ -183,7 +183,9 @@ object BlasIdioms {
     private def dimsFromArgTypes[A](a: MixedTree[ArrayIR, A],
                                     b: MixedTree[ArrayIR, A]): (MixedTree[Type, A], MixedTree[Type, A], MixedTree[Type, A]) = {
       (a, b) match {
-        case (ArrayType(ArrayType(_, m), n), ArrayType(ArrayType(_, k), l)) =>
+        case (ArrayType(ArrayType(_, m: MixedTree[ArrayIR, A]), n: MixedTree[ArrayIR, A]),
+          ArrayType(ArrayType(_, k: MixedTree[ArrayIR, A]), l: MixedTree[ArrayIR, A])) =>
+
           (aTransposed, bTransposed) match {
             case (false, false) => (n, m, k)
             case (false, true) => (n, m, l)

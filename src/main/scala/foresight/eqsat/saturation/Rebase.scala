@@ -16,7 +16,9 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
  */
 final case class Rebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](extractor: Extractor[NodeT, EGraphT],
                                                                                          getRoot: EGraphT => EClassCall,
-                                                                                         setRoot: (EGraphT, EClassCall) => EGraphT) extends Strategy[EGraphT, Unit] {
+                                                                                         setRoot: (EGraphT, EClassCall) => EGraphT)
+  extends Strategy[NodeT, EGraphT, Unit] {
+  
   override def initialData: Unit = ()
 
   override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {

@@ -17,7 +17,7 @@ class CoreAndArithRuleTest {
   private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
   private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
 
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all ++ arithRules.all): Strategy[EGraph[ArrayIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all ++ arithRules.all): Strategy[ArrayIR, EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable

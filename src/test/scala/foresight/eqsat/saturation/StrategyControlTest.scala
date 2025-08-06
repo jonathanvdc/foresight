@@ -12,8 +12,8 @@ class StrategyControlTest {
    * A test strategy that counts the number of times it is applied to an e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  private final class ApplicationCountingStrategy[EGraphT <: EGraphLike[_, EGraphT] with EGraph[_]]
-    extends Strategy[EGraphT, Unit] {
+  private final class ApplicationCountingStrategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]
+    extends Strategy[NodeT, EGraphT, Unit] {
 
     var applicationCount: Int = 0
 
@@ -27,7 +27,7 @@ class StrategyControlTest {
 
   @Test
   def simpleApplication(): Unit = {
-    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    val strategy = new ApplicationCountingStrategy[Nothing, EGraph[Nothing]]
     assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
     strategy(EGraph.empty)
     assert(strategy.applicationCount == 1, "Strategy is applied once.")
@@ -35,7 +35,7 @@ class StrategyControlTest {
 
   @Test
   def repeatedApplicationWithIterationLimit(): Unit = {
-    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    val strategy = new ApplicationCountingStrategy[Nothing, EGraph[Nothing]]
     assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
 
     // Apply the strategy with an iteration limit of 3
@@ -49,7 +49,7 @@ class StrategyControlTest {
 
   @Test
   def doubleRepeatedApplication(): Unit = {
-    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    val strategy = new ApplicationCountingStrategy[Nothing, EGraph[Nothing]]
     assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
 
     // Apply the strategy with an iteration limit of 3, running twice with repeatUntilStable
@@ -65,7 +65,7 @@ class StrategyControlTest {
 
   @Test
   def doubleRepeatedApplicationWithState(): Unit = {
-    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    val strategy = new ApplicationCountingStrategy[Nothing, EGraph[Nothing]]
     assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
 
     // Apply the strategy with an iteration limit of 3, running twice with repeatUntilStableWithState
@@ -81,7 +81,7 @@ class StrategyControlTest {
 
   @Test
   def changeLoggerFiresEveryIteration(): Unit = {
-    val strategy = new ApplicationCountingStrategy[EGraph[Nothing]]
+    val strategy = new ApplicationCountingStrategy[Nothing, EGraph[Nothing]]
     assert(strategy.applicationCount == 0, "Strategy is not applied yet.")
 
     var counter = 0

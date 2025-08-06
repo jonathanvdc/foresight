@@ -25,7 +25,7 @@ object MaximalRuleApplicationWithCaching {
             EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
             MatchT <: PortableMatch[NodeT, MatchT]](
       rules: Seq[Rule[NodeT, MatchT, EGraphT]]
-    ): Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
+    ): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
     MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT](
       rules, SearchAndApply.withCaching[NodeT, EGraphT, MatchT])
   }
