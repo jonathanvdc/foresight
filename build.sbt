@@ -1,5 +1,5 @@
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.13.14") //, "3.4.1")
-ThisBuild / scalaVersion := "2.13.14"
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.13.14", "3.4.1")
+ThisBuild / scalaVersion := "3.4.1"
 
 ThisBuild / organization := "com.github.jonathanvdc"
 ThisBuild / version := {
