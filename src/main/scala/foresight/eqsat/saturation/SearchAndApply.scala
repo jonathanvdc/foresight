@@ -9,11 +9,12 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
 /**
  * A strategy that searches for matches of a set of rules in an e-graph and applies them.
  *
+ * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam RuleT The type of the rules to search and apply.
  * @tparam EGraphT The type of the e-graph.
  * @tparam MatchT The type of the matches produced by the rules.
  */
-trait SearchAndApply[RuleT <: Rule[_, MatchT, _], EGraphT <: EGraphLike[_, EGraphT] with EGraph[_], MatchT] {
+trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT] {
   /**
    * Searches for matches of the given rules in the e-graph.
    *
@@ -54,8 +55,8 @@ object SearchAndApply {
    */
   def withoutCaching[NodeT,
                      EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                     MatchT]: SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    new SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
+                     MatchT]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+    new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
       override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
                           egraph: EGraphT,
                           parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
@@ -96,8 +97,8 @@ object SearchAndApply {
    */
   def withCaching[NodeT,
                   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                  MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
-    new SearchAndApply[Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
+                  MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+    new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
       override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
                           egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                           parallelize: ParallelMap): Map[String, Seq[MatchT]] = {

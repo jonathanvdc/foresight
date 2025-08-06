@@ -25,7 +25,7 @@ final case class StochasticRuleApplication[
   RuleT <: Rule[NodeT, MatchT, _],
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   MatchT](rules: Seq[RuleT],
-          searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
+          searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
           priorities: MatchPriorities[NodeT, RuleT, MatchT],
           random: Random) extends Strategy[EGraphT, Random] {
 
@@ -95,7 +95,7 @@ object StochasticRuleApplication {
     MatchT
   ](
     rules: Seq[RuleT],
-    searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT],
+    searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
     priorities: MatchPriorities[NodeT, RuleT, MatchT]
   ): StochasticRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
     new StochasticRuleApplication(rules, searchAndApply, priorities, Random(0))

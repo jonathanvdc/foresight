@@ -19,7 +19,7 @@ final case class MaximalRuleApplication[NodeT,
                                         EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                         MatchT](
   rules: Seq[RuleT],
-  searchAndApply: SearchAndApply[RuleT, EGraphT, MatchT]
+  searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
 ) extends Strategy[EGraphT, Unit] {
 
   override def initialData: Unit = ()
