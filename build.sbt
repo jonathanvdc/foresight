@@ -51,8 +51,12 @@ lazy val foresight = (project in file("."))
             "-unchecked",
             "-deprecation",
             "-feature",
-            "-Wconf:msg=with.*is deprecated:silent",
-            "-Wconf:msg=The syntax `x: _\\*`.*no longer supported:silent"
+            // Silence deprecated `with` type operator
+            "-Wconf:msg=.*with as a type operator has been deprecated.*:silent",
+            // Silence deprecated wildcard types (`_`)
+            "-Wconf:msg=.*`_` is deprecated for wildcard arguments.*:silent",
+            // Silence deprecated vararg splices (`x: _*`)
+            "-Wconf:msg=.*x: _\\*.*no longer supported.*:silent"
           )
         case Some((3, _)) =>
           Seq("-unchecked", "-deprecation", "-feature")
