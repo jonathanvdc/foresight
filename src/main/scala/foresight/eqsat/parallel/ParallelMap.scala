@@ -1,7 +1,16 @@
 package foresight.eqsat.parallel
 
 /**
- * A trait that provides a method to apply a function to each element of an iterable.
+ * The core parallelism abstraction in Foresight, `ParallelMap` is a trait for applying functions to collections,
+ * supporting both sequential and parallel execution. It serves as the foundation for parallel computation throughout
+ * the library, enabling scalable data processing and concurrent algorithms.
+ *
+ * `ParallelMap` provides flexible mapping strategies, allowing users to control how computations are distributed and
+ * executed. It supports hierarchical parallelism through child strategies, cancellation via tokens, and timing features
+ * for performance measurement.
+ *
+ * Implementations of this trait can vary in their parallelism model, resource usage, and cancellation semantics,
+ * making it suitable for custom execution models and advanced parallel processing scenarios.
  */
 trait ParallelMap {
   /**
