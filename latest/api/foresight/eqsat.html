@@ -591,17 +591,18 @@
             <div class="cover">
              <div class="doc">
               <p>A lightweight wrapper around an e-graph that defers the application of union operations.</p>
-              <p>Instead of immediately applying a union (which may trigger expensive rebuilds), this class lets you collect multiple unions and apply them in a batch using <a href="eqsat/EGraphWithPendingUnions.html#rebuilt-0">rebuilt</a> or <a href="eqsat/EGraphWithPendingUnions.html#rebuild-ffffff99">rebuild</a>.</p>
-              <p>Most users will not need to construct this class directly. Instead, you can call <a href="eqsat/EGraph.html#union-527">EGraph.union</a> on any <code>EGraph</code>, which returns an <code>EGraphWithPendingUnions</code>, allowing fluent chaining of unions:</p>
+              <p>Normally, applying a union in an e-graph requires invoking <a href="eqsat/EGraph.html#unionMany-fffff0dd">EClassCall)], ParallelMap)</a>, which merges the e-classes and triggers a rebuild. When many unions are expected—such as during a rewrite pass—it is more efficient to defer them and apply them all at once.</p>
+              <p><code>EGraphWithPendingUnions</code> collects such deferred unions and lets you apply them in a batch by calling <a href="eqsat/EGraphWithPendingUnions.html#rebuilt-0">rebuilt</a> or <a href="eqsat/EGraphWithPendingUnions.html#rebuild-ffffff99">rebuild</a>. Internally, these methods delegate to <a href="eqsat/EGraph.html#unionMany-fffff0dd">EGraph.unionMany</a>, ensuring that all unions are applied and the e-graph is fully rebuilt.</p>
+              <p>You rarely need to construct this wrapper directly. Instead, you can call <a href="eqsat/EGraph.html#union-527">EGraph.union</a>, which returns an <code>EGraphWithPendingUnions</code>, allowing fluent chaining:</p>
               <div class="snippet mono-small-block">
                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val updated = egraph
 </span><span line-number="2" class=""><span class="tooltip-container"></span> .union(a, b)    // returns EGraphWithPendingUnions
 </span><span line-number="3" class=""><span class="tooltip-container"></span> .union(c, d)    // chains further unions
-</span><span line-number="4" class=""><span class="tooltip-container"></span> .rebuilt        // applies all unions and returns a rebuilt EGraph
+</span><span line-number="4" class=""><span class="tooltip-container"></span> .rebuilt        // applies all pending unions and returns a rebuilt EGraph
 </span></code></pre>
                <div class="buttons"></div>
               </div>
-              <p>This is particularly useful in rewrite systems and equality saturation loops, where many unions are computed but it's more efficient to apply them all at once.</p>
+              <p>This is particularly useful in rewrite systems and equality saturation loops, where batching union operations avoids excessive intermediate rebuilds and improves performance.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -615,7 +616,7 @@
                Repr
               </dt>
               <dd class="body-medium">
-               <p>The concrete type of the underlying e-graph.</p>
+               <p>The concrete type of the underlying e-graph, which must support union and rebuild.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -687,11 +688,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the e-graph with pending unions.</p>
+             <p>A companion object for <a href="eqsat/EGraphWithPendingUnions.html">EGraphWithPendingUnions</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the e-graph with pending unions.</p>
+              <p>A companion object for <a href="eqsat/EGraphWithPendingUnions.html">EGraphWithPendingUnions</a>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">

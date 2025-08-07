@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the e-graph with pending unions.</p>
+  <p>A companion object for <a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a>.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,11 +210,12 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new e-graph with pending unions.</p>
+             <p>Wraps an e-graph with no pending unions.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new e-graph with pending unions.</p>
+              <p>Wraps an e-graph with no pending unions.</p>
+              <p>This constructor is mostly used internally; most users should instead use <a href="EGraph.html#union-527">EGraph.union</a>, which returns an <a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> and enables fluent chaining.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -222,13 +223,13 @@ node5 -> node1;
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>The type of e-nodes in the e-graph.</p>
               </dd>
               <dt class="body-small">
                Repr
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-graph.</p>
+               <p>The concrete type of the e-graph.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -237,7 +238,7 @@ node5 -> node1;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph.</p>
+               <p>The e-graph to wrap.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -246,7 +247,7 @@ node5 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An e-graph with pending unions.</p>
+               <p>A wrapper around the e-graph with no unions pending.</p>
               </dd>
              </dl>
             </div>

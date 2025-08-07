@@ -772,11 +772,13 @@ node7 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes. The effects of this operation are deferred until the e-graph is rebuilt.</p>
+             <p>Defers a union between two e-classes in this e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes. The effects of this operation are deferred until the e-graph is rebuilt.</p>
+              <p>Defers a union between two e-classes in this e-graph.</p>
+              <p>This method does not immediately merge the two e-classes. Instead, it returns an <a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> that records the union request. You can chain further unions on the result and apply them all at once later using <a href="EGraphWithPendingUnions.html#rebuild-ffffff99">EGraphWithPendingUnions.rebuild</a> or <a href="EGraphWithPendingUnions.html#rebuilt-0">EGraphWithPendingUnions.rebuilt</a>.</p>
+              <p>Internally, all deferred unions are eventually passed to <a href="EGraphLike.html#unionMany-fffff0dd">unionMany</a>, which performs a full rebuild of the e-graph to apply the merges. Deferring unions in this way improves performance when many unions are expected, as it avoids rebuilding after each one.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -784,13 +786,13 @@ node7 -> node0;
                left
               </dt>
               <dd class="body-medium">
-               <p>The reference to the first e-class to union.</p>
+               <p>A reference to the first e-class.</p>
               </dd>
               <dt class="body-small">
                right
               </dt>
               <dd class="body-medium">
-               <p>The reference to the second e-class to union.</p>
+               <p>A reference to the second e-class.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -799,7 +801,23 @@ node7 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.</p>
+               <p>An <a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> containing this e-graph and the deferred union.</p>
+              </dd>
+              <dt class="body-small">
+               See also
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p><a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a></p>
+                </div>
+                <div>
+                 <p><a href="EGraphWithPendingUnions.html#rebuild-ffffff99">EGraphWithPendingUnions.rebuild</a></p>
+                </div>
+                <div>
+                 <p><a href="EGraphLike.html#unionMany-fffff0dd">unionMany</a></p>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Inherited from:

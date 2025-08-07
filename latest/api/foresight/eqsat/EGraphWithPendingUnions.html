@@ -16,17 +16,18 @@
 <div class="cover">
  <div class="doc">
   <p>A lightweight wrapper around an e-graph that defers the application of union operations.</p>
-  <p>Instead of immediately applying a union (which may trigger expensive rebuilds), this class lets you collect multiple unions and apply them in a batch using <a href="EGraphWithPendingUnions.html#rebuilt-0">rebuilt</a> or <a href="EGraphWithPendingUnions.html#rebuild-ffffff99">rebuild</a>.</p>
-  <p>Most users will not need to construct this class directly. Instead, you can call <a href="EGraph.html#union-527">EGraph.union</a> on any <code>EGraph</code>, which returns an <code>EGraphWithPendingUnions</code>, allowing fluent chaining of unions:</p>
+  <p>Normally, applying a union in an e-graph requires invoking <a href="EGraph.html#unionMany-fffff0dd">EClassCall)], ParallelMap)</a>, which merges the e-classes and triggers a rebuild. When many unions are expected—such as during a rewrite pass—it is more efficient to defer them and apply them all at once.</p>
+  <p><code>EGraphWithPendingUnions</code> collects such deferred unions and lets you apply them in a batch by calling <a href="EGraphWithPendingUnions.html#rebuilt-0">rebuilt</a> or <a href="EGraphWithPendingUnions.html#rebuild-ffffff99">rebuild</a>. Internally, these methods delegate to <a href="EGraph.html#unionMany-fffff0dd">EGraph.unionMany</a>, ensuring that all unions are applied and the e-graph is fully rebuilt.</p>
+  <p>You rarely need to construct this wrapper directly. Instead, you can call <a href="EGraph.html#union-527">EGraph.union</a>, which returns an <code>EGraphWithPendingUnions</code>, allowing fluent chaining:</p>
   <div class="snippet mono-small-block">
    <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val updated = egraph
 </span><span line-number="2" class=""><span class="tooltip-container"></span> .union(a, b)    // returns EGraphWithPendingUnions
 </span><span line-number="3" class=""><span class="tooltip-container"></span> .union(c, d)    // chains further unions
-</span><span line-number="4" class=""><span class="tooltip-container"></span> .rebuilt        // applies all unions and returns a rebuilt EGraph
+</span><span line-number="4" class=""><span class="tooltip-container"></span> .rebuilt        // applies all pending unions and returns a rebuilt EGraph
 </span></code></pre>
    <div class="buttons"></div>
   </div>
-  <p>This is particularly useful in rewrite systems and equality saturation loops, where many unions are computed but it's more efficient to apply them all at once.</p>
+  <p>This is particularly useful in rewrite systems and equality saturation loops, where batching union operations avoids excessive intermediate rebuilds and improves performance.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -41,7 +42,7 @@
     Repr
    </dt>
    <dd class="body-medium">
-    <p>The concrete type of the underlying e-graph.</p>
+    <p>The concrete type of the underlying e-graph, which must support union and rebuild.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -161,11 +162,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Rebuilds the e-graph, applying all pending unions.</p>
+             <p>Applies all pending unions and rebuilds the underlying e-graph using the given parallelization strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Rebuilds the e-graph, applying all pending unions.</p>
+              <p>Applies all pending unions and rebuilds the underlying e-graph using the given parallelization strategy.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -173,7 +174,7 @@ node6 -> node2;
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallelization strategy to use.</p>
+               <p>The strategy used to parallelize the rebuild (e.g., thread pool, sequential fallback).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -182,7 +183,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new e-graph with the e-graph rebuilt.</p>
+               <p>The rebuilt e-graph with all pending unions applied.</p>
               </dd>
              </dl>
             </div>
@@ -205,11 +206,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Rebuilds the e-graph, applying all pending unions.</p>
+             <p>Applies all pending unions and returns the rebuilt e-graph using the default parallelization strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Rebuilds the e-graph, applying all pending unions.</p>
+              <p>Applies all pending unions and returns the rebuilt e-graph using the default parallelization strategy.</p>
+              <p>This is a convenience alias for <code>rebuild(ParallelMap.default)</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -217,7 +219,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new e-graph with the e-graph rebuilt.</p>
+               <p>The rebuilt e-graph with all pending unions applied.</p>
               </dd>
              </dl>
             </div>
@@ -240,11 +242,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-graph requires a rebuild.</p>
+             <p>Checks whether the e-graph has any deferred unions pending application.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-graph requires a rebuild.</p>
+              <p>Checks whether the e-graph has any deferred unions pending application.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -252,7 +254,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-graph requires a rebuild, otherwise false.</p>
+               <p><code>true</code> if there are pending unions and the e-graph should be rebuilt; <code>false</code> if the e-graph is already up to date.</p>
               </dd>
              </dl>
             </div>
@@ -275,11 +277,13 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes. The effects of this operation are deferred until the e-graph is rebuilt.</p>
+             <p>Defers a union between two e-classes.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes. The effects of this operation are deferred until the e-graph is rebuilt.</p>
+              <p>Defers a union between two e-classes.</p>
+              <p>The union is not applied immediately but instead recorded in the list of pending unions. Use <a href="EGraphWithPendingUnions.html#rebuild-ffffff99">rebuild</a> or <a href="EGraphWithPendingUnions.html#rebuilt-0">rebuilt</a> to apply all deferred unions and obtain a fully updated e-graph.</p>
+              <p>If the two e-classes already belong to the same class, this method is a no-op.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -287,13 +291,13 @@ node6 -> node2;
                left
               </dt>
               <dd class="body-medium">
-               <p>The reference to the first e-class to union.</p>
+               <p>The first e-class reference.</p>
               </dd>
               <dt class="body-small">
                right
               </dt>
               <dd class="body-medium">
-               <p>The reference to the second e-class to union.</p>
+               <p>The second e-class reference.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -302,7 +306,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.</p>
+               <p>A new <a href="EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> with the union operation added to the pending list.</p>
               </dd>
              </dl>
             </div>
