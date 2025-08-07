@@ -9,7 +9,7 @@ package foresight.eqsat
  * over an e-graph with user-defined data and iteration control. Strategies can be composed,
  * repeated, rebased, and extended with metadata.
  *
- * ==Key Concepts==
+ * ## Key Concepts
  *
  *  - [[Strategy]]: Core trait representing a saturation step that transforms an e-graph.
  *  - [[SearchAndApply]]: Separates search from application logic for fine-grained control.
@@ -19,7 +19,8 @@ package foresight.eqsat
  *  - [[StochasticRuleApplication]]: Applies a batch of matches selected probabilistically based on priorities.
  *  - [[StochasticRuleApplicationWithCaching]]: Same as above, but avoids reapplying matches across iterations.
  *
- * ==Typical Usage==
+ * ## Typical Usage
+ *
  * More sophisticated strategies are constructed using combinators such as [[foresight.eqsat.saturation.Strategy.thenApply]],
  * [[foresight.eqsat.saturation.Strategy.repeatUntilStable]], [[foresight.eqsat.saturation.Strategy.withIterationLimit]],
  * [[foresight.eqsat.saturation.Strategy.withTimeout]] and [[foresight.eqsat.saturation.Strategy.thenRebase]].
