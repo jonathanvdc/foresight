@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A strategy that applies a sequence of rules with backoff. Each rule has a match limit and a ban length. Once the match limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again, at which point both the match limit and the ban length are doubled.</p>
+  <p>A saturation strategy that applies rules with a backoff heuristic.</p>
+  <p>Rules are initially allowed to apply a limited number of matches. Once this quota is exhausted, the rule is banned for a fixed number of iterations. After the ban period ends, the rule is re-enabled with both its match limit and ban duration doubled. This encourages frequent early exploration and gradual fading out of overly eager rules.</p>
+  <p>Rules apply up to their remaining match limits each iteration, chosen uniformly at random from the match set.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -27,19 +29,19 @@
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the matches produced by the rules.</p>
+    <p>The type of rule match.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The node type in the e-graph.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rules to apply, which must extend the <code>Rule</code> trait.</p>
+    <p>The rewrite rule type.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -48,13 +50,13 @@
     rules
    </dt>
    <dd class="body-medium">
-    <p>The sequence of rules to apply, each with its own match limit and ban length.</p>
+    <p>Rules annotated with initial match limits and ban lengths.</p>
    </dd>
    <dt class="body-small">
     searchAndApply
    </dt>
    <dd class="body-medium">
-    <p>The search and apply strategy that finds matches of the rules and applies them to the e-graph.</p>
+    <p>Strategy for finding and applying rule matches to the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>

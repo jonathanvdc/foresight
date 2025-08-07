@@ -99,11 +99,12 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A rewrite rule annotated with a match limit and a ban length. The match limit is the maximum number of matches that can be applied for this rule. Once this limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again. At this point both the match limit and the ban length are doubled.</p>
+             <p>Annotates a rewrite rule with initial scheduling parameters for backoff.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A rewrite rule annotated with a match limit and a ban length. The match limit is the maximum number of matches that can be applied for this rule. Once this limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again. At this point both the match limit and the ban length are doubled.</p>
+              <p>Annotates a rewrite rule with initial scheduling parameters for backoff.</p>
+              <p>The backoff strategy limits how often a rule can fire. Each rule is given an initial match limit (i.e., how many matches it may apply before being paused) and an initial ban length (how long it is paused once exhausted). Both are doubled after each cooldown cycle.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -111,13 +112,13 @@
                initialBanLength
               </dt>
               <dd class="body-medium">
-               <p>The initial ban length.</p>
+               <p>The number of iterations the rule is banned after hitting its match limit.</p>
               </dd>
               <dt class="body-small">
                initialMatchLimit
               </dt>
               <dd class="body-medium">
-               <p>The initial match limit.</p>
+               <p>The initial number of matches this rule can apply before being temporarily banned.</p>
               </dd>
               <dt class="body-small">
                rule
@@ -174,11 +175,13 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A strategy that applies a sequence of rules with backoff. Each rule has a match limit and a ban length. Once the match limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again, at which point both the match limit and the ban length are doubled.</p>
+             <p>A saturation strategy that applies rules with a backoff heuristic.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A strategy that applies a sequence of rules with backoff. Each rule has a match limit and a ban length. Once the match limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again, at which point both the match limit and the ban length are doubled.</p>
+              <p>A saturation strategy that applies rules with a backoff heuristic.</p>
+              <p>Rules are initially allowed to apply a limited number of matches. Once this quota is exhausted, the rule is banned for a fixed number of iterations. After the ban period ends, the rule is re-enabled with both its match limit and ban duration doubled. This encourages frequent early exploration and gradual fading out of overly eager rules.</p>
+              <p>Rules apply up to their remaining match limits each iteration, chosen uniformly at random from the match set.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -192,19 +195,19 @@
                MatchT
               </dt>
               <dd class="body-medium">
-               <p>The type of the matches produced by the rules.</p>
+               <p>The type of rule match.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>The node type in the e-graph.</p>
               </dd>
               <dt class="body-small">
                RuleT
               </dt>
               <dd class="body-medium">
-               <p>The type of the rules to apply, which must extend the <code>Rule</code> trait.</p>
+               <p>The rewrite rule type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -213,13 +216,13 @@
                rules
               </dt>
               <dd class="body-medium">
-               <p>The sequence of rules to apply, each with its own match limit and ban length.</p>
+               <p>Rules annotated with initial match limits and ban lengths.</p>
               </dd>
               <dt class="body-small">
                searchAndApply
               </dt>
               <dd class="body-medium">
-               <p>The search and apply strategy that finds matches of the rules and applies them to the e-graph.</p>
+               <p>Strategy for finding and applying rule matches to the e-graph.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -273,52 +276,32 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Statistics for the backoff rule application strategy. This includes the current iteration, a map of rule names to their statistics, and a random number generator used for selecting matches randomly.</p>
+             <p>Represents the state of a backoff strategy across iterations.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Statistics for the backoff rule application strategy. This includes the current iteration, a map of rule names to their statistics, and a random number generator used for selecting matches randomly.</p>
+              <p>Represents the state of a backoff strategy across iterations.</p>
+              <p>Used as the persistent state (<code>DataT</code>) for <a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a>, it tracks the number of iterations so far, all rule-specific scheduling state, and the random generator used for sampling.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               MatchT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the matches produced by the rule.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-              <dt class="body-small">
-               RuleT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the rule.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                iteration
               </dt>
               <dd class="body-medium">
-               <p>The current iteration of the backoff strategy.</p>
+               <p>The current iteration count.</p>
               </dd>
               <dt class="body-small">
                random
               </dt>
               <dd class="body-medium">
-               <p>A random number generator used for selecting matches randomly.</p>
+               <p>Random number generator used to shuffle matches.</p>
               </dd>
               <dt class="body-small">
                stats
               </dt>
               <dd class="body-medium">
-               <p>A map from rule names to their statistics.</p>
+               <p>Per-rule statistics, keyed by rule name.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -915,7 +898,6 @@
               <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
               <ul>
                <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
-               <li>Rewrite rule debugging where per-match traceability is useful.</li>
                <li>Gradual saturation where each match is only applied once.</li>
               </ul>
              </div>
@@ -1153,64 +1135,44 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Statistics for a rule in the backoff strategy. This includes the rule itself, the match limit, the ban length, the time until which the rule is banned, and the number of remaining matches that can be applied before the rule is banned.</p>
+             <p>Tracks dynamic backoff statistics for a single rule.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Statistics for a rule in the backoff strategy. This includes the rule itself, the match limit, the ban length, the time until which the rule is banned, and the number of remaining matches that can be applied before the rule is banned.</p>
+              <p>Tracks dynamic backoff statistics for a single rule.</p>
+              <p>These stats are used to determine whether a rule is active, when it becomes eligible again, and how many more matches it may apply in the current activation window.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               MatchT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the matches produced by the rule.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-              <dt class="body-small">
-               RuleT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the rule.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                banLength
               </dt>
               <dd class="body-medium">
-               <p>The number of iterations for which the rule is banned once its match limit is reached.</p>
+               <p>The number of iterations the rule will be banned after hitting its match limit.</p>
               </dd>
               <dt class="body-small">
                bannedUntil
               </dt>
               <dd class="body-medium">
-               <p>The iteration until which the rule is banned, if it is currently banned.</p>
+               <p>If banned, the iteration number at which the rule will become eligible again.</p>
               </dd>
               <dt class="body-small">
                matchLimit
               </dt>
               <dd class="body-medium">
-               <p>The maximum number of matches that can be applied for this rule before it is banned.</p>
+               <p>The total number of matches this rule can apply during its current active window.</p>
               </dd>
               <dt class="body-small">
                remainingMatches
               </dt>
               <dd class="body-medium">
-               <p>The number of matches that can still be applied for this rule before it is banned.</p>
+               <p>The number of matches this rule can still apply before triggering a ban.</p>
               </dd>
               <dt class="body-small">
                rule
               </dt>
               <dd class="body-medium">
-               <p>The rewrite rule.</p>
+               <p>The rewrite rule being tracked.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>

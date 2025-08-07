@@ -12,61 +12,41 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Statistics for a rule in the backoff strategy. This includes the rule itself, the match limit, the ban length, the time until which the rule is banned, and the number of remaining matches that can be applied before the rule is banned.</p>
+  <p>Tracks dynamic backoff statistics for a single rule.</p>
+  <p>These stats are used to determine whether a rule is active, when it becomes eligible again, and how many more matches it may apply in the current activation window.</p>
  </div>
  <section id="attributes">
-  <h2 class="h500">Type parameters</h2>
-  <dl class="attributes">
-   <dt class="body-small">
-    MatchT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the matches produced by the rule.</p>
-   </dd>
-   <dt class="body-small">
-    NodeT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
-   </dd>
-   <dt class="body-small">
-    RuleT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the rule.</p>
-   </dd>
-  </dl>
   <h2 class="h500">Value parameters</h2>
   <dl class="attributes">
    <dt class="body-small">
     banLength
    </dt>
    <dd class="body-medium">
-    <p>The number of iterations for which the rule is banned once its match limit is reached.</p>
+    <p>The number of iterations the rule will be banned after hitting its match limit.</p>
    </dd>
    <dt class="body-small">
     bannedUntil
    </dt>
    <dd class="body-medium">
-    <p>The iteration until which the rule is banned, if it is currently banned.</p>
+    <p>If banned, the iteration number at which the rule will become eligible again.</p>
    </dd>
    <dt class="body-small">
     matchLimit
    </dt>
    <dd class="body-medium">
-    <p>The maximum number of matches that can be applied for this rule before it is banned.</p>
+    <p>The total number of matches this rule can apply during its current active window.</p>
    </dd>
    <dt class="body-small">
     remainingMatches
    </dt>
    <dd class="body-medium">
-    <p>The number of matches that can still be applied for this rule before it is banned.</p>
+    <p>The number of matches this rule can still apply before triggering a ban.</p>
    </dd>
    <dt class="body-small">
     rule
    </dt>
    <dd class="body-medium">
-    <p>The rewrite rule.</p>
+    <p>The rewrite rule being tracked.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -217,4 +197,4 @@ node6 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Value parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

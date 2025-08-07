@@ -12,7 +12,8 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A rewrite rule annotated with a match limit and a ban length. The match limit is the maximum number of matches that can be applied for this rule. Once this limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban length has passed, the rule can be applied again. At this point both the match limit and the ban length are doubled.</p>
+  <p>Annotates a rewrite rule with initial scheduling parameters for backoff.</p>
+  <p>The backoff strategy limits how often a rule can fire. Each rule is given an initial match limit (i.e., how many matches it may apply before being paused) and an initial ban length (how long it is paused once exhausted). Both are doubled after each cooldown cycle.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -21,13 +22,13 @@
     initialBanLength
    </dt>
    <dd class="body-medium">
-    <p>The initial ban length.</p>
+    <p>The number of iterations the rule is banned after hitting its match limit.</p>
    </dd>
    <dt class="body-small">
     initialMatchLimit
    </dt>
    <dd class="body-medium">
-    <p>The initial match limit.</p>
+    <p>The initial number of matches this rule can apply before being temporarily banned.</p>
    </dd>
    <dt class="body-small">
     rule

@@ -12,49 +12,29 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Statistics for the backoff rule application strategy. This includes the current iteration, a map of rule names to their statistics, and a random number generator used for selecting matches randomly.</p>
+  <p>Represents the state of a backoff strategy across iterations.</p>
+  <p>Used as the persistent state (<code>DataT</code>) for <a href="BackoffRuleApplication.html">BackoffRuleApplication</a>, it tracks the number of iterations so far, all rule-specific scheduling state, and the random generator used for sampling.</p>
  </div>
  <section id="attributes">
-  <h2 class="h500">Type parameters</h2>
-  <dl class="attributes">
-   <dt class="body-small">
-    MatchT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the matches produced by the rule.</p>
-   </dd>
-   <dt class="body-small">
-    NodeT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
-   </dd>
-   <dt class="body-small">
-    RuleT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the rule.</p>
-   </dd>
-  </dl>
   <h2 class="h500">Value parameters</h2>
   <dl class="attributes">
    <dt class="body-small">
     iteration
    </dt>
    <dd class="body-medium">
-    <p>The current iteration of the backoff strategy.</p>
+    <p>The current iteration count.</p>
    </dd>
    <dt class="body-small">
     random
    </dt>
    <dd class="body-medium">
-    <p>A random number generator used for selecting matches randomly.</p>
+    <p>Random number generator used to shuffle matches.</p>
    </dd>
    <dt class="body-small">
     stats
    </dt>
    <dd class="body-medium">
-    <p>A map from rule names to their statistics.</p>
+    <p>Per-rule statistics, keyed by rule name.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -205,4 +185,4 @@ node6 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Value parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
