@@ -443,11 +443,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the immutable e-graph trait.</p>
+             <p>A companion object for <a href="eqsat/EGraph.html">EGraph</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the immutable e-graph trait.</p>
+              <p>A companion object for <a href="eqsat/EGraph.html">EGraph</a>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1191,11 +1191,16 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A slot in an e-graph. Slots are unique identifiers for variables in the e-graph.</p>
+             <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A slot in an e-graph. Slots are unique identifiers for variables in the e-graph.</p>
+              <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
+              <ul>
+               <li><a href="eqsat/Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: slots with an integer identifier, considered equivalent if their numbers match.</li>
+               <li><a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: slots that are always distinct, even from other unique slots, unless they are the exact same object reference.</li>
+              </ul>
+              <p>For external users, prefer using <a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a> and <a href="eqsat/Slot$.html#fresh-17f">Slot.fresh</a> to ensure slot uniqueness.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1261,11 +1266,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Companion object for the Slot trait.</p>
+             <p>Companion object for the <a href="eqsat/Slot.html">Slot</a> trait.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Companion object for the Slot trait.</p>
+              <p>Companion object for the <a href="eqsat/Slot.html">Slot</a> trait.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">

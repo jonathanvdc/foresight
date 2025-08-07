@@ -15,7 +15,12 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A slot in an e-graph. Slots are unique identifiers for variables in the e-graph.</p>
+  <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
+  <ul>
+   <li><a href="Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: slots with an integer identifier, considered equivalent if their numbers match.</li>
+   <li><a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: slots that are always distinct, even from other unique slots, unless they are the exact same object reference.</li>
+  </ul>
+  <p>For external users, prefer using <a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a> and <a href="Slot$.html#fresh-17f">Slot.fresh</a> to ensure slot uniqueness.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
