@@ -176,13 +176,11 @@ node3 -> node2;
               <p>Rewriting strategies often accumulate redundant or irrelevant information in the e-graph; rebasing helps keep the search focused by collapsing the current best result into a fresh starting point.</p>
               <p>Concretely, each iteration does the following:</p>
               <ol>
-               <li>Applies the underlying strategy. 
-                <ol start="2">
-                 <li>If no change occurs, returns the original graph.</li>
-                 <li>If a change occurs, extracts a tree from the current root.</li>
-                 <li>If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.</li>
-                 <li>Otherwise, creates a new empty e-graph and inserts the new tree as the new root.</li>
-                </ol></li>
+               <li>Applies the underlying strategy.</li>
+               <li>If no change occurs, returns the original graph.</li>
+               <li>If a change occurs, extracts a tree from the current root.</li>
+               <li>If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.</li>
+               <li>Otherwise, creates a new empty e-graph and inserts the new tree as the new root.</li>
               </ol>
              </div>
              <h2 class="h200">Value parameters</h2>
