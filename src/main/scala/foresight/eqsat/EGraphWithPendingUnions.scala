@@ -3,12 +3,28 @@ package foresight.eqsat
 import foresight.eqsat.parallel.ParallelMap
 
 /**
- * An e-graph with pending unions. This class is used to represent an e-graph that has unions that have not been applied yet.
+ * A lightweight wrapper around an e-graph that defers the application of union operations.
  *
- * @param egraph The e-graph.
- * @param pending The pending unions.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam Repr The type of the e-graph.
+ * Instead of immediately applying a union (which may trigger expensive rebuilds),
+ * this class lets you collect multiple unions and apply them in a batch using [[rebuilt]] or [[rebuild]].
+ *
+ * Most users will not need to construct this class directly. Instead, you can call [[EGraph.union]]
+ * on any `EGraph`, which returns an `EGraphWithPendingUnions`, allowing fluent chaining of unions:
+ *
+ * {{{
+ * val updated = egraph
+ *   .union(a, b)    // returns EGraphWithPendingUnions
+ *   .union(c, d)    // chains further unions
+ *   .rebuilt        // applies all unions and returns a rebuilt EGraph
+ * }}}
+ *
+ * This is particularly useful in rewrite systems and equality saturation loops, where many unions
+ * are computed but it's more efficient to apply them all at once.
+ *
+ * @param egraph The underlying e-graph.
+ * @param pending A list of deferred unions (pairs of e-class references).
+ * @tparam NodeT The type of e-nodes stored in the e-graph.
+ * @tparam Repr The concrete type of the underlying e-graph.
  */
 final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
                                                                                                      pending: List[(EClassCall, EClassCall)]) {
