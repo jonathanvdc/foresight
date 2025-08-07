@@ -15,7 +15,7 @@ import foresight.eqsat.hashCons.HashConsEGraph
 trait EGraph[NodeT] extends EGraphLike[NodeT, EGraph[NodeT]]
 
 /**
- * A companion object for the immutable e-graph trait.
+ * A companion object for [[EGraph]].
  */
 object EGraph {
   /**
