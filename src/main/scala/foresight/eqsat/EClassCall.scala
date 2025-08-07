@@ -1,8 +1,8 @@
 package foresight.eqsat
 
 /**
- * An application of an e-class reference to arguments. These arguments come in the form of a slot map, where the keys
- * are the parameter slots of the e-class and the values are the arguments.
+ * An application of an [[EClassRef]] to arguments. These arguments come in the form of a [[SlotMap]], where the
+ * keys are the parameter slots of the e-class and the values are the arguments.
  *
  * @param ref The reference to the e-class.
  * @param args The arguments applied to the e-class, described as a slot map. The slot map's keys are the e-class's
