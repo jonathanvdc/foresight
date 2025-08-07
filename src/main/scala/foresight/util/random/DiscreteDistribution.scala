@@ -24,13 +24,15 @@ import scala.annotation.tailrec
  *   - Weighted random choice among prioritized options
  *   - Probabilistic rule selection in equality saturation
  *   - Discrete softmax-like prioritization heuristics
+ *
+ * See also: [[https://en.wikipedia.org/wiki/Discrete_probability_distribution Discrete probability distribution]]
  */
 trait DiscreteDistribution {
   /**
-   * Returns the probability mass assigned to the given index.
+   * Returns the probability mass assigned to the specified index in the distribution.
    *
-   * @param value A non-negative integer index.
-   * @return The probability of this index according to the distribution.
+   * @param value The non-negative integer index for which to retrieve the probability.
+   * @return The probability mass associated with the given index, as defined by the distribution.
    */
   def apply(value: Int): Double
 
