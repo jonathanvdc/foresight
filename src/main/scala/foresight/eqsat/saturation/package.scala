@@ -1,7 +1,7 @@
 package foresight.eqsat
 
 /**
- * This package defines core abstractions and concrete strategies for saturation-based rewriting
+ * Defines core abstractions and concrete strategies for saturation-based rewriting
  * over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until
  * no new terms can be discovered or until a budget is exhausted.
  *
