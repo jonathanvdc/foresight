@@ -7,7 +7,7 @@ import foresight.util.random.DiscreteDistribution
  * A match prioritization strategy that adjusts (reweights) priority scores using a fitted probability distribution.
  *
  * This class wraps an existing [[MatchPriorities]] instance and transforms its output priorities
- * via a user-supplied [[DiscreteDistribution]]. The distribution defines how to rescale or reshape
+ * via a user-supplied [[foresight.util.random.DiscreteDistribution]]. The distribution defines how to rescale or reshape
  * the priority values, for example to emphasize rare or high-value matches more strongly.
  *
  * This is useful in stochastic rule application settings where the raw priorities may not reflect

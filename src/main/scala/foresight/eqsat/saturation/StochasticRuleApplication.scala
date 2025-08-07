@@ -11,7 +11,7 @@ import foresight.util.random.{Random, Sample}
  *
  * This strategy repeatedly:
  *   1. Searches for matches of the given rewrite rules in the e-graph.
- *   2. Assigns priorities to each match using the provided [[MatchPriorities]].
+ *   2. Assigns priorities to each match using the provided [[foresight.eqsat.saturation.priorities.MatchPriorities]].
  *   3. Selects a batch of matches to apply, using weighted random sampling without replacement.
  *   4. Applies the selected matches using a configurable [[SearchAndApply]] strategy.
  *
@@ -102,7 +102,7 @@ final case class StochasticRuleApplication[
  * Factory methods for creating [[StochasticRuleApplication]] strategies.
  *
  * These overloaded `apply` methods allow users to omit explicit construction of
- * [[SearchAndApply]] or [[Random]] instances if defaults are acceptable.
+ * [[SearchAndApply]] or [[foresight.util.random.Random]] instances if defaults are acceptable.
  */
 object StochasticRuleApplication {
   /**
