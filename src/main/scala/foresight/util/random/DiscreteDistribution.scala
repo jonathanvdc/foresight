@@ -25,7 +25,7 @@ import scala.annotation.tailrec
  *   - Probabilistic rule selection in equality saturation
  *   - Discrete softmax-like prioritization heuristics
  *
- * See also: [[https://en.wikipedia.org/wiki/Discrete_probability_distribution Discrete probability distribution]]
+ * See also: [[https://en.wikipedia.org/wiki/Discrete_probability_distribution Discrete probability distribution (Wikipedia)]]
  */
 trait DiscreteDistribution {
   /**
