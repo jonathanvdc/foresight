@@ -123,11 +123,23 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph, the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously extracted tree, the rebasing operation is also skipped.</p>
+             <p>Chains a rebasing operation to this strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph, the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously extracted tree, the rebasing operation is also skipped.</p>
+              <p>Chains a rebasing operation to this strategy.</p>
+              <p>This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree, but only when a change occurs <strong>and</strong> the extracted tree differs from the previous one.</p>
+              <p>Rewriting strategies often accumulate redundant or irrelevant information in the e-graph; rebasing helps keep the search focused by collapsing the current best result into a fresh starting point.</p>
+              <p>Concretely, each iteration does the following:</p>
+              <ol>
+               <li>Applies the underlying strategy. 
+                <ol start="2">
+                 <li>If no change occurs, returns the original graph.</li>
+                 <li>If a change occurs, extracts a tree from the current root.</li>
+                 <li>If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.</li>
+                 <li>Otherwise, creates a new empty e-graph and inserts the new tree as the new root.</li>
+                </ol></li>
+              </ol>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -135,13 +147,13 @@ node3 -> node2;
                areEquivalent
               </dt>
               <dd class="body-medium">
-               <p>A function to check if two trees are equivalent. Defaults to structural equality.</p>
+               <p>An optional function to compare trees for equivalence. Defaults to structural equality (<code>==</code>).</p>
               </dd>
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting a tree from the e-graph.</p>
+               <p>Extracts a tree from the e-graph starting at a root node.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -150,7 +162,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new strategy that applies the rebasing operation after the original strategy.</p>
+               <p>A new strategy that performs rebasing after each transformation when the result tree changes.</p>
               </dd>
              </dl>
             </div>
