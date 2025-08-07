@@ -423,10 +423,10 @@ object Strategy {
      *
      * Concretely, each iteration does the following:
      *  1. Applies the underlying strategy.
-     *     2. If no change occurs, returns the original graph.
-     *     3. If a change occurs, extracts a tree from the current root.
-     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
-     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *  2. If no change occurs, returns the original graph.
+     *  3. If a change occurs, extracts a tree from the current root.
+     *  4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *  5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
      *
      * @param extractor Extracts a tree from the e-graph starting at a root node.
      * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
@@ -462,10 +462,10 @@ object Strategy {
      *
      * Concretely, each iteration does the following:
      *  1. Applies the underlying strategy.
-     *     2. If no change occurs, returns the original graph.
-     *     3. If a change occurs, extracts a tree from the current root.
-     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
-     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *  2. If no change occurs, returns the original graph.
+     *  3. If a change occurs, extracts a tree from the current root.
+     *  4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *  5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
      *
      * @param extractor Extracts a tree from the e-graph starting at a root node.
      * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
@@ -503,10 +503,10 @@ object Strategy {
      *
      * Concretely, each iteration does the following:
      *  1. Applies the underlying strategy.
-     *     2. If no change occurs, returns the original graph.
-     *     3. If a change occurs, extracts a tree from the current root.
-     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
-     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *  2. If no change occurs, returns the original graph.
+     *  3. If a change occurs, extracts a tree from the current root.
+     *  4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *  5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
      *
      * @param extractor Extracts a tree from the e-graph starting at a root node.
      * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
