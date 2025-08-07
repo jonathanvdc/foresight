@@ -9,20 +9,51 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
 import scala.concurrent.duration.Duration
 
 /**
- * A strategy for saturating an e-graph.
+ * A generic, composable strategy for saturating an e-graph using rewrite rules.
  *
- * Strategies define a sequence of transformations or operations that are applied to an e-graph in order to explore,
- * optimize, or rewrite its structure.
- * Each strategy encapsulates the logic for a single iteration, including how state is carried forward and how changes
- * are detected.
- * Strategies can be composed, chained, repeated until a fixpoint, or limited by iteration count or timeout.
- * They provide a flexible mechanism for controlling the saturation process, allowing for customization of
- * parallelization, metadata management, and extraction of results.
- * The generic type parameters allow strategies to operate on different e-graph implementations and to carry arbitrary
- * state between iterations.
+ * Strategies define the logic for applying one or more transformation steps to an [[EGraph]],
+ * potentially over multiple iterations. They are responsible for how rewrites are applied,
+ * how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).
  *
- * @tparam EGraphT The type of the e-graph.
- * @tparam Data The type of the data carried by the strategy. This data is used to carry state between iterations.
+ * ## Design philosophy
+ *
+ * Strategies are:
+ *   - **Modular** – They can be composed using `thenApply`, repeated with `repeatUntilStable`, or extended with
+ *   features like logging, timeout, or metadata.
+ *   - **Stateful** – Each strategy carries a custom `Data` payload that can track iteration-specific state across
+ *   calls.
+ *   - **Flexible** – They work with different e-graph wrappers like [[EGraphWithMetadata]], [[EGraphWithRoot]], and
+ *   [[EGraphWithRecordedApplications]] via extension methods.
+ *
+ * ## Key operations
+ *
+ *   - `apply` performs a single iteration of the strategy.
+ *   - `initialData` provides the initial state for the strategy.
+ *   - `thenApply`, `repeatUntilStable`, `withIterationLimit`, and `withTimeout` allow control-flow composition.
+ *   - `withChangeLogger` allows inspection/debugging after each iteration.
+ *
+ * ## Usage example
+ * {{{
+ * val strategy: Strategy[Node, MyEGraph, MyState] =
+ *   myRuleApplicationStrategy
+ *     .withIterationLimit(10)
+ *     .withTimeout(1.second)
+ *     .repeatUntilStable
+ * }}}
+ *
+ * ## Integration with e-graph wrappers
+ *
+ * The companion object defines implicit classes that lift strategies to:
+ *   - e-graphs with metadata (`addAnalyses`, `closeMetadata`)
+ *   - e-graphs with roots (`withRoot`, `closeRoot`)
+ *   - strategies that rebase after each iteration (`thenRebase`)
+ *   - strategies that record match applications (`closeRecording`)
+ *
+ * These allow higher-level behavior without modifying the core strategy.
+ *
+ * @tparam NodeT The type of nodes in the e-graph.
+ * @tparam EGraphT The type of the e-graph being transformed (e.g., plain, rooted, or metadata-enriched).
+ * @tparam Data The type of state carried by the strategy across iterations.
  */
 trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data] {
   /**
