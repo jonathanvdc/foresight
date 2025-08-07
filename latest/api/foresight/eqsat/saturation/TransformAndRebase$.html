@@ -15,7 +15,20 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that provides a convenient way to create a <a href="TransformAndRebase.html">TransformAndRebase</a> instance operating on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+  <p>Factory methods for constructing <a href="TransformAndRebase.html">TransformAndRebase</a> strategies with different e-graph wrappers.</p>
+  <p>These helpers simplify creation of rebasing strategies over common e-graph variants, including:</p>
+  <ul>
+   <li><a href="EGraphWithRoot.html">EGraphWithRoot</a></li>
+   <li><a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a></li>
+   <li><a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a></li>
+   <li>combinations of the above</li>
+  </ul>
+  <p>In all cases, the behavior is:</p>
+  <ol>
+   <li>Apply a strategy to the e-graph.</li>
+   <li>If changed, extract a tree and rebase to an empty e-graph if the new tree differs from the old.</li>
+   <li>Return a new rooted e-graph or skip rebasing as needed.</li>
+  </ol>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,63 +223,35 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy for an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy for an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Data
-              </dt>
-              <dd class="body-medium">
-               <p>The type of data that the transformation strategy operates on. This can be used to carry additional information during the transformation process.</p>
-              </dd>
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph that the strategy operates on, which must be a subtype of both <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                areEquivalent
               </dt>
               <dd class="body-medium">
-               <p>A function to check if two trees are equivalent.</p>
+               <p>Optional function for tree equivalence. Defaults to <code>==</code>.</p>
               </dd>
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting trees from e-class calls in the e-graph.</p>
+               <p>A tree extractor operating on the inner <a href="../EGraph.html">foresight.eqsat.EGraph</a>.</p>
               </dd>
               <dt class="body-small">
                transform
               </dt>
               <dd class="body-medium">
-               <p>The strategy to apply to the e-graph before rebasing.</p>
+               <p>A strategy operating on <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -287,52 +272,29 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy for an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
-              <p>This version uses structural equality to check if two trees are equivalent.</p>
+              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy for an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph that the strategy operates on, which must be a subtype of both <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting trees from e-class calls in the e-graph.</p>
+               <p>A tree extractor operating on the inner <a href="../EGraph.html">foresight.eqsat.EGraph</a>.</p>
               </dd>
               <dt class="body-small">
                transform
               </dt>
               <dd class="body-medium">
-               <p>The strategy to apply to the e-graph before rebasing.</p>
+               <p>A strategy operating on <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -353,63 +315,36 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> containing an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> containing an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+              <p>This overload adds support for e-graph metadata and allows rebasing while preserving analyses.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Data
-              </dt>
-              <dd class="body-medium">
-               <p>The type of data that the transformation strategy operates on. This can be used to carry additional information during the transformation process.</p>
-              </dd>
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph that the strategy operates on, which must be a subtype of both <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                areEquivalent
               </dt>
               <dd class="body-medium">
-               <p>A function to check if two trees are equivalent. Defaults to structural equality.</p>
+               <p>Optional function for tree equivalence. Defaults to <code>==</code>.</p>
               </dd>
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting trees from e-class calls in the e-graph.</p>
+               <p>Tree extractor operating on the same enriched graph.</p>
               </dd>
               <dt class="body-small">
                transform
               </dt>
               <dd class="body-medium">
-               <p>The strategy to apply to the e-graph before rebasing.</p>
+               <p>Strategy operating on metadata-enriched rooted e-graphs.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -430,52 +365,30 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> containing an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
-              <p>This version uses structural equality to check if two trees are equivalent.</p>
+              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> containing an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+              <p>This overload adds support for e-graph metadata and allows rebasing while preserving analyses.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph that the strategy operates on, which must be a subtype of both <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting trees from e-class calls in the e-graph.</p>
+               <p>Tree extractor operating on the same enriched graph.</p>
               </dd>
               <dt class="body-small">
                transform
               </dt>
               <dd class="body-medium">
-               <p>The strategy to apply to the e-graph before rebasing.</p>
+               <p>Strategy operating on metadata-enriched rooted e-graphs.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -496,69 +409,36 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> of an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+             <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> containing an <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithMetadata: No DRI found for query">foresight.eqsat.saturation.EGraphWithMetadata</span> and <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> of an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>. A transformation strategy is applied to the e-graph, and then the e-graph is rebased by extracting a tree from the e-graph and adding it to a new e-graph with a new root. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+              <p>Creates a <a href="TransformAndRebase.html">TransformAndRebase</a> strategy over <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> containing an <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithMetadata: No DRI found for query">foresight.eqsat.saturation.EGraphWithMetadata</span> and <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+              <p>This version records match applications, supports metadata, and operates on rooted graphs.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Data
-              </dt>
-              <dd class="body-medium">
-               <p>The type of data that the transformation strategy operates on. This can be used to carry additional information during the transformation process.</p>
-              </dd>
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph that the strategy operates on, which must be a subtype of both <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
-              </dd>
-              <dt class="body-small">
-               Match
-              </dt>
-              <dd class="body-medium">
-               <p>The type of matches produced by the transformation strategy.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
                areEquivalent
               </dt>
               <dd class="body-medium">
-               <p>A function to check if two trees are equivalent. Defaults to structural equality.</p>
+               <p>Optional function for tree equivalence. Defaults to <code>==</code>.</p>
               </dd>
               <dt class="body-small">
                extractor
               </dt>
               <dd class="body-medium">
-               <p>The extractor to use for extracting trees from e-class calls in the e-graph.</p>
+               <p>Tree extractor over metadata-rooted e-graphs.</p>
               </dd>
               <dt class="body-small">
                transform
               </dt>
               <dd class="body-medium">
-               <p>The strategy to apply to the e-graph before rebasing.</p>
+               <p>Strategy operating on a deeply wrapped e-graph.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A <a href="TransformAndRebase.html">TransformAndRebase</a> strategy that operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> of an <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a> of an <a href="EGraphWithRoot.html">EGraphWithRoot</a>.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

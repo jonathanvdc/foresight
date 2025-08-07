@@ -15,22 +15,42 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A strategy that first transforms the e-graph using a given strategy and then rebases the e-graph by extracting a tree from the e-graph, subsequently adding that tree to a new e-graph. If the transformation does not change the e-graph, it skips rebasing. If the transformation changes the e-graph, it extracts a new tree and checks if it is equivalent to the previously extracted tree. If it is, the e-graph is left unchanged and not rebased; otherwise, it adds the new tree to an empty e-graph and returns the new e-graph with the new root.</p>
+  <p>A compound strategy that transforms an e-graph and optionally rebases it by extracting and reinserting a tree.</p>
+  <p>This strategy wraps a transformation strategy (<code>transform</code>) and augments it with <strong>tree rebasing semantics</strong>:</p>
+  <ol>
+   <li>The inner strategy is first applied to the e-graph.</li>
+   <li>If it produces no change, the strategy halts and rebasing is skipped.</li>
+   <li>If it does change the e-graph, the new tree rooted at a given <a href="../EClassCall.html">foresight.eqsat.EClassCall</a> is extracted.</li>
+   <li>If the newly extracted tree is equivalent (according to <code>areEquivalent</code>) to the previous one, rebasing is skipped.</li>
+   <li>Otherwise, the new tree is added to an empty e-graph, producing a new root and a freshly rooted e-graph.</li>
+  </ol>
+  <p>This approach is especially useful in fixpoint-style optimization loops, where you want to:</p>
+  <ul>
+   <li>Track convergence at the level of extracted trees, not just internal graph structure.</li>
+   <li>Avoid redundant re-extractions and expansions.</li>
+   <li>Restart from a canonical or minimal representative tree when changes occur.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
   <dl class="attributes">
    <dt class="body-small">
+    Data
+   </dt>
+   <dd class="body-medium">
+    <p>The internal state type carried by the transformation strategy.</p>
+   </dd>
+   <dt class="body-small">
     EGraphT
    </dt>
    <dd class="body-medium">
-    <p>The type of the e-graph that the strategy operates on.</p>
+    <p>The type of the e-graph, usually a wrapper like <a href="EGraphWithRoot.html">EGraphWithRoot</a> or <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a>.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The type of nodes in the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -39,31 +59,31 @@
     areEquivalent
    </dt>
    <dd class="body-medium">
-    <p>A function to check if two trees are equivalent. Defaults to structural equality.</p>
+    <p>A predicate for determining whether two trees are considered the same.</p>
    </dd>
    <dt class="body-small">
     extractor
    </dt>
    <dd class="body-medium">
-    <p>The extractor to use for extracting the tree.</p>
+    <p>A mechanism for extracting a <a href="../Tree.html">foresight.eqsat.Tree</a> from an e-graph at a given root.</p>
    </dd>
    <dt class="body-small">
     getRoot
    </dt>
    <dd class="body-medium">
-    <p>A function to find the root of the e-graph.</p>
+    <p>A function that extracts the <a href="../EClassCall.html">foresight.eqsat.EClassCall</a> representing the current root of the e-graph.</p>
    </dd>
    <dt class="body-small">
     setRoot
    </dt>
    <dd class="body-medium">
-    <p>A function to create a new e-graph with the specified root.</p>
+    <p>A function that inserts a new tree root into an e-graph.</p>
    </dd>
    <dt class="body-small">
     transform
    </dt>
    <dd class="body-medium">
-    <p>The strategy to apply to the e-graph before rebasing.</p>
+    <p>The core transformation strategy to apply before rebasing.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
