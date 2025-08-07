@@ -4,23 +4,44 @@ import foresight.eqsat.rewriting.Rule
 import foresight.util.random.DiscreteDistribution
 
 /**
- * A prioritization that reweights the priorities of matches based on a curve-fitted distribution.
+ * A match prioritization strategy that adjusts (reweights) priority scores using a fitted probability distribution.
  *
- * @param originalPriorities The original match priorities to be reweighted.
- * @param distribution The discrete distribution used for reweighting the priorities.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rule.
- * @tparam MatchT The type of the matches produced by the rule.
+ * This class wraps an existing [[MatchPriorities]] instance and transforms its output priorities
+ * via a user-supplied [[DiscreteDistribution]]. The distribution defines how to rescale or reshape
+ * the priority values, for example to emphasize rare or high-value matches more strongly.
+ *
+ * This is useful in stochastic rule application settings where the raw priorities may not reflect
+ * the desired sampling behavior—for instance, when encouraging exploration, controlling match diversity,
+ * or enforcing soft caps on overly dominant matches.
+ *
+ * @example
+ * To apply a geometric decay to the top-N matches:
+ * {{{
+ * val basePriorities = MyDomainPriorities
+ * val decay = ShiftedGeometricDistribution(0.5)
+ * val fitted = CurveFittedPriorities(basePriorities, decay)
+ * }}}
+ *
+ * @param originalPriorities The base prioritization whose output will be reweighted.
+ * @param distribution A discrete probability distribution used to convert raw priorities into normalized weights.
+ *
+ * @tparam NodeT The type of e-graph nodes.
+ * @tparam RuleT The type of rules being applied.
+ * @tparam MatchT The type of matches returned by the rules.
  */
 final case class CurveFittedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT](originalPriorities: MatchPriorities[NodeT, RuleT, MatchT],
                                                                                        distribution: DiscreteDistribution)
     extends ReweightedPriorities[NodeT, RuleT, MatchT] {
 
   /**
-   * Reweights the priorities of the matches.
+   * Applies the distribution to reweight the priorities of previously scored matches.
    *
-   * @param matches A sequence of prioritized matches.
-   * @return A sequence of prioritized matches with reweighted priorities.
+   * The order of matches is preserved, and the distribution is applied positionally
+   * to the priority values (e.g., higher-ranked matches may receive lower weights
+   * depending on the shape of the distribution).
+   *
+   * @param matches A sequence of matches with initial priority scores.
+   * @return The same matches, reweighted using the provided distribution.
    */
   override def reweight(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Seq[PrioritizedMatch[RuleT, MatchT]] = {
     distribution.prioritiesToProbabilities(matches.map(m => m -> m.priority))

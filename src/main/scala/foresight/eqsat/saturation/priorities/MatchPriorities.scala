@@ -3,26 +3,37 @@ package foresight.eqsat.saturation.priorities
 import foresight.eqsat.rewriting.Rule
 
 /**
- * A trait that defines a prioritization for matches found during rule application.
+ * Defines a strategy for prioritizing rule matches during stochastic rule application.
  *
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rule.
- * @tparam MatchT The type of the matches produced by the rule.
+ * This trait is used to guide the selection of which matches to apply in a given iteration
+ * of a saturation loop, such as in [[foresight.eqsat.saturation.StochasticRuleApplication]].
+ * It assigns a numeric priority to each match and determines how many to apply at once.
+ *
+ * Typical implementations might prioritize based on match cost, rule type, rule name,
+ * or other domain-specific heuristics. This enables the system to explore the search space
+ * more effectively or efficiently than by applying all matches or selecting them uniformly at random.
+ *
+ * @tparam NodeT The type of nodes in the e-graph.
+ * @tparam RuleT The type of rewrite rules, which must produce matches of type `MatchT`.
+ * @tparam MatchT The type of matches returned by applying a rule.
  */
 trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
   /**
-   * Prioritizes matches based on some criteria.
+   * Assigns a priority score to each match, indicating its relative importance or desirability.
    *
-   * @param matches A sequence of pairs, each containing a rule and a match.
-   * @return A sequence of triples, each containing a rule, a match, and a priority score.
+   * @param matches A sequence of (rule, match) pairs found during rule search.
+   * @return A sequence of [[PrioritizedMatch]] instances containing each rule, match, and its computed priority.
    */
   def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[PrioritizedMatch[RuleT, MatchT]]
 
   /**
-   * Determines the batch size based on the prioritized matches.
+   * Determines how many of the prioritized matches to apply in this iteration.
    *
-   * @param matches A sequence of triples, each containing a rule, a match, and a priority score.
-   * @return The number of matches to apply in this batch.
+   * This can be constant or depend on the distribution of priorities, the total number of matches,
+   * or other criteria such as heuristics or exploration/exploitation trade-offs.
+   *
+   * @param matches The prioritized matches.
+   * @return The number of matches to apply.
    */
   def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Int
 }
