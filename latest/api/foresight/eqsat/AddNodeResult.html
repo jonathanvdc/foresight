@@ -15,7 +15,13 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>The result of adding a node to the e-graph.</p>
+  <p>Represents the outcome of attempting to add an e-node to an e-graph.</p>
+  <p>There are two possible results:</p>
+  <ul>
+   <li><a href="AddNodeResult$$AlreadyThere.html">AddNodeResult.AlreadyThere</a>: The e-node was already present in the e-graph.</li>
+   <li><a href="AddNodeResult$$Added.html">AddNodeResult.Added</a>: The e-node was successfully added to the e-graph.</li>
+  </ul>
+  <p>Both cases provide the corresponding <a href="EClassCall.html">EClassCall</a> for the e-node.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
