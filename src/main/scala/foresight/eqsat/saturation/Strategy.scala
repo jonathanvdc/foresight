@@ -11,7 +11,7 @@ import scala.concurrent.duration.Duration
 /**
  * A generic, composable strategy for saturating an e-graph using rewrite rules.
  *
- * Strategies define the logic for applying one or more transformation steps to an [[EGraph]],
+ * Strategies define the logic for applying one or more transformation steps to an [[foresight.eqsat.EGraph]],
  * potentially over multiple iterations. They are responsible for how rewrites are applied,
  * how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).
  *
@@ -22,8 +22,8 @@ import scala.concurrent.duration.Duration
  *   features like logging, timeout, or metadata.
  *   - **Stateful** – Each strategy carries a custom `Data` payload that can track iteration-specific state across
  *   calls.
- *   - **Flexible** – They work with different e-graph wrappers like [[EGraphWithMetadata]], [[EGraphWithRoot]], and
- *   [[EGraphWithRecordedApplications]] via extension methods.
+ *   - **Flexible** – They work with different e-graph wrappers like [[foresight.eqsat.metadata.EGraphWithMetadata]],
+ *   [[EGraphWithRoot]], and [[EGraphWithRecordedApplications]] via extension methods.
  *
  * ## Key operations
  *
