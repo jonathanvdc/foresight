@@ -15,7 +15,15 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A strategy that applies a sequence of rules in a stochastic manner. It searches for matches of the rules in an e-graph, prioritizes them based on a given function, and applies a batch of matches selected randomly, weighing the selection by their priority.</p>
+  <p>A saturation strategy that applies rewrite rules stochastically, based on user-defined priorities.</p>
+  <p>This strategy repeatedly:</p>
+  <ol>
+   <li>Searches for matches of the given rewrite rules in the e-graph.</li>
+   <li>Assigns priorities to each match using the provided <span data-unresolved-link="" title="Problem linking MatchPriorities: No DRI found for query">MatchPriorities</span>.</li>
+   <li>Selects a batch of matches to apply, using weighted random sampling without replacement.</li>
+   <li>Applies the selected matches using a configurable <a href="SearchAndApply.html">SearchAndApply</a> strategy.</li>
+  </ol>
+  <p>This approach is useful when it's expensive or unnecessary to apply every match, or when exploration is guided by domain-specific heuristics (e.g., rule priority, match cost).</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,25 +32,25 @@
     EGraphT
    </dt>
    <dd class="body-medium">
-    <p>The type of the e-graph.</p>
+    <p>The type of e-graph, combining <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>.</p>
    </dd>
    <dt class="body-small">
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the matches produced by the rules.</p>
+    <p>The type of matches returned by rules.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The type of e-graph nodes.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rules to apply.</p>
+    <p>The type of rewrite rules.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -51,29 +59,49 @@
     priorities
    </dt>
    <dd class="body-medium">
-    <p>The prioritizer that determines the priority of matches and the batch size to apply.</p>
+    <p>A prioritization mechanism for matches, including batch size selection.</p>
    </dd>
    <dt class="body-small">
     random
    </dt>
    <dd class="body-medium">
-    <p>A random number generator used for selecting matches randomly.</p>
+    <p>A random number generator used to sample matches based on priority.</p>
    </dd>
    <dt class="body-small">
     rules
    </dt>
    <dd class="body-medium">
-    <p>The rules to apply.</p>
+    <p>The set of rewrite rules to apply.</p>
    </dd>
    <dt class="body-small">
     searchAndApply
    </dt>
    <dd class="body-medium">
-    <p>The search and apply strategy to find and apply matches.</p>
+    <p>A search and apply strategy to find and apply rule matches.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p>To use this strategy without caching, you can create an instance like this:</p>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy = StochasticRuleApplication(
+</span><span line-number="2" class=""><span class="tooltip-container"></span> rules = myRules,
+</span><span line-number="3" class=""><span class="tooltip-container"></span> searchAndApply = SearchAndApply.withoutCaching,
+</span><span line-number="4" class=""><span class="tooltip-container"></span> priorities = MyCustomPriorities,
+</span><span line-number="5" class=""><span class="tooltip-container"></span> random = Random(42)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
