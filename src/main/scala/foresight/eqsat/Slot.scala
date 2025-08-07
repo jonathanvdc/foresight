@@ -1,7 +1,13 @@
 package foresight.eqsat
 
 /**
- * A slot in an e-graph. Slots are unique identifiers for variables in the e-graph.
+ * Represents a slot in an e-graph, serving as a unique identifier for variable bindings.
+ * There are two types of slots:
+ *  - [[Slot.NumberedSlot]]: slots with an integer identifier, considered equivalent if their numbers match.
+ *  - [[Slot.UniqueSlot]]: slots that are always distinct, even from other unique slots, unless they are the exact same
+ *    object reference.
+ *
+ * For external users, prefer using [[Slot.UniqueSlot]] and [[Slot.fresh]] to ensure slot uniqueness.
  */
 sealed trait Slot extends Ordered[Slot] {
   /**
@@ -25,7 +31,7 @@ sealed trait Slot extends Ordered[Slot] {
 }
 
 /**
- * Companion object for the Slot trait.
+ * Companion object for the [[Slot]] trait.
  */
 object Slot {
   /**
