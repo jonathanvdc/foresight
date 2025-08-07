@@ -5,42 +5,54 @@ import foresight.eqsat.parallel.ParallelMap
 /**
  * A lightweight wrapper around an e-graph that defers the application of union operations.
  *
- * Instead of immediately applying a union (which may trigger expensive rebuilds),
- * this class lets you collect multiple unions and apply them in a batch using [[rebuilt]] or [[rebuild]].
+ * Normally, applying a union in an e-graph requires invoking [[EGraph.unionMany(Seq[(EClassCall, EClassCall)], ParallelMap)]], which
+ * merges the e-classes and triggers a rebuild. When many unions are expected—such as during
+ * a rewrite pass—it is more efficient to defer them and apply them all at once.
  *
- * Most users will not need to construct this class directly. Instead, you can call [[EGraph.union]]
- * on any `EGraph`, which returns an `EGraphWithPendingUnions`, allowing fluent chaining of unions:
+ * `EGraphWithPendingUnions` collects such deferred unions and lets you apply them in a batch
+ * by calling [[rebuilt]] or [[rebuild]]. Internally, these methods delegate to [[EGraph.unionMany]],
+ * ensuring that all unions are applied and the e-graph is fully rebuilt.
+ *
+ * You rarely need to construct this wrapper directly. Instead, you can call [[EGraph.union]],
+ * which returns an `EGraphWithPendingUnions`, allowing fluent chaining:
  *
  * {{{
  * val updated = egraph
  *   .union(a, b)    // returns EGraphWithPendingUnions
  *   .union(c, d)    // chains further unions
- *   .rebuilt        // applies all unions and returns a rebuilt EGraph
+ *   .rebuilt        // applies all pending unions and returns a rebuilt EGraph
  * }}}
  *
- * This is particularly useful in rewrite systems and equality saturation loops, where many unions
- * are computed but it's more efficient to apply them all at once.
+ * This is particularly useful in rewrite systems and equality saturation loops, where batching
+ * union operations avoids excessive intermediate rebuilds and improves performance.
  *
  * @param egraph The underlying e-graph.
  * @param pending A list of deferred unions (pairs of e-class references).
  * @tparam NodeT The type of e-nodes stored in the e-graph.
- * @tparam Repr The concrete type of the underlying e-graph.
+ * @tparam Repr The concrete type of the underlying e-graph, which must support union and rebuild.
  */
+
 final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
                                                                                                      pending: List[(EClassCall, EClassCall)]) {
   /**
-   * Determines whether the e-graph requires a rebuild.
-   * @return True if the e-graph requires a rebuild, otherwise false.
+   * Checks whether the e-graph has any deferred unions pending application.
+   *
+   * @return `true` if there are pending unions and the e-graph should be rebuilt;
+   *         `false` if the e-graph is already up to date.
    */
   def requiresRebuild: Boolean = pending.nonEmpty
 
   /**
-   * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
-   * The effects of this operation are deferred until the e-graph is rebuilt.
+   * Defers a union between two e-classes.
    *
-   * @param left The reference to the first e-class to union.
-   * @param right The reference to the second e-class to union.
-   * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
+   * The union is not applied immediately but instead recorded in the list of pending unions.
+   * Use [[rebuild]] or [[rebuilt]] to apply all deferred unions and obtain a fully updated e-graph.
+   *
+   * If the two e-classes already belong to the same class, this method is a no-op.
+   *
+   * @param left The first e-class reference.
+   * @param right The second e-class reference.
+   * @return A new [[EGraphWithPendingUnions]] with the union operation added to the pending list.
    */
   def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[NodeT, Repr] = {
     if (egraph.areSame(left, right)) {
@@ -51,9 +63,10 @@ final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr]
   }
 
   /**
-   * Rebuilds the e-graph, applying all pending unions.
-   * @param parallelize The parallelization strategy to use.
-   * @return The new e-graph with the e-graph rebuilt.
+   * Applies all pending unions and rebuilds the underlying e-graph using the given parallelization strategy.
+   *
+   * @param parallelize The strategy used to parallelize the rebuild (e.g., thread pool, sequential fallback).
+   * @return The rebuilt e-graph with all pending unions applied.
    */
   def rebuild(parallelize: ParallelMap): Repr = {
     if (pending.isEmpty) {
@@ -64,22 +77,29 @@ final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr]
   }
 
   /**
-   * Rebuilds the e-graph, applying all pending unions.
-   * @return The new e-graph with the e-graph rebuilt.
+   * Applies all pending unions and returns the rebuilt e-graph using the default parallelization strategy.
+   *
+   * This is a convenience alias for `rebuild(ParallelMap.default)`.
+   *
+   * @return The rebuilt e-graph with all pending unions applied.
    */
   def rebuilt: Repr = rebuild(ParallelMap.default)
 }
 
 /**
- * A companion object for the e-graph with pending unions.
+ * A companion object for [[EGraphWithPendingUnions]].
  */
 object EGraphWithPendingUnions {
   /**
-   * Creates a new e-graph with pending unions.
-   * @param egraph The e-graph.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam Repr The type of the e-graph.
-   * @return An e-graph with pending unions.
+   * Wraps an e-graph with no pending unions.
+   *
+   * This constructor is mostly used internally; most users should instead use [[EGraph.union]],
+   * which returns an [[EGraphWithPendingUnions]] and enables fluent chaining.
+   *
+   * @param egraph The e-graph to wrap.
+   * @tparam NodeT The type of e-nodes in the e-graph.
+   * @tparam Repr  The concrete type of the e-graph.
+   * @return A wrapper around the e-graph with no unions pending.
    */
   def apply[NodeT, Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr): EGraphWithPendingUnions[NodeT, Repr] =
     EGraphWithPendingUnions(egraph, Nil)

@@ -255,12 +255,23 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
-   * Unions two e-classes in this e-graph. The resulting e-class contains all e-nodes from both e-classes.
-   * The effects of this operation are deferred until the e-graph is rebuilt.
+   * Defers a union between two e-classes in this e-graph.
    *
-   * @param left The reference to the first e-class to union.
-   * @param right The reference to the second e-class to union.
-   * @return The e-class reference of the resulting e-class, and the new e-graph with the e-classes unioned.
+   * This method does not immediately merge the two e-classes. Instead, it returns an
+   * [[EGraphWithPendingUnions]] that records the union request. You can chain further
+   * unions on the result and apply them all at once later using [[EGraphWithPendingUnions.rebuild]]
+   * or [[EGraphWithPendingUnions.rebuilt]].
+   *
+   * Internally, all deferred unions are eventually passed to [[unionMany]], which performs
+   * a full rebuild of the e-graph to apply the merges. Deferring unions in this way improves
+   * performance when many unions are expected, as it avoids rebuilding after each one.
+   *
+   * @param left A reference to the first e-class.
+   * @param right A reference to the second e-class.
+   * @return An [[EGraphWithPendingUnions]] containing this e-graph and the deferred union.
+   * @see [[EGraphWithPendingUnions]]
+   * @see [[EGraphWithPendingUnions.rebuild]]
+   * @see [[unionMany]]
    */
   final def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[NodeT, This] =
     EGraphWithPendingUnions[NodeT, This](this.asInstanceOf[This]).union(left, right)
