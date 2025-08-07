@@ -102,7 +102,7 @@
               <li><a href="eqsat/saturation/StochasticRuleApplicationWithCaching$.html">StochasticRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
              </ul>
              <h2><a href="#typical-usage" id="typical-usage">Typical Usage</a></h2>
-             <p>More sophisticated strategies are constructed using combinators such as <a href="eqsat/saturation/Strategy.html#thenApply-b1">foresight.eqsat.saturation.Strategy.thenApply</a>, <a href="eqsat/saturation/Strategy.html#repeatUntilStable-0">foresight.eqsat.saturation.Strategy.repeatUntilStable</a>, <a href="eqsat/saturation/Strategy.html#withIterationLimit-151">foresight.eqsat.saturation.Strategy.withIterationLimit</a>, <a href="eqsat/saturation/Strategy.html#withTimeout-151">foresight.eqsat.saturation.Strategy.withTimeout</a> and <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.Strategy.thenRebase: No DRI found for query">foresight.eqsat.saturation.Strategy.thenRebase</span>. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
+             <p>More sophisticated strategies are constructed using built-in or user-defined combinators. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
              <div class="snippet mono-small-block">
               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span> val strategy = MaximalRuleApplication(myRules)
 </span><span line-number="2" class=""><span class="tooltip-container"></span>   .withTimeout(30.seconds)
