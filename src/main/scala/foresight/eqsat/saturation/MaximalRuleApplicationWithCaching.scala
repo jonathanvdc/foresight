@@ -16,13 +16,13 @@ import foresight.eqsat.rewriting.{PortableMatch, Rule}
  * Each iteration simply performs a full match-and-apply sweep over all rules,
  * skipping matches that were already applied previously.
  *
- * ## Key characteristics
+ * ==Key characteristics==
  *   - Applies all previously unapplied matches per rule, per iteration.
  *   - Skips any matches that have already been applied in prior iterations.
  *   - Avoids redundant reapplication of the same rewrite.
  *   - Can be composed with [[Strategy.repeatUntilStable]] to run until no unapplied matches remain.
  *
- * ## Use cases
+ * ==Use cases==
  *   - Efficient and deterministic saturation when repeat application is unnecessary or undesirable.
  *   - Gradual saturation where each match is only applied once.
  *

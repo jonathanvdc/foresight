@@ -15,18 +15,18 @@ import foresight.eqsat.rewriting.Rule
  * This process is repeated once per strategy iteration. Importantly, this strategy does not independently
  * saturate to a fixpoint for each rule—it performs **only one pass** per rule per iteration.
  *
- * ## Characteristics
+ * ==Characteristics==
  *   - Exhaustive per-iteration application: all matches of all rules are applied.
  *   - No internal fixpointing per rule or across the e-graph.
  *   - Deterministic, non-prioritized, and non-stochastic.
  *   - Can be composed with [[Strategy.repeatUntilStable]] to run to convergence.
  *
- * ## Use cases
+ * ==Use cases==
  *   - Baseline comparison against other selective or prioritized strategies.
  *   - Deterministic debugging and validation of rewrite rule behavior.
  *   - Scenarios where exhaustive coverage per iteration is preferred.
  *
- * ## Caution
+ * ==Caution==
  * This strategy may apply redundant or overlapping rewrites and can cause
  * rapid growth of the e-graph in large or densely connected rule sets.
  *

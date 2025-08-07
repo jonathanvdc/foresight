@@ -15,7 +15,7 @@ import scala.concurrent.duration.Duration
  * potentially over multiple iterations. They are responsible for how rewrites are applied,
  * how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).
  *
- * ## Design philosophy
+ * ==Design philosophy==
  *
  * Strategies are:
  *   - **Modular** – They can be composed using `thenApply`, repeated with `repeatUntilStable`, or extended with
@@ -25,14 +25,14 @@ import scala.concurrent.duration.Duration
  *   - **Flexible** – They work with different e-graph wrappers like [[foresight.eqsat.metadata.EGraphWithMetadata]],
  *   [[EGraphWithRoot]], and [[EGraphWithRecordedApplications]] via extension methods.
  *
- * ## Key operations
+ * ==Key operations==
  *
  *   - `apply` performs a single iteration of the strategy.
  *   - `initialData` provides the initial state for the strategy.
  *   - `thenApply`, `repeatUntilStable`, `withIterationLimit`, and `withTimeout` allow control-flow composition.
  *   - `withChangeLogger` allows inspection/debugging after each iteration.
  *
- * ## Usage example
+ * ==Usage example==
  * {{{
  * val strategy: Strategy[Node, MyEGraph, MyState] =
  *   myRuleApplicationStrategy
@@ -41,7 +41,7 @@ import scala.concurrent.duration.Duration
  *     .repeatUntilStable
  * }}}
  *
- * ## Integration with e-graph wrappers
+ * ==Integration with e-graph wrappers==
  *
  * The companion object defines implicit classes that lift strategies to:
  *   - e-graphs with metadata (`addAnalyses`, `closeMetadata`)
