@@ -1,7 +1,11 @@
 package foresight.util.random
 
 /**
- * Utility object for performing random sampling operations.
+ * Provides utility methods for random sampling, including weighted sampling algorithms.
+ *
+ * This object contains efficient implementations for selecting weighted random samples from a collection,
+ * Elements are chosen with probabilities proportional to their assigned weights, and can operate
+ * without replacement using the Efraimidis–Spirakis algorithm.
  */
 object Sample {
   /**
