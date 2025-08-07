@@ -10,7 +10,7 @@ import foresight.eqsat.parallel.ParallelMap
  * a rewrite pass—it is more efficient to defer them and apply them all at once.
  *
  * `EGraphWithPendingUnions` collects such deferred unions and lets you apply them in a batch
- * by calling [[rebuilt]] or [[rebuild]]. Internally, these methods delegate to [[EGraph.unionMany]],
+ * by calling [[rebuilt]] or [[rebuild]]. Internally, these methods delegate to [[EGraph.unionMany(Seq[(EClassCall, EClassCall)], ParallelMap)]],
  * ensuring that all unions are applied and the e-graph is fully rebuilt.
  *
  * You rarely need to construct this wrapper directly. Instead, you can call [[EGraph.union]],
@@ -31,7 +31,6 @@ import foresight.eqsat.parallel.ParallelMap
  * @tparam NodeT The type of e-nodes stored in the e-graph.
  * @tparam Repr The concrete type of the underlying e-graph, which must support union and rebuild.
  */
-
 final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
                                                                                                      pending: List[(EClassCall, EClassCall)]) {
   /**
