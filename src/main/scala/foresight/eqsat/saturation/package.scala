@@ -21,11 +21,8 @@ package foresight.eqsat
  *
  * ## Typical Usage
  *
- * More sophisticated strategies are constructed using combinators such as [[foresight.eqsat.saturation.Strategy.thenApply]],
- * [[foresight.eqsat.saturation.Strategy.repeatUntilStable]], [[foresight.eqsat.saturation.Strategy.withIterationLimit]],
- * [[foresight.eqsat.saturation.Strategy.withTimeout]] and [[foresight.eqsat.saturation.Strategy.thenRebase]].
- * For example, to run a maximal application strategy to convergence with a timeout and
- * periodic rebasing:
+ * More sophisticated strategies are constructed using built-in or user-defined combinators. For example, to run a
+ * maximal application strategy to convergence with a timeout and periodic rebasing:
  *
  * {{{
  *   val strategy = MaximalRuleApplication(myRules)
