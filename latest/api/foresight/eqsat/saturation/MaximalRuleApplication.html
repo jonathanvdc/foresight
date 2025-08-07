@@ -22,20 +22,21 @@
    <li>Applies <strong>every match</strong> found, in one batch.</li>
   </ol>
   <p>This process is repeated once per strategy iteration. Importantly, this strategy does not independently saturate to a fixpoint for each rule—it performs <strong>only one pass</strong> per rule per iteration.</p>
-  <p>==Characteristics==</p>
+  <h2><a href="#characteristics" id="characteristics">Characteristics</a></h2>
   <ul>
    <li>Exhaustive per-iteration application: all matches of all rules are applied.</li>
    <li>No internal fixpointing per rule or across the e-graph.</li>
    <li>Deterministic, non-prioritized, and non-stochastic.</li>
    <li>Can be composed with <a href="Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run to convergence.</li>
   </ul>
-  <p>==Use cases==</p>
+  <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
   <ul>
    <li>Baseline comparison against other selective or prioritized strategies.</li>
    <li>Deterministic debugging and validation of rewrite rule behavior.</li>
    <li>Scenarios where exhaustive coverage per iteration is preferred.</li>
   </ul>
-  <p>==Caution== This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
+  <h2><a href="#caution" id="caution">Caution</a></h2>
+  <p>This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>

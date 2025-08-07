@@ -17,21 +17,21 @@
  <div class="doc">
   <p>A generic, composable strategy for saturating an e-graph using rewrite rules.</p>
   <p>Strategies define the logic for applying one or more transformation steps to an <a href="../EGraph.html">foresight.eqsat.EGraph</a>, potentially over multiple iterations. They are responsible for how rewrites are applied, how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).</p>
-  <p>==Design philosophy==</p>
+  <h2><a href="#design-philosophy" id="design-philosophy">Design philosophy</a></h2>
   <p>Strategies are:</p>
   <ul>
    <li><strong>Modular</strong> – They can be composed using <code>thenApply</code>, repeated with <code>repeatUntilStable</code>, or extended with features like logging, timeout, or metadata.</li>
    <li><strong>Stateful</strong> – Each strategy carries a custom <code>Data</code> payload that can track iteration-specific state across calls.</li>
    <li><strong>Flexible</strong> – They work with different e-graph wrappers like <a href="../metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a>, <a href="EGraphWithRoot.html">EGraphWithRoot</a>, and <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> via extension methods.</li>
   </ul>
-  <p>==Key operations==</p>
+  <h2><a href="#key-operations" id="key-operations">Key operations</a></h2>
   <ul>
    <li><code>apply</code> performs a single iteration of the strategy.</li>
    <li><code>initialData</code> provides the initial state for the strategy.</li>
    <li><code>thenApply</code>, <code>repeatUntilStable</code>, <code>withIterationLimit</code>, and <code>withTimeout</code> allow control-flow composition.</li>
    <li><code>withChangeLogger</code> allows inspection/debugging after each iteration.</li>
   </ul>
-  <p>==Usage example==</p>
+  <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
   <div class="snippet mono-small-block">
    <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy: Strategy[Node, MyEGraph, MyState] =
 </span><span line-number="2" class=""><span class="tooltip-container"></span> myRuleApplicationStrategy
@@ -41,7 +41,7 @@
 </span></code></pre>
    <div class="buttons"></div>
   </div>
-  <p>==Integration with e-graph wrappers==</p>
+  <h2><a href="#integration-with-e-graph-wrappers" id="integration-with-e-graph-wrappers">Integration with e-graph wrappers</a></h2>
   <p>The companion object defines implicit classes that lift strategies to:</p>
   <ul>
    <li>e-graphs with metadata (<code>addAnalyses</code>, <code>closeMetadata</code>)</li>

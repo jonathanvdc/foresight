@@ -91,7 +91,7 @@
             <div class="doc">
              <p>Defines core abstractions and concrete strategies for saturation-based rewriting over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until no new terms can be discovered or until a budget is exhausted.</p>
              <p>The key component is the <a href="eqsat/saturation/Strategy.html">Strategy</a> trait, which encapsulates a step-by-step transformation over an e-graph with user-defined data and iteration control. Strategies can be composed, repeated, rebased, and extended with metadata.</p>
-             <p>==Key Concepts==</p>
+             <h2><a href="#key-concepts" id="key-concepts">Key Concepts</a></h2>
              <ul>
               <li><a href="eqsat/saturation/Strategy.html">Strategy</a>: Core trait representing a saturation step that transforms an e-graph.</li>
               <li><a href="eqsat/saturation/SearchAndApply.html">SearchAndApply</a>: Separates search from application logic for fine-grained control.</li>
@@ -101,7 +101,8 @@
               <li><a href="eqsat/saturation/StochasticRuleApplication.html">StochasticRuleApplication</a>: Applies a batch of matches selected probabilistically based on priorities.</li>
               <li><a href="eqsat/saturation/StochasticRuleApplicationWithCaching$.html">StochasticRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
              </ul>
-             <p>==Typical Usage== More sophisticated strategies are constructed using combinators such as <a href="eqsat/saturation/Strategy.html#thenApply-b1">foresight.eqsat.saturation.Strategy.thenApply</a>, <a href="eqsat/saturation/Strategy.html#repeatUntilStable-0">foresight.eqsat.saturation.Strategy.repeatUntilStable</a>, <a href="eqsat/saturation/Strategy.html#withIterationLimit-151">foresight.eqsat.saturation.Strategy.withIterationLimit</a>, <a href="eqsat/saturation/Strategy.html#withTimeout-151">foresight.eqsat.saturation.Strategy.withTimeout</a> and <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.Strategy.thenRebase: No DRI found for query">foresight.eqsat.saturation.Strategy.thenRebase</span>. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
+             <h2><a href="#typical-usage" id="typical-usage">Typical Usage</a></h2>
+             <p>More sophisticated strategies are constructed using combinators such as <a href="eqsat/saturation/Strategy.html#thenApply-b1">foresight.eqsat.saturation.Strategy.thenApply</a>, <a href="eqsat/saturation/Strategy.html#repeatUntilStable-0">foresight.eqsat.saturation.Strategy.repeatUntilStable</a>, <a href="eqsat/saturation/Strategy.html#withIterationLimit-151">foresight.eqsat.saturation.Strategy.withIterationLimit</a>, <a href="eqsat/saturation/Strategy.html#withTimeout-151">foresight.eqsat.saturation.Strategy.withTimeout</a> and <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.Strategy.thenRebase: No DRI found for query">foresight.eqsat.saturation.Strategy.thenRebase</span>. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
              <div class="snippet mono-small-block">
               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span> val strategy = MaximalRuleApplication(myRules)
 </span><span line-number="2" class=""><span class="tooltip-container"></span>   .withTimeout(30.seconds)
