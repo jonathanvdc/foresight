@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A trait that defines a prioritization for matches found during rule application.</p>
+  <p>Defines a strategy for prioritizing rule matches during stochastic rule application.</p>
+  <p>This trait is used to guide the selection of which matches to apply in a given iteration of a saturation loop, such as in <a href="../StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>. It assigns a numeric priority to each match and determines how many to apply at once.</p>
+  <p>Typical implementations might prioritize based on match cost, rule type, rule name, or other domain-specific heuristics. This enables the system to explore the search space more effectively or efficiently than by applying all matches or selecting them uniformly at random.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,19 +23,19 @@
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the matches produced by the rule.</p>
+    <p>The type of matches returned by applying a rule.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The type of nodes in the e-graph.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rule.</p>
+    <p>The type of rewrite rules, which must produce matches of type <code>MatchT</code>.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -136,11 +138,12 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines the batch size based on the prioritized matches.</p>
+             <p>Determines how many of the prioritized matches to apply in this iteration.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines the batch size based on the prioritized matches.</p>
+              <p>Determines how many of the prioritized matches to apply in this iteration.</p>
+              <p>This can be constant or depend on the distribution of priorities, the total number of matches, or other criteria such as heuristics or exploration/exploitation trade-offs.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -148,7 +151,7 @@ node6 -> node0;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>The prioritized matches.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -157,7 +160,7 @@ node6 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The number of matches to apply in this batch.</p>
+               <p>The number of matches to apply.</p>
               </dd>
              </dl>
             </div>
@@ -180,11 +183,11 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Prioritizes matches based on some criteria.</p>
+             <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Prioritizes matches based on some criteria.</p>
+              <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -192,7 +195,7 @@ node6 -> node0;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of pairs, each containing a rule and a match.</p>
+               <p>A sequence of (rule, match) pairs found during rule search.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -201,7 +204,7 @@ node6 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>A sequence of <a href="PrioritizedMatch.html">PrioritizedMatch</a> instances containing each rule, match, and its computed priority.</p>
               </dd>
              </dl>
             </div>

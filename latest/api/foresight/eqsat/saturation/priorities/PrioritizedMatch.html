@@ -12,7 +12,8 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A case class representing a prioritized match.</p>
+  <p>Represents a rule match annotated with a priority score.</p>
+  <p>This class is used in saturation strategies (e.g., <a href="../StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>) to pair a rule and its associated match with a numeric score that reflects its importance or desirability. The priority score typically guides probabilistic selection, such as weighted sampling or batch filtering.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,13 +22,13 @@
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the match.</p>
+    <p>The type of the match returned by the rule's search.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rule.</p>
+    <p>The type of the rule (often a subclass of <a href="../../rewriting/Rule.html">foresight.eqsat.rewriting.Rule</a>).</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -36,13 +37,13 @@
     priority
    </dt>
    <dd class="body-medium">
-    <p>The priority score assigned to this match.</p>
+    <p>A non-negative score indicating the importance of this match (higher means more likely to be chosen).</p>
    </dd>
    <dt class="body-small">
     rule
    </dt>
    <dd class="body-medium">
-    <p>The rule associated with the match.</p>
+    <p>The rewrite rule that produced the match.</p>
    </dd>
    <dt class="body-small">
     ruleMatch

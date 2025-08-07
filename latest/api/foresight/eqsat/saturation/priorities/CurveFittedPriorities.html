@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A prioritization that reweights the priorities of matches based on a curve-fitted distribution.</p>
+  <p>A match prioritization strategy that adjusts (reweights) priority scores using a fitted probability distribution.</p>
+  <p>This class wraps an existing <a href="MatchPriorities.html">MatchPriorities</a> instance and transforms its output priorities via a user-supplied <span data-unresolved-link="" title="Problem linking DiscreteDistribution: No DRI found for query">DiscreteDistribution</span>. The distribution defines how to rescale or reshape the priority values, for example to emphasize rare or high-value matches more strongly.</p>
+  <p>This is useful in stochastic rule application settings where the raw priorities may not reflect the desired sampling behavior—for instance, when encouraging exploration, controlling match diversity, or enforcing soft caps on overly dominant matches.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,19 +23,19 @@
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the matches produced by the rule.</p>
+    <p>The type of matches returned by the rules.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The type of e-graph nodes.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rule.</p>
+    <p>The type of rules being applied.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -42,17 +44,34 @@
     distribution
    </dt>
    <dd class="body-medium">
-    <p>The discrete distribution used for reweighting the priorities.</p>
+    <p>A discrete probability distribution used to convert raw priorities into normalized weights.</p>
    </dd>
    <dt class="body-small">
     originalPriorities
    </dt>
    <dd class="body-medium">
-    <p>The original match priorities to be reweighted.</p>
+    <p>The base prioritization whose output will be reweighted.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p>To apply a geometric decay to the top-N matches:</p>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val basePriorities = MyDomainPriorities
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val decay = ShiftedGeometricDistribution(0.5)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val fitted = CurveFittedPriorities(basePriorities, decay)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -159,11 +178,12 @@ node8 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Reweights the priorities of the matches.</p>
+             <p>Applies the distribution to reweight the priorities of previously scored matches.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Reweights the priorities of the matches.</p>
+              <p>Applies the distribution to reweight the priorities of previously scored matches.</p>
+              <p>The order of matches is preserved, and the distribution is applied positionally to the priority values (e.g., higher-ranked matches may receive lower weights depending on the shape of the distribution).</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -171,7 +191,7 @@ node8 -> node2;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of prioritized matches.</p>
+               <p>A sequence of matches with initial priority scores.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -180,7 +200,7 @@ node8 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A sequence of prioritized matches with reweighted priorities.</p>
+               <p>The same matches, reweighted using the provided distribution.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -219,11 +239,12 @@ node8 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines the batch size based on the prioritized matches.</p>
+             <p>Determines how many of the prioritized matches to apply in this iteration.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines the batch size based on the prioritized matches.</p>
+              <p>Determines how many of the prioritized matches to apply in this iteration.</p>
+              <p>This can be constant or depend on the distribution of priorities, the total number of matches, or other criteria such as heuristics or exploration/exploitation trade-offs.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -231,7 +252,7 @@ node8 -> node2;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>The prioritized matches.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -240,7 +261,7 @@ node8 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The number of matches to apply in this batch.</p>
+               <p>The number of matches to apply.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -277,11 +298,11 @@ node8 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Prioritizes matches based on some criteria.</p>
+             <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Prioritizes matches based on some criteria.</p>
+              <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -289,7 +310,7 @@ node8 -> node2;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of pairs, each containing a rule and a match.</p>
+               <p>A sequence of (rule, match) pairs found during rule search.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -298,7 +319,7 @@ node8 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>A sequence of <a href="PrioritizedMatch.html">PrioritizedMatch</a> instances containing each rule, match, and its computed priority.</p>
               </dd>
               <dt class="body-small">
                Definition Classes

@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A prioritization that assigns a uniform priority to all matches.</p>
+  <p>A simple prioritization strategy that assigns equal weight to all rule matches.</p>
+  <p>Each match receives a uniform priority score of <code>1.0</code>, meaning no preference is given to any rule or match based on cost, structure, or context. This is equivalent to uniform random sampling when used with a stochastic strategy.</p>
+  <p>This strategy is useful as a baseline, or in situations where no domain-specific prioritization is available or desired. It ensures fairness among matches while limiting batch size to control saturation performance.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,19 +23,19 @@
     MatchT
    </dt>
    <dd class="body-medium">
-    <p>The type of the matches produced by the rule.</p>
+    <p>The type of matches returned by each rule.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>The type of nodes in the e-graph.</p>
    </dd>
    <dt class="body-small">
     RuleT
    </dt>
    <dd class="body-medium">
-    <p>The type of the rule.</p>
+    <p>The type of rewrite rules.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -42,7 +44,7 @@
     maxBatchSize
    </dt>
    <dd class="body-medium">
-    <p>The maximum number of matches to process in a single batch.</p>
+    <p>The maximum number of matches to select and apply in one iteration.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -147,11 +149,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines the batch size based on the prioritized matches.</p>
+             <p>Determines how many of the prioritized matches to apply in this iteration.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines the batch size based on the prioritized matches.</p>
+              <p>Determines how many of the prioritized matches to apply in this iteration.</p>
+              <p>This can be constant or depend on the distribution of priorities, the total number of matches, or other criteria such as heuristics or exploration/exploitation trade-offs.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -159,7 +162,7 @@ node7 -> node2;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>The prioritized matches.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -168,7 +171,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The number of matches to apply in this batch.</p>
+               <p>The number of matches to apply.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -199,11 +202,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Prioritizes matches based on some criteria.</p>
+             <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Prioritizes matches based on some criteria.</p>
+              <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -211,7 +214,7 @@ node7 -> node2;
                matches
               </dt>
               <dd class="body-medium">
-               <p>A sequence of pairs, each containing a rule and a match.</p>
+               <p>A sequence of (rule, match) pairs found during rule search.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -220,7 +223,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A sequence of triples, each containing a rule, a match, and a priority score.</p>
+               <p>A sequence of <a href="PrioritizedMatch.html">PrioritizedMatch</a> instances containing each rule, match, and its computed priority.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
