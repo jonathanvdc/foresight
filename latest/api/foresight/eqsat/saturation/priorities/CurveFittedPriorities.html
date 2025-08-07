@@ -13,7 +13,7 @@
 <div class="cover">
  <div class="doc">
   <p>A match prioritization strategy that adjusts (reweights) priority scores using a fitted probability distribution.</p>
-  <p>This class wraps an existing <a href="MatchPriorities.html">MatchPriorities</a> instance and transforms its output priorities via a user-supplied <span data-unresolved-link="" title="Problem linking DiscreteDistribution: No DRI found for query">DiscreteDistribution</span>. The distribution defines how to rescale or reshape the priority values, for example to emphasize rare or high-value matches more strongly.</p>
+  <p>This class wraps an existing <a href="MatchPriorities.html">MatchPriorities</a> instance and transforms its output priorities via a user-supplied <a href="../../../util/random/DiscreteDistribution.html">foresight.util.random.DiscreteDistribution</a>. The distribution defines how to rescale or reshape the priority values, for example to emphasize rare or high-value matches more strongly.</p>
   <p>This is useful in stochastic rule application settings where the raw priorities may not reflect the desired sampling behavior—for instance, when encouraging exploration, controlling match diversity, or enforcing soft caps on overly dominant matches.</p>
  </div>
  <section id="attributes">
