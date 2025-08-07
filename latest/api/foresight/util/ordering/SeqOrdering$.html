@@ -11,7 +11,10 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Provides lexicographical ordering for sequences.</p>
+  <p>This object contains an implicit method to create an <code>Ordering[Seq[A]]</code> given an <code>Ordering[A]</code>, allowing sequences to be compared elementwise.</p>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
@@ -89,9 +92,53 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="lexOrdering-fffffa31" data-f-keywords="implicit">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">implicit </span></span><span class="kind"><span t="k">def </span></span><a href="SeqOrdering$.html#lexOrdering-fffffa31" t="n" class="documentableName ">lexOrdering</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">implicit </span><span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">A</span>]): <span data-unresolved-link="" t="t">Ordering</span>[<span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">A</span>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns a lexicographical ordering for sequences of type <code>A</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns a lexicographical ordering for sequences of type <code>A</code>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>the element type of the sequence</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               ord
+              </dt>
+              <dd class="body-medium">
+               <p>the ordering for elements of type <code>A</code></p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>an ordering for <code>Seq[A]</code> based on the provided element ordering</p>
+              </dd>
+             </dl>
+            </div>
            </div>
           </div>
          </div>
