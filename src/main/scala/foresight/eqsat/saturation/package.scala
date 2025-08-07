@@ -20,9 +20,10 @@ package foresight.eqsat
  *  - [[StochasticRuleApplicationWithCaching]]: Same as above, but avoids reapplying matches across iterations.
  *
  * ==Typical Usage==
- * More sophisticated strategies are constructed using combinators such as [[Strategy.thenApply]],
- * [[Strategy.repeatUntilStable]], [[Strategy.withIterationLimit]], [[Strategy.withTimeout]] and
- * [[Strategy.thenRebase]]. For example, to run a maximal application strategy to convergence with a timeout and
+ * More sophisticated strategies are constructed using combinators such as [[foresight.eqsat.saturation.Strategy.thenApply]],
+ * [[foresight.eqsat.saturation.Strategy.repeatUntilStable]], [[foresight.eqsat.saturation.Strategy.withIterationLimit]],
+ * [[foresight.eqsat.saturation.Strategy.withTimeout]] and [[foresight.eqsat.saturation.Strategy.thenRebase]].
+ * For example, to run a maximal application strategy to convergence with a timeout and
  * periodic rebasing:
  *
  * {{{

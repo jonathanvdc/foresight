@@ -45,7 +45,7 @@ object MaximalRuleApplicationWithCaching {
    * @param rules The rules to apply exhaustively.
    * @tparam NodeT   The type of nodes in the e-graph.
    * @tparam EGraphT The base type of the e-graph (must implement [[EGraphLike]] and [[EGraph]]).
-   * @tparam MatchT  The type of matches produced by the rules (must extend [[PortableMatch]]).
+   * @tparam MatchT  The type of matches produced by the rules (must extend [[foresight.eqsat.rewriting.PortableMatch]]).
    * @return A strategy that performs cached maximal application of rules.
    */
   def apply[NodeT,
