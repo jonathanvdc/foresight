@@ -703,11 +703,32 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A strategy that, for a sequence of rules, applies every match for each rule.</p>
+             <p>A strategy that performs a single maximal rewrite pass over a set of rules.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A strategy that, for a sequence of rules, applies every match for each rule.</p>
+              <p>A strategy that performs a single maximal rewrite pass over a set of rules.</p>
+              <p>For each rule in the given sequence, this strategy:</p>
+              <ol>
+               <li>Searches for <strong>all matches</strong> of that rule in the e-graph.</li>
+               <li>Applies <strong>every match</strong> found, in one batch.</li>
+              </ol>
+              <p>This process is repeated once per strategy iteration. Importantly, this strategy does not independently saturate to a fixpoint for each rule—it performs <strong>only one pass</strong> per rule per iteration.</p>
+              <h2><a href="#characteristics" id="characteristics">Characteristics</a></h2>
+              <ul>
+               <li>Exhaustive per-iteration application: all matches of all rules are applied.</li>
+               <li>No internal fixpointing per rule or across the e-graph.</li>
+               <li>Deterministic, non-prioritized, and non-stochastic.</li>
+               <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run to convergence.</li>
+              </ul>
+              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <ul>
+               <li>Baseline comparison against other selective or prioritized strategies.</li>
+               <li>Deterministic debugging and validation of rewrite rule behavior.</li>
+               <li>Scenarios where exhaustive coverage per iteration is preferred.</li>
+              </ul>
+              <h2><a href="#caution" id="caution">Caution</a></h2>
+              <p>This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -715,25 +736,25 @@
                EGraphT
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-graph.</p>
+               <p>The e-graph implementation (must be both <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>).</p>
               </dd>
               <dt class="body-small">
                MatchT
               </dt>
               <dd class="body-medium">
-               <p>The type of the matches produced by the rules.</p>
+               <p>The type of matches returned by rule search.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>The type of nodes in the e-graph.</p>
               </dd>
               <dt class="body-small">
                RuleT
               </dt>
               <dd class="body-medium">
-               <p>The type of the rules to apply.</p>
+               <p>The type of rules used.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -743,6 +764,12 @@
               </dt>
               <dd class="body-medium">
                <p>The rules to apply.</p>
+              </dd>
+              <dt class="body-small">
+               searchAndApply
+              </dt>
+              <dd class="body-medium">
+               <p>A strategy for rule search and application (may or may not cache matches).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -802,11 +829,12 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategy that provides a factory method for creating a <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> instance without caching.</p>
+             <p>Factory methods for constructing <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategies.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategy that provides a factory method for creating a <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> instance without caching.</p>
+              <p>Factory methods for constructing <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategies.</p>
+              <p>These overloads simplify creation of maximal application strategies by configuring default search behavior without caching.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -870,14 +898,46 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A strategy that, for a sequence of rules, applies every match for each rule. This strategy caches the matches that have already been applied, so that they are not applied again. This strategy operates on an <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+             <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A strategy that, for a sequence of rules, applies every match for each rule. This strategy caches the matches that have already been applied, so that they are not applied again. This strategy operates on an <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+              <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
+              <p>This is a cached variant of <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> that operates on <a href="saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, which tracks which rule–match pairs have already been applied. Once a match has been applied, it is <strong>not re-applied in future iterations</strong>.</p>
+              <p>Like its uncached counterpart, this strategy does not saturate to a fixpoint per iteration. Each iteration simply performs a full match-and-apply sweep over all rules, skipping matches that were already applied previously.</p>
+              <h2><a href="#key-characteristics" id="key-characteristics">Key characteristics</a></h2>
+              <ul>
+               <li>Applies all previously unapplied matches per rule, per iteration.</li>
+               <li>Skips any matches that have already been applied in prior iterations.</li>
+               <li>Avoids redundant reapplication of the same rewrite.</li>
+               <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run until no unapplied matches remain.</li>
+              </ul>
+              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <ul>
+               <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
+               <li>Rewrite rule debugging where per-match traceability is useful.</li>
+               <li>Gradual saturation where each match is only applied once.</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> MaximalRuleApplicationWithCaching(rules)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val saturated = strategy.run(EGraphWithRecordedApplications(initialEGraph))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>

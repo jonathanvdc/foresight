@@ -15,7 +15,8 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> strategy that provides a factory method for creating a <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> instance without caching.</p>
+  <p>Factory methods for constructing <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> strategies.</p>
+  <p>These overloads simplify creation of maximal application strategies by configuring default search behavior without caching.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,33 +211,13 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a strategy that applies every match for each rule without caching the matches that have already been applied.</p>
+             <p>Creates a <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> strategy that applies <strong>all matches</strong> of all rules in a single iteration, without caching.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a strategy that applies every match for each rule without caching the matches that have already been applied.</p>
+              <p>Creates a <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> strategy that applies <strong>all matches</strong> of all rules in a single iteration, without caching.</p>
+              <p>This variant does not perform saturation to a fixpoint on its own. To run to convergence, wrap it with <a href="Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a>.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               EGraphT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-graph.</p>
-              </dd>
-              <dt class="body-small">
-               MatchT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the matches produced by the rules.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -249,10 +230,21 @@ node5 -> node1;
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
-               Returns
+               Example
               </dt>
               <dd class="body-medium">
-               <p>A strategy that applies the rules without caching.</p>
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> MaximalRuleApplication(rules)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val finalGraph = strategy.run(initialEGraph)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>

@@ -12,11 +12,43 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A strategy that, for a sequence of rules, applies every match for each rule. This strategy caches the matches that have already been applied, so that they are not applied again. This strategy operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+  <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
+  <p>This is a cached variant of <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> that operates on <a href="EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, which tracks which rule–match pairs have already been applied. Once a match has been applied, it is <strong>not re-applied in future iterations</strong>.</p>
+  <p>Like its uncached counterpart, this strategy does not saturate to a fixpoint per iteration. Each iteration simply performs a full match-and-apply sweep over all rules, skipping matches that were already applied previously.</p>
+  <h2><a href="#key-characteristics" id="key-characteristics">Key characteristics</a></h2>
+  <ul>
+   <li>Applies all previously unapplied matches per rule, per iteration.</li>
+   <li>Skips any matches that have already been applied in prior iterations.</li>
+   <li>Avoids redundant reapplication of the same rewrite.</li>
+   <li>Can be composed with <a href="Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run until no unapplied matches remain.</li>
+  </ul>
+  <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+  <ul>
+   <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
+   <li>Rewrite rule debugging where per-match traceability is useful.</li>
+   <li>Gradual saturation where each match is only applied once.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> MaximalRuleApplicationWithCaching(rules)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val saturated = strategy.run(EGraphWithRecordedApplications(initialEGraph))
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -104,11 +136,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a strategy that applies every match for each rule, caching the matches that have already been applied. This strategy operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+             <p>Constructs a strategy that applies all unapplied matches for each rule, caching matches as they are applied.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a strategy that applies every match for each rule, caching the matches that have already been applied. This strategy operates on an <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+              <p>Constructs a strategy that applies all unapplied matches for each rule, caching matches as they are applied.</p>
+              <p>This strategy requires the input e-graph to be wrapped in <a href="EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>, which tracks which rewrites have been applied so far.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -116,19 +149,19 @@ node3 -> node2;
                EGraphT
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-graph.</p>
+               <p>The base type of the e-graph (must implement <a href="../EGraphLike.html">EGraphLike</a> and <a href="../EGraph.html">EGraph</a>).</p>
               </dd>
               <dt class="body-small">
                MatchT
               </dt>
               <dd class="body-medium">
-               <p>The type of the matches produced by the rules.</p>
+               <p>The type of matches produced by the rules (must extend <span data-unresolved-link="" title="Problem linking PortableMatch: No DRI found for query">PortableMatch</span>).</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>The type of nodes in the e-graph.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -137,7 +170,7 @@ node3 -> node2;
                rules
               </dt>
               <dd class="body-medium">
-               <p>The rules to apply.</p>
+               <p>The rules to apply exhaustively.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -146,7 +179,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A strategy that applies the rules with caching.</p>
+               <p>A strategy that performs cached maximal application of rules.</p>
               </dd>
              </dl>
             </div>
