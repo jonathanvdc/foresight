@@ -72,9 +72,52 @@
        </div>
        <div class="documentableElement">
         <div class="documentableElement-expander">
+         <button class="icon-button ar show-content"></button>
          <div class="header monospace mono-medium">
           <div class="signature">
            <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="eqsat/saturation.html" t="n" class="documentableName ">foresight.eqsat.saturation</a>
+          </div>
+         </div>
+        </div>
+        <div class="docs">
+         <span class="modifiers"></span>
+         <div>
+          <div class="originInfo"></div>
+          <div class="memberDocumentation">
+           <div class="documentableBrief doc">
+            <p>This package defines core abstractions and concrete strategies for saturation-based rewriting over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until no new terms can be discovered or until a budget is exhausted.</p>
+           </div>
+           <div class="cover">
+            <div class="doc">
+             <p>This package defines core abstractions and concrete strategies for saturation-based rewriting over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until no new terms can be discovered or until a budget is exhausted.</p>
+             <p>The key component is the <a href="eqsat/saturation/Strategy.html">Strategy</a> trait, which encapsulates a step-by-step transformation over an e-graph with user-defined data and iteration control. Strategies can be composed, repeated, rebased, and extended with metadata.</p>
+             <p>==Key Concepts==</p>
+             <ul>
+              <li><a href="eqsat/saturation/Strategy.html">Strategy</a>: Core trait representing a saturation step that transforms an e-graph.</li>
+              <li><a href="eqsat/saturation/SearchAndApply.html">SearchAndApply</a>: Separates search from application logic for fine-grained control.</li>
+              <li><a href="eqsat/saturation/MaximalRuleApplication.html">MaximalRuleApplication</a>: Applies every match for each rule once per iteration (no fixpoint).</li>
+              <li><a href="eqsat/saturation/MaximalRuleApplicationWithCaching$.html">MaximalRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+              <li><a href="eqsat/saturation/BackoffRuleApplication.html">BackoffRuleApplication</a>: Applies rules with dynamic quotas and cooldown periods to balance rule usage.</li>
+              <li><a href="eqsat/saturation/StochasticRuleApplication.html">StochasticRuleApplication</a>: Applies a batch of matches selected probabilistically based on priorities.</li>
+              <li><a href="eqsat/saturation/StochasticRuleApplicationWithCaching$.html">StochasticRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+             </ul>
+             <p>==Typical Usage== More sophisticated strategies are constructed using combinators such as <a href="eqsat/saturation/Strategy.html#thenApply-b1">Strategy.thenApply</a>, <a href="eqsat/saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a>, <a href="eqsat/saturation/Strategy.html#withIterationLimit-151">Strategy.withIterationLimit</a>, <a href="eqsat/saturation/Strategy.html#withTimeout-151">Strategy.withTimeout</a> and <span data-unresolved-link="" title="Problem linking Strategy.thenRebase: No DRI found for query">Strategy.thenRebase</span>. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
+             <div class="snippet mono-small-block">
+              <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span> val strategy = MaximalRuleApplication(myRules)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>   .withTimeout(30.seconds)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   .thenRebase(extractor)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   .withIterationLimit(5)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span> val result = strategy.run(myEGraph)
+</span></code></pre>
+              <div class="buttons"></div>
+             </div>
+            </div>
+            <h2 class="h200">Attributes</h2>
+            <dl class="attributes attributes-small"></dl>
+           </div>
           </div>
          </div>
         </div>

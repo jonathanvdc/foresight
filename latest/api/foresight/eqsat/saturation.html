@@ -10,6 +10,39 @@
   <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="saturation.html" t="n" class="documentableName ">foresight.eqsat.saturation</a>
  </div>
 </div>
+<div class="cover">
+ <div class="doc">
+  <p>This package defines core abstractions and concrete strategies for saturation-based rewriting over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until no new terms can be discovered or until a budget is exhausted.</p>
+  <p>The key component is the <a href="saturation/Strategy.html">Strategy</a> trait, which encapsulates a step-by-step transformation over an e-graph with user-defined data and iteration control. Strategies can be composed, repeated, rebased, and extended with metadata.</p>
+  <p>==Key Concepts==</p>
+  <ul>
+   <li><a href="saturation/Strategy.html">Strategy</a>: Core trait representing a saturation step that transforms an e-graph.</li>
+   <li><a href="saturation/SearchAndApply.html">SearchAndApply</a>: Separates search from application logic for fine-grained control.</li>
+   <li><a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a>: Applies every match for each rule once per iteration (no fixpoint).</li>
+   <li><a href="saturation/MaximalRuleApplicationWithCaching$.html">MaximalRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+   <li><a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a>: Applies rules with dynamic quotas and cooldown periods to balance rule usage.</li>
+   <li><a href="saturation/StochasticRuleApplication.html">StochasticRuleApplication</a>: Applies a batch of matches selected probabilistically based on priorities.</li>
+   <li><a href="saturation/StochasticRuleApplicationWithCaching$.html">StochasticRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+  </ul>
+  <p>==Typical Usage== More sophisticated strategies are constructed using combinators such as <a href="saturation/Strategy.html#thenApply-b1">Strategy.thenApply</a>, <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a>, <a href="saturation/Strategy.html#withIterationLimit-151">Strategy.withIterationLimit</a>, <a href="saturation/Strategy.html#withTimeout-151">Strategy.withTimeout</a> and <span data-unresolved-link="" title="Problem linking Strategy.thenRebase: No DRI found for query">Strategy.thenRebase</span>. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span> val strategy = MaximalRuleApplication(myRules)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>   .withTimeout(30.seconds)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   .thenRebase(extractor)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   .withIterationLimit(5)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span> val result = strategy.run(myEGraph)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes"></dl>
+ </section>
+</div>
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
@@ -2027,4 +2060,4 @@
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
