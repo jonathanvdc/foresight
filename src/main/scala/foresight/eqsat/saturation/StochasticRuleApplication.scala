@@ -7,18 +7,37 @@ import foresight.eqsat.saturation.priorities.{MatchPriorities, PrioritizedMatch}
 import foresight.util.random.{Random, Sample}
 
 /**
- * A strategy that applies a sequence of rules in a stochastic manner. It searches for matches of the rules in an e-graph,
- * prioritizes them based on a given function, and applies a batch of matches selected randomly, weighing the selection
- * by their priority.
+ * A saturation strategy that applies rewrite rules stochastically, based on user-defined priorities.
  *
- * @param rules The rules to apply.
- * @param searchAndApply The search and apply strategy to find and apply matches.
- * @param priorities The prioritizer that determines the priority of matches and the batch size to apply.
- * @param random A random number generator used for selecting matches randomly.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rules to apply.
- * @tparam EGraphT The type of the e-graph.
- * @tparam MatchT The type of the matches produced by the rules.
+ * This strategy repeatedly:
+ *   1. Searches for matches of the given rewrite rules in the e-graph.
+ *   2. Assigns priorities to each match using the provided [[MatchPriorities]].
+ *   3. Selects a batch of matches to apply, using weighted random sampling without replacement.
+ *   4. Applies the selected matches using a configurable [[SearchAndApply]] strategy.
+ *
+ * This approach is useful when it's expensive or unnecessary to apply every match,
+ * or when exploration is guided by domain-specific heuristics (e.g., rule priority, match cost).
+ *
+ * @example
+ * To use this strategy without caching, you can create an instance like this:
+ * {{{
+ * val strategy = StochasticRuleApplication(
+ *   rules = myRules,
+ *   searchAndApply = SearchAndApply.withoutCaching,
+ *   priorities = MyCustomPriorities,
+ *   random = Random(42)
+ * )
+ * }}}
+ *
+ * @param rules The set of rewrite rules to apply.
+ * @param searchAndApply A search and apply strategy to find and apply rule matches.
+ * @param priorities A prioritization mechanism for matches, including batch size selection.
+ * @param random A random number generator used to sample matches based on priority.
+ *
+ * @tparam NodeT The type of e-graph nodes.
+ * @tparam RuleT The type of rewrite rules.
+ * @tparam EGraphT The type of e-graph, combining [[EGraphLike]] and [[EGraph]].
+ * @tparam MatchT The type of matches returned by rules.
  */
 final case class StochasticRuleApplication[
   NodeT,
@@ -30,7 +49,7 @@ final case class StochasticRuleApplication[
           random: Random) extends Strategy[NodeT, EGraphT, Random] {
 
   /**
-   * A map from rule names to the rules themselves. This is used to quickly look up a rule by its name.
+   * A lookup table from rule names to rule instances, used during match annotation and application.
    */
   private val rulesByName = rules.map(rule => rule.name -> rule).toMap
 
@@ -61,6 +80,13 @@ final case class StochasticRuleApplication[
     (newEGraph, newRng)
   }
 
+  /**
+   * Selects a batch of matches without replacement, using priority as selection weight.
+   *
+   * @param prioritizedMatches The list of prioritized matches.
+   * @param batchSize The number of matches to select.
+   * @return A tuple of selected (rule, match) pairs and the updated RNG state.
+   */
   private def selectMatches(
     prioritizedMatches: Seq[PrioritizedMatch[RuleT, MatchT]],
     batchSize: Int
@@ -73,7 +99,10 @@ final case class StochasticRuleApplication[
 }
 
 /**
- * Companion object for [[StochasticRuleApplication]] that provides factory methods to create instances.
+ * Factory methods for creating [[StochasticRuleApplication]] strategies.
+ *
+ * These overloaded `apply` methods allow users to omit explicit construction of
+ * [[SearchAndApply]] or [[Random]] instances if defaults are acceptable.
  */
 object StochasticRuleApplication {
   /**
