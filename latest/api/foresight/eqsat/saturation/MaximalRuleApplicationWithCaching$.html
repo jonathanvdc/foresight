@@ -15,14 +15,14 @@
   <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
   <p>This is a cached variant of <a href="MaximalRuleApplication.html">MaximalRuleApplication</a> that operates on <a href="EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, which tracks which rule–match pairs have already been applied. Once a match has been applied, it is <strong>not re-applied in future iterations</strong>.</p>
   <p>Like its uncached counterpart, this strategy does not saturate to a fixpoint per iteration. Each iteration simply performs a full match-and-apply sweep over all rules, skipping matches that were already applied previously.</p>
-  <h2><a href="#key-characteristics" id="key-characteristics">Key characteristics</a></h2>
+  <p>==Key characteristics==</p>
   <ul>
    <li>Applies all previously unapplied matches per rule, per iteration.</li>
    <li>Skips any matches that have already been applied in prior iterations.</li>
    <li>Avoids redundant reapplication of the same rewrite.</li>
    <li>Can be composed with <a href="Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run until no unapplied matches remain.</li>
   </ul>
-  <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+  <p>==Use cases==</p>
   <ul>
    <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
    <li>Gradual saturation where each match is only applied once.</li>

@@ -15,13 +15,13 @@
   <p>Provides strategies for prioritizing rule matches in equality saturation.</p>
   <p>In saturation-based rewrite systems, many rule matches may be discovered in a single iteration. Applying all of them can be expensive, redundant, or counterproductive. This package defines abstractions and implementations for prioritizing and selecting a subset of matches to apply per iteration.</p>
   <p>The core abstraction is <a href="priorities/MatchPriorities.html">MatchPriorities</a>, which defines a trait for assigning priority scores to rule matches and determining the batch size to apply. These priorities are consumed by stochastic strategies like <a href="StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>, which use them to bias sampling.</p>
-  <h2><a href="#included-prioritization-strategies" id="included-prioritization-strategies">Included prioritization strategies</a></h2>
+  <p>==Included prioritization strategies==</p>
   <ul>
    <li><a href="priorities/UniformPriorities.html">UniformPriorities</a> assigns equal priority to all matches, applying up to a fixed batch size.</li>
    <li><a href="priorities/ReweightedPriorities.html">ReweightedPriorities</a> is a compositional trait for transforming priorities produced by another strategy.</li>
    <li><a href="priorities/CurveFittedPriorities.html">CurveFittedPriorities</a> reweights matches using a <a href="../../util/random/DiscreteDistribution.html">foresight.util.random.DiscreteDistribution</a>.</li>
   </ul>
-  <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
+  <p>==Usage example==</p>
   <div class="snippet mono-small-block">
    <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val base = MyDomainPriorities
 </span><span line-number="2" class=""><span class="tooltip-container"></span>val curve = ShiftedGeometricDistribution(0.5)

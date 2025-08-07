@@ -80,13 +80,13 @@
              <p>Provides strategies for prioritizing rule matches in equality saturation.</p>
              <p>In saturation-based rewrite systems, many rule matches may be discovered in a single iteration. Applying all of them can be expensive, redundant, or counterproductive. This package defines abstractions and implementations for prioritizing and selecting a subset of matches to apply per iteration.</p>
              <p>The core abstraction is <a href="saturation/priorities/MatchPriorities.html">MatchPriorities</a>, which defines a trait for assigning priority scores to rule matches and determining the batch size to apply. These priorities are consumed by stochastic strategies like <a href="saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>, which use them to bias sampling.</p>
-             <h2><a href="#included-prioritization-strategies" id="included-prioritization-strategies">Included prioritization strategies</a></h2>
+             <p>==Included prioritization strategies==</p>
              <ul>
               <li><a href="saturation/priorities/UniformPriorities.html">UniformPriorities</a> assigns equal priority to all matches, applying up to a fixed batch size.</li>
               <li><a href="saturation/priorities/ReweightedPriorities.html">ReweightedPriorities</a> is a compositional trait for transforming priorities produced by another strategy.</li>
               <li><a href="saturation/priorities/CurveFittedPriorities.html">CurveFittedPriorities</a> reweights matches using a <a href="../util/random/DiscreteDistribution.html">foresight.util.random.DiscreteDistribution</a>.</li>
              </ul>
-             <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
+             <p>==Usage example==</p>
              <div class="snippet mono-small-block">
               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val base = MyDomainPriorities
 </span><span line-number="2" class=""><span class="tooltip-container"></span>val curve = ShiftedGeometricDistribution(0.5)
@@ -730,21 +730,20 @@
                <li>Applies <strong>every match</strong> found, in one batch.</li>
               </ol>
               <p>This process is repeated once per strategy iteration. Importantly, this strategy does not independently saturate to a fixpoint for each rule—it performs <strong>only one pass</strong> per rule per iteration.</p>
-              <h2><a href="#characteristics" id="characteristics">Characteristics</a></h2>
+              <p>==Characteristics==</p>
               <ul>
                <li>Exhaustive per-iteration application: all matches of all rules are applied.</li>
                <li>No internal fixpointing per rule or across the e-graph.</li>
                <li>Deterministic, non-prioritized, and non-stochastic.</li>
                <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run to convergence.</li>
               </ul>
-              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <p>==Use cases==</p>
               <ul>
                <li>Baseline comparison against other selective or prioritized strategies.</li>
                <li>Deterministic debugging and validation of rewrite rule behavior.</li>
                <li>Scenarios where exhaustive coverage per iteration is preferred.</li>
               </ul>
-              <h2><a href="#caution" id="caution">Caution</a></h2>
-              <p>This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
+              <p>==Caution== This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -921,14 +920,14 @@
               <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
               <p>This is a cached variant of <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> that operates on <a href="saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, which tracks which rule–match pairs have already been applied. Once a match has been applied, it is <strong>not re-applied in future iterations</strong>.</p>
               <p>Like its uncached counterpart, this strategy does not saturate to a fixpoint per iteration. Each iteration simply performs a full match-and-apply sweep over all rules, skipping matches that were already applied previously.</p>
-              <h2><a href="#key-characteristics" id="key-characteristics">Key characteristics</a></h2>
+              <p>==Key characteristics==</p>
               <ul>
                <li>Applies all previously unapplied matches per rule, per iteration.</li>
                <li>Skips any matches that have already been applied in prior iterations.</li>
                <li>Avoids redundant reapplication of the same rewrite.</li>
                <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run until no unapplied matches remain.</li>
               </ul>
-              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <p>==Use cases==</p>
               <ul>
                <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
                <li>Gradual saturation where each match is only applied once.</li>
@@ -1672,21 +1671,21 @@
              <div class="doc">
               <p>A generic, composable strategy for saturating an e-graph using rewrite rules.</p>
               <p>Strategies define the logic for applying one or more transformation steps to an <a href="EGraph.html">foresight.eqsat.EGraph</a>, potentially over multiple iterations. They are responsible for how rewrites are applied, how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).</p>
-              <h2><a href="#design-philosophy" id="design-philosophy">Design philosophy</a></h2>
+              <p>==Design philosophy==</p>
               <p>Strategies are:</p>
               <ul>
                <li><strong>Modular</strong> – They can be composed using <code>thenApply</code>, repeated with <code>repeatUntilStable</code>, or extended with features like logging, timeout, or metadata.</li>
                <li><strong>Stateful</strong> – Each strategy carries a custom <code>Data</code> payload that can track iteration-specific state across calls.</li>
                <li><strong>Flexible</strong> – They work with different e-graph wrappers like <a href="metadata/EGraphWithMetadata.html">foresight.eqsat.metadata.EGraphWithMetadata</a>, <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a>, and <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> via extension methods.</li>
               </ul>
-              <h2><a href="#key-operations" id="key-operations">Key operations</a></h2>
+              <p>==Key operations==</p>
               <ul>
                <li><code>apply</code> performs a single iteration of the strategy.</li>
                <li><code>initialData</code> provides the initial state for the strategy.</li>
                <li><code>thenApply</code>, <code>repeatUntilStable</code>, <code>withIterationLimit</code>, and <code>withTimeout</code> allow control-flow composition.</li>
                <li><code>withChangeLogger</code> allows inspection/debugging after each iteration.</li>
               </ul>
-              <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
+              <p>==Usage example==</p>
               <div class="snippet mono-small-block">
                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy: Strategy[Node, MyEGraph, MyState] =
 </span><span line-number="2" class=""><span class="tooltip-container"></span> myRuleApplicationStrategy
@@ -1696,7 +1695,7 @@
 </span></code></pre>
                <div class="buttons"></div>
               </div>
-              <h2><a href="#integration-with-e-graph-wrappers" id="integration-with-e-graph-wrappers">Integration with e-graph wrappers</a></h2>
+              <p>==Integration with e-graph wrappers==</p>
               <p>The companion object defines implicit classes that lift strategies to:</p>
               <ul>
                <li>e-graphs with metadata (<code>addAnalyses</code>, <code>closeMetadata</code>)</li>
