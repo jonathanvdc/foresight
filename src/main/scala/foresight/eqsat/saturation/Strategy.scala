@@ -412,13 +412,25 @@ object Strategy {
     }
 
     /**
-     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
-     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
-     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
-     * extracted tree, the rebasing operation is also skipped.
-     * @param extractor The extractor to use for extracting a tree from the e-graph.
-     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
-     * @return A new strategy that applies the rebasing operation after the original strategy.
+     * Chains a rebasing operation to this strategy.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * Concretely, each iteration does the following:
+     *  1. Applies the underlying strategy.
+     *     2. If no change occurs, returns the original graph.
+     *     3. If a change occurs, extracts a tree from the current root.
+     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphT],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
@@ -439,13 +451,25 @@ object Strategy {
                                      Data](private val strategy: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data]) extends AnyVal {
 
     /**
-     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
-     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
-     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
-     * extracted tree, the rebasing operation is also skipped.
-     * @param extractor The extractor to use for extracting a tree from the e-graph.
-     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
-     * @return A new strategy that applies the rebasing operation after the original strategy.
+     * Chains a rebasing operation to this strategy.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * Concretely, each iteration does the following:
+     *  1. Applies the underlying strategy.
+     *     2. If no change occurs, returns the original graph.
+     *     3. If a change occurs, extracts a tree from the current root.
+     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
@@ -468,13 +492,25 @@ object Strategy {
                                               Data](private val strategy: Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data]) extends AnyVal {
 
     /**
-     * Chains a rebasing operation to the strategy. The rebasing operation extracts a tree from the e-graph using the
-     * provided extractor and then rebases the e-graph with that tree. If the strategy does not change the e-graph,
-     * the rebasing operation is skipped. If the tree extracted from the e-graph is equivalent to the previously
-     * extracted tree, the rebasing operation is also skipped.
-     * @param extractor The extractor to use for extracting a tree from the e-graph.
-     * @param areEquivalent A function to check if two trees are equivalent. Defaults to structural equality.
-     * @return A new strategy that applies the rebasing operation after the original strategy.
+     * Chains a rebasing operation to this strategy.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * Concretely, each iteration does the following:
+     *  1. Applies the underlying strategy.
+     *     2. If no change occurs, returns the original graph.
+     *     3. If a change occurs, extracts a tree from the current root.
+     *     4. If the extracted tree is equivalent to the previous tree, returns the modified graph as-is.
+     *     5. Otherwise, creates a new empty e-graph and inserts the new tree as the new root.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], (Data, Option[Tree[NodeT]])] = {
