@@ -58,6 +58,7 @@
                <li>Probabilistic rule selection in equality saturation</li>
                <li>Discrete softmax-like prioritization heuristics</li>
               </ul>
+              <p>See also: <a href="https://en.wikipedia.org/wiki/Discrete_probability_distribution">Discrete probability distribution</a></p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -278,11 +279,17 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A shifted geometric distribution. The probability of a value k is <code>p * (1 - p)^k</code>.</p>
+             <p>Represents a shifted geometric distribution, a discrete probability distribution modeling the number of failures before the first success in a sequence of Bernoulli trials, with the support shifted so that values start at 0.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A shifted geometric distribution. The probability of a value k is <code>p * (1 - p)^k</code>.</p>
+              <p>Represents a shifted geometric distribution, a discrete probability distribution modeling the number of failures before the first success in a sequence of Bernoulli trials, with the support shifted so that values start at 0.</p>
+              <p>The probability mass function (PMF) for a value <code>k</code> is: <code>P(X = k) = p * (1 - p)^k</code> where:</p>
+              <ul>
+               <li><code>p</code> is the probability of success (0 &lt; p &lt;= 1)</li>
+               <li><code>k</code> is a non-negative integer (k &gt;= 0)</li>
+              </ul>
+              <p>See also: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">Geometric distribution (Wikipedia)</a></p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -290,7 +297,7 @@
                p
               </dt>
               <dd class="body-medium">
-               <p>The probability of success.</p>
+               <p>Probability of success in each trial.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>

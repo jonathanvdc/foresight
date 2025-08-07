@@ -12,7 +12,13 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A shifted geometric distribution. The probability of a value k is <code>p * (1 - p)^k</code>.</p>
+  <p>Represents a shifted geometric distribution, a discrete probability distribution modeling the number of failures before the first success in a sequence of Bernoulli trials, with the support shifted so that values start at 0.</p>
+  <p>The probability mass function (PMF) for a value <code>k</code> is: <code>P(X = k) = p * (1 - p)^k</code> where:</p>
+  <ul>
+   <li><code>p</code> is the probability of success (0 &lt; p &lt;= 1)</li>
+   <li><code>k</code> is a non-negative integer (k &gt;= 0)</li>
+  </ul>
+  <p>See also: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">Geometric distribution (Wikipedia)</a></p>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -21,7 +27,7 @@
     p
    </dt>
    <dd class="body-medium">
-    <p>The probability of success.</p>
+    <p>Probability of success in each trial.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -126,11 +132,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Returns the probability mass assigned to the given index.</p>
+             <p>Returns the probability mass assigned to the specified index in the distribution.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Returns the probability mass assigned to the given index.</p>
+              <p>Returns the probability mass assigned to the specified index in the distribution.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -138,7 +144,7 @@ node7 -> node2;
                value
               </dt>
               <dd class="body-medium">
-               <p>A non-negative integer index.</p>
+               <p>The non-negative integer index for which to retrieve the probability.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -147,7 +153,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The probability of this index according to the distribution.</p>
+               <p>The probability mass associated with the given index, as defined by the distribution.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
