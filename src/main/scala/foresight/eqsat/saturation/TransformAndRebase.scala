@@ -157,7 +157,7 @@ object TransformAndRebase {
 
   /**
    * Creates a [[TransformAndRebase]] strategy over [[EGraphWithRecordedApplications]] containing
-   * an [[foresight.eqsat.saturation.EGraphWithMetadata]] and [[EGraphWithRoot]].
+   * an [[foresight.eqsat.metadata.EGraphWithMetadata]] and [[EGraphWithRoot]].
    *
    * This version records match applications, supports metadata, and operates on rooted graphs.
    *
