@@ -10,6 +10,6 @@ package foresight.util
  * - [[DiscreteDistribution]] for representing and sampling from discrete probability distributions
  *
  * Typical use cases include selecting random subsets from collections, implementing randomized algorithms,
- * simulating probabilistic processes, and working with discrete probability distributions.
+ * and working with discrete probability distributions.
  */
 package object random
