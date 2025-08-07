@@ -10,6 +10,6 @@ package foresight.eqsat
  * discovered and e-classes are merged, multiple `EClassRef` instances may refer to the same underlying e-class.
  *
  * To resolve ambiguity and obtain a single, canonical reference for an e-class, use
- * [[EGraphLike.canonicalize]].
+ * [[EGraphLike.canonicalize(EClassRef)]].
  */
 final class EClassRef
