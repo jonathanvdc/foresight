@@ -12,7 +12,16 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A discrete probability distribution.</p>
+  <p>A trait representing a discrete probability distribution over non-negative integer indices.</p>
+  <p>Implementations define how probability mass is assigned to integer values (e.g., based on geometric decay or custom heuristics). This abstraction supports flexible priority-based decision-making or sampling strategies.</p>
+  <p>The primary method <a href="DiscreteDistribution.html#apply-640">apply</a> returns the probability associated with a given index. It is expected that probabilities are non-negative and sum to at most 1 across all values (though this is not enforced at the trait level).</p>
+  <p>The helper method <a href="DiscreteDistribution.html#prioritiesToProbabilities-8e0">prioritiesToProbabilities</a> enables assigning probabilities to arbitrary keys based on a provided priority mapping. Keys with equal priorities are grouped and assigned the mean probability of their position-based indices, derived from the distribution. The resulting probabilities are then normalized to ensure they sum to exactly 1.</p>
+  <p>Use this trait to model discrete ranking or selection scenarios, such as:</p>
+  <ul>
+   <li>Weighted random choice among prioritized options</li>
+   <li>Probabilistic rule selection in equality saturation</li>
+   <li>Discrete softmax-like prioritization heuristics</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -105,11 +114,11 @@ node4 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Returns the probability of a given value.</p>
+             <p>Returns the probability mass assigned to the given index.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Returns the probability of a given value.</p>
+              <p>Returns the probability mass assigned to the given index.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -117,7 +126,7 @@ node4 -> node0;
                value
               </dt>
               <dd class="body-medium">
-               <p>The value.</p>
+               <p>A non-negative integer index.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -126,7 +135,7 @@ node4 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The probability of the value.</p>
+               <p>The probability of this index according to the distribution.</p>
               </dd>
              </dl>
             </div>
@@ -157,11 +166,13 @@ node4 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Converts a sequence of priorities to a sequence of probabilities. The probabilities are assigned based on the mean weight of the priority group.</p>
+             <p>Converts a sequence of (key, priority) pairs into a normalized sequence of (key, probability) pairs.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Converts a sequence of priorities to a sequence of probabilities. The probabilities are assigned based on the mean weight of the priority group.</p>
+              <p>Converts a sequence of (key, priority) pairs into a normalized sequence of (key, probability) pairs.</p>
+              <p>Keys are grouped by their priority, then sorted by descending priority. Each group is assigned an average probability based on the distribution's <code>apply</code> method, using the index range corresponding to that group.</p>
+              <p>Finally, the resulting probabilities are normalized so that their sum is exactly 1 by distributing any leftover mass uniformly.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -169,7 +180,7 @@ node4 -> node0;
                K
               </dt>
               <dd class="body-medium">
-               <p>The type of the keys.</p>
+               <p>The type of keys.</p>
               </dd>
               <dt class="body-small">
                Priority
@@ -184,13 +195,13 @@ node4 -> node0;
                mapping
               </dt>
               <dd class="body-medium">
-               <p>The sequence of priorities to convert.</p>
+               <p>A sequence of (key, priority) pairs.</p>
               </dd>
               <dt class="body-small">
                ord
               </dt>
               <dd class="body-medium">
-               <p>The ordering of the priorities.</p>
+               <p>The ordering used to sort priorities.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -199,7 +210,7 @@ node4 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The sequence of keys with their probabilities.</p>
+               <p>A sequence of (key, probability) pairs.</p>
               </dd>
              </dl>
             </div>

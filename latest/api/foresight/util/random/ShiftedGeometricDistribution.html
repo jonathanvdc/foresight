@@ -126,11 +126,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Returns the probability of a given value.</p>
+             <p>Returns the probability mass assigned to the given index.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Returns the probability of a given value.</p>
+              <p>Returns the probability mass assigned to the given index.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -138,7 +138,7 @@ node7 -> node2;
                value
               </dt>
               <dd class="body-medium">
-               <p>The value.</p>
+               <p>A non-negative integer index.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -147,7 +147,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The probability of the value.</p>
+               <p>The probability of this index according to the distribution.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -186,11 +186,13 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Converts a sequence of priorities to a sequence of probabilities. The probabilities are assigned based on the mean weight of the priority group.</p>
+             <p>Converts a sequence of (key, priority) pairs into a normalized sequence of (key, probability) pairs.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Converts a sequence of priorities to a sequence of probabilities. The probabilities are assigned based on the mean weight of the priority group.</p>
+              <p>Converts a sequence of (key, priority) pairs into a normalized sequence of (key, probability) pairs.</p>
+              <p>Keys are grouped by their priority, then sorted by descending priority. Each group is assigned an average probability based on the distribution's <code>apply</code> method, using the index range corresponding to that group.</p>
+              <p>Finally, the resulting probabilities are normalized so that their sum is exactly 1 by distributing any leftover mass uniformly.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -198,7 +200,7 @@ node7 -> node2;
                K
               </dt>
               <dd class="body-medium">
-               <p>The type of the keys.</p>
+               <p>The type of keys.</p>
               </dd>
               <dt class="body-small">
                Priority
@@ -213,13 +215,13 @@ node7 -> node2;
                mapping
               </dt>
               <dd class="body-medium">
-               <p>The sequence of priorities to convert.</p>
+               <p>A sequence of (key, priority) pairs.</p>
               </dd>
               <dt class="body-small">
                ord
               </dt>
               <dd class="body-medium">
-               <p>The ordering of the priorities.</p>
+               <p>The ordering used to sort priorities.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -228,7 +230,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The sequence of keys with their probabilities.</p>
+               <p>A sequence of (key, probability) pairs.</p>
               </dd>
               <dt class="body-small">
                Inherited from:

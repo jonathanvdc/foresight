@@ -44,11 +44,20 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A discrete probability distribution.</p>
+             <p>A trait representing a discrete probability distribution over non-negative integer indices.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A discrete probability distribution.</p>
+              <p>A trait representing a discrete probability distribution over non-negative integer indices.</p>
+              <p>Implementations define how probability mass is assigned to integer values (e.g., based on geometric decay or custom heuristics). This abstraction supports flexible priority-based decision-making or sampling strategies.</p>
+              <p>The primary method <a href="random/DiscreteDistribution.html#apply-640">apply</a> returns the probability associated with a given index. It is expected that probabilities are non-negative and sum to at most 1 across all values (though this is not enforced at the trait level).</p>
+              <p>The helper method <a href="random/DiscreteDistribution.html#prioritiesToProbabilities-8e0">prioritiesToProbabilities</a> enables assigning probabilities to arbitrary keys based on a provided priority mapping. Keys with equal priorities are grouped and assigned the mean probability of their position-based indices, derived from the distribution. The resulting probabilities are then normalized to ensure they sum to exactly 1.</p>
+              <p>Use this trait to model discrete ranking or selection scenarios, such as:</p>
+              <ul>
+               <li>Weighted random choice among prioritized options</li>
+               <li>Probabilistic rule selection in equality saturation</li>
+               <li>Discrete softmax-like prioritization heuristics</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
