@@ -1,7 +1,13 @@
 package foresight.eqsat
 
 /**
- * The result of adding a node to the e-graph.
+ * Represents the outcome of attempting to add an e-node to an e-graph.
+ *
+ * There are two possible results:
+ *   - [[AddNodeResult.AlreadyThere]]: The e-node was already present in the e-graph.
+ *   - [[AddNodeResult.Added]]: The e-node was successfully added to the e-graph.
+ *
+ * Both cases provide the corresponding [[EClassCall]] for the e-node.
  */
 sealed trait AddNodeResult {
   /**
