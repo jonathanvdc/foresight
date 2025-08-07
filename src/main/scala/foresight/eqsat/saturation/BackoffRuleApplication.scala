@@ -8,31 +8,31 @@ import scala.collection.mutable
 import scala.util.Random
 
 /**
- * A rewrite rule annotated with a match limit and a ban length. The match limit is the maximum number of matches that
- * can be applied for this rule. Once this limit is reached, the rule is banned for a number of iterations equal to the
- * ban length. After the ban length has passed, the rule can be applied again. At this point both the match limit and
- * the ban length are doubled.
+ * Annotates a rewrite rule with initial scheduling parameters for backoff.
+ *
+ * The backoff strategy limits how often a rule can fire. Each rule is given an initial match limit
+ * (i.e., how many matches it may apply before being paused) and an initial ban length (how long it is
+ * paused once exhausted). Both are doubled after each cooldown cycle.
  *
  * @param rule The rewrite rule.
- * @param initialMatchLimit The initial match limit.
- * @param initialBanLength The initial ban length.
+ * @param initialMatchLimit The initial number of matches this rule can apply before being temporarily banned.
+ * @param initialBanLength The number of iterations the rule is banned after hitting its match limit.
  */
 final case class BackoffRule[NodeT,
                              RuleT <: Rule[NodeT, MatchT, _],
                              MatchT](rule: RuleT, initialMatchLimit: Int, initialBanLength: Int)
 
 /**
- * Statistics for a rule in the backoff strategy. This includes the rule itself, the match limit, the ban length,
- * the time until which the rule is banned, and the number of remaining matches that can be applied before the rule
- * is banned.
- * @param rule The rewrite rule.
- * @param matchLimit The maximum number of matches that can be applied for this rule before it is banned.
- * @param banLength The number of iterations for which the rule is banned once its match limit is reached.
- * @param bannedUntil The iteration until which the rule is banned, if it is currently banned.
- * @param remainingMatches The number of matches that can still be applied for this rule before it is banned.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rule.
- * @tparam MatchT The type of the matches produced by the rule.
+ * Tracks dynamic backoff statistics for a single rule.
+ *
+ * These stats are used to determine whether a rule is active, when it becomes eligible again,
+ * and how many more matches it may apply in the current activation window.
+ *
+ * @param rule The rewrite rule being tracked.
+ * @param matchLimit The total number of matches this rule can apply during its current active window.
+ * @param banLength The number of iterations the rule will be banned after hitting its match limit.
+ * @param bannedUntil If banned, the iteration number at which the rule will become eligible again.
+ * @param remainingMatches The number of matches this rule can still apply before triggering a ban.
  */
 final case class RuleStats[NodeT,
                            RuleT <: Rule[NodeT, MatchT, _],
@@ -40,14 +40,14 @@ final case class RuleStats[NodeT,
                                    remainingMatches: Int)
 
 /**
- * Statistics for the backoff rule application strategy. This includes the current iteration, a map of rule names
- * to their statistics, and a random number generator used for selecting matches randomly.
- * @param iteration The current iteration of the backoff strategy.
- * @param stats A map from rule names to their statistics.
- * @param random A random number generator used for selecting matches randomly.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rule.
- * @tparam MatchT The type of the matches produced by the rule.
+ * Represents the state of a backoff strategy across iterations.
+ *
+ * Used as the persistent state (`DataT`) for [[BackoffRuleApplication]], it tracks the number
+ * of iterations so far, all rule-specific scheduling state, and the random generator used for sampling.
+ *
+ * @param iteration The current iteration count.
+ * @param stats Per-rule statistics, keyed by rule name.
+ * @param random Random number generator used to shuffle matches.
  */
 final case class BackoffRuleStats[NodeT,
                                   RuleT <: Rule[NodeT, MatchT, _],
@@ -56,16 +56,22 @@ final case class BackoffRuleStats[NodeT,
                                           random: Random)
 
 /**
- * A strategy that applies a sequence of rules with backoff. Each rule has a match limit and a ban length. Once the
- * match limit is reached, the rule is banned for a number of iterations equal to the ban length. After the ban
- * length has passed, the rule can be applied again, at which point both the match limit and the ban length are
- * doubled.
- * @param rules The sequence of rules to apply, each with its own match limit and ban length.
- * @param searchAndApply The search and apply strategy that finds matches of the rules and applies them to the e-graph.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam RuleT The type of the rules to apply, which must extend the `Rule` trait.
+ * A saturation strategy that applies rules with a backoff heuristic.
+ *
+ * Rules are initially allowed to apply a limited number of matches. Once this quota is exhausted,
+ * the rule is banned for a fixed number of iterations. After the ban period ends, the rule is re-enabled
+ * with both its match limit and ban duration doubled. This encourages frequent early exploration and gradual
+ * fading out of overly eager rules.
+ *
+ * Rules apply up to their remaining match limits each iteration, chosen uniformly at random from the match set.
+ *
+ * @param rules Rules annotated with initial match limits and ban lengths.
+ * @param searchAndApply Strategy for finding and applying rule matches to the e-graph.
+ *
+ * @tparam NodeT The node type in the e-graph.
+ * @tparam RuleT The rewrite rule type.
  * @tparam EGraphT The type of the e-graph.
- * @tparam MatchT The type of the matches produced by the rules.
+ * @tparam MatchT The type of rule match.
  */
 final case class BackoffRuleApplication[NodeT,
                                         RuleT <: Rule[NodeT, MatchT, _],

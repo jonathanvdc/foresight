@@ -24,7 +24,6 @@ import foresight.eqsat.rewriting.{PortableMatch, Rule}
  *
  * ## Use cases
  *   - Efficient and deterministic saturation when repeat application is unnecessary or undesirable.
- *   - Rewrite rule debugging where per-match traceability is useful.
  *   - Gradual saturation where each match is only applied once.
  *
  * @example
