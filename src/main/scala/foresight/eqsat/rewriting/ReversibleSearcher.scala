@@ -49,7 +49,7 @@ trait ReversibleSearcher[
 }
 
 /**
- * ### Factory and utilities for [[ReversibleSearcher]]
+ * Factory and utilities for [[ReversibleSearcher]]
  */
 object ReversibleSearcher {
 
