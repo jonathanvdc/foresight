@@ -1,10 +1,10 @@
 package foresight.eqsat
 
 /**
- * The `foresight.eqsat.rewriting` package provides the core building blocks for
- * rewrite-driven equality saturation over immutable e-graphs. It defines the
- * search/apply pipeline, mechanisms for delayed command execution, parallel search,
- * reversible rules, and match portability for caching across e-graph snapshots.
+ * Provides the core building blocks for rewrite-driven equality saturation over
+ * immutable e-graphs. Defines the search/apply pipeline, mechanisms for delayed
+ * command execution, parallel search, reversible rules, and match portability
+ * for caching across e-graph snapshots.
  *
  * ## Core ideas
  *
