@@ -5,56 +5,84 @@ import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.saturation.EGraphWithRoot
 
 /**
- * An applier that applies a match to an e-graph.
+ * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
  *
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam MatchT The type of the match.
- * @tparam EGraphT The type of the e-graph that the applier applies the match to.
+ * In Foresight, e-graphs are immutable. An [[Applier]] does not update the graph in place.
+ * Instead, it builds a [[Command]] describing the edits (e.g., insertions, unions) that, when executed by
+ * the command engine, yields a new e-graph.
+ *
+ * Typically, an [[Applier]] is paired with a [[Searcher]] inside a [[Rule]]:
+ *  - the searcher finds `MatchT` values,
+ *  - the applier maps each `MatchT` to a `Command[NodeT]`,
+ *  - those per-match commands are aggregated/optimized by the rule into a single operation.
+ *
+ * ## Contract
+ * - **Purity**: [[apply]] does not mutate `egraph`. It only describes work via a [[Command]].
+ * - **Thread-safety**: Appliers may be invoked in parallel across distinct matches of the same snapshot.
+ * They must be safe for concurrent use and avoid shared mutable state.
+ * - **Idempotence** (recommended): When feasible, produce commands that tolerate duplicates (e.g., union
+ * of already-unified classes is a no-op).
+ *
+ * @tparam NodeT   Node payload type stored in the e-graph.
+ * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
+ * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
  */
 trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+
   /**
-   * Creates a command that applies a match to an e-graph.
-   * @param m The match to apply.
-   * @param egraph The e-graph in which the match was found.
-   * @return The command that represents the application of the match.
+   * Build a command that applies the effects implied by `m` within `egraph`.
+   *
+   * The returned command is typically combined with other commands (from other matches) by [[Rule]]
+   * into a single optimized batch. It must be safe to execute even if other matches also affect
+   * overlapping parts of the graph.
+   *
+   * @param m      A single match previously found in `egraph`.
+   * @param egraph Immutable e-graph snapshot the match was derived from.
+   * @return A command representing the intended edits for this match.
    */
   def apply(m: MatchT, egraph: EGraphT): Command[NodeT]
 }
 
 /**
- * The companion object for the [[Applier]] trait.
+ * Constructors, combinators, and utilities for [[Applier]].
  */
 object Applier {
+
   /**
-   * An applier that does nothing. It ignores the match and returns an empty command.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam MatchT The type of the match.
-   * @tparam EGraphT The type of the e-graph that the applier applies the match to.
-   * @return An applier that ignores the match and returns an empty command.
+   * A no-op applier: ignore the match and emit an empty command.
+   *
+   * Useful as a placeholder in reversible pipelines or for rules that are search-only.
+   * Reversal returns [[Searcher.empty]] so the pair remains structurally reversible.
    */
   def ignore[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Applier[NodeT, MatchT, EGraphT] =
     new ReversibleApplier[NodeT, MatchT, EGraphT] {
       override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = CommandQueue.empty
+
       override def tryReverse: Option[Searcher[NodeT, Seq[MatchT], EGraphT]] = Some(Searcher.empty)
     }
 
   /**
-   * An applier that applies matches only if a filter returns true.
-   * @param applier The applier to apply the match.
-   * @param filter The filter that determines whether to apply the match.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam MatchT The type of the match.
-   * @tparam EGraphT The type of the e-graph that the applier applies the match to.
+   * Conditionally apply: run `applier` only when `filter(match, egraph)` is true; otherwise emit no-op.
+   *
+   * Preserves reversibility: if the inner applier is [[ReversibleApplier]], reversal yields a
+   * [[Searcher.Filter]] with the same predicate.
+   *
+   * @param applier Inner applier.
+   * @param filter  Predicate deciding whether to apply this match.
+   * @example Only mutate when the match is "fresh"
+   * {{{
+   * val guarded = Applier.Filter(base, (m: MyMatch, g: MyEGraph) => !m.isStale(g))
+   * }}}
    */
-  final case class Filter[NodeT,
-                          MatchT,
-                          EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](applier: Applier[NodeT, MatchT, EGraphT],
-                                                                                    filter: (MatchT, EGraphT) => Boolean)
+  final case class Filter[
+    NodeT, MatchT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](applier: Applier[NodeT, MatchT, EGraphT],
+    filter: (MatchT, EGraphT) => Boolean)
     extends ReversibleApplier[NodeT, MatchT, EGraphT] {
 
-    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = {
+    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] =
       if (filter(m, egraph)) applier.apply(m, egraph) else CommandQueue.empty
-    }
 
     override def tryReverse: Option[Searcher[NodeT, Seq[MatchT], EGraphT]] = applier match {
       case r: ReversibleApplier[NodeT, MatchT, EGraphT] => r.tryReverse.map(Searcher.Filter(_, filter))
@@ -63,85 +91,101 @@ object Applier {
   }
 
   /**
-   * An applier that maps a match to a new match and applies it to an e-graph.
-   * @param applier The applier to apply the match.
-   * @param f The function that maps the match to a new match.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam MatchT1 The type of the match to map.
-   * @tparam MatchT2 The type of the match to apply.
-   * @tparam EGraphT The type of the e-graph that the applier applies the match to.
+   * Pre-map the input match type: transforms `MatchT1` to `MatchT2` and then applies `applier`.
+   *
+   * Think of this as an input adapter for an existing applier. Handy when you’ve refined or
+   * re-shaped matches during search and want to reuse an applier that expects a different match shape.
+   *
+   * @param applier Downstream applier that consumes `MatchT2`.
+   * @param f       Mapping from outer match (`MatchT1`) to inner match (`MatchT2`), with access to `egraph`.
+   * @example Adapt a generic "replace at class" applier to a "replace at node" match
+   * {{{
+   * val nodeToClass: (NodeMatch, MyEGraph) => ClassMatch = ...
+   * val adapted: Applier[MyNode, NodeMatch, MyEGraph] =
+   *   Applier.Map(classApplier, nodeToClass)
+   * }}}
    */
-  final case class Map[NodeT,
-                       MatchT1,
-                       MatchT2,
-                       EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](applier: Applier[NodeT, MatchT2, EGraphT],
-                                                                                 f: (MatchT1, EGraphT) => MatchT2)
+  final case class Map[
+    NodeT, MatchT1, MatchT2,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](applier: Applier[NodeT, MatchT2, EGraphT],
+    f: (MatchT1, EGraphT) => MatchT2)
     extends Applier[NodeT, MatchT1, EGraphT] {
 
-    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] = {
+    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] =
       applier.apply(f(m, egraph), egraph)
-    }
   }
 
   /**
-   * An applier that first applies a function to its matches, flattens the result, and applies it to an e-graph.
-   * @param applier The applier to apply the match.
-   * @param f The function that maps the match to a new match.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam MatchT1 The type of the match to map.
-   * @tparam MatchT2 The type of the match to apply.
-   * @tparam EGraphT The type of the e-graph that the applier applies the match to.
+   * Pre-flatMap the input match type: expand one match into **many** then apply and batch them.
+   *
+   * Useful when a single outer match implies multiple inner edits (e.g., expand an equivalence to
+   * a set of updates). The resulting [[CommandQueue]] preserves the order of the produced
+   * inner commands (though the engine may later optimize/deduplicate).
+   *
+   * @param applier Downstream applier that consumes `MatchT2`.
+   * @param f       `(MatchT1, EGraphT) => Iterable[MatchT2]` expansion.
    */
-  final case class FlatMap[NodeT,
-                           MatchT1,
-                           MatchT2,
-                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](applier: Applier[NodeT, MatchT2, EGraphT],
-                                                                                      f: (MatchT1, EGraphT) => Iterable[MatchT2])
+  final case class FlatMap[
+    NodeT, MatchT1, MatchT2,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](applier: Applier[NodeT, MatchT2, EGraphT],
+    f: (MatchT1, EGraphT) => Iterable[MatchT2])
     extends Applier[NodeT, MatchT1, EGraphT] {
 
-    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] = {
+    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] =
       CommandQueue(f(m, egraph).map(applier.apply(_, egraph)).toSeq)
-    }
   }
 
+  // ---------------------- Syntax sugar for Applier combinators ----------------------
+
   /**
-   * An implicit class that adds operations to the [[Applier]] trait.
-   * @param applier The applier to add operations to.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam MatchT The type of the match.
-   * @tparam EGraphT The type of the e-graph that the applier applies the match to.
+   * Enrichment methods for composing appliers.
+   *
+   * @example Guard, then adapt, then fan out
+   * {{{
+   * val pipelined: Applier[MyNode, Outer, MyEGraph] =
+   *   baseApplier
+   *     .filter((m: Outer, g) => isWorthIt(m, g))
+   *     .map   ((m: Outer, g) => toInner(m, g))
+   *     .flatMap((m: Outer, g) => explode(m, g)) // Outer => Iterable[Inner2]
+   * }}}
    */
-  implicit class ApplierOps[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](private val applier: Applier[NodeT, MatchT, EGraphT])
-    extends AnyVal {
+  implicit class ApplierOps[
+    NodeT, MatchT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](private val applier: Applier[NodeT, MatchT, EGraphT]) extends AnyVal {
+
     /**
-     * Creates a new applier that applies the match only if the filter returns true.
+     * Conditionally apply this applier; otherwise emit an empty command.
      *
-     * @param filter The filter that determines whether to apply the match.
-     * @return The new applier that applies the match only if the filter returns true.
+     * @param filter `(match, egraph) => Boolean` predicate.
+     * @return An applier that enforces the predicate.
      */
-    def filter(filter: (MatchT, EGraphT) => Boolean): Applier[NodeT, MatchT, EGraphT] = {
+    def filter(filter: (MatchT, EGraphT) => Boolean): Applier[NodeT, MatchT, EGraphT] =
       Filter(applier, filter)
-    }
 
     /**
-     * Creates a new applier that maps the match to a new match and applies it to an e-graph.
+     * Pre-map the input match type for this applier.
      *
-     * @param f The function that maps the match to a new match.
-     * @tparam MatchT2 The type of the match to apply.
-     * @return The new applier that maps the match to a new match and applies it to an e-graph.
+     * Note the direction: you provide a function from **new** input type `MatchT2` to this
+     * applier's **existing** input type `MatchT`.
+     *
+     * @param f `(MatchT2, EGraphT) => MatchT` adapter to the inner applier.
+     * @tparam MatchT2 New outer match type.
+     * @return An applier that accepts `MatchT2`.
      */
-    def map[MatchT2](f: (MatchT2, EGraphT) => MatchT): Applier[NodeT, MatchT2, EGraphT] = {
+    def map[MatchT2](f: (MatchT2, EGraphT) => MatchT): Applier[NodeT, MatchT2, EGraphT] =
       Map(applier, f)
-    }
 
     /**
-     * Creates a new applier that flattens a sequence of matches and applies them to an e-graph.
-     * @param f The function that maps the match to a new match.
-     * @tparam MatchT2 The type of the match to apply.
-     * @return The new applier that flattens a sequence of matches and applies them to an e-graph.
+     * Pre-flatMap the input match type: expand a single outer match to many inner matches.
+     *
+     * @param f `(MatchT2, EGraphT) => Iterable[MatchT]` expansion feeding the inner applier.
+     * @tparam MatchT2 New outer match type.
+     * @return An applier that accepts `MatchT2` and batches inner commands.
      */
-    def flatMap[MatchT2](f: (MatchT2, EGraphT) => Iterable[MatchT]): Applier[NodeT, MatchT2, EGraphT] = {
+    def flatMap[MatchT2](f: (MatchT2, EGraphT) => Iterable[MatchT]): Applier[NodeT, MatchT2, EGraphT] =
       FlatMap(applier, f)
-    }
   }
 }
