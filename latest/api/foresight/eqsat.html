@@ -76,67 +76,31 @@
           <div class="originInfo"></div>
           <div class="memberDocumentation">
            <div class="documentableBrief doc">
-            <p>Building blocks for rewrite-driven equality saturation over immutable e-graphs. This package defines the search/apply pipeline, delayed command execution, parallel search, reversible rules, and match portability for caching.</p>
+            <p>The <code>foresight.eqsat.rewriting</code> package provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. It defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
            </div>
            <div class="cover">
             <div class="doc">
-             <p>Building blocks for rewrite-driven equality saturation over immutable e-graphs. This package defines the search/apply pipeline, delayed command execution, parallel search, reversible rules, and match portability for caching.</p>
-             <h1><a href="#core-ideas" id="core-ideas">Core ideas</a></h1>
-             <ul>
-              <li><strong>Immutable e-graphs</strong>: All edits are expressed as <a href="eqsat/commands/Command.html">foresight.eqsat.commands.Command</a> values and executed later to produce a new snapshot. No in-place mutation.</li>
-              <li><strong>Search → Apply → Compose</strong>: A <a href="eqsat/rewriting/Searcher.html">Searcher</a> finds matches; an <span data-unresolved-link="">Applier</span> turns each match into a command; a <span data-unresolved-link="">Rule</span> bundles per-match commands into a single, optimized operation.</li>
-              <li><strong>Parallelism</strong>: Methods accept <a href="eqsat/parallel/ParallelMap.html">foresight.eqsat.parallel.ParallelMap</a> to label and distribute work.</li>
-              <li><strong>Reversal</strong>: Many components admit an inverse: <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>, <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a>, and <a href="eqsat/rewriting/ReversibleSearcherPhase.html">ReversibleSearcherPhase</a>. A rule built from reversible parts can be flipped via <span data-unresolved-link="">Rule.tryReverse</span>.</li>
-              <li><strong>Portability</strong>: Matches can remain meaningful across snapshots via <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>, enabling caching and application recording through <a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a> and <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>.</li>
-             </ul>
-             <h1><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h1>
-             <ol>
-              <li><strong>Define search</strong> using phases: 
-               <ul>
-                <li>A phase implements <a href="eqsat/rewriting/SearcherPhase.html">SearcherPhase</a>: per-class work via <code>search(call, egraph, input)</code> and whole-graph aggregation via <code>aggregate(map)</code>.</li>
-                <li>Compose phases with <a href="eqsat/rewriting/Searcher.html#chain-249">Searcher.chain</a> or run independent searches with <a href="eqsat/rewriting/Searcher.html#product-727">Searcher.product</a>.</li>
-               </ul></li>
-              <li><strong>Define apply</strong> by mapping a match to a <a href="eqsat/commands/Command.html">foresight.eqsat.commands.Command</a> using <span data-unresolved-link="">Applier</span>.</li>
-              <li><strong>Create a rule</strong> by pairing searcher and applier in a <span data-unresolved-link="">Rule</span>, then either run it immediately (<span data-unresolved-link="">Rule.apply</span>) or stage it and batch with others (<span data-unresolved-link="">Rule.delayed</span>).</li>
-              <li><strong>Optionally cache</strong> with <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>, which relies on <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a> for snapshot-to-snapshot consistency.</li>
-             </ol>
-             <h1><a href="#from-low-level-rules-to-high-level-saturation" id="from-low-level-rules-to-high-level-saturation">From low-level rules to high-level saturation</a></h1>
-             <p>High-level <strong>saturation strategies</strong> (see <a href="eqsat/saturation.html">foresight.eqsat.saturation</a>) orchestrate iterations, stopping conditions, caching, and rebasing:</p>
-             <ul>
-              <li><a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a>: Composable driver for saturation steps.</li>
-              <li><a href="eqsat/saturation/SearchAndApply.html">foresight.eqsat.saturation.SearchAndApply</a>: Separates search from application.</li>
-              <li><a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a> and <code>WithCaching</code> variants.</li>
-              <li><a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a> for quota/cooldown balancing.</li>
-              <li><a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a> and <code>WithCaching</code> variants.</li>
-             </ul>
-             <h1><a href="#reversal-bidirectional-rules" id="reversal-bidirectional-rules">Reversal (bidirectional rules)</a></h1>
-             <ul>
-              <li>A <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a> exposes <code>tryReverse: Option[Applier]</code>.</li>
-              <li>A <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a> exposes <code>tryReverse: Option[Searcher]</code>.</li>
-              <li>A pipeline of phases can reverse step-by-step using <a href="eqsat/rewriting/ReversibleSearcherPhase.html#tryReverse-3c2">ReversibleSearcherPhase.tryReverse</a>.</li>
-              <li><span data-unresolved-link="">Rule.tryReverse</span> returns a flipped rule when both parts support reversal.</li>
-             </ul>
-             <h1><a href="#portability-and-caching" id="portability-and-caching">Portability and caching</a></h1>
-             <ul>
-              <li>A match type implements <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a> to remain valid as the e-graph evolves.</li>
-              <li>Structural-only matches can implement <code>port</code> as a no-op; ID-bearing matches translate IDs to the new snapshot (e.g., canonicalization).</li>
-              <li><a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a> records per-rule applied matches and re-ports them after unions. <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a> uses that record to skip already-applied matches.</li>
-             </ul>
-             <h1><a href="#design-contracts-high-level" id="design-contracts-high-level">Design contracts (high level)</a></h1>
-             <ul>
-              <li><strong>Purity</strong>: searchers and phases do not mutate the e-graph; appliers build commands instead of editing in place.</li>
-              <li><strong>Thread-safety</strong>: search and apply can run in parallel over independent work units.</li>
-              <li><strong>Command aggregation</strong>: rules combine per-match commands into an optimized batch; commands aim to be idempotent.</li>
-             </ul>
-             <h1><a href="#quick-reference" id="quick-reference">Quick reference</a></h1>
-             <ul>
-              <li>Search: <a href="eqsat/rewriting/Searcher.html">Searcher</a>, <a href="eqsat/rewriting/SearcherPhase.html">SearcherPhase</a>, <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>, <a href="eqsat/rewriting/ReversibleSearcherPhase.html">ReversibleSearcherPhase</a></li>
-              <li>Apply: <span data-unresolved-link="">Applier</span>, <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a></li>
-              <li>Rules: <span data-unresolved-link="">Rule</span></li>
-              <li>Matches across snapshots: <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a></li>
-              <li>Caching/recording: <a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a></li>
-              <li>Strategies: <a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a>, <a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a>, <a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a>, <a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a></li>
-             </ul>
+             <p>The <code>foresight.eqsat.rewriting</code> package provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. It defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
+             <h2><a href="#core-ideas" id="core-ideas">Core ideas</a></h2>
+             <p>The system is built on <strong>immutable e-graphs</strong>, where every change is represented as a <a href="eqsat/commands/Command.html">foresight.eqsat.commands.Command</a> value. Instead of mutating the e-graph in place, commands are executed later to produce a new snapshot.</p>
+             <p>Rules follow a <strong>search → apply → compose</strong> flow. A <a href="eqsat/rewriting/Searcher.html">Searcher</a> is responsible for finding matches; an <span data-unresolved-link="">Applier</span> transforms each match into a command; and a <span data-unresolved-link="">Rule</span> combines these per-match commands into a single optimized operation.</p>
+             <p>Many methods in this package support <strong>parallelism</strong> through <a href="eqsat/parallel/ParallelMap.html">foresight.eqsat.parallel.ParallelMap</a>, allowing work to be labeled and distributed efficiently.</p>
+             <p>Components are often <strong>reversible</strong>. A <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>, for example, can be inverted into an applier, while a <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a> can become a searcher. Pipelines composed of reversible phases—via <a href="eqsat/rewriting/ReversibleSearcherPhase.html">ReversibleSearcherPhase</a>—can be reversed step-by-step, and a <span data-unresolved-link="">Rule</span> built entirely from reversible parts can be flipped in its entirety using <span data-unresolved-link="">Rule.tryReverse</span>.</p>
+             <p>Matches are also <strong>portable</strong>. By implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>, a match can remain meaningful across multiple e-graph snapshots, enabling caching and reapplication through <a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a> and <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>.</p>
+             <h2><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h2>
+             <p>A typical use of this package begins by defining a searcher. This is often constructed from one or more phases implementing <a href="eqsat/rewriting/SearcherPhase.html">SearcherPhase</a>, which perform per-class work through <code>search(call, egraph, input)</code> and aggregate results across the whole graph using <code>aggregate(map)</code>. Phases can be composed sequentially with <a href="eqsat/rewriting/Searcher.html#chain-249">Searcher.chain</a> or run in parallel with <a href="eqsat/rewriting/Searcher.html#product-727">Searcher.product</a>.</p>
+             <p>Next, an applier is defined to convert each match into a <a href="eqsat/commands/Command.html">foresight.eqsat.commands.Command</a>. The searcher and applier are then paired to form a <span data-unresolved-link="">Rule</span>. Rules can be executed immediately using <span data-unresolved-link="">Rule.apply</span>, or staged for later execution with <span data-unresolved-link="">Rule.delayed</span>—either individually or batched with others.</p>
+             <p>When portability is required, caching can be introduced via <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>, which ensures that matches are recognized and skipped if they have already been applied to the current e-graph state.</p>
+             <h2><a href="#from-low-level-rules-to-high-level-saturation" id="from-low-level-rules-to-high-level-saturation">From low-level rules to high-level saturation</a></h2>
+             <p>While individual rules and matchers form the foundation, higher-level orchestration is handled by the saturation framework in <a href="eqsat/saturation.html">foresight.eqsat.saturation</a>. A <a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a> composes these rules into a sequence of saturation steps, controlling iteration order, stopping conditions, caching behavior, and e-graph rebasing. Predefined strategies include <a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a> (and its caching variant), <a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a> for quota and cooldown control, and <a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a> for randomized application order.</p>
+             <h2><a href="#reversal" id="reversal">Reversal</a></h2>
+             <p>Reversal is a key capability for bidirectional reasoning. A <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a> can produce an applier that undoes its transformation, and a <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a> can do the opposite. Pipelines can be reversed phase by phase via <a href="eqsat/rewriting/ReversibleSearcherPhase.html#tryReverse-3c2">ReversibleSearcherPhase.tryReverse</a>, and if both the searcher and applier in a <span data-unresolved-link="">Rule</span> are reversible, the entire rule can be inverted with <span data-unresolved-link="">Rule.tryReverse</span>.</p>
+             <h2><a href="#portability-and-caching" id="portability-and-caching">Portability and caching</a></h2>
+             <p>Portability ensures that matches survive e-graph changes. A type implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a> can map its internal identifiers to the corresponding ones in a new snapshot, preserving structural meaning. Purely structural matches can treat <code>port</code> as a no-op, while ID-bearing matches perform translations such as canonicalization. Recording and replaying matches is supported by <a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, and caching is provided by <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>.</p>
+             <h2><a href="#design-contracts" id="design-contracts">Design contracts</a></h2>
+             <p>The package assumes that searchers and phases are pure, meaning they never mutate the e-graph directly. Appliers produce commands rather than making in-place changes. Search and application are safe to run in parallel when operating on disjoint work units. Finally, commands generated by a rule are aggregated into an optimized batch and are intended to be idempotent.</p>
+             <h2><a href="#quick-reference" id="quick-reference">Quick reference</a></h2>
+             <p>Main entry points for search are <a href="eqsat/rewriting/Searcher.html">Searcher</a>, <a href="eqsat/rewriting/SearcherPhase.html">SearcherPhase</a>, <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>, and <a href="eqsat/rewriting/ReversibleSearcherPhase.html">ReversibleSearcherPhase</a>; for application: <span data-unresolved-link="">Applier</span> and <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a>; for composition: <span data-unresolved-link="">Rule</span>; for matches across snapshots: <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>; and for caching and recording: <a href="eqsat/saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a> and <a href="eqsat/saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>. Strategies for high-level orchestration include <a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a>, <a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a>, <a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a>, and <a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>.</p>
             </div>
             <h2 class="h200">Attributes</h2>
             <dl class="attributes attributes-small">
