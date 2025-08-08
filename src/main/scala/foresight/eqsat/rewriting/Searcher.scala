@@ -18,7 +18,7 @@ import foresight.eqsat.saturation.EGraphWithRoot
  * documented by the concrete implementation.
  *
  * # Phased search
- * Complex searches are often expressed as a pipeline of [[SearcherPhase]] instances. Use:
+ * Complex searches can be expressed as a pipeline of [[SearcherPhase]] instances. Use:
  *  - [[Searcher.apply]] to build a searcher from a single phase;
  *  - [[chain]] to append a phase that consumes the previous output;
  *  - [[product]] to run two independent searchers and pair their results.
