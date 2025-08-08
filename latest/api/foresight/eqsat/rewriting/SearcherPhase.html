@@ -16,11 +16,11 @@
   <p><code>SearcherPhase</code> expresses: (1) how to compute class-local results for each e-class, and (2) how to aggregate those per-class results into a whole-graph output. Phases are composed by <a href="Searcher.html#chain-249">Searcher.chain</a> and are typically wrapped by <a href="Searcher$.html#apply-487">Searcher.apply</a> for the first stage.</p>
   <h1><a href="#responsibilities" id="responsibilities">Responsibilities</a></h1>
   <ul>
-   <li><strong>Per-class search</strong> (<a href="SearcherPhase.html#search-fffff97f">egraph:*, input:*)</a>): given a canonical e-class and an <code>input</code> (from the previous phase), compute a result <code>IntermediateT</code> for that class alone.</li>
+   <li><strong>Per-class search</strong> (<code>search(call, egraph, input)</code>): given a canonical e-class and an <code>input</code> (from the previous phase), compute a result <code>IntermediateT</code> for that class alone.</li>
    <li><strong>Aggregation</strong> (<a href="SearcherPhase.html#aggregate-fffffcbb">aggregate</a>): combine the <code>IntermediateT</code> results for <em>all</em> classes into a single <code>OutputT</code> for the phase.</li>
   </ul>
   <h1><a href="#execution-model" id="execution-model">Execution model</a></h1>
-  <p>The convenience <a href="SearcherPhase.html#search-fffff97f">input:*, parallelize:*)</a> provided here:</p>
+  <p>The convenience search(egraph, input, parallelize) provided here:</p>
   <ol>
    <li>enumerates all classes via <code>egraph.classes</code>,</li>
    <li>canonicalizes each class ref before calling the per-class <code>search</code>,</li>
