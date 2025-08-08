@@ -959,7 +959,7 @@
               <ol>
                <li>enumerates all classes via <code>egraph.classes</code>,</li>
                <li>canonicalizes each class ref before calling the per-class <code>search</code>,</li>
-               <li>runs per-class work in parallel via <span data-unresolved-link="" title="Problem linking ParallelMap: No DRI found for query">ParallelMap</span>,</li>
+               <li>runs per-class work in parallel via <a href="parallel/ParallelMap.html">foresight.eqsat.parallel.ParallelMap</a>,</li>
                <li>passes the <code>Map[EClassRef, IntermediateT]</code> to <a href="rewriting/SearcherPhase.html#aggregate-fffffcbb">aggregate</a>.</li>
               </ol>
               <p>Implementations may assume the <a href="EClassCall.html">EClassCall</a> passed to per-class <code>search</code> refers to the class's <strong>canonical representative</strong> at the time of the call.</p>
