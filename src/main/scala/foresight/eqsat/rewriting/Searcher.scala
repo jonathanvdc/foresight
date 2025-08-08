@@ -360,7 +360,7 @@ object Searcher {
   ](private val searcher: Searcher[NodeT, (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]), EGraphT]) extends AnyVal {
 
     /**
-     * Merge the two match sets pairwise over their cartesian product using [[PatternMatch.merge]].
+     * Merge the two match sets pairwise over their cartesian product using [[patterns.PatternMatch.merge]].
      *
      * Note: this may be expensive if both sides are large; consider early filtering.
      *
