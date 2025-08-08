@@ -9,7 +9,7 @@ import foresight.eqsat.EGraph
  * In Foresight, e-graphs are **immutable** and many strategies use **delayed/batched execution**.
  * A [[Searcher]] may compute matches on snapshot `G0`, while the corresponding [[Applier]] or
  * [[Rule]] eventually executes commands against a **derived** snapshot `Gk` (after unions, rebuilds,
- * or other rules). A `PortableMatch` supplies a `port` operation that updates any snapshot-sensitive
+ * or other changes). A `PortableMatch` supplies a `port` operation that updates any snapshot-sensitive
  * references (e.g., e-class IDs, node handles) so the match remains valid on the newer graph.
  *
  * # When to implement `PortableMatch`?
