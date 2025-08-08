@@ -111,7 +111,7 @@ trait SearcherPhase[
    * The implementation:
    *  - iterates over `egraph.classes`,
    *  - canonicalizes each class ref,
-   *  - computes per-class results with [[search(call:*, egraph:*, input:*)]],
+   *  - computes per-class results with `search(call, egraph, input)`,
    *  - aggregates via [[aggregate]].
    *
    * @param egraph       Immutable e-graph snapshot to search.
