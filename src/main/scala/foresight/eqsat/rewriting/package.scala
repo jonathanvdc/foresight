@@ -20,9 +20,9 @@ package foresight.eqsat
  *
  * # Typical workflow
  * 1. **Define search** using phases:
- *    - A phase implements [[SearcherPhase]]: per-class work via `search(call, egraph, input)` and
- *      whole-graph aggregation via `aggregate(map)`.
- *    - Compose phases with [[Searcher.chain]] or run independent searches with [[Searcher.product]].
+ *      - A phase implements [[SearcherPhase]]: per-class work via `search(call, egraph, input)` and
+ *       whole-graph aggregation via `aggregate(map)`.
+ *      - Compose phases with [[Searcher.chain]] or run independent searches with [[Searcher.product]].
  * 2. **Define apply** by mapping a match to a [[foresight.eqsat.commands.Command]] using [[Applier]].
  * 3. **Create a rule** by pairing searcher and applier in a [[Rule]], then either run it immediately
  *    ([[Rule.apply]]) or stage it and batch with others ([[Rule.delayed]]).
