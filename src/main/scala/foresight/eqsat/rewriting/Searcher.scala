@@ -158,7 +158,7 @@ object Searcher {
   /**
    * A no-op searcher that returns an empty sequence of matches but is considered reversible.
    *
-   * Reversal yields an [[Applier.ignore]] applier, allowing rules to treat the empty searcher
+   * Reversal yields a no-op applier, allowing rules to treat the empty searcher
    * as a structural placeholder in reversible pipelines.
    *
    * @tparam NodeT   Node payload type.
