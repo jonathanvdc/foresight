@@ -23,13 +23,11 @@
   </ul>
   <h1><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h1>
   <ol>
-   <li><strong>Define search</strong> using phases:</li>
-  </ol>
-  <ul>
-   <li>A phase implements <a href="rewriting/SearcherPhase.html">SearcherPhase</a>: per-class work via <code>search(call, egraph, input)</code> and whole-graph aggregation via <code>aggregate(map)</code>.</li>
-   <li>Compose phases with <a href="rewriting/Searcher.html#chain-249">Searcher.chain</a> or run independent searches with <a href="rewriting/Searcher.html#product-727">Searcher.product</a>.</li>
-  </ul>
-  <ol start="2">
+   <li><strong>Define search</strong> using phases: 
+    <ul>
+     <li>A phase implements <a href="rewriting/SearcherPhase.html">SearcherPhase</a>: per-class work via <code>search(call, egraph, input)</code> and whole-graph aggregation via <code>aggregate(map)</code>.</li>
+     <li>Compose phases with <a href="rewriting/Searcher.html#chain-249">Searcher.chain</a> or run independent searches with <a href="rewriting/Searcher.html#product-727">Searcher.product</a>.</li>
+    </ul></li>
    <li><strong>Define apply</strong> by mapping a match to a <a href="commands/Command.html">foresight.eqsat.commands.Command</a> using <span data-unresolved-link="">Applier</span>.</li>
    <li><strong>Create a rule</strong> by pairing searcher and applier in a <span data-unresolved-link="">Rule</span>, then either run it immediately (<span data-unresolved-link="">Rule.apply</span>) or stage it and batch with others (<span data-unresolved-link="">Rule.delayed</span>).</li>
    <li><strong>Optionally cache</strong> with <a href="saturation/SearchAndApply$.html#withCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.withCaching</a>, which relies on <a href="rewriting/PortableMatch.html">PortableMatch</a> for snapshot-to-snapshot consistency.</li>
