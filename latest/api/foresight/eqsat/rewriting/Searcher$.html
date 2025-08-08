@@ -664,6 +664,63 @@ node3 -> node2;
           </div>
          </div>
         </div>
+        <div class="documentableElement" id="empty-fffffe8e">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Searcher$.html#empty-fffffe8e" t="n" class="documentableName ">empty</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]]: <a href="Searcher.html" t="t">Searcher</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">MatchT</span>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A no-op searcher that returns an empty sequence of matches but is considered reversible.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A no-op searcher that returns an empty sequence of matches but is considered reversible.</p>
+              <p>Reversal yields <span data-unresolved-link="">Applier.ignore</span>, allowing rules to treat the empty searcher as a structural placeholder in reversible pipelines.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>E-graph type.</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>Match element type (e.g., <a href="patterns/PatternMatch.html">patterns.PatternMatch</a>).</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>Node payload type.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A <a href="ReversibleSearcher.html">ReversibleSearcher</a> that always returns <code>Seq.empty</code>.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
        </div>
       </section>
      </div>
