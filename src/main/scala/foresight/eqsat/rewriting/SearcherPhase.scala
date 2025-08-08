@@ -20,7 +20,7 @@ import foresight.eqsat.parallel.ParallelMap
  * The convenience [[search(egraph:*, input:*, parallelize:*)]] provided here:
  *  1. enumerates all classes via `egraph.classes`,
  *  2. canonicalizes each class ref before calling the per-class `search`,
- *  3. runs per-class work in parallel via [[ParallelMap]],
+ *  3. runs per-class work in parallel via [[foresight.eqsat.parallel.ParallelMap]],
  *  4. passes the `Map[EClassRef, IntermediateT]` to [[aggregate]].
  *
  * Implementations may assume the [[EClassCall]] passed to per-class `search` refers to the
@@ -116,7 +116,7 @@ trait SearcherPhase[
    *
    * @param egraph       Immutable e-graph snapshot to search.
    * @param input        Input from the previous phase (or `Unit` for the first phase).
-   * @param parallelize  Parallelization strategy and task labeling (defaults to [[ParallelMap.default]]).
+   * @param parallelize  Parallelization strategy and task labeling.
    * @return             The aggregated output for this phase.
    */
   final def search(egraph: EGraphT, input: InputT, parallelize: ParallelMap = ParallelMap.default): OutputT = {

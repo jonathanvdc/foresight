@@ -79,7 +79,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
    * For structured parallel work, use `parallelize.child("phase-name")`.
    *
    * @param egraph      E-graph to search.
-   * @param parallelize Parallel mapping/labeling strategy (defaults to [[ParallelMap.default]]).
+   * @param parallelize Parallel mapping/labeling strategy.
    * @return Search output (often a sequence of matches).
    */
   def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): OutputT
@@ -120,11 +120,11 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
   }
 
   /**
-   * Adapt this searcher so it accepts an [[EGraphWithMetadata]] without changing the search logic.
+   * Adapt this searcher so it accepts an [[foresight.eqsat.metadata.EGraphWithMetadata]] without changing the search logic.
    *
    * The adapter simply unwraps `.egraph` and delegates to this searcher.
    *
-   * @return A searcher over [[EGraphWithMetadata]] that forwards to this searcher.
+   * @return A searcher over [[foresight.eqsat.metadata.EGraphWithMetadata]] that forwards to this searcher.
    */
   final def requireMetadata: Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] = {
     new Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] {
@@ -135,11 +135,11 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
   }
 
   /**
-   * Adapt this searcher so it accepts an [[EGraphWithRoot]] without changing the search logic.
+   * Adapt this searcher so it accepts an [[foresight.eqsat.saturation.EGraphWithRoot]] without changing the search logic.
    *
    * The adapter simply unwraps `.egraph` and delegates to this searcher.
    *
-   * @return A searcher over [[EGraphWithRoot]] that forwards to this searcher.
+   * @return A searcher over [[foresight.eqsat.saturation.EGraphWithRoot]] that forwards to this searcher.
    */
   final def requireRoot: Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] = {
     new Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] {
