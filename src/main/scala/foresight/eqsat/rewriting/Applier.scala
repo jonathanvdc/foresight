@@ -7,9 +7,8 @@ import foresight.eqsat.saturation.EGraphWithRoot
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
  *
- * In Foresight, e-graphs are immutable. An [[Applier]] does not update the graph in place.
- * Instead, it builds a [[Command]] describing the edits (e.g., insertions, unions) that, when executed by
- * the command engine, yields a new e-graph.
+ * An [[Applier]] does not update the graph directly. Instead, it builds a [[Command]] describing the edits (e.g.,
+ * insertions, unions) that, when executed by the command engine, yields a new e-graph.
  *
  * Typically, an [[Applier]] is paired with a [[Searcher]] inside a [[Rule]]:
  *  - the searcher finds `MatchT` values,
