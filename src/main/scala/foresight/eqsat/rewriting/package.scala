@@ -1,73 +1,109 @@
 package foresight.eqsat
 
 /**
- * Building blocks for rewrite-driven equality saturation over immutable e-graphs.
- * This package defines the search/apply pipeline, delayed command execution, parallel search,
- * reversible rules, and match portability for caching.
+ * The `foresight.eqsat.rewriting` package provides the core building blocks for
+ * rewrite-driven equality saturation over immutable e-graphs. It defines the
+ * search/apply pipeline, mechanisms for delayed command execution, parallel search,
+ * reversible rules, and match portability for caching across e-graph snapshots.
  *
- * # Core ideas
- * - **Immutable e-graphs**: All edits are expressed as [[foresight.eqsat.commands.Command]] values and
- *   executed later to produce a new snapshot. No in-place mutation.
- * - **Search → Apply → Compose**: A [[Searcher]] finds matches; an [[Applier]] turns each match into a
- *   command; a [[Rule]] bundles per-match commands into a single, optimized operation.
- * - **Parallelism**: Methods accept [[foresight.eqsat.parallel.ParallelMap]] to label and distribute work.
- * - **Reversal**: Many components admit an inverse: [[ReversibleSearcher]], [[ReversibleApplier]],
- *   and [[ReversibleSearcherPhase]]. A rule built from reversible parts can be flipped via [[Rule.tryReverse]].
- * - **Portability**: Matches can remain meaningful across snapshots via [[PortableMatch]], enabling
- *   caching and application recording through
- *   [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
- *   [[foresight.eqsat.saturation.SearchAndApply$.withCaching]].
+ * ## Core ideas
  *
- * # Typical workflow
- * 1. **Define search** using phases:
- *      - A phase implements [[SearcherPhase]]: per-class work via `search(call, egraph, input)` and
- *       whole-graph aggregation via `aggregate(map)`.
- *      - Compose phases with [[Searcher.chain]] or run independent searches with [[Searcher.product]].
- * 2. **Define apply** by mapping a match to a [[foresight.eqsat.commands.Command]] using [[Applier]].
- * 3. **Create a rule** by pairing searcher and applier in a [[Rule]], then either run it immediately
- *    ([[Rule.apply]]) or stage it and batch with others ([[Rule.delayed]]).
- * 4. **Optionally cache** with [[foresight.eqsat.saturation.SearchAndApply$.withCaching]], which relies
- *    on [[PortableMatch]] for snapshot-to-snapshot consistency.
+ * The system is built on **immutable e-graphs**, where every change is represented
+ * as a [[foresight.eqsat.commands.Command]] value. Instead of mutating the e-graph
+ * in place, commands are executed later to produce a new snapshot.
  *
- * # From low-level rules to high-level saturation
- * High-level **saturation strategies** (see [[foresight.eqsat.saturation]]) orchestrate iterations,
- * stopping conditions, caching, and rebasing:
- *   - [[foresight.eqsat.saturation.Strategy]]: Composable driver for saturation steps.
- *   - [[foresight.eqsat.saturation.SearchAndApply]]: Separates search from application.
- *   - [[foresight.eqsat.saturation.MaximalRuleApplication]] and `WithCaching` variants.
- *   - [[foresight.eqsat.saturation.BackoffRuleApplication]] for quota/cooldown balancing.
- *   - [[foresight.eqsat.saturation.StochasticRuleApplication]] and `WithCaching` variants.
+ * Rules follow a **search → apply → compose** flow. A [[Searcher]] is responsible
+ * for finding matches; an [[Applier]] transforms each match into a command; and
+ * a [[Rule]] combines these per-match commands into a single optimized operation.
  *
- * # Reversal (bidirectional rules)
- * - A [[ReversibleSearcher]] exposes `tryReverse: Option[Applier]`.
- * - A [[ReversibleApplier]] exposes `tryReverse: Option[Searcher]`.
- * - A pipeline of phases can reverse step-by-step using [[ReversibleSearcherPhase.tryReverse]].
- * - [[Rule.tryReverse]] returns a flipped rule when both parts support reversal.
+ * Many methods in this package support **parallelism** through
+ * [[foresight.eqsat.parallel.ParallelMap]], allowing work to be labeled and
+ * distributed efficiently.
  *
- * # Portability and caching
- *   - A match type implements [[PortableMatch]] to remain valid as the e-graph evolves.
- *   - Structural-only matches can implement `port` as a no-op; ID-bearing matches translate IDs
- *     to the new snapshot (e.g., canonicalization).
- *   - [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] records per-rule applied matches and
- *     re-ports them after unions. [[foresight.eqsat.saturation.SearchAndApply$.withCaching]] uses that
- *     record to skip already-applied matches.
+ * Components are often **reversible**. A [[ReversibleSearcher]], for example, can
+ * be inverted into an applier, while a [[ReversibleApplier]] can become a searcher.
+ * Pipelines composed of reversible phases—via [[ReversibleSearcherPhase]]—can be
+ * reversed step-by-step, and a [[Rule]] built entirely from reversible parts can
+ * be flipped in its entirety using [[Rule.tryReverse]].
  *
- * # Design contracts (high level)
- * - **Purity**: searchers and phases do not mutate the e-graph; appliers build commands instead of editing in place.
- * - **Thread-safety**: search and apply can run in parallel over independent work units.
- * - **Command aggregation**: rules combine per-match commands into an optimized batch; commands aim to be idempotent.
+ * Matches are also **portable**. By implementing [[PortableMatch]], a match can
+ * remain meaningful across multiple e-graph snapshots, enabling caching and
+ * reapplication through
+ * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
+ * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]].
  *
- * # Quick reference
- *   - Search: [[Searcher]], [[SearcherPhase]], [[ReversibleSearcher]], [[ReversibleSearcherPhase]]
- *   - Apply:  [[Applier]], [[ReversibleApplier]]
- *   - Rules:  [[Rule]]
- *   - Matches across snapshots: [[PortableMatch]]
- *   - Caching/recording: [[foresight.eqsat.saturation.EGraphWithRecordedApplications]],
- *     [[foresight.eqsat.saturation.SearchAndApply$.withCaching]]
- *   - Strategies: [[foresight.eqsat.saturation.Strategy]],
- *     [[foresight.eqsat.saturation.MaximalRuleApplication]],
- *     [[foresight.eqsat.saturation.BackoffRuleApplication]],
- *     [[foresight.eqsat.saturation.StochasticRuleApplication]]
+ * ## Typical workflow
+ *
+ * A typical use of this package begins by defining a searcher. This is often
+ * constructed from one or more phases implementing [[SearcherPhase]], which
+ * perform per-class work through `search(call, egraph, input)` and aggregate
+ * results across the whole graph using `aggregate(map)`. Phases can be composed
+ * sequentially with [[Searcher.chain]] or run in parallel with
+ * [[Searcher.product]].
+ *
+ * Next, an applier is defined to convert each match into a
+ * [[foresight.eqsat.commands.Command]]. The searcher and applier are then paired
+ * to form a [[Rule]]. Rules can be executed immediately using [[Rule.apply]], or
+ * staged for later execution with [[Rule.delayed]]—either individually or batched
+ * with others.
+ *
+ * When portability is required, caching can be introduced via
+ * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]], which ensures that
+ * matches are recognized and skipped if they have already been applied to the
+ * current e-graph state.
+ *
+ * ## From low-level rules to high-level saturation
+ *
+ * While individual rules and matchers form the foundation, higher-level orchestration
+ * is handled by the saturation framework in [[foresight.eqsat.saturation]]. A
+ * [[foresight.eqsat.saturation.Strategy]] composes these rules into a sequence of
+ * saturation steps, controlling iteration order, stopping conditions, caching
+ * behavior, and e-graph rebasing. Predefined strategies include
+ * [[foresight.eqsat.saturation.MaximalRuleApplication]] (and its caching variant),
+ * [[foresight.eqsat.saturation.BackoffRuleApplication]] for quota and cooldown
+ * control, and [[foresight.eqsat.saturation.StochasticRuleApplication]] for
+ * randomized application order.
+ *
+ * ## Reversal
+ *
+ * Reversal is a key capability for bidirectional reasoning. A
+ * [[ReversibleSearcher]] can produce an applier that undoes its transformation,
+ * and a [[ReversibleApplier]] can do the opposite. Pipelines can be reversed phase
+ * by phase via [[ReversibleSearcherPhase.tryReverse]], and if both the searcher and
+ * applier in a [[Rule]] are reversible, the entire rule can be inverted with
+ * [[Rule.tryReverse]].
+ *
+ * ## Portability and caching
+ *
+ * Portability ensures that matches survive e-graph changes. A type implementing
+ * [[PortableMatch]] can map its internal identifiers to the corresponding ones in
+ * a new snapshot, preserving structural meaning. Purely structural matches can
+ * treat `port` as a no-op, while ID-bearing matches perform translations such as
+ * canonicalization. Recording and replaying matches is supported by
+ * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]], and caching is
+ * provided by [[foresight.eqsat.saturation.SearchAndApply$.withCaching]].
+ *
+ * ## Design contracts
+ *
+ * The package assumes that searchers and phases are pure, meaning they never
+ * mutate the e-graph directly. Appliers produce commands rather than making
+ * in-place changes. Search and application are safe to run in parallel when
+ * operating on disjoint work units. Finally, commands generated by a rule are
+ * aggregated into an optimized batch and are intended to be idempotent.
+ *
+ * ## Quick reference
+ *
+ * Main entry points for search are [[Searcher]], [[SearcherPhase]],
+ * [[ReversibleSearcher]], and [[ReversibleSearcherPhase]]; for application:
+ * [[Applier]] and [[ReversibleApplier]]; for composition: [[Rule]]; for matches
+ * across snapshots: [[PortableMatch]]; and for caching and recording:
+ * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
+ * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]]. Strategies for
+ * high-level orchestration include
+ * [[foresight.eqsat.saturation.Strategy]],
+ * [[foresight.eqsat.saturation.MaximalRuleApplication]],
+ * [[foresight.eqsat.saturation.BackoffRuleApplication]], and
+ * [[foresight.eqsat.saturation.StochasticRuleApplication]].
  *
  * @example Typical workflow
  * {{{
