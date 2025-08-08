@@ -45,7 +45,7 @@ final case class StochasticRuleApplication[
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
-          priorities: MatchPriorities[NodeT, RuleT, MatchT],
+          priorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT],
           random: Random) extends Strategy[NodeT, EGraphT, Random] {
 
   /**
@@ -62,8 +62,8 @@ final case class StochasticRuleApplication[
         matches.map(m => (rule, m))
     }
 
-    val prioritizedMatches = priorities.prioritize(matches)
-    val batchSize = priorities.batchSize(prioritizedMatches)
+    val prioritizedMatches = priorities.prioritize(matches, egraph)
+    val batchSize = priorities.batchSize(prioritizedMatches, egraph)
 
     val (selectedMatches, newRng) = selectMatches(prioritizedMatches, batchSize)
     val selectedByRule = selectedMatches.groupBy { case (r, _) => r.name }
@@ -125,7 +125,7 @@ object StochasticRuleApplication {
   ](
     rules: Seq[RuleT],
     searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
-    priorities: MatchPriorities[NodeT, RuleT, MatchT]
+    priorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT]
   ): StochasticRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
     new StochasticRuleApplication(rules, searchAndApply, priorities, Random(0))
   }
@@ -147,7 +147,7 @@ object StochasticRuleApplication {
     MatchT
   ](
      rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT],
+     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT],
      random: Random
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     apply(rules, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT], priorities)
@@ -169,7 +169,7 @@ object StochasticRuleApplication {
     MatchT
   ](
     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-    priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], MatchT]
+    priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT]
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     apply(rules, priorities, Random(0))
   }

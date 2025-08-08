@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
+import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.rewriting.Rule
 import foresight.util.random.DiscreteDistribution
 
@@ -27,11 +28,17 @@ import foresight.util.random.DiscreteDistribution
  *
  * @tparam NodeT The type of e-graph nodes.
  * @tparam RuleT The type of rules being applied.
+ * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by the rules.
  */
-final case class CurveFittedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT](originalPriorities: MatchPriorities[NodeT, RuleT, MatchT],
-                                                                                       distribution: DiscreteDistribution)
-    extends ReweightedPriorities[NodeT, RuleT, MatchT] {
+final case class CurveFittedPriorities[
+  NodeT,
+  RuleT <: Rule[NodeT, MatchT, _],
+  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+  MatchT
+](originalPriorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT],
+  distribution: DiscreteDistribution)
+    extends ReweightedPriorities[NodeT, RuleT, EGraphT, MatchT] {
 
   /**
    * Applies the distribution to reweight the priorities of previously scored matches.

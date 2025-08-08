@@ -41,14 +41,16 @@ class SaturateArithTest {
       distributivity1,
       distributivity2)
 
+    type ArithRule = Rule[Arith, PatternMatch[Arith], EGraph[Arith]]
+
     def simpleStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
     def cachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
     def uniformStochasticStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
-      val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
+      val prioritizer = UniformPriorities[Arith, ArithRule, EGraph[Arith], PatternMatch[Arith]](30)
       StochasticRuleApplication(all, prioritizer).repeatUntilStable
     }
     def uniformStochasticCachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
-      val prioritizer = UniformPriorities[Arith, Rule[Arith, PatternMatch[Arith], EGraph[Arith]], PatternMatch[Arith]](30)
+      val prioritizer = UniformPriorities[Arith, ArithRule, EGraphWithRecordedApplications[Arith, EGraph[Arith], PatternMatch[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 

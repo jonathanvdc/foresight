@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
+import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.rewriting.Rule
 
 /**
@@ -17,13 +18,16 @@ import foresight.eqsat.rewriting.Rule
  *
  * @tparam NodeT The type of nodes in the e-graph.
  * @tparam RuleT The type of rules used to generate matches.
+ * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches found for each rule.
  */
-trait ReweightedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] extends MatchPriorities[NodeT, RuleT, MatchT] {
+trait ReweightedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT]
+  extends MatchPriorities[NodeT, RuleT, EGraphT, MatchT] {
+
   /**
    * The underlying prioritizer that computes the initial (raw) priority scores.
    */
-  def originalPriorities: MatchPriorities[NodeT, RuleT, MatchT]
+  def originalPriorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT]
 
   /**
    * Reweights the priority scores of an already-prioritized list of matches.
@@ -36,12 +40,12 @@ trait ReweightedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] exten
    */
   def reweight(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Seq[PrioritizedMatch[RuleT, MatchT]]
 
-  override def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[PrioritizedMatch[RuleT, MatchT]] = {
-    val prioritized = originalPriorities.prioritize(matches)
+  override def prioritize(matches: Seq[(RuleT, MatchT)], egraph: EGraphT): Seq[PrioritizedMatch[RuleT, MatchT]] = {
+    val prioritized = originalPriorities.prioritize(matches, egraph)
     reweight(prioritized)
   }
 
-  override def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Int = {
-    originalPriorities.batchSize(matches)
+  override def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]], egraph: EGraphT): Int = {
+    originalPriorities.batchSize(matches, egraph)
   }
 }

@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
+import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.rewriting.Rule
 
 /**
@@ -15,16 +16,18 @@ import foresight.eqsat.rewriting.Rule
  *
  * @tparam NodeT The type of nodes in the e-graph.
  * @tparam RuleT The type of rewrite rules, which must produce matches of type `MatchT`.
+ * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by applying a rule.
  */
-trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
+trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT] {
   /**
    * Assigns a priority score to each match, indicating its relative importance or desirability.
    *
    * @param matches A sequence of (rule, match) pairs found during rule search.
+   * @param egraph The e-graph in which the matches were found, used for context or additional information.
    * @return A sequence of [[PrioritizedMatch]] instances containing each rule, match, and its computed priority.
    */
-  def prioritize(matches: Seq[(RuleT, MatchT)]): Seq[PrioritizedMatch[RuleT, MatchT]]
+  def prioritize(matches: Seq[(RuleT, MatchT)], egraph: EGraphT): Seq[PrioritizedMatch[RuleT, MatchT]]
 
   /**
    * Determines how many of the prioritized matches to apply in this iteration.
@@ -33,7 +36,8 @@ trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], MatchT] {
    * or other criteria such as heuristics or exploration/exploitation trade-offs.
    *
    * @param matches The prioritized matches.
+   * @param egraph The e-graph in which the matches were found, used for context or additional information.
    * @return The number of matches to apply.
    */
-  def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Int
+  def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]], egraph: EGraphT): Int
 }
