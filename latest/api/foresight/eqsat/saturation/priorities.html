@@ -60,7 +60,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="priorities/CurveFittedPriorities.html" t="n" class="documentableName ">CurveFittedPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">originalPriorities</span>: <a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">MatchT</span>], <span t="k"></span><span data-unresolved-link="" t="n">distribution</span>: <a href="../../util/random/DiscreteDistribution.html" t="t">DiscreteDistribution</a>)<span t="k"> extends </span><a href="priorities/ReweightedPriorities.html" t="t">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="priorities/CurveFittedPriorities.html" t="n" class="documentableName ">CurveFittedPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">originalPriorities</span>: <a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>], <span t="k"></span><span data-unresolved-link="" t="n">distribution</span>: <a href="../../util/random/DiscreteDistribution.html" t="t">DiscreteDistribution</a>)<span t="k"> extends </span><a href="priorities/ReweightedPriorities.html" t="t">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
            </div>
           </div>
          </div>
@@ -80,6 +80,12 @@
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph to operate on.</p>
+              </dd>
               <dt class="body-small">
                MatchT
               </dt>
@@ -148,10 +154,10 @@
                  trait <span data-unresolved-link="" t="n">Equals</span>
                 </div>
                 <div>
-                 trait <a href="priorities/ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 trait <a href="priorities/ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
-                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
                  class <span data-unresolved-link="" t="n">Object</span>
@@ -175,7 +181,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="priorities/MatchPriorities.html" t="n" class="documentableName ">MatchPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="priorities/MatchPriorities.html" t="n" class="documentableName ">MatchPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]
            </div>
           </div>
          </div>
@@ -195,6 +201,12 @@
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph to operate on.</p>
+              </dd>
               <dt class="body-small">
                MatchT
               </dt>
@@ -238,13 +250,13 @@
               <dd class="body-medium">
                <div class="mono-small-block subtypes">
                 <div>
-                 trait <a href="priorities/ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 trait <a href="priorities/ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
-                 class <a href="priorities/CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 class <a href="priorities/CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
-                 class <a href="priorities/UniformPriorities.html" t="n">UniformPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 class <a href="priorities/UniformPriorities.html" t="n">UniformPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div><span></span>
                </div>
               </dd>
@@ -350,7 +362,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="priorities/ReweightedPriorities.html" t="n" class="documentableName ">ReweightedPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]<span t="k"> extends </span><a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
+            <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="priorities/ReweightedPriorities.html" t="n" class="documentableName ">ReweightedPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]<span t="k"> extends </span><a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
            </div>
           </div>
          </div>
@@ -371,6 +383,12 @@
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph to operate on.</p>
+              </dd>
               <dt class="body-small">
                MatchT
               </dt>
@@ -398,7 +416,7 @@
               <dd class="body-medium">
                <div class="mono-small-block supertypes">
                 <div>
-                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
                  class <span data-unresolved-link="" t="n">Object</span>
@@ -417,7 +435,7 @@
               <dd class="body-medium">
                <div class="mono-small-block subtypes">
                 <div>
-                 class <a href="priorities/CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 class <a href="priorities/CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div><span></span>
                </div>
               </dd>
@@ -432,7 +450,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="priorities/UniformPriorities.html" t="n" class="documentableName ">UniformPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">maxBatchSize</span>: <span data-unresolved-link="" t="t">Int</span>)<span t="k"> extends </span><a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="priorities/UniformPriorities.html" t="n" class="documentableName ">UniformPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">maxBatchSize</span>: <span data-unresolved-link="" t="t">Int</span>)<span t="k"> extends </span><a href="priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
            </div>
           </div>
          </div>
@@ -452,6 +470,12 @@
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph to operate on.</p>
+              </dd>
               <dt class="body-small">
                MatchT
               </dt>
@@ -497,7 +521,7 @@
                  trait <span data-unresolved-link="" t="n">Equals</span>
                 </div>
                 <div>
-                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+                 trait <a href="priorities/MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
                 </div>
                 <div>
                  class <span data-unresolved-link="" t="n">Object</span>

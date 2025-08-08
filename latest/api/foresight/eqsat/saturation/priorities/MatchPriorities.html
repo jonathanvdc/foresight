@@ -7,7 +7,7 @@
 </div>
 <div class="main-signature mono-small-block">
  <div class="signature">
-  <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="MatchPriorities.html" t="n" class="documentableName ">MatchPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]
+  <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="MatchPriorities.html" t="n" class="documentableName ">MatchPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]
  </div>
 </div>
 <div class="cover">
@@ -19,6 +19,12 @@
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    EGraphT
+   </dt>
+   <dd class="body-medium">
+    <p>The type of e-graph to operate on.</p>
+   </dd>
    <dt class="body-small">
     MatchT
    </dt>
@@ -48,13 +54,13 @@
      <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
      <svg id="graph"></svg>
      <script type="text/dot" id="dot"> digraph g {
- node0 [id=node0, label="<span style=\"color: #FFFFFF;\">trait <a href=\"MatchPriorities.html\" t=\"n\">MatchPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">trait <a href=\"MatchPriorities.html\" t=\"n\">MatchPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
 node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
-node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"ReweightedPriorities.html\" t=\"n\">ReweightedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
-node5 [id=node5, label="<span style=\"color: #FFFFFF;\">class <a href=\"CurveFittedPriorities.html\" t=\"n\">CurveFittedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">MatchT</span>]</span>", class="class vertex"];
-node6 [id=node6, label="<span style=\"color: #FFFFFF;\">class <a href=\"UniformPriorities.html\" t=\"n\">UniformPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">MatchT</span>]</span>", class="class vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"ReweightedPriorities.html\" t=\"n\">ReweightedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
+node5 [id=node5, label="<span style=\"color: #FFFFFF;\">class <a href=\"CurveFittedPriorities.html\" t=\"n\">CurveFittedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="class vertex"];
+node6 [id=node6, label="<span style=\"color: #FFFFFF;\">class <a href=\"UniformPriorities.html\" t=\"n\">UniformPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="class vertex"];
 
 
  node0 -> node1;
@@ -91,13 +97,13 @@ node6 -> node0;
    <dd class="body-medium">
     <div class="mono-small-block subtypes">
      <div>
-      trait <a href="ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+      trait <a href="ReweightedPriorities.html" t="n">ReweightedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
      </div>
      <div>
-      class <a href="CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+      class <a href="CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
      </div>
      <div>
-      class <a href="UniformPriorities.html" t="n">UniformPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]
+      class <a href="UniformPriorities.html" t="n">UniformPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
      </div><span></span>
     </div>
    </dd>
@@ -123,12 +129,12 @@ node6 -> node0;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Abstract methods</h4>
         </div>
-        <div class="documentableElement" id="batchSize-fffff55c">
+        <div class="documentableElement" id="batchSize-fffffbb2">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatchPriorities.html#batchSize-fffff55c" t="n" class="documentableName ">batchSize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]): <span data-unresolved-link="" t="t">Int</span>
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatchPriorities.html#batchSize-fffffbb2" t="n" class="documentableName ">batchSize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>): <span data-unresolved-link="" t="t">Int</span>
            </div>
           </div>
          </div>
@@ -147,6 +153,12 @@ node6 -> node0;
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph in which the matches were found, used for context or additional information.</p>
+              </dd>
               <dt class="body-small">
                matches
               </dt>
@@ -168,12 +180,12 @@ node6 -> node0;
           </div>
          </div>
         </div>
-        <div class="documentableElement" id="prioritize-716">
+        <div class="documentableElement" id="prioritize-280">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatchPriorities.html#prioritize-716" t="n" class="documentableName ">prioritize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[(<span t="t">RuleT</span>, <span t="t">MatchT</span>)]): <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatchPriorities.html#prioritize-280" t="n" class="documentableName ">prioritize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[(<span t="t">RuleT</span>, <span t="t">MatchT</span>)], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>): <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]
            </div>
           </div>
          </div>
@@ -191,6 +203,12 @@ node6 -> node0;
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph in which the matches were found, used for context or additional information.</p>
+              </dd>
               <dt class="body-small">
                matches
               </dt>
