@@ -11,13 +11,13 @@ import foresight.eqsat.parallel.ParallelMap
  * by [[Searcher.chain]] and are typically wrapped by [[Searcher.apply]] for the first stage.
  *
  * # Responsibilities
- *  - **Per-class search** ([[search(call:*, egraph:*, input:*)]]): given a canonical e-class and an
+ *  - **Per-class search** (`search(call, egraph, input)`): given a canonical e-class and an
  *    `input` (from the previous phase), compute a result `IntermediateT` for that class alone.
  *  - **Aggregation** ([[aggregate]]): combine the `IntermediateT` results for *all* classes into a
  *    single `OutputT` for the phase.
  *
  * # Execution model
- * The convenience [[search(egraph:*, input:*, parallelize:*)]] provided here:
+ * The convenience search(egraph, input, parallelize) provided here:
  *  1. enumerates all classes via `egraph.classes`,
  *  2. canonicalizes each class ref before calling the per-class `search`,
  *  3. runs per-class work in parallel via [[foresight.eqsat.parallel.ParallelMap]],
