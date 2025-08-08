@@ -158,11 +158,11 @@ object Searcher {
   /**
    * A no-op searcher that returns an empty sequence of matches but is considered reversible.
    *
-   * Reversal yields a no-op applier, allowing rules to treat the empty searcher
+   * Reversal yields [[Applier.ignore]], allowing rules to treat the empty searcher
    * as a structural placeholder in reversible pipelines.
    *
    * @tparam NodeT   Node payload type.
-   * @tparam MatchT  Match element type (e.g., [[PatternMatch]]).
+   * @tparam MatchT  Match element type (e.g., [[patterns.PatternMatch]]).
    * @tparam EGraphT E-graph type.
    * @return A [[ReversibleSearcher]] that always returns `Seq.empty`.
    */
