@@ -76,11 +76,11 @@
           <div class="originInfo"></div>
           <div class="memberDocumentation">
            <div class="documentableBrief doc">
-            <p>The <code>foresight.eqsat.rewriting</code> package provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. It defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
+            <p>Provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. Defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
            </div>
            <div class="cover">
             <div class="doc">
-             <p>The <code>foresight.eqsat.rewriting</code> package provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. It defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
+             <p>Provides the core building blocks for rewrite-driven equality saturation over immutable e-graphs. Defines the search/apply pipeline, mechanisms for delayed command execution, parallel search, reversible rules, and match portability for caching across e-graph snapshots.</p>
              <h2><a href="#core-ideas" id="core-ideas">Core ideas</a></h2>
              <p>The system is built on <strong>immutable e-graphs</strong>, where every change is represented as a <a href="eqsat/commands/Command.html">foresight.eqsat.commands.Command</a> value. Instead of mutating the e-graph in place, commands are executed later to produce a new snapshot.</p>
              <p>Rules follow a <strong>search → apply → compose</strong> flow. A <a href="eqsat/rewriting/Searcher.html">Searcher</a> is responsible for finding matches; an <span data-unresolved-link="">Applier</span> transforms each match into a command; and a <span data-unresolved-link="">Rule</span> combines these per-match commands into a single optimized operation.</p>
