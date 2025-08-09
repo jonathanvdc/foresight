@@ -1,111 +1,174 @@
 package foresight.eqsat.parallel
 
 /**
- * The core parallelism abstraction in Foresight, `ParallelMap` is a trait for applying functions to collections,
- * supporting both sequential and parallel execution. It serves as the foundation for parallel computation throughout
- * the library, enabling scalable data processing and concurrent algorithms.
+ * Core parallelism abstraction in Foresight.
  *
- * `ParallelMap` provides flexible mapping strategies, allowing users to control how computations are distributed and
- * executed. It supports hierarchical parallelism through child strategies, cancellation via tokens, and timing features
- * for performance measurement.
+ * `ParallelMap` defines a uniform interface for applying functions to collections,
+ * supporting both sequential and parallel execution. It is the foundation for scalable
+ * data processing and concurrent algorithms throughout the library.
  *
- * Implementations of this trait can vary in their parallelism model, resource usage, and cancellation semantics,
- * making it suitable for custom execution models and advanced parallel processing scenarios.
+ * ## Key Features
+ *   - **Flexible execution**: Implementations may run tasks sequentially, in parallel,
+ *     or with custom scheduling and resource usage.
+ *   - **Hierarchical strategies**: Create named child strategies via [[child]],
+ *     useful for subdividing work in complex algorithms.
+ *   - **Cancellation support**: Wrap an existing strategy with [[cancelable]] to stop
+ *     computation early when a [[CancellationToken]] is triggered.
+ *   - **Performance measurement**: Use [[timed]] to obtain a [[TimedParallelMap]]
+ *     for measuring execution times.
+ *   - **Arbitrary task execution**: Run standalone computations with [[run]].
+ *
+ * ## Usage
+ * {{{
+ * val pm: ParallelMap = ParallelMap.parallel
+ *
+ * // Parallel mapping over a collection
+ * val results = pm(Seq(1, 2, 3), (x: Int) => x * x)
+ *
+ * // With cancellation
+ * val token = new CancellationToken
+ * val cancelablePM = pm.cancelable(token)
+ *
+ * // Timed execution
+ * val timedPM = pm.timed
+ * }}}
+ *
+ * ## Implementation Notes
+ * Implementations may differ in:
+ * - Degree of parallelism and thread scheduling
+ * - Overhead for small collections
+ * - Cancellation behavior (when checks are performed)
+ *
+ * @see [[ParallelMap.sequential]], [[ParallelMap.parallel]], [[ParallelMap.fixedThreadParallel]]
  */
 trait ParallelMap {
   /**
-   * Creates a child parallel mapping strategy, tagged with a name.
-   * @param name The name of the child parallel mapping strategy.
-   * @return The child parallel mapping strategy.
+   * Creates a named child parallel mapping strategy.
+   *
+   * Child strategies can inherit resource pools or scheduling from their parent,
+   * but can also have independent timing, cancellation, or logging.
+   *
+   * @param name Identifier for the child strategy (for debugging or metrics).
+   * @return A new [[ParallelMap]] scoped as a child of this strategy.
    */
   def child(name: String): ParallelMap
 
   /**
-   * Applies a function to each element of an iterable.
-   * @param inputs The iterable to apply the function to.
-   * @param f The function to apply to each element of the iterable.
-   * @tparam A The type of the elements of the iterable.
-   * @tparam B The type of the result of applying the function to the elements of the iterable.
-   * @return The result of applying the function to each element of the iterable.
+   * Applies a function to each element of a collection.
+   *
+   * Execution may be sequential or parallel depending on the implementation.
+   *
+   * @param inputs Input collection to process.
+   * @param f Function to apply to each element.
+   * @tparam A Element type of `inputs`.
+   * @tparam B Result type of `f`.
+   * @return Collection of results, in the same order as the input.
    */
   def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B]
 
   /**
-   * Creates a new parallel mapping strategy that cancels the operation if a cancellation token is canceled.
-   * @param token The cancellation token to use.
-   * @return The new parallel mapping strategy.
+   * Wraps this strategy with a cancellation check.
+   *
+   * If the given [[CancellationToken]] is canceled:
+   *   - Before starting: no work is performed; throws [[OperationCanceledException]].
+   *   - During execution: stops at the next cancellation check and throws [[OperationCanceledException]].
+   *
+   * Cancellation checks occur:
+   *   - Once before the mapping starts
+   *   - Once before processing each element
+   *
+   * @param token Cancellation trigger.
+   * @throws OperationCanceledException if canceled before or during execution.
+   * @return A new [[ParallelMap]] that respects the given token.
    */
-  @throws[OperationCanceledException]
   final def cancelable(token: CancellationToken): ParallelMap = new ParallelMap {
-    override def child(name: String): ParallelMap = ParallelMap.this.child(name).cancelable(token)
+    override def child(name: String): ParallelMap =
+      ParallelMap.this.child(name).cancelable(token)
 
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = {
-      if (token.isCanceled) {
-        throw OperationCanceledException(token)
-      }
+      if (token.isCanceled) throw OperationCanceledException(token)
       ParallelMap.this.apply(inputs, (a: A) => {
-        if (token.isCanceled) {
-          throw OperationCanceledException(token)
-        }
+        if (token.isCanceled) throw OperationCanceledException(token)
         f(a)
       })
     }
 
     override def run[A](f: => A): A = {
-      if (token.isCanceled) {
-        throw OperationCanceledException(token)
-      }
+      if (token.isCanceled) throw OperationCanceledException(token)
       ParallelMap.this.run(f)
     }
   }
 
   /**
-   * Runs a function and returns the result.
-   * @param f The function to run.
-   * @tparam A The type of the result of the function.
-   * @return The result of the function.
+   * Executes an arbitrary computation within this parallel mapping strategy.
+   *
+   * Internally implemented using [[apply]] over a single dummy element.
+   *
+   * @param f The computation to execute.
+   * @tparam A The result type.
+   * @return The result of the computation.
    */
-  def run[A](f: => A): A = apply[Int, A](Seq(0), _ => f).head
+  def run[A](f: => A): A =
+    apply[Int, A](Seq(0), _ => f).head
 
   /**
-   * Creates a new parallel mapping strategy that measures the time taken to process elements.
-   * @return The new parallel mapping strategy.
+   * Wraps this strategy to record execution times.
+   *
+   * Useful for profiling or monitoring performance. Timing starts at the root
+   * and can be nested for child strategies.
+   *
+   * @return A [[TimedParallelMap]] that records elapsed times.
    */
-  final def timed: TimedParallelMap = new TimedParallelMap("root", this)
+  final def timed: TimedParallelMap =
+    new TimedParallelMap("root", this)
 }
 
 /**
- * A companion object for the `ParallelMap` trait.
+ * Factory and predefined [[ParallelMap]] strategies.
  */
 object ParallelMap {
+
   /**
-   * A parallel map that processes elements sequentially.
+   * Sequential execution strategy.
+   *
+   * Processes elements in input order, on the calling thread,
+   * without any concurrency overhead.
+   *
+   * Best for:
+   *   - Small collections
+   *   - Deterministic debugging
+   *   - Environments where parallelism is unavailable or undesired
    */
   val sequential: ParallelMap = new ParallelMap {
     override def child(name: String): ParallelMap = this
-    override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] = inputs.map(f)
+    override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] =
+      inputs.map(f)
   }
 
   /**
-   * A parallel map that processes elements in parallel.
+   * Default parallel execution strategy.
+   *
+   * Uses the library's standard parallelism settings (e.g., thread pool).
+   * Suitable for most parallel workloads.
    */
-  val parallel: ParallelMap = ParallelMapImpl.parallel
+  val parallel: ParallelMap =
+    ParallelMapImpl.parallel
 
   /**
-   * A parallel map that processes elements in parallel using a fixed number of threads.
-   * @param n The number of threads to use for parallel processing.
-   * @return The parallel map that uses a fixed number of threads.
+   * Parallel execution with a fixed number of threads.
+   *
+   * @param n Number of threads to use.
+   * @return A [[ParallelMap]] backed by a fixed-size thread pool.
+   *         If `n == 1`, returns [[sequential]].
    */
-  def fixedThreadParallel(n: Int): ParallelMap = {
-    if (n == 1) {
-      sequential
-    } else {
-      ParallelMapImpl.fixedThreadParallel(n)
-    }
-  }
+  def fixedThreadParallel(n: Int): ParallelMap =
+    if (n == 1) sequential else ParallelMapImpl.fixedThreadParallel(n)
 
   /**
-   * The default parallel mapping strategy.
+   * The library-wide default mapping strategy.
+   *
+   * Currently equal to [[parallel]].
    */
-  val default: ParallelMap = parallel
+  val default: ParallelMap =
+    parallel
 }
