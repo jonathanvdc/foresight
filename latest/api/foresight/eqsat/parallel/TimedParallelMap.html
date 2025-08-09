@@ -114,11 +114,12 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Applies a function to each element of an iterable.</p>
+             <p>Applies a function to each element of a collection.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Applies a function to each element of an iterable.</p>
+              <p>Applies a function to each element of a collection.</p>
+              <p>Execution may be sequential or parallel depending on the implementation.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -126,13 +127,13 @@ node4 -> node1;
                A
               </dt>
               <dd class="body-medium">
-               <p>The type of the elements of the iterable.</p>
+               <p>Element type of <code>inputs</code>.</p>
               </dd>
               <dt class="body-small">
                B
               </dt>
               <dd class="body-medium">
-               <p>The type of the result of applying the function to the elements of the iterable.</p>
+               <p>Result type of <code>f</code>.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -141,13 +142,13 @@ node4 -> node1;
                f
               </dt>
               <dd class="body-medium">
-               <p>The function to apply to each element of the iterable.</p>
+               <p>Function to apply to each element.</p>
               </dd>
               <dt class="body-small">
                inputs
               </dt>
               <dd class="body-medium">
-               <p>The iterable to apply the function to.</p>
+               <p>Input collection to process.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -156,7 +157,7 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The result of applying the function to each element of the iterable.</p>
+               <p>Collection of results, in the same order as the input.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -187,11 +188,12 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a child parallel mapping strategy, tagged with a name.</p>
+             <p>Creates a named child parallel mapping strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a child parallel mapping strategy, tagged with a name.</p>
+              <p>Creates a named child parallel mapping strategy.</p>
+              <p>Child strategies can inherit resource pools or scheduling from their parent, but can also have independent timing, cancellation, or logging.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -199,7 +201,7 @@ node4 -> node1;
                name
               </dt>
               <dd class="body-medium">
-               <p>The name of the child parallel mapping strategy.</p>
+               <p>Identifier for the child strategy (for debugging or metrics).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -208,7 +210,7 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The child parallel mapping strategy.</p>
+               <p>A new <a href="ParallelMap.html">ParallelMap</a> scoped as a child of this strategy.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -344,11 +346,12 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Runs a function and returns the result.</p>
+             <p>Executes an arbitrary computation within this parallel mapping strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Runs a function and returns the result.</p>
+              <p>Executes an arbitrary computation within this parallel mapping strategy.</p>
+              <p>Internally implemented using <a href="TimedParallelMap.html#apply-ffffff11">apply</a> over a single dummy element.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -356,7 +359,7 @@ node4 -> node1;
                A
               </dt>
               <dd class="body-medium">
-               <p>The type of the result of the function.</p>
+               <p>The result type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -365,7 +368,7 @@ node4 -> node1;
                f
               </dt>
               <dd class="body-medium">
-               <p>The function to run.</p>
+               <p>The computation to execute.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -374,7 +377,7 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The result of the function.</p>
+               <p>The result of the computation.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -413,11 +416,21 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new parallel mapping strategy that cancels the operation if a cancellation token is canceled.</p>
+             <p>Wraps this strategy with a cancellation check.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new parallel mapping strategy that cancels the operation if a cancellation token is canceled.</p>
+              <p>Wraps this strategy with a cancellation check.</p>
+              <p>If the given <a href="CancellationToken.html">CancellationToken</a> is canceled:</p>
+              <ul>
+               <li>Before starting: no work is performed; throws <a href="OperationCanceledException.html">OperationCanceledException</a>.</li>
+               <li>During execution: stops at the next cancellation check and throws <a href="OperationCanceledException.html">OperationCanceledException</a>.</li>
+              </ul>
+              <p>Cancellation checks occur:</p>
+              <ul>
+               <li>Once before the mapping starts</li>
+               <li>Once before processing each element</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -425,7 +438,7 @@ node4 -> node1;
                token
               </dt>
               <dd class="body-medium">
-               <p>The cancellation token to use.</p>
+               <p>Cancellation trigger.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -434,7 +447,18 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new parallel mapping strategy.</p>
+               <p>A new <a href="ParallelMap.html">ParallelMap</a> that respects the given token.</p>
+              </dd>
+              <dt class="body-small">
+               Throws
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <a href="OperationCanceledException.html">OperationCanceledException</a>
+                 <p>if canceled before or during execution.</p>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -463,11 +487,12 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new parallel mapping strategy that measures the time taken to process elements.</p>
+             <p>Wraps this strategy to record execution times.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new parallel mapping strategy that measures the time taken to process elements.</p>
+              <p>Wraps this strategy to record execution times.</p>
+              <p>Useful for profiling or monitoring performance. Timing starts at the root and can be nested for child strategies.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -475,7 +500,7 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new parallel mapping strategy.</p>
+               <p>A <a href="TimedParallelMap.html">TimedParallelMap</a> that records elapsed times.</p>
               </dd>
               <dt class="body-small">
                Inherited from:

@@ -161,16 +161,56 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The core parallelism abstraction in Foresight, <code>ParallelMap</code> is a trait for applying functions to collections, supporting both sequential and parallel execution. It serves as the foundation for parallel computation throughout the library, enabling scalable data processing and concurrent algorithms.</p>
+             <p>Core parallelism abstraction in Foresight.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The core parallelism abstraction in Foresight, <code>ParallelMap</code> is a trait for applying functions to collections, supporting both sequential and parallel execution. It serves as the foundation for parallel computation throughout the library, enabling scalable data processing and concurrent algorithms.</p>
-              <p><code>ParallelMap</code> provides flexible mapping strategies, allowing users to control how computations are distributed and executed. It supports hierarchical parallelism through child strategies, cancellation via tokens, and timing features for performance measurement.</p>
-              <p>Implementations of this trait can vary in their parallelism model, resource usage, and cancellation semantics, making it suitable for custom execution models and advanced parallel processing scenarios.</p>
+              <p>Core parallelism abstraction in Foresight.</p>
+              <p><code>ParallelMap</code> defines a uniform interface for applying functions to collections, supporting both sequential and parallel execution. It is the foundation for scalable data processing and concurrent algorithms throughout the library.</p>
+              <h2><a href="#key-features" id="key-features">Key Features</a></h2>
+              <ul>
+               <li><strong>Flexible execution</strong>: Implementations may run tasks sequentially, in parallel, or with custom scheduling and resource usage.</li>
+               <li><strong>Hierarchical strategies</strong>: Create named child strategies via <a href="parallel/ParallelMap.html#child-fffff194">child</a>, useful for subdividing work in complex algorithms.</li>
+               <li><strong>Cancellation support</strong>: Wrap an existing strategy with <a href="parallel/ParallelMap.html#cancelable-fffffcbf">cancelable</a> to stop computation early when a <a href="parallel/CancellationToken.html">CancellationToken</a> is triggered.</li>
+               <li><strong>Performance measurement</strong>: Use <a href="parallel/ParallelMap.html#timed-0">timed</a> to obtain a <a href="parallel/TimedParallelMap.html">TimedParallelMap</a> for measuring execution times.</li>
+               <li><strong>Arbitrary task execution</strong>: Run standalone computations with <a href="parallel/ParallelMap.html#run-fffff7d2">run</a>.</li>
+              </ul>
+              <h2><a href="#usage" id="usage">Usage</a></h2>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val pm: ParallelMap = ParallelMap.parallel
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Parallel mapping over a collection
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val results = pm(Seq(1, 2, 3), (x: Int) =&gt; x * x)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>
+</span><span line-number="6" class=""><span class="tooltip-container"></span>// With cancellation
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val cancelablePM = pm.cancelable(token)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>
+</span><span line-number="10" class=""><span class="tooltip-container"></span>// Timed execution
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val timedPM = pm.timed
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <h2><a href="#implementation-notes" id="implementation-notes">Implementation Notes</a></h2>
+              <p>Implementations may differ in:</p>
+              <ul>
+               <li>Degree of parallelism and thread scheduling</li>
+               <li>Overhead for small collections</li>
+               <li>Cancellation behavior (when checks are performed)</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               See also
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p><a href="parallel/ParallelMap$.html#sequential-0">ParallelMap.sequential</a>, <a href="parallel/ParallelMap$.html#parallel-0">ParallelMap.parallel</a>, <a href="parallel/ParallelMap$.html#fixedThreadParallel-fffff156">ParallelMap.fixedThreadParallel</a></p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -224,11 +264,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the <code>ParallelMap</code> trait.</p>
+             <p>Factory and predefined <a href="parallel/ParallelMap.html">ParallelMap</a> strategies.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the <code>ParallelMap</code> trait.</p>
+              <p>Factory and predefined <a href="parallel/ParallelMap.html">ParallelMap</a> strategies.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
