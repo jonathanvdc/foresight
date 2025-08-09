@@ -44,14 +44,70 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A token that can be used to cancel an operation.</p>
+             <p>Cooperative cancellation signal for long-running or batched operations.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A token that can be used to cancel an operation.</p>
+              <p>Cooperative cancellation signal for long-running or batched operations.</p>
+              <p>A <code>CancellationToken</code> is a simple, thread-safe flag that can be polled by running code to decide whether to abort early. It does not forcibly interrupt threads. Instead, libraries (for example, <a href="parallel/ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a>) periodically check the token and abort work cooperatively (often by throwing an <a href="parallel/OperationCanceledException.html">OperationCanceledException</a>).</p>
+              <p>Common usage:</p>
+              <ul>
+               <li>Create a token for a job.</li>
+               <li>Optionally arm a timeout with <a href="parallel/CancellationToken.html#cancelAfter-44f">cancelAfter</a>.</li>
+               <li>Pass the token into your work and periodically check it (or rely on library checkpoints).</li>
+               <li>Do not disarm; if the timeout elapses, the job cancels.</li>
+              </ul>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="2" class=""><span class="tooltip-container"></span>token.cancelAfter(30.seconds)                // let the job auto-cancel after 30s
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val pm = ParallelMap.parallel.cancelable(token)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val out = pm(Seq(1, 2, 3), { x =&gt;
+</span><span line-number="6" class=""><span class="tooltip-container"></span> expensiveComputation(x)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>})
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <p>Advanced:</p>
+              <ul>
+               <li>If you need to suppress or extend a timeout while the task is running, keep the control token returned by <a href="parallel/CancellationToken.html#cancelAfter-44f">cancelAfter</a> and cancel it to disarm the scheduled cancel, or cancel and re-arm to extend the deadline. Most code does not need this.</li>
+               <li>One example is a "heartbeat": extend the timeout periodically while progress is observed.</li>
+              </ul>
+              <p>Example: heartbeat to keep the job alive while progress is made</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def process(items: Seq[Item], token: CancellationToken): Unit = {
+</span><span line-number="2" class=""><span class="tooltip-container"></span> var ctl = token.cancelAfter(10.seconds)      // initial deadline
+</span><span line-number="3" class=""><span class="tooltip-container"></span> for ((item, i) &lt;- items.zipWithIndex) {
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   step(item, token)                          // check token inside
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   if (i % 100 == 0) {                        // progress checkpoint
+</span><span line-number="6" class=""><span class="tooltip-container"></span>     ctl.cancel()                             // disarm old deadline
+</span><span line-number="7" class=""><span class="tooltip-container"></span>     ctl = token.cancelAfter(10.seconds)      // renew deadline
+</span><span line-number="8" class=""><span class="tooltip-container"></span>   }
+</span><span line-number="9" class=""><span class="tooltip-container"></span> }
+</span><span line-number="10" class=""><span class="tooltip-container"></span>}
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <p>Thread safety:</p>
+              <ul>
+               <li>Uses a Java AtomicBoolean for internal state.</li>
+               <li>Changes to the cancellation flag are visible to all threads immediately.</li>
+               <li>Both reads and writes are non-blocking and lock-free.</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               See also
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p><a href="parallel/ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a> for integrating cancellation with mapping.</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -326,11 +382,34 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A parallel map that measures the time taken to process elements.</p>
+             <p>A <a href="parallel/ParallelMap.html">ParallelMap</a> decorator that records wall-clock timing for mapping and ad-hoc tasks.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A parallel map that measures the time taken to process elements.</p>
+              <p>A <a href="parallel/ParallelMap.html">ParallelMap</a> decorator that records wall-clock timing for mapping and ad-hoc tasks.</p>
+              <p><code>TimedParallelMap</code> captures elapsed time for both this node and its <strong>entire subtree</strong> of child strategies created via <a href="parallel/TimedParallelMap.html#child-fffff194">child</a>. Timing is computed as:</p>
+              <ul>
+               <li><strong>Start</strong>: the earliest <code>System.nanoTime()</code> observed among this node and all of its children during any call to <a href="parallel/TimedParallelMap.html#apply-ffffff11">apply</a> or <a href="parallel/TimedParallelMap.html#run-fffff7d2">run</a>.</li>
+               <li><strong>End</strong>: the latest <code>System.nanoTime()</code> observed among this node and all of its children.</li>
+               <li><a href="parallel/TimedParallelMap.html#nanos-0">nanos</a> returns <code>End - Start</code>. Overlapping child work is <strong>not double-counted</strong>; this is wall-clock duration, not a sum of per-task CPU times.</li>
+              </ul>
+              <h2><a href="#typical-usage" id="typical-usage">Typical usage</a></h2>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val pm: ParallelMap = ParallelMap.parallel
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val timed = new TimedParallelMap("root", pm)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val child = timed.child("phase-1")
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val out   = child(Seq(1,2,3), _ * 2)   // work to be timed under "phase-1"
+</span><span line-number="6" class=""><span class="tooltip-container"></span>
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val report: TimingReport = timed.report
+</span><span line-number="8" class=""><span class="tooltip-container"></span>println(report.pretty)                 // or however you surface it
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <h2><a href="#thread-safety" id="thread-safety">Thread safety</a></h2>
+              <p>All timing state and the child list are protected by an internal <span data-unresolved-link="">java.util.concurrent.locks.ReentrantLock</span>. You may call <a href="parallel/TimedParallelMap.html#apply-ffffff11">apply</a>, <a href="parallel/TimedParallelMap.html#run-fffff7d2">run</a>, <a href="parallel/TimedParallelMap.html#child-fffff194">child</a>, <a href="parallel/TimedParallelMap.html#nanos-0">nanos</a>, and <a href="parallel/TimedParallelMap.html#report-0">report</a> concurrently from multiple threads.</p>
+              <h2><a href="#overhead" id="overhead">Overhead</a></h2>
+              <p>Timing introduces one <code>System.nanoTime()</code> pair per <a href="parallel/TimedParallelMap.html#apply-ffffff11">apply</a>/<a href="parallel/TimedParallelMap.html#run-fffff7d2">run</a> call and a few lock acquisitions. For extremely fine-grained tasks, prefer timing fewer, larger phases.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -338,13 +417,13 @@
                inner
               </dt>
               <dd class="body-medium">
-               <p>The inner parallel mapping strategy to use.</p>
+               <p>The underlying strategy to which work is delegated.</p>
               </dd>
               <dt class="body-small">
                name
               </dt>
               <dd class="body-medium">
-               <p>The name of the parallel mapping strategy.</p>
+               <p>Logical name for this timing node (used in <a href="parallel/TimedParallelMap.html#report-0">report</a>).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -389,11 +468,25 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A report of the time taken for a hierarchy of operations.</p>
+             <p>Hierarchical, wall-clock timing summary for a tree of operations.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A report of the time taken for a hierarchy of operations.</p>
+              <p>Hierarchical, wall-clock timing summary for a tree of operations.</p>
+              <p>Each node reports:</p>
+              <ul>
+               <li><span data-unresolved-link="">name</span>: logical label (e.g., a phase or rule group)</li>
+               <li><span data-unresolved-link="">nanos</span>: elapsed wall-clock time for this node <strong>including all descendants</strong></li>
+               <li><span data-unresolved-link="">children</span>: sub-reports for nested phases</li>
+              </ul>
+              <p>Percentages shown by <span data-unresolved-link="">toString</span> are computed relative to the <em>root</em> node passed to the pretty-printer of that tree. If you call <code>root.toString</code>, every line’s percentage is relative to <code>root.nanos</code>. If you print a subtree, percentages will be relative to that subtree’s <code>nanos</code>.</p>
+              <p>Typical sources of <code>TimingReport</code> are <a href="parallel/TimedParallelMap.html#report-0">TimedParallelMap.report</a> trees.</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val report: TimingReport = timedPM.report
+</span><span line-number="2" class=""><span class="tooltip-container"></span>println(report)    // Multiline hierarchy with durations and percentages
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -401,19 +494,19 @@
                children
               </dt>
               <dd class="body-medium">
-               <p>The timing reports of child operations.</p>
+               <p>Child timing reports (each child is a subtree).</p>
               </dd>
               <dt class="body-small">
                name
               </dt>
               <dd class="body-medium">
-               <p>The name of the operation.</p>
+               <p>Logical label for this timing node.</p>
               </dd>
               <dt class="body-small">
                nanos
               </dt>
               <dd class="body-medium">
-               <p>The wall clock time taken for this operation in nanoseconds, including child operations.</p>
+               <p>Wall-clock time in nanoseconds for this node <strong>and all of its descendants</strong>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -470,11 +563,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the <a href="parallel/TimingReport.html">TimingReport</a> class.</p>
+             <p>Utilities for constructing and normalizing <a href="parallel/TimingReport.html">TimingReport</a> trees.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the <a href="parallel/TimingReport.html">TimingReport</a> class.</p>
+              <p>Utilities for constructing and normalizing <a href="parallel/TimingReport.html">TimingReport</a> trees.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">

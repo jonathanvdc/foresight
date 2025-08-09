@@ -15,7 +15,21 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A report of the time taken for a hierarchy of operations.</p>
+  <p>Hierarchical, wall-clock timing summary for a tree of operations.</p>
+  <p>Each node reports:</p>
+  <ul>
+   <li><span data-unresolved-link="">name</span>: logical label (e.g., a phase or rule group)</li>
+   <li><span data-unresolved-link="">nanos</span>: elapsed wall-clock time for this node <strong>including all descendants</strong></li>
+   <li><span data-unresolved-link="">children</span>: sub-reports for nested phases</li>
+  </ul>
+  <p>Percentages shown by <span data-unresolved-link="">toString</span> are computed relative to the <em>root</em> node passed to the pretty-printer of that tree. If you call <code>root.toString</code>, every line’s percentage is relative to <code>root.nanos</code>. If you print a subtree, percentages will be relative to that subtree’s <code>nanos</code>.</p>
+  <p>Typical sources of <code>TimingReport</code> are <a href="TimedParallelMap.html#report-0">TimedParallelMap.report</a> trees.</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val report: TimingReport = timedPM.report
+</span><span line-number="2" class=""><span class="tooltip-container"></span>println(report)    // Multiline hierarchy with durations and percentages
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -24,19 +38,19 @@
     children
    </dt>
    <dd class="body-medium">
-    <p>The timing reports of child operations.</p>
+    <p>Child timing reports (each child is a subtree).</p>
    </dd>
    <dt class="body-small">
     name
    </dt>
    <dd class="body-medium">
-    <p>The name of the operation.</p>
+    <p>Logical label for this timing node.</p>
    </dd>
    <dt class="body-small">
     nanos
    </dt>
    <dd class="body-medium">
-    <p>The wall clock time taken for this operation in nanoseconds, including child operations.</p>
+    <p>Wall-clock time in nanoseconds for this node <strong>and all of its descendants</strong>.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -141,21 +155,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The time taken for this operation, including child operations, as a Duration.</p>
+             <p>Elapsed wall-clock time as a Scala <span data-unresolved-link="">scala.concurrent.duration.Duration</span>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The time taken for this operation, including child operations, as a Duration.</p>
+              <p>Elapsed wall-clock time as a Scala <span data-unresolved-link="">scala.concurrent.duration.Duration</span>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The time taken as a Duration.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -176,20 +183,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Converts the timing report to a string representation.</p>
+             <p>Pretty, indented, multiline report.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Converts the timing report to a string representation.</p>
+              <p>Pretty, indented, multiline report.</p>
+              <p>Lines are ordered as in <span data-unresolved-link="">children</span> (depth-first). Each line shows: <code>name: &lt;duration&gt; (&lt;percentage%&gt;)</code>, where the percentage is relative to this node’s total if printed standalone, or to the root if called on the root.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The string representation of the timing report.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>

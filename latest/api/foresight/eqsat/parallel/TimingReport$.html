@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the <a href="TimingReport.html">TimingReport</a> class.</p>
+  <p>Utilities for constructing and normalizing <a href="TimingReport.html">TimingReport</a> trees.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,11 +210,18 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Merges a sequence of timing reports into a single report.</p>
+             <p>Merges multiple reports with the same conceptual root into a single tree.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Merges a sequence of timing reports into a single report.</p>
+              <p>Merges multiple reports with the same conceptual root into a single tree.</p>
+              <p>Semantics:</p>
+              <ul>
+               <li>Root <span data-unresolved-link="" title="Problem linking nanos: No DRI found for query">nanos</span> becomes the <strong>sum</strong> of all root nanos.</li>
+               <li>Children are grouped by <span data-unresolved-link="">TimingReport.name</span>; groups are merged recursively.</li>
+               <li>Sibling groups are sorted by name for stable output.</li>
+              </ul>
+              <p>Use this to coalesce timing from repeated runs or distributed shards into a single report.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -222,13 +229,13 @@ node5 -> node1;
                name
               </dt>
               <dd class="body-medium">
-               <p>The name of the merged report.</p>
+               <p>Name for the merged root.</p>
               </dd>
               <dt class="body-small">
                reports
               </dt>
               <dd class="body-medium">
-               <p>The sequence of timing reports to merge.</p>
+               <p>Non-empty sequence of root reports to merge.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -237,7 +244,18 @@ node5 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The merged timing report.</p>
+               <p>A single, merged <a href="TimingReport.html">TimingReport</a> tree.</p>
+              </dd>
+              <dt class="body-small">
+               Throws
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <span data-unresolved-link="">IllegalArgumentException</span>
+                 <p>if <code>reports</code> is empty.</p>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -260,30 +278,15 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies a timing report by merging any of its children that have the same name.</p>
+             <p>Normalizes a single report by merging child subtrees that share the same name.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies a timing report by merging any of its children that have the same name.</p>
+              <p>Normalizes a single report by merging child subtrees that share the same name.</p>
+              <p>Equivalent to calling <a href="TimingReport$.html#merge-1b4">merge</a> on a singleton sequence of <code>report</code>. Handy for collapsing repeated, same-named phases under a node.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               report
-              </dt>
-              <dd class="body-medium">
-               <p>The timing report to simplify.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The simplified timing report.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

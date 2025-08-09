@@ -12,7 +12,30 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A parallel map that measures the time taken to process elements.</p>
+  <p>A <a href="ParallelMap.html">ParallelMap</a> decorator that records wall-clock timing for mapping and ad-hoc tasks.</p>
+  <p><code>TimedParallelMap</code> captures elapsed time for both this node and its <strong>entire subtree</strong> of child strategies created via <a href="TimedParallelMap.html#child-fffff194">child</a>. Timing is computed as:</p>
+  <ul>
+   <li><strong>Start</strong>: the earliest <code>System.nanoTime()</code> observed among this node and all of its children during any call to <a href="TimedParallelMap.html#apply-ffffff11">apply</a> or <a href="TimedParallelMap.html#run-fffff7d2">run</a>.</li>
+   <li><strong>End</strong>: the latest <code>System.nanoTime()</code> observed among this node and all of its children.</li>
+   <li><a href="TimedParallelMap.html#nanos-0">nanos</a> returns <code>End - Start</code>. Overlapping child work is <strong>not double-counted</strong>; this is wall-clock duration, not a sum of per-task CPU times.</li>
+  </ul>
+  <h2><a href="#typical-usage" id="typical-usage">Typical usage</a></h2>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val pm: ParallelMap = ParallelMap.parallel
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val timed = new TimedParallelMap("root", pm)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val child = timed.child("phase-1")
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val out   = child(Seq(1,2,3), _ * 2)   // work to be timed under "phase-1"
+</span><span line-number="6" class=""><span class="tooltip-container"></span>
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val report: TimingReport = timed.report
+</span><span line-number="8" class=""><span class="tooltip-container"></span>println(report.pretty)                 // or however you surface it
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <h2><a href="#thread-safety" id="thread-safety">Thread safety</a></h2>
+  <p>All timing state and the child list are protected by an internal <span data-unresolved-link="">java.util.concurrent.locks.ReentrantLock</span>. You may call <a href="TimedParallelMap.html#apply-ffffff11">apply</a>, <a href="TimedParallelMap.html#run-fffff7d2">run</a>, <a href="TimedParallelMap.html#child-fffff194">child</a>, <a href="TimedParallelMap.html#nanos-0">nanos</a>, and <a href="TimedParallelMap.html#report-0">report</a> concurrently from multiple threads.</p>
+  <h2><a href="#overhead" id="overhead">Overhead</a></h2>
+  <p>Timing introduces one <code>System.nanoTime()</code> pair per <a href="TimedParallelMap.html#apply-ffffff11">apply</a>/<a href="TimedParallelMap.html#run-fffff7d2">run</a> call and a few lock acquisitions. For extremely fine-grained tasks, prefer timing fewer, larger phases.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -21,13 +44,13 @@
     inner
    </dt>
    <dd class="body-medium">
-    <p>The inner parallel mapping strategy to use.</p>
+    <p>The underlying strategy to which work is delegated.</p>
    </dd>
    <dt class="body-small">
     name
    </dt>
    <dd class="body-medium">
-    <p>The name of the parallel mapping strategy.</p>
+    <p>Logical name for this timing node (used in <a href="TimedParallelMap.html#report-0">report</a>).</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -114,51 +137,14 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Applies a function to each element of a collection.</p>
+             <p>Delegates to the inner strategy while recording a timing window for this node.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Applies a function to each element of a collection.</p>
-              <p>Execution may be sequential or parallel depending on the implementation.</p>
+              <p>Delegates to the inner strategy while recording a timing window for this node.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               A
-              </dt>
-              <dd class="body-medium">
-               <p>Element type of <code>inputs</code>.</p>
-              </dd>
-              <dt class="body-small">
-               B
-              </dt>
-              <dd class="body-medium">
-               <p>Result type of <code>f</code>.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               f
-              </dt>
-              <dd class="body-medium">
-               <p>Function to apply to each element.</p>
-              </dd>
-              <dt class="body-small">
-               inputs
-              </dt>
-              <dd class="body-medium">
-               <p>Input collection to process.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>Collection of results, in the same order as the input.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -188,30 +174,15 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a named child parallel mapping strategy.</p>
+             <p>Creates a named child timing node that delegates work to the same underlying strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a named child parallel mapping strategy.</p>
-              <p>Child strategies can inherit resource pools or scheduling from their parent, but can also have independent timing, cancellation, or logging.</p>
+              <p>Creates a named child timing node that delegates work to the same underlying strategy.</p>
+              <p>The child contributes to this node's overall timing window (see <a href="TimedParallelMap.html#nanos-0">nanos</a>).</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               name
-              </dt>
-              <dd class="body-medium">
-               <p>Identifier for the child strategy (for debugging or metrics).</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new <a href="ParallelMap.html">ParallelMap</a> scoped as a child of this strategy.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -241,21 +212,15 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The name of the parallel mapping strategy.</p>
+             <p>The immediate child timing nodes created from this strategy via <a href="TimedParallelMap.html#child-fffff194">child</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The name of the parallel mapping strategy.</p>
+              <p>The immediate child timing nodes created from this strategy via <a href="TimedParallelMap.html#child-fffff194">child</a>.</p>
+              <p>Returned as an immutable snapshot.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The name of the parallel mapping strategy.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -276,21 +241,15 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The wall clock time taken to process elements in this parallel map, including the time taken by child parallel maps.</p>
+             <p>Wall-clock elapsed time (in nanoseconds) covered by this node <strong>and all of its descendants</strong>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The wall clock time taken to process elements in this parallel map, including the time taken by child parallel maps.</p>
+              <p>Wall-clock elapsed time (in nanoseconds) covered by this node <strong>and all of its descendants</strong>.</p>
+              <p>Defined as <code>max(endTimes) - min(startTimes)</code> across the subtree. If no work has been recorded yet (no <a href="TimedParallelMap.html#apply-ffffff11">apply</a> or <a href="TimedParallelMap.html#run-fffff7d2">run</a> was called on this node or its children), returns <code>0</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The wall clock time in nanoseconds.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -311,21 +270,15 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A timing report of the operations performed by this parallel map and its children.</p>
+             <p>Builds a hierarchical <a href="TimingReport.html">TimingReport</a> for this node and its children.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A timing report of the operations performed by this parallel map and its children.</p>
+              <p>Builds a hierarchical <a href="TimingReport.html">TimingReport</a> for this node and its children.</p>
+              <p>The report captures each node's name and elapsed wall-clock time (via <a href="TimedParallelMap.html#nanos-0">nanos</a>) and then runs a simplification pass (see <a href="TimingReport$.html#simplify-280">TimingReport.simplify</a>) to collapse trivial structure.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The timing report.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -346,39 +299,14 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Executes an arbitrary computation within this parallel mapping strategy.</p>
+             <p>Delegates to the inner strategy while recording a timing window for this node.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Executes an arbitrary computation within this parallel mapping strategy.</p>
-              <p>Internally implemented using <a href="TimedParallelMap.html#apply-ffffff11">apply</a> over a single dummy element.</p>
+              <p>Delegates to the inner strategy while recording a timing window for this node.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               A
-              </dt>
-              <dd class="body-medium">
-               <p>The result type.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               f
-              </dt>
-              <dd class="body-medium">
-               <p>The computation to execute.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The result of the computation.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>

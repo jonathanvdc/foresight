@@ -12,11 +12,67 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A token that can be used to cancel an operation.</p>
+  <p>Cooperative cancellation signal for long-running or batched operations.</p>
+  <p>A <code>CancellationToken</code> is a simple, thread-safe flag that can be polled by running code to decide whether to abort early. It does not forcibly interrupt threads. Instead, libraries (for example, <a href="ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a>) periodically check the token and abort work cooperatively (often by throwing an <a href="OperationCanceledException.html">OperationCanceledException</a>).</p>
+  <p>Common usage:</p>
+  <ul>
+   <li>Create a token for a job.</li>
+   <li>Optionally arm a timeout with <a href="CancellationToken.html#cancelAfter-44f">cancelAfter</a>.</li>
+   <li>Pass the token into your work and periodically check it (or rely on library checkpoints).</li>
+   <li>Do not disarm; if the timeout elapses, the job cancels.</li>
+  </ul>
+  <p>Example:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="2" class=""><span class="tooltip-container"></span>token.cancelAfter(30.seconds)                // let the job auto-cancel after 30s
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val pm = ParallelMap.parallel.cancelable(token)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val out = pm(Seq(1, 2, 3), { x =&gt;
+</span><span line-number="6" class=""><span class="tooltip-container"></span> expensiveComputation(x)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>})
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>Advanced:</p>
+  <ul>
+   <li>If you need to suppress or extend a timeout while the task is running, keep the control token returned by <a href="CancellationToken.html#cancelAfter-44f">cancelAfter</a> and cancel it to disarm the scheduled cancel, or cancel and re-arm to extend the deadline. Most code does not need this.</li>
+   <li>One example is a "heartbeat": extend the timeout periodically while progress is observed.</li>
+  </ul>
+  <p>Example: heartbeat to keep the job alive while progress is made</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def process(items: Seq[Item], token: CancellationToken): Unit = {
+</span><span line-number="2" class=""><span class="tooltip-container"></span> var ctl = token.cancelAfter(10.seconds)      // initial deadline
+</span><span line-number="3" class=""><span class="tooltip-container"></span> for ((item, i) &lt;- items.zipWithIndex) {
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   step(item, token)                          // check token inside
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   if (i % 100 == 0) {                        // progress checkpoint
+</span><span line-number="6" class=""><span class="tooltip-container"></span>     ctl.cancel()                             // disarm old deadline
+</span><span line-number="7" class=""><span class="tooltip-container"></span>     ctl = token.cancelAfter(10.seconds)      // renew deadline
+</span><span line-number="8" class=""><span class="tooltip-container"></span>   }
+</span><span line-number="9" class=""><span class="tooltip-container"></span> }
+</span><span line-number="10" class=""><span class="tooltip-container"></span>}
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>Thread safety:</p>
+  <ul>
+   <li>Uses a Java AtomicBoolean for internal state.</li>
+   <li>Changes to the cancellation flag are visible to all threads immediately.</li>
+   <li>Both reads and writes are non-blocking and lock-free.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    See also
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p><a href="ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a> for integrating cancellation with mapping.</p>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -93,11 +149,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Cancels the operation.</p>
+             <p>Marks this token as canceled.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Cancels the operation.</p>
+              <p>Marks this token as canceled.</p>
+              <p>Any code polling <a href="CancellationToken.html#isCanceled-0">isCanceled</a> will observe the change immediately on all threads. Safe to call multiple times.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -121,11 +178,13 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Cancels the operation after a timeout. This operation is non-blocking and returns a new <code>CancellationToken</code> that can be used to cancel the cancellation.</p>
+             <p>Arms a timeout that will cancel this token after the given duration.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Cancels the operation after a timeout. This operation is non-blocking and returns a new <code>CancellationToken</code> that can be used to cancel the cancellation.</p>
+              <p>Arms a timeout that will cancel this token after the given duration.</p>
+              <p>This method is non-blocking. It returns a new <a href="CancellationToken.html">CancellationToken</a> (the control token) that can be used to disarm the scheduled cancellation if needed.</p>
+              <p>Typical pattern is to ignore the returned control token entirely; the timeout will fire and cancel this token if the job is still running.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -133,7 +192,7 @@ node3 -> node2;
                timeout
               </dt>
               <dd class="body-medium">
-               <p>The timeout after which the operation will be cancelled.</p>
+               <p>Duration to wait before canceling this token.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -142,7 +201,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new <code>CancellationToken</code> that can be used to cancel the cancellation.</p>
+               <p>A separate token that, when canceled, prevents the scheduled timeout from firing.</p>
               </dd>
              </dl>
             </div>
@@ -165,11 +224,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Returns <code>true</code> if the operation has been cancelled, <code>false</code> otherwise.</p>
+             <p>Returns whether this token has been canceled.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Returns <code>true</code> if the operation has been cancelled, <code>false</code> otherwise.</p>
+              <p>Returns whether this token has been canceled.</p>
+              <p>This is a non-blocking, thread-safe read.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
