@@ -35,9 +35,9 @@ package foresight.eqsat.parallel
  *
  * ## Implementation Notes
  * Implementations may differ in:
- * - Degree of parallelism and thread scheduling
- * - Overhead for small collections
- * - Cancellation behavior (when checks are performed)
+ *   - Degree of parallelism and thread scheduling
+ *   - Overhead for small collections
+ *   - Cancellation behavior (when checks are performed)
  *
  * @see [[ParallelMap.sequential]], [[ParallelMap.parallel]], [[ParallelMap.fixedThreadParallel]]
  */
