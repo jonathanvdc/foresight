@@ -67,20 +67,45 @@ trait ParallelMap {
   def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B]
 
   /**
-   * Wraps this strategy with a cancellation check.
+   * Returns a view of this strategy that cooperatively cancels work using the given token.
    *
-   * If the given [[CancellationToken]] is canceled:
-   *   - Before starting: no work is performed; throws [[OperationCanceledException]].
-   *   - During execution: stops at the next cancellation check and throws [[OperationCanceledException]].
+   * Semantics:
+   *   - If the token is canceled before work begins, no work is performed and an
+   *     [[OperationCanceledException]] is thrown immediately.
+   *   - While mapping, cancellation is observed at wrapper checkpoints (see below). When detected,
+   *     an [[OperationCanceledException]] is thrown and remaining work is skipped.
    *
-   * Cancellation checks occur:
-   *   - Once before the mapping starts
-   *   - Once before processing each element
+   * Checkpoints added by this wrapper:
+   *   - One check before the mapping starts.
+   *   - One check before processing each input element.
    *
-   * @param token Cancellation trigger.
-   * @throws OperationCanceledException if canceled before or during execution.
-   * @return A new [[ParallelMap]] that respects the given token.
+   * Important:
+   *   - The wrapper does not interrupt user code while running a single element function `f`.
+   *     If `f` can run for a long time, pass the token into `f` and poll it inside `f`
+   *     to achieve finer-grained cancellation.
+   *
+   * Example:
+   * {{{
+   * val token = new CancellationToken
+   * token.cancelAfter(30.seconds)                 // common "set and forget" timeout
+   *
+   * val pm = ParallelMap.parallel.cancelable(token)
+   * val out = pm(items, { a =>
+   *   // Optional finer-grained check inside user code
+   *   if (token.isCanceled) throw OperationCanceledException(token)
+   *   compute(a)
+   * })
+   * }}}
+   *
+   * Composition:
+   *   - Children created via [[child]] inherit cancellation by wrapping the parent's child.
+   *   - Can be combined with [[timed]]; timing still reflects the work up to cancellation.
+   *
+   * @param token Cancellation trigger to observe.
+   * @throws OperationCanceledException if the token is canceled before start or at any checkpoint.
+   * @return A new [[ParallelMap]] that observes the token at the described checkpoints.
    */
+
   final def cancelable(token: CancellationToken): ParallelMap = new ParallelMap {
     override def child(name: String): ParallelMap =
       ParallelMap.this.child(name).cancelable(token)
