@@ -10,6 +10,89 @@
   <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="parallel.html" t="n" class="documentableName ">foresight.eqsat.parallel</a>
  </div>
 </div>
+<div class="cover">
+ <div class="doc">
+  <p>Parallelism utilities for Foresight.</p>
+  <p>This package provides a minimal, composable abstraction for executing collection transforms and ad-hoc tasks with optional cancellation and timing. The design favors clear checkpoints over implicit thread interruption, so that callers control how cooperative cancellation is observed inside their own code.</p>
+  <p>Core types:</p>
+  <ul>
+   <li><a href="parallel/ParallelMap.html">ParallelMap</a>: strategy interface for applying a function over a collection, with sequential and parallel implementations, child scoping, and wrappers for cancellation and timing.</li>
+   <li><a href="parallel/TimedParallelMap.html">TimedParallelMap</a>: decorator that records wall-clock timing for a strategy and its child hierarchy, producing a <a href="parallel/TimingReport.html">TimingReport</a>.</li>
+   <li><a href="parallel/CancellationToken.html">CancellationToken</a>: thread-safe, cooperative cancellation flag with optional timeouts via <code>cancelAfter</code>.</li>
+   <li><a href="parallel/OperationCanceledException.html">OperationCanceledException</a>: exception thrown when cancellation is observed at a checkpoint.</li>
+   <li><a href="parallel/TimingReport.html">TimingReport</a>: immutable, hierarchical timing summary with merge and simplify helpers.</li>
+  </ul>
+  <p>Choosing a strategy:</p>
+  <ul>
+   <li>Use <a href="parallel/ParallelMap$.html#sequential-0">ParallelMap.sequential</a> for tiny inputs, deterministic debugging, or environments without threads.</li>
+   <li>Use <a href="parallel/ParallelMap$.html#parallel-0">ParallelMap.parallel</a> for general-purpose parallelism with library defaults.</li>
+   <li>Use <a href="parallel/ParallelMap$.html#fixedThreadParallel-fffff156">ParallelMap.fixedThreadParallel</a> when you need an explicit thread cap.</li>
+  </ul>
+  <p>Cancellation model:</p>
+  <ul>
+   <li>Wrap a strategy with <a href="parallel/ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a> and pass a <a href="parallel/CancellationToken.html">CancellationToken</a>.</li>
+   <li>The wrapper performs checks before starting and before each element.</li>
+   <li>Long-running element functions should also poll the token inside <code>f</code> to observe cancellation promptly.</li>
+   <li>Typical usage is to arm a timeout with <code>token.cancelAfter(d)</code> and not disarm it.</li>
+  </ul>
+  <p>Timing and reporting:</p>
+  <ul>
+   <li>Call <a href="parallel/ParallelMap.html#timed-0">ParallelMap.timed</a> or wrap an existing strategy in <a href="parallel/TimedParallelMap.html">TimedParallelMap</a> to collect timings.</li>
+   <li>Elapsed time is wall-clock across the subtree, not a sum of per-task CPU times.</li>
+   <li>Use <a href="parallel/TimingReport$.html#simplify-280">TimingReport.simplify</a> to collapse repeated, same-named child nodes; use <a href="parallel/TimingReport$.html#merge-1b4">TimingReport.merge</a> to combine reports from multiple runs or shards.</li>
+  </ul>
+  <p>Threading considerations:</p>
+  <ul>
+   <li><a href="parallel/CancellationToken.html">CancellationToken</a> uses an AtomicBoolean for safe cross-thread visibility without locks.</li>
+   <li><a href="parallel/TimedParallelMap.html">TimedParallelMap</a> protects its internal state with a lock and is safe to use concurrently.</li>
+   <li>Implementations of <a href="parallel/ParallelMap.html">ParallelMap</a> may differ in scheduling and resource usage; choose according to workload.</li>
+  </ul>
+  <p>Examples:</p>
+  <p>Simple parallel map with timeout</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import scala.concurrent.duration._
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="4" class=""><span class="tooltip-container"></span>token.cancelAfter(30.seconds)                           // set-and-forget cancellation
+</span><span line-number="5" class=""><span class="tooltip-container"></span>
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val pm = ParallelMap.parallel.cancelable(token)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val out = pm(Seq(1, 2, 3), x =&gt; x * x)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>Finer-grained cancellation inside a long-running function</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def compute(x: Int, token: CancellationToken): Int = {
+</span><span line-number="2" class=""><span class="tooltip-container"></span> if (token.isCanceled) throw OperationCanceledException(token)
+</span><span line-number="3" class=""><span class="tooltip-container"></span> // ... long step ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span> if (token.isCanceled) throw OperationCanceledException(token)
+</span><span line-number="5" class=""><span class="tooltip-container"></span> // ... next step ...
+</span><span line-number="6" class=""><span class="tooltip-container"></span> x * x
+</span><span line-number="7" class=""><span class="tooltip-container"></span>}
+</span><span line-number="8" class=""><span class="tooltip-container"></span>
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val out = ParallelMap.parallel.cancelable(token)(items, x =&gt; compute(x, token))
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>Timing a nested workflow</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val timed = ParallelMap.parallel.timed
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val phase1 = timed.child("phase-1")
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val phase2 = timed.child("phase-2")
+</span><span line-number="4" class=""><span class="tooltip-container"></span>
+</span><span line-number="5" class=""><span class="tooltip-container"></span>phase1(Seq.fill(100)(()), _ =&gt; doWork1())
+</span><span line-number="6" class=""><span class="tooltip-container"></span>phase2.run(doWork2())
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span>println(timed.report)                                   // hierarchical durations with percentages
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes"></dl>
+ </section>
+</div>
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
@@ -145,11 +228,33 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An exception that is thrown when an operation is cancelled.</p>
+             <p>Exception signaling that an operation was canceled via a <a href="parallel/CancellationToken.html">CancellationToken</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An exception that is thrown when an operation is cancelled.</p>
+              <p>Exception signaling that an operation was canceled via a <a href="parallel/CancellationToken.html">CancellationToken</a>.</p>
+              <p>This is the mechanism used by cooperative cancellation in Foresight. Code that supports cancellation (such as <a href="parallel/ParallelMap.html#cancelable-fffffcbf">ParallelMap.cancelable</a>) will periodically check a token's <a href="parallel/CancellationToken.html#isCanceled-0">CancellationToken.isCanceled</a> flag and, if set, abort by throwing this exception.</p>
+              <p>Usage:</p>
+              <ul>
+               <li>Constructed and thrown internally by APIs that accept a <a href="parallel/CancellationToken.html">CancellationToken</a>.</li>
+               <li>You can also throw it manually if you check the token yourself inside long-running logic.</li>
+               <li>Typically caught at a high level to stop the operation cleanly.</li>
+              </ul>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="2" class=""><span class="tooltip-container"></span>token.cancelAfter(5.seconds)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>try {
+</span><span line-number="5" class=""><span class="tooltip-container"></span> val pm = ParallelMap.parallel.cancelable(token)
+</span><span line-number="6" class=""><span class="tooltip-container"></span> pm(myLargeDataset, processItem)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>} catch {
+</span><span line-number="8" class=""><span class="tooltip-container"></span> case OperationCanceledException(t) if t == token =&gt;
+</span><span line-number="9" class=""><span class="tooltip-container"></span>   println("Work was canceled due to timeout.")
+</span><span line-number="10" class=""><span class="tooltip-container"></span>}
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -157,7 +262,7 @@
                token
               </dt>
               <dd class="body-medium">
-               <p>The cancellation token that was used to cancel the operation.</p>
+               <p>The <a href="parallel/CancellationToken.html">CancellationToken</a> that triggered the cancellation.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -623,4 +728,4 @@
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

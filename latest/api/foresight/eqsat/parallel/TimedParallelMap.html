@@ -344,20 +344,43 @@ node4 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Wraps this strategy with a cancellation check.</p>
+             <p>Returns a view of this strategy that cooperatively cancels work using the given token.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Wraps this strategy with a cancellation check.</p>
-              <p>If the given <a href="CancellationToken.html">CancellationToken</a> is canceled:</p>
+              <p>Returns a view of this strategy that cooperatively cancels work using the given token.</p>
+              <p>Semantics:</p>
               <ul>
-               <li>Before starting: no work is performed; throws <a href="OperationCanceledException.html">OperationCanceledException</a>.</li>
-               <li>During execution: stops at the next cancellation check and throws <a href="OperationCanceledException.html">OperationCanceledException</a>.</li>
+               <li>If the token is canceled before work begins, no work is performed and an <a href="OperationCanceledException.html">OperationCanceledException</a> is thrown immediately.</li>
+               <li>While mapping, cancellation is observed at wrapper checkpoints (see below). When detected, an <a href="OperationCanceledException.html">OperationCanceledException</a> is thrown and remaining work is skipped.</li>
               </ul>
-              <p>Cancellation checks occur:</p>
+              <p>Checkpoints added by this wrapper:</p>
               <ul>
-               <li>Once before the mapping starts</li>
-               <li>Once before processing each element</li>
+               <li>One check before the mapping starts.</li>
+               <li>One check before processing each input element.</li>
+              </ul>
+              <p>Important:</p>
+              <ul>
+               <li>The wrapper does not interrupt user code while running a single element function <code>f</code>. If <code>f</code> can run for a long time, pass the token into <code>f</code> and poll it inside <code>f</code> to achieve finer-grained cancellation.</li>
+              </ul>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val token = new CancellationToken
+</span><span line-number="2" class=""><span class="tooltip-container"></span>token.cancelAfter(30.seconds)                 // common "set and forget" timeout
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val pm = ParallelMap.parallel.cancelable(token)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val out = pm(items, { a =&gt;
+</span><span line-number="6" class=""><span class="tooltip-container"></span> // Optional finer-grained check inside user code
+</span><span line-number="7" class=""><span class="tooltip-container"></span> if (token.isCanceled) throw OperationCanceledException(token)
+</span><span line-number="8" class=""><span class="tooltip-container"></span> compute(a)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>})
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <p>Composition:</p>
+              <ul>
+               <li>Children created via <a href="ParallelMap.html#child-fffff194">child</a> inherit cancellation by wrapping the parent's child.</li>
+               <li>Can be combined with <a href="ParallelMap.html#timed-0">timed</a>; timing still reflects the work up to cancellation.</li>
               </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
@@ -366,7 +389,7 @@ node4 -> node1;
                token
               </dt>
               <dd class="body-medium">
-               <p>Cancellation trigger.</p>
+               <p>Cancellation trigger to observe.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -375,7 +398,7 @@ node4 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new <a href="ParallelMap.html">ParallelMap</a> that respects the given token.</p>
+               <p>A new <a href="ParallelMap.html">ParallelMap</a> that observes the token at the described checkpoints.</p>
               </dd>
               <dt class="body-small">
                Throws
@@ -384,7 +407,7 @@ node4 -> node1;
                <div>
                 <div>
                  <a href="OperationCanceledException.html">OperationCanceledException</a>
-                 <p>if canceled before or during execution.</p>
+                 <p>if the token is canceled before start or at any checkpoint.</p>
                 </div>
                </div>
               </dd>
