@@ -27,9 +27,93 @@
        </div>
        <div class="documentableElement">
         <div class="documentableElement-expander">
+         <button class="icon-button ar show-content"></button>
          <div class="header monospace mono-medium">
           <div class="signature">
            <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="eqsat/commands.html" t="n" class="documentableName ">foresight.eqsat.commands</a>
+          </div>
+         </div>
+        </div>
+        <div class="docs">
+         <span class="modifiers"></span>
+         <div>
+          <div class="originInfo"></div>
+          <div class="memberDocumentation">
+           <div class="documentableBrief doc">
+            <p>Defines the command system for making batched, replayable edits to an <a href="eqsat/EGraph.html">EGraph</a>.</p>
+           </div>
+           <div class="cover">
+            <div class="doc">
+             <p>Defines the command system for making batched, replayable edits to an <a href="eqsat/EGraph.html">EGraph</a>.</p>
+             <p>A <a href="eqsat/commands/Command.html">commands.Command</a> is an immutable description of a single edit, such as inserting one or more nodes (<a href="eqsat/commands/AddManyCommand.html">commands.AddManyCommand</a>) or merging e-classes (<a href="eqsat/commands/UnionManyCommand.html">commands.UnionManyCommand</a>).</p>
+             <p>Commands are:</p>
+             <ul>
+              <li><strong>pure values</strong> that do not mutate an e-graph until <a href="eqsat/commands/Command.html#apply-fffff2e4">commands.Command.apply</a></li>
+              <li><strong>self-describing</strong>: they declare their required inputs (<a href="eqsat/commands/Command.html#uses-0">commands.Command.uses</a>) and any new virtual symbols they define (<a href="eqsat/commands/Command.html#definitions-0">commands.Command.definitions</a>)</li>
+              <li><strong>optimizable</strong>: they can simplify themselves for a given e-graph (<a href="eqsat/commands/Command.html#simplify-ed0">commands.Command.simplify</a>)</li>
+             </ul>
+             <h2><a href="#symbols-and-reification" id="symbols-and-reification">Symbols and Reification</a></h2>
+             <p>Commands refer to e-classes symbolically via <a href="eqsat/commands/EClassSymbol.html">commands.EClassSymbol</a>:</p>
+             <ul>
+              <li><a href="eqsat/commands/EClassSymbol$$Real.html">commands.EClassSymbol.Real</a> for existing classes</li>
+              <li><a href="eqsat/commands/EClassSymbol$$Virtual.html">commands.EClassSymbol.Virtual</a> for classes not yet in the graph</li>
+             </ul>
+             <p>When a command is applied, virtual symbols are mapped to real classes using a <strong>reification map</strong> (<code>Map[Virtual, EClassCall]</code>). This allows command sequences to be planned without knowing concrete IDs upfront.</p>
+             <h2><a href="#batching-and-composition" id="batching-and-composition">Batching and Composition</a></h2>
+             <p>Most real edits involve more than one command. The package provides:</p>
+             <ul>
+              <li>
+               <p><a href="eqsat/commands/CommandQueue.html">commands.CommandQueue</a> — an immutable batch of commands that itself implements <a href="eqsat/commands/Command.html">commands.Command</a>, so queues can be nested or chained.</p></li>
+              <li>
+               <p><a href="eqsat/commands/CommandQueueBuilder.html">commands.CommandQueueBuilder</a> — a mutable helper for incrementally building a queue without reassigning after each append.</p></li>
+             </ul>
+             <p>Queues can be:</p>
+             <ul>
+              <li><strong>simplified</strong>: removing redundant unions, skipping inserts for already-present nodes</li>
+              <li><strong>optimized</strong>: merging independent commands for fewer graph rebuilds</li>
+             </ul>
+             <h2><a href="#common-command-types" id="common-command-types">Common Command Types</a></h2>
+             <ul>
+              <li>
+               <p><a href="eqsat/commands/AddManyCommand.html">commands.AddManyCommand</a> — inserts one or more <a href="eqsat/commands/ENodeSymbol.html">commands.ENodeSymbol</a>s, each paired with the <a href="eqsat/commands/EClassSymbol$$Virtual.html">commands.EClassSymbol.Virtual</a> that will represent its resulting class.</p></li>
+              <li>
+               <p><a href="eqsat/commands/UnionManyCommand.html">commands.UnionManyCommand</a> — unifies multiple pairs of e-classes at once.</p></li>
+              <li>
+               <p><a href="eqsat/commands/CommandQueue.html">commands.CommandQueue</a> — sequences arbitrary commands and can itself be nested inside other queues.</p></li>
+             </ul>
+             <h2><a href="#example" id="example">Example</a></h2>
+             <div class="snippet mono-small-block">
+              <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands._
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val builder = new CommandQueueBuilder[MyNode]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// Add a tree and get its root symbol
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val root = builder.add(myTree)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Add a dependent node
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val depNode = ENodeSymbol(op, Nil, Nil, Seq(root))
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val depSym = builder.add(depNode)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>
+</span><span line-number="12" class=""><span class="tooltip-container"></span>// Request a union of the two classes
+</span><span line-number="13" class=""><span class="tooltip-container"></span>builder.union(root, depSym)
+</span><span line-number="14" class=""><span class="tooltip-container"></span>
+</span><span line-number="15" class=""><span class="tooltip-container"></span>// Get the queue, optimize it, and apply it
+</span><span line-number="16" class=""><span class="tooltip-container"></span>val queue = builder.queue.optimized
+</span><span line-number="17" class=""><span class="tooltip-container"></span>val (maybeNewGraph, reif) = queue.apply(egraph, Map.empty, parallel)
+</span></code></pre>
+              <div class="buttons"></div>
+             </div>
+             <h2><a href="#lifecycle" id="lifecycle">Lifecycle</a></h2>
+             <ol>
+              <li><strong>Build</strong> — construct commands via <code>AddManyCommand</code>, <code>UnionManyCommand</code>, or convenience methods in <a href="eqsat/commands/CommandQueue.html">commands.CommandQueue</a> / <a href="eqsat/commands/CommandQueueBuilder.html">commands.CommandQueueBuilder</a>.</li>
+              <li><strong>Simplify</strong> — run <code>simplify(egraph, partialMap)</code> to drop redundant work and pre-bind resolvable symbols.</li>
+              <li><strong>Optimize</strong> — call <code>optimized</code> on queues to merge unions and batch adds.</li>
+              <li><strong>Apply</strong> — run <code>apply(egraph, reification, parallelMap)</code> to produce an updated graph.</li>
+             </ol>
+            </div>
+            <h2 class="h200">Attributes</h2>
+            <dl class="attributes attributes-small"></dl>
+           </div>
           </div>
          </div>
         </div>

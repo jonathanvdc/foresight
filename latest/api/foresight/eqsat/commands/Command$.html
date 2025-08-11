@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for <a href="Command.html">Command</a>.</p>
+  <p>Factory methods for constructing common <a href="Command.html">Command</a> instances.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -113,11 +113,17 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a command that unifies an e-class symbol with an expression tree.</p>
+             <p>Creates a <a href="Command.html">Command</a> that asserts an existing <a href="EClassSymbol.html">EClassSymbol</a> is equivalent to a given expression tree.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a command that unifies an e-class symbol with an expression tree.</p>
+              <p>Creates a <a href="Command.html">Command</a> that asserts an existing <a href="EClassSymbol.html">EClassSymbol</a> is equivalent to a given expression tree.</p>
+              <p>Internally, this:</p>
+              <ol>
+               <li>Inserts the tree (creating a fresh virtual symbol for its root if needed)</li>
+               <li>Unions that root with <code>symbol</code></li>
+              </ol>
+              <p>This is the canonical “add-and-unify” operation when you want to grow the e-graph with a concrete term and immediately equate it with an existing class.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -125,7 +131,7 @@ node3 -> node2;
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The node type of the expression tree.</p>
+               <p>Node type for the expression.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -134,13 +140,13 @@ node3 -> node2;
                symbol
               </dt>
               <dd class="body-medium">
-               <p>The e-class symbol to unify.</p>
+               <p>E-class symbol to unify with the tree’s root.</p>
               </dd>
               <dt class="body-small">
                tree
               </dt>
               <dd class="body-medium">
-               <p>The expression tree to unify with the e-class symbol.</p>
+               <p>Expression to insert/reuse and equate.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -149,7 +155,25 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The command that unifies the e-class symbol with the expression tree.</p>
+               <p>A compound command performing the insert and the union.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.Command
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val cmd: Command[MyNode] =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Command.addEquivalentTree(existingSym, myTree)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val (optGraph, out) =
+</span><span line-number="5" class=""><span class="tooltip-container"></span> cmd.simplify(egraph).apply(egraph, Map.empty, parallel)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>

@@ -15,7 +15,8 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A command that can be applied to an e-graph.</p>
+  <p>A <a href="Command.html">Command</a> encapsulates a single, replayable edit to an e-graph.</p>
+  <p>Commands are pure values that describe what to do; they don’t perform any mutation until applied. This design allows callers to build, simplify, batch, or reorder edits before committing them to an <a href="../EGraph.html">EGraph</a>.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,7 +25,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The node type of the expressions that the e-graph represents.</p>
+    <p>Node type for expressions represented by the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -133,11 +134,11 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Applies the command to the given e-graph.</p>
+             <p>Executes the command against an e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Applies the command to the given e-graph.</p>
+              <p>Executes the command against an e-graph.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -145,19 +146,19 @@ node6 -> node0;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph to which the command should be applied.</p>
+               <p>Destination e-graph. Implementations may either return it unchanged or produce a new immutable e-graph snapshot.</p>
               </dd>
               <dt class="body-small">
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallelization strategy to use.</p>
+               <p>Parallelization strategy to label and distribute any internal work.</p>
               </dd>
               <dt class="body-small">
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class symbols.</p>
+               <p>Mapping from virtual symbols to concrete calls available before this command runs. This is used to ground virtual references present in <a href="Command.html#uses-0">uses</a>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -166,7 +167,11 @@ node6 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols. The map contains an entry for each virtual e-class symbol that is created by the command.</p>
+               <p>A pair <code>(maybeNewGraph, outMap)</code> where:</p>
+               <ul>
+                <li><code>maybeNewGraph</code> is <code>Some(newGraph)</code> if any change occurred, or <code>None</code> for a no-op.</li>
+                <li><code>outMap</code> binds every symbol in <a href="Command.html#definitions-0">definitions</a> to its realized <a href="../EClassCall.html">EClassCall</a>.</li>
+               </ul>
               </dd>
              </dl>
             </div>
@@ -189,11 +194,12 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that are defined by the command.</p>
+             <p>The virtual e-class symbols this command promises to define when executed.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that are defined by the command.</p>
+              <p>The virtual e-class symbols this command promises to define when executed.</p>
+              <p>Each virtual symbol represents an e-class that will be materialized in the target e-graph and receive a concrete <a href="../EClassCall.html">EClassCall</a>. After a successful <a href="Command.html#apply-fffff2e4">apply</a>, the returned reification map contains an entry for every symbol listed here.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -217,11 +223,18 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph.</p>
+              <p>Typical simplifications include:</p>
+              <ul>
+               <li>eliminating unions whose endpoints are already congruent</li>
+               <li>dropping inserts of nodes already present</li>
+               <li>narrowing work by pre-binding outputs in the returned partial reification</li>
+              </ul>
+              <p>The returned partial map contains bindings this command can prove without running, which callers may compose across multiple commands to reduce future work.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -229,13 +242,13 @@ node6 -> node0;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Target e-graph used as context for optimization.</p>
               </dd>
               <dt class="body-small">
                partialReification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-clas symbols.</p>
+               <p>Known virtual-to-concrete bindings available upstream.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -244,7 +257,7 @@ node6 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command and a partial reification map for this command.</p>
+               <p>A pair <code>(simplifiedCommand, partialBindings)</code> for this command.</p>
               </dd>
              </dl>
             </div>
@@ -267,11 +280,16 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that need to be reified to run the command.</p>
+             <p>The e-class symbols this command expects to already exist when it runs.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that need to be reified to run the command.</p>
+              <p>The e-class symbols this command expects to already exist when it runs.</p>
+              <p>These are the external dependencies needed to interpret the command (e.g., “union the new class with this existing one”). Implementations list all required symbols so that callers can:</p>
+              <ul>
+               <li>validate a reification plan ahead of time</li>
+               <li>topologically sort commands</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -303,11 +321,17 @@ node6 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
+              <p>Typical simplifications include:</p>
+              <ul>
+               <li>eliminating unions whose endpoints are already congruent</li>
+               <li>dropping inserts of nodes already present</li>
+               <li>narrowing work by pre-binding outputs in the returned partial reification</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -315,7 +339,7 @@ node6 -> node0;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Target e-graph used as context for optimization.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -324,7 +348,7 @@ node6 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command.</p>
+               <p>A simplified command.</p>
               </dd>
              </dl>
             </div>

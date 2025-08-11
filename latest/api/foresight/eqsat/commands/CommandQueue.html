@@ -15,7 +15,8 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.</p>
+  <p>A composable batch of <a href="Command.html">Command</a>s that itself behaves as a single <a href="Command.html">Command</a>.</p>
+  <p>Queues enable staging, simplification, and reordering of edits before applying them to an <a href="../EGraph.html">EGraph</a>. When applied, commands run in sequence, threading the evolving reification map through each step.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,7 +25,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The node type of the expressions that the e-graph represents.</p>
+    <p>Node type for expressions represented by the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -33,11 +34,29 @@
     commands
    </dt>
    <dd class="body-medium">
-    <p>The commands to be applied to the e-graph.</p>
+    <p>The commands in execution order (prior to <a href="CommandQueue.html#optimized-0">optimized</a>).</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val q0 = CommandQueue.empty[MyNode]
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val (x, q1) = q0.add(myTree)                  // add a tree, get its symbol
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val (y, q2) = q1.add(ENodeSymbol(op, Nil, Nil, Seq(x)))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val q3 = q2.union(x, y).optimized             // merge unions, batch adds
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val (maybeGraph, refs) = q3(g, Map.empty, parallel)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -144,11 +163,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Appends a command to the queue that adds a new e-node to the e-graph.</p>
+             <p>Appends an insertion of a single <a href="ENodeSymbol.html">ENodeSymbol</a> as an <a href="AddManyCommand.html">AddManyCommand</a> of size 1.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Appends a command to the queue that adds a new e-node to the e-graph.</p>
+              <p>Appends an insertion of a single <a href="ENodeSymbol.html">ENodeSymbol</a> as an <a href="AddManyCommand.html">AddManyCommand</a> of size 1.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -156,7 +175,7 @@ node7 -> node2;
                node
               </dt>
               <dd class="body-medium">
-               <p>The e-node to add to the e-graph.</p>
+               <p>Node to add.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -165,7 +184,21 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The virtual e-class symbol that represents the added e-node and the new command queue.</p>
+               <p>The fresh output symbol for the node and the extended queue.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val (sym, q2) = q1.add(ENodeSymbol(op, defs, uses, args))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -188,11 +221,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Appends a command to the queue that adds a new tree to the e-graph.</p>
+             <p>Appends an insertion of a <a href="../MixedTree.html">MixedTree</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Appends a command to the queue that adds a new tree to the e-graph.</p>
+              <p>Appends an insertion of a <a href="../MixedTree.html">MixedTree</a>.</p>
+              <p>Child subtrees are added first (depth-first), then a final node is inserted referencing their produced symbols. If the tree is a <a href="../MixedTree$$Call.html">MixedTree.Call</a>, it is treated as already-real and no command is added.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -200,7 +234,7 @@ node7 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The tree to add to the e-graph.</p>
+               <p>Tree to insert.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -209,7 +243,21 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The virtual e-class symbol that represents the added tree and the new command queue.</p>
+               <p>The symbol for the tree's root and the extended queue.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val (root, q2) = q1.add(myTree)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -232,11 +280,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Applies the command to the given e-graph.</p>
+             <p>Applies each command in order, threading the latest graph and reification.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Applies the command to the given e-graph.</p>
+              <p>Applies each command in order, threading the latest graph and reification.</p>
+              <p>For each step, the current graph (updated only if the previous command returned <code>Some(newGraph)</code>) and the accumulated virtual-to-real bindings are passed to the next command.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -244,19 +293,19 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph to which the command should be applied.</p>
+               <p>Initial graph snapshot.</p>
               </dd>
               <dt class="body-small">
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallelization strategy to use.</p>
+               <p>Strategy for distributing work across commands that can parallelize internally.</p>
               </dd>
               <dt class="body-small">
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class symbols.</p>
+               <p>Initial virtual-to-concrete bindings available to the first command.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -265,7 +314,27 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols. The map contains an entry for each virtual e-class symbol that is created by the command.</p>
+               <ul>
+                <li><code>Some(newGraph)</code> if at least one command changed the graph, otherwise <code>None</code>.</li>
+                <li>The final reification map, containing the union of all bindings produced by the sub-commands.</li>
+               </ul>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val (g1, r1) = {
+</span><span line-number="2" class=""><span class="tooltip-container"></span> val (maybeG, out) = queue.apply(g0, Map.empty, parallel)
+</span><span line-number="3" class=""><span class="tooltip-container"></span> (maybeG.getOrElse(g0), out)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>}
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -296,11 +365,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Chains a command to the end of the queue.</p>
+             <p>Appends a single <a href="Command.html">Command</a> to the end of this queue.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Chains a command to the end of the queue.</p>
+              <p>Appends a single <a href="Command.html">Command</a> to the end of this queue.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -308,7 +377,7 @@ node7 -> node2;
                command
               </dt>
               <dd class="body-medium">
-               <p>The command to chain.</p>
+               <p>Command to add.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -317,7 +386,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new command queue.</p>
+               <p>The extended queue.</p>
               </dd>
              </dl>
             </div>
@@ -340,11 +409,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Chains a command queue to the end of the queue.</p>
+             <p>Concatenates another <a href="CommandQueue.html">CommandQueue</a> to the end of this queue.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Chains a command queue to the end of the queue.</p>
+              <p>Concatenates another <a href="CommandQueue.html">CommandQueue</a> to the end of this queue.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -352,7 +421,7 @@ node7 -> node2;
                commandQueue
               </dt>
               <dd class="body-medium">
-               <p>The command queue to chain.</p>
+               <p>Queue to append.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -361,7 +430,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new command queue.</p>
+               <p>The extended queue.</p>
               </dd>
              </dl>
             </div>
@@ -384,11 +453,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that are defined by the command.</p>
+             <p>All virtual symbols defined by the commands in this queue.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that are defined by the command.</p>
+              <p>All virtual symbols defined by the commands in this queue.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -421,11 +490,17 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Optimizes the command queue by merging union commands. Commands may be reordered in order to facilitate this.</p>
+             <p>Rewrites this queue into an equivalent but cheaper sequence by:</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Optimizes the command queue by merging union commands. Commands may be reordered in order to facilitate this.</p>
+              <p>Rewrites this queue into an equivalent but cheaper sequence by:</p>
+              <ul>
+               <li>flattening nested queues,</li>
+               <li>merging adjacent <a href="UnionManyCommand.html">UnionManyCommand</a>s,</li>
+               <li>batching independent <a href="AddManyCommand.html">AddManyCommand</a>s and layering dependent ones.</li>
+              </ul>
+              <p>Commands may be reordered where independence permits.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -433,7 +508,21 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The optimized command queue.</p>
+               <p>An optimized queue; does not modify this instance.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val qOptim = q.optimized
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -456,11 +545,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Simplifies each command against the current e-graph and threads partial reification.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Simplifies each command against the current e-graph and threads partial reification.</p>
+              <p>Each command is simplified in sequence, accumulating any discovered bindings. The resulting queue is then <a href="CommandQueue.html#optimized-0">optimized</a> to merge unions and batch adds.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -468,13 +558,13 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Context graph used by sub-command simplifications.</p>
               </dd>
               <dt class="body-small">
                partialReification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-clas symbols.</p>
+               <p>Upstream bindings available prior to running this queue.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -483,7 +573,22 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command and a partial reification map for this command.</p>
+               <p>The simplified-and-optimized queue and the accumulated partial bindings.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val (simp, partial) = q.simplify(g, Map.empty)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val (maybeG, finalRefs) = simp.apply(g, partial, parallel)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -514,11 +619,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Appends a command to the queue that unions two e-classes in the e-graph.</p>
+             <p>Appends a <a href="UnionManyCommand.html">UnionManyCommand</a> of size 1.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Appends a command to the queue that unions two e-classes in the e-graph.</p>
+              <p>Appends a <a href="UnionManyCommand.html">UnionManyCommand</a> of size 1.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -526,13 +631,13 @@ node7 -> node2;
                left
               </dt>
               <dd class="body-medium">
-               <p>The first e-class to union.</p>
+               <p>Left class symbol.</p>
               </dd>
               <dt class="body-small">
                right
               </dt>
               <dd class="body-medium">
-               <p>The second e-class to union.</p>
+               <p>Right class symbol.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -541,7 +646,21 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new command queue.</p>
+               <p>The extended queue.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val q2 = q1.union(a, b)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -564,11 +683,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that need to be reified to run the command.</p>
+             <p>All symbols used by the commands in this queue.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that need to be reified to run the command.</p>
+              <p>All symbols used by the commands in this queue.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -669,11 +788,17 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
+              <p>Typical simplifications include:</p>
+              <ul>
+               <li>eliminating unions whose endpoints are already congruent</li>
+               <li>dropping inserts of nodes already present</li>
+               <li>narrowing work by pre-binding outputs in the returned partial reification</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -681,7 +806,7 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Target e-graph used as context for optimization.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -690,7 +815,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command.</p>
+               <p>A simplified command.</p>
               </dd>
               <dt class="body-small">
                Inherited from:

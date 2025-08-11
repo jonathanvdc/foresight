@@ -15,7 +15,13 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A symbolic e-class application.</p>
+  <p>Symbolic handle for an e-class in an e-graph.</p>
+  <p>An <a href="EClassSymbol.html">EClassSymbol</a> can be:</p>
+  <ul>
+   <li>a concrete reference to an existing e-class (<a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>), or</li>
+   <li>a placeholder for an e-class not yet added (<a href="EClassSymbol$$Virtual.html">EClassSymbol.Virtual</a>).</li>
+  </ul>
+  <p>Symbols are used by <a href="Command.html">Command</a> instances to refer to e-classes in a portable, reifiable way.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -119,21 +125,14 @@ node5 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Checks if the e-class symbol is a concrete e-class application.</p>
+             <p>Returns <code>true</code> if this symbol refers to an existing e-class (i.e. is an <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Checks if the e-class symbol is a concrete e-class application.</p>
+              <p>Returns <code>true</code> if this symbol refers to an existing e-class (i.e. is an <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A Boolean value indicating whether the e-class symbol is a real e-class application.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -154,21 +153,14 @@ node5 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Checks if the e-class symbol is a virtual e-class application.</p>
+             <p>Returns <code>true</code> if this symbol is a placeholder (i.e. an <a href="EClassSymbol$$Virtual.html">EClassSymbol.Virtual</a>).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Checks if the e-class symbol is a virtual e-class application.</p>
+              <p>Returns <code>true</code> if this symbol is a placeholder (i.e. an <a href="EClassSymbol$$Virtual.html">EClassSymbol.Virtual</a>).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A Boolean value indicating whether the e-class symbol is a virtual e-class application.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -189,11 +181,16 @@ node5 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Refines the e-class symbol using the given reification.</p>
+             <p>Replaces this symbol with an <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a> if resolvable.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Refines the e-class symbol using the given reification.</p>
+              <p>Replaces this symbol with an <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a> if resolvable.</p>
+              <ul>
+               <li>If already real, returns an equivalent <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>.</li>
+               <li>If virtual and present in <code>reification</code>, returns a new <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>.</li>
+               <li>Otherwise, returns <code>this</code> unchanged.</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -201,7 +198,7 @@ node5 -> node0;
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls.</p>
+               <p>Mapping from virtual symbols to concrete calls.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -210,7 +207,7 @@ node5 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The real e-class symbol that the e-class symbol represents, if one exists in the reification map. Otherwise, the original e-class symbol.</p>
+               <p>A real symbol if resolvable, else the original symbol.</p>
               </dd>
              </dl>
             </div>
@@ -233,11 +230,12 @@ node5 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Reifies the e-class symbol using the given reification.</p>
+             <p>Resolves this symbol to its <a href="../EClassCall.html">EClassCall</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Reifies the e-class symbol using the given reification.</p>
+              <p>Resolves this symbol to its <a href="../EClassCall.html">EClassCall</a>.</p>
+              <p>If this symbol is real, its call is returned directly. If it is virtual, the corresponding entry in <code>reification</code> must exist.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -245,7 +243,7 @@ node5 -> node0;
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls.</p>
+               <p>Mapping from virtual symbols to concrete calls.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -254,7 +252,34 @@ node5 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class call that the e-class symbol represents.</p>
+               <p>The concrete call for this symbol.</p>
+              </dd>
+              <dt class="body-small">
+               Throws
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <span data-unresolved-link="">NoSuchElementException</span>
+                 <p>if this symbol is virtual and not found in <code>reification</code>.</p>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val v = EClassSymbol.virtual()
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val call = EClassCall(...)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val realCall = v.reify(Map(v -&gt; call)) // returns call
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -277,11 +302,12 @@ node5 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Tries to reify the e-class symbol using the given reification.</p>
+             <p>Optionally resolves this symbol to its <a href="../EClassCall.html">EClassCall</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Tries to reify the e-class symbol using the given reification.</p>
+              <p>Optionally resolves this symbol to its <a href="../EClassCall.html">EClassCall</a>.</p>
+              <p>If this symbol is real, its call is wrapped in <code>Some</code>. If it is virtual, returns the matching entry in <code>reification</code> if present, or <code>None</code> if missing.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -289,7 +315,7 @@ node5 -> node0;
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls.</p>
+               <p>Mapping from virtual symbols to concrete calls.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -298,7 +324,7 @@ node5 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class call that the e-class symbol represents, if it is a real e-class symbol or a virtual symbol that is in the reification map. Otherwise, <code>None</code>.</p>
+               <p>The resolved call, or <code>None</code> if unresolved.</p>
               </dd>
              </dl>
             </div>

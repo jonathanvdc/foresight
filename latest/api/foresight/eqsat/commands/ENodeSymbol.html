@@ -12,7 +12,15 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A symbolic e-node that may or may not yet be in the e-graph.</p>
+  <p>Symbolic handle for an <a href="../ENode.html">ENode</a> in an e-graph.</p>
+  <p>Unlike a concrete <a href="../ENode.html">ENode</a>, an <a href="ENodeSymbol.html">ENodeSymbol</a> may reference <a href="EClassSymbol$$Virtual.html">EClassSymbol.Virtual</a> arguments and therefore may not yet exist in the e-graph. It describes:</p>
+  <ul>
+   <li>the node's operator or type (<code>nodeType</code>),</li>
+   <li>the value slots it defines (<code>definitions</code>),</li>
+   <li>the value slots it consumes (<code>uses</code>),</li>
+   <li>and its child e-classes (<code>args</code>).</li>
+  </ul>
+  <p>Symbols are typically produced by <a href="Command.html">Command</a> instances to describe planned insertions.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,7 +29,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the e-node.</p>
+    <p>Domain-specific type used to represent operators or node labels.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -30,25 +38,25 @@
     args
    </dt>
    <dd class="body-medium">
-    <p>The arguments of the e-node, represented as e-class symbols.</p>
+    <p>Child e-class symbols representing the node's operands.</p>
    </dd>
    <dt class="body-small">
     definitions
    </dt>
    <dd class="body-medium">
-    <p>The slots that are defined directly by the e-node.</p>
+    <p>Slots whose values are defined directly by this node.</p>
    </dd>
    <dt class="body-small">
     nodeType
    </dt>
    <dd class="body-medium">
-    <p>The type of the e-node.</p>
+    <p>Operator or label of the e-node (e.g., <code>+</code>, <code>*</code>, function name).</p>
    </dd>
    <dt class="body-small">
     uses
    </dt>
    <dd class="body-medium">
-    <p>The slots that are used directly by the e-node.</p>
+    <p>Slots whose values are read directly by this node.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -147,11 +155,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Reifies the e-node symbol using the given reification.</p>
+             <p>Resolves this symbolic node to a concrete <a href="../ENode.html">ENode</a> using the given reification.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Reifies the e-node symbol using the given reification.</p>
+              <p>Resolves this symbolic node to a concrete <a href="../ENode.html">ENode</a> using the given reification.</p>
+              <p>All <a href="EClassSymbol$$Virtual.html">EClassSymbol.Virtual</a>s in <span data-unresolved-link="">args</span> must be present in the <code>reification</code> map. Any <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a> in <span data-unresolved-link="">args</span> is left unchanged.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -159,7 +168,7 @@ node6 -> node2;
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls.</p>
+               <p>Mapping from virtual e-class symbols to concrete <a href="../EClassCall.html">EClassCall</a>s.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -168,7 +177,29 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-node that the e-node symbol represents.</p>
+               <p>An <a href="../ENode.html">ENode</a> with all arguments fully resolved.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val v1 = EClassSymbol.virtual()
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val call1 = EClassCall(...)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val symbol = ENodeSymbol(
+</span><span line-number="4" class=""><span class="tooltip-container"></span> nodeType = MyOp.Add,
+</span><span line-number="5" class=""><span class="tooltip-container"></span> definitions = Seq.empty,
+</span><span line-number="6" class=""><span class="tooltip-container"></span> uses = Seq.empty,
+</span><span line-number="7" class=""><span class="tooltip-container"></span> args = Seq(v1)
+</span><span line-number="8" class=""><span class="tooltip-container"></span>)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val node: ENode[MyOp] = symbol.reify(Map(v1 -&gt; call1))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>

@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A command that unions many e-classes in an e-graph.</p>
+  <p>A <a href="Command.html">Command</a> that unions multiple pairs of e-classes in a single batch.</p>
+  <p>Each entry in <span data-unresolved-link="">pairs</span> may contain real or virtual <a href="EClassSymbol.html">EClassSymbol</a>s. Virtual symbols are resolved via the reification map passed to <a href="UnionManyCommand.html#apply-fffff2e4">apply</a>. All unions are accumulated using <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> and committed in one rebuild step if needed.</p>
+  <p>This command defines no new virtual symbols; it only merges existing classes.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,7 +23,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The node type of the expressions that the e-graph represents.</p>
+    <p>Node type for expressions represented by the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -30,7 +32,7 @@
     pairs
    </dt>
    <dd class="body-medium">
-    <p>The pairs of e-class symbols to union.</p>
+    <p>Pairs of symbols whose underlying classes should be unified.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -135,11 +137,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Applies the command to the given e-graph.</p>
+             <p>Resolves all symbols using the given map and enqueues each union into an <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a>. If any union changes the structure, a rebuild is performed.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Applies the command to the given e-graph.</p>
+              <p>Resolves all symbols using the given map and enqueues each union into an <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a>. If any union changes the structure, a rebuild is performed.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -147,19 +149,19 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph to which the command should be applied.</p>
+               <p>Target e-graph to update.</p>
               </dd>
               <dt class="body-small">
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallelization strategy to use.</p>
+               <p>Strategy for distributing the rebuild, if needed.</p>
               </dd>
               <dt class="body-small">
                reification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class symbols.</p>
+               <p>Mapping from virtual symbols to concrete calls, used to resolve the left/right sides before unioning.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -168,7 +170,27 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols. The map contains an entry for each virtual e-class symbol that is created by the command.</p>
+               <ul>
+                <li><code>Some(newGraph)</code> if at least one union required changes (triggering a rebuild), otherwise <code>None</code>.</li>
+                <li>An empty reification map (unions do not define outputs).</li>
+               </ul>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val a: EClassSymbol = EClassSymbol.real(callA)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val b: EClassSymbol = EClassSymbol.real(callB)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val cmd = UnionManyCommand(Seq(a -&gt; b))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val (maybeGraph, _) = cmd.apply(egraph, Map.empty, parallel)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -199,11 +221,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that are defined by the command.</p>
+             <p>No new e-classes are created by a union; this command defines nothing.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that are defined by the command.</p>
+              <p>No new e-classes are created by a union; this command defines nothing.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -236,11 +258,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Simplifies the union set against the current e-graph and partial bindings.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Simplifies the union set against the current e-graph and partial bindings.</p>
+              <p>Each side is first refined using <code>partialReification</code>. Pairs that become two real calls already known to be equal are dropped. If all pairs drop, the result is <a href="CommandQueue$.html#empty-fffff77a">CommandQueue.empty</a>; otherwise a reduced <a href="UnionManyCommand.html">UnionManyCommand</a> is returned.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -248,13 +271,13 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Context used for equality checks.</p>
               </dd>
               <dt class="body-small">
                partialReification
               </dt>
               <dd class="body-medium">
-               <p>A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-clas symbols.</p>
+               <p>Known virtual-to-real bindings.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -263,7 +286,24 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command and a partial reification map for this command.</p>
+               <p>A simplified command and an (empty) partial reification.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val v = EClassSymbol.virtual()
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val simplified = UnionManyCommand(Seq(v -&gt; EClassSymbol.real(callX)))
+</span><span line-number="3" class=""><span class="tooltip-container"></span> .simplify(egraph, Map(v -&gt; callX))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>// Becomes CommandQueue.empty because both sides resolve to the same class.
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -294,11 +334,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All e-class symbols that need to be reified to run the command.</p>
+             <p>All symbols referenced by this batch of unions.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All e-class symbols that need to be reified to run the command.</p>
+              <p>All symbols referenced by this batch of unions.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -399,11 +439,17 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+             <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph. For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op. Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map assignment.</p>
+              <p>Returns a semantically equivalent command that is cheaper to execute on the given e-graph. Assumes no prior reification information and does not return any partial bindings.</p>
+              <p>Typical simplifications include:</p>
+              <ul>
+               <li>eliminating unions whose endpoints are already congruent</li>
+               <li>dropping inserts of nodes already present</li>
+               <li>narrowing work by pre-binding outputs in the returned partial reification</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -411,7 +457,7 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph for which the command is to be simplified.</p>
+               <p>Target e-graph used as context for optimization.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -420,7 +466,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The simplified command.</p>
+               <p>A simplified command.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
