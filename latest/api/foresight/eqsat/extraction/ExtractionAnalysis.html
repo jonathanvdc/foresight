@@ -15,7 +15,10 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>An analysis that produces extraction trees with minimal cost.</p>
+  <p>An analysis that derives minimal-cost extraction results for each e-class.</p>
+  <p>This analysis computes an <a href="ExtractionTreeCall.html">ExtractionTreeCall</a> at every e-class using a user-provided <a href="CostFunction.html">CostFunction</a> and implicit orderings. The resulting value encodes both the chosen minimal-cost tree and the slot renaming needed to apply it in context.</p>
+  <p>The cost domain <code>C</code> is totally ordered by the implicit <code>Ordering[C]</code>. When multiple candidates have the same minimal cost, ties are broken deterministically using the implicit <code>Ordering[NodeT]</code> via <a href="ExtractionTreeOrdering.html">ExtractionTreeOrdering</a>.</p>
+  <p>Immutability: Foresight e-graphs are immutable. Running this analysis does not mutate the input; it produces results attached to the analysis view of the graph.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,13 +27,13 @@
     C
    </dt>
    <dd class="body-medium">
-    <p>The type of the cost.</p>
+    <p>Cost type produced by the cost function.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the e-graph.</p>
+    <p>Node/operator type stored in the e-graph.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -39,25 +42,25 @@
     cost
    </dt>
    <dd class="body-medium">
-    <p>The cost function for the analysis.</p>
+    <p>Node-local cost model used to score trees bottom-up.</p>
    </dd>
    <dt class="body-small">
     costOrdering
    </dt>
    <dd class="body-medium">
-    <p>The ordering for the cost.</p>
+    <p>(implicit) Total ordering over costs used to select minima.</p>
    </dd>
    <dt class="body-small">
     name
    </dt>
    <dd class="body-medium">
-    <p>The name of the analysis.</p>
+    <p>Human-readable name for diagnostics and debugging.</p>
    </dd>
    <dt class="body-small">
     nodeOrdering
    </dt>
    <dd class="body-medium">
-    <p>An ordering for the nodes.</p>
+    <p>(implicit) Tie-breaker over node types for deterministic selection.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -153,50 +156,6 @@ node7 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="extractor-9cf">
-         <div class="documentableElement-expander">
-          <button class="icon-button ar show-content"></button>
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="ExtractionAnalysis.html#extractor-9cf" t="n" class="documentableName ">extractor</a>[<span t="k"></span><span data-unresolved-link="" t="t">Repr</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]]: <a href="Extractor.html" t="t">Extractor</a>[<span t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphWithMetadata</span>[<span t="t">NodeT</span>, <span data-unresolved-link="" t="t">Repr</span>]]
-           </div>
-          </div>
-         </div>
-         <div class="docs">
-          <span class="modifiers"></span>
-          <div>
-           <div class="originInfo"></div>
-           <div class="memberDocumentation">
-            <div class="documentableBrief doc">
-             <p>The extractor corresponding to this extraction analysis.</p>
-            </div>
-            <div class="cover">
-             <div class="doc">
-              <p>The extractor corresponding to this extraction analysis.</p>
-             </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Repr
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the underlying e-graph.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The extractor for the analysis.</p>
-              </dd>
-             </dl>
-            </div>
-           </div>
-          </div>
-         </div>
-        </div>
         <div class="documentableElement" id="join-fffff6c9" data-f-keywords="override">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
@@ -212,11 +171,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Joins two analysis results.</p>
+             <p>Joins two competing results by choosing the minimal one under the analysis ordering.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Joins two analysis results.</p>
+              <p>Joins two competing results by choosing the minimal one under the analysis ordering.</p>
+              <p>Primary key: <code>costOrdering</code>. Tie-break: <code>nodeOrdering</code> (via <a href="ExtractionTreeOrdering.html">ExtractionTreeOrdering</a>).</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -224,13 +184,13 @@ node7 -> node2;
                left
               </dt>
               <dd class="body-medium">
-               <p>The left analysis result.</p>
+               <p>Candidate A.</p>
               </dd>
               <dt class="body-small">
                right
               </dt>
               <dd class="body-medium">
-               <p>The right analysis result.</p>
+               <p>Candidate B.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -239,7 +199,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The joined analysis result.</p>
+               <p>The chosen minimal candidate.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -270,11 +230,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Computes the local analysis result for a node, given its arguments and definitions.</p>
+             <p>Constructs the analysis value for a node given already-computed child results.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Computes the local analysis result for a node, given its arguments and definitions.</p>
+              <p>Constructs the analysis value for a node given already-computed child results.</p>
+              <p>Computes the node's cost via the provided <a href="CostFunction.html">CostFunction</a>, builds an <a href="ExtractionTree.html">ExtractionTree</a> carrying that cost and structure, asserts slot uniqueness, and wraps it as an <a href="ExtractionTreeCall.html">ExtractionTreeCall</a> with an identity renaming on the tree's slot set.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -282,25 +243,25 @@ node7 -> node2;
                args
               </dt>
               <dd class="body-medium">
-               <p>Analysis results for the node's arguments (in order).</p>
+               <p>Child analysis results (already scored and well-typed).</p>
               </dd>
               <dt class="body-small">
                defs
               </dt>
               <dd class="body-medium">
-               <p>Slots this node defines.</p>
+               <p>Slots defined locally by this node.</p>
               </dd>
               <dt class="body-small">
                node
               </dt>
               <dd class="body-medium">
-               <p>The node payload.</p>
+               <p>The operator/type at this node.</p>
               </dd>
               <dt class="body-small">
                uses
               </dt>
               <dd class="body-medium">
-               <p>Slots this node reads.</p>
+               <p>Slots used by this node but defined elsewhere.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -309,7 +270,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The analysis result for this node.</p>
+               <p>The composed analysis result for the subtree.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -340,11 +301,12 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Renames the slots in an analysis result.</p>
+             <p>Renames the slots in an analysis result without changing its chosen structure or cost.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Renames the slots in an analysis result.</p>
+              <p>Renames the slots in an analysis result without changing its chosen structure or cost.</p>
+              <p>This composes the result's existing renaming with the provided <code>renaming</code>. Composition is performed so that slots already mapped in the result are retained where appropriate.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -352,13 +314,13 @@ node7 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming to apply to the slots. The keys of the map are the slots as they appear in the result, and the values are the slots to which they are renamed.</p>
+               <p>A mapping from current slot IDs to their new IDs in the caller's context.</p>
               </dd>
               <dt class="body-small">
                result
               </dt>
               <dd class="body-medium">
-               <p>The analysis result to rename.</p>
+               <p>The analysis result to rebind.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -367,7 +329,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The analysis result with the slots renamed.</p>
+               <p>A result equivalent up to alpha-renaming.</p>
               </dd>
               <dt class="body-small">
                Definition Classes

@@ -120,9 +120,66 @@
        </div>
        <div class="documentableElement">
         <div class="documentableElement-expander">
+         <button class="icon-button ar show-content"></button>
          <div class="header monospace mono-medium">
           <div class="signature">
            <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="eqsat/extraction.html" t="n" class="documentableName ">foresight.eqsat.extraction</a>
+          </div>
+         </div>
+        </div>
+        <div class="docs">
+         <span class="modifiers"></span>
+         <div>
+          <div class="originInfo"></div>
+          <div class="memberDocumentation">
+           <div class="documentableBrief doc">
+            <p>Tools for turning e-graph e-classes into concrete expression trees using a pluggable, bottom-up cost model. This package is agnostic to the meaning of cost and to the concrete e-graph representation; it works with any immutable <code>EGraph</code> that provides the required metadata.</p>
+           </div>
+           <div class="cover">
+            <div class="doc">
+             <p>Tools for turning e-graph e-classes into concrete expression trees using a pluggable, bottom-up cost model. This package is agnostic to the meaning of cost and to the concrete e-graph representation; it works with any immutable <code>EGraph</code> that provides the required metadata.</p>
+             <h2><a href="#design" id="design">Design</a></h2>
+             <p>Extraction is a two-step process. First, an analysis computes, for every e-class, a minimal (under a user-defined ordering) cost-annotated tree together with a total slot renaming that makes the tree valid in context. Second, an extractor projects that analysis result into a plain expression tree.</p>
+             <p>E-graphs in Foresight are immutable. All APIs return new values; nothing mutates in place. Slot renamings are explicit, total mappings applied during materialization.</p>
+             <h2><a href="#key-abstractions" id="key-abstractions">Key abstractions</a></h2>
+             <p><code>CostFunction[NodeT, C]</code> defines the node-local cost model. Given a node’s operator, its locally defined/used slots, and already-costed children, it returns a cost of type <code>C</code>. The cost may be numeric, tuple-based, or any type with an implicit <code>Ordering[C]</code>.</p>
+             <p><code>ExtractionAnalysis[NodeT, C]</code> runs over an e-graph to compute, per e-class, an <code>ExtractionTreeCall[NodeT, C]</code> that minimizes cost and then applies deterministic tie-breaking. The analysis requires <code>Ordering[C]</code> and <code>Ordering[NodeT]</code>. Helpers like <code>ExtractionAnalysis.smallest</code> and <code>ExtractionAnalysis.shallowest</code> are provided.</p>
+             <p><code>ExtractionTree[NodeT, C]</code> is an immutable, cost-annotated tree: it stores the root operator, definitions/uses, children, total cost, size, and depth.</p>
+             <p><code>ExtractionTreeCall[NodeT, C]</code> pairs an <code>ExtractionTree</code> with a total <code>SlotMap</code> (alpha-renaming) over the tree’s slots. It supports composition of renamings and applying them to produce a renamed tree.</p>
+             <p><code>ExtractionTreeOrdering[NodeT, C]</code> defines the total order used for selection and tie-breaking. Comparison is lexicographic over: cost → size → depth → nodeType → definitions → uses → args.</p>
+             <h2><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h2>
+             <ol>
+              <li>Define a <code>CostFunction</code> that reflects your objective (e.g., node count, height, latency).</li>
+              <li>Build an <code>ExtractionAnalysis(name, cost)</code> with implicit <code>Ordering[C]</code> and <code>Ordering[NodeT]</code> in scope.</li>
+              <li>Obtain an <code>Extractor</code> via <code>analysis.extractor</code>, then call it with an <code>EClassCall</code> (or a <code>MixedTree</code>, which gets added to a derived graph) to get a plain <code>Tree</code>.</li>
+             </ol>
+             <h2><a href="#determinism-and-tie-breaking" id="determinism-and-tie-breaking">Determinism and tie-breaking</a></h2>
+             <p>Two trees with equal cost are ordered by structure and <code>nodeType</code> using the provided <code>Ordering[NodeT]</code>, then by slot sequences and children, yielding deterministic results.</p>
+             <h2><a href="#slots-and-renaming" id="slots-and-renaming">Slots and renaming</a></h2>
+             <p>Slots bound at a node are listed in <code>definitions</code>; externally provided ones are in <code>uses</code>. An <code>ExtractionTreeCall</code> carries a total renaming over the tree’s <code>slotSet</code>. Composition methods ensure the mapping remains total when threading results through callers.</p>
+            </div>
+            <h2 class="h200">Attributes</h2>
+            <dl class="attributes attributes-small">
+             <dt class="body-small">
+              Example
+             </dt>
+             <dd class="body-medium">
+              <div>
+               <div>
+                <div class="snippet mono-small-block">
+                 <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>implicit val costOrd: Ordering[Int] = Ordering.Int
+</span><span line-number="2" class=""><span class="tooltip-container"></span>implicit val nodeOrd: Ordering[Op]  = Op.ordering
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val analysis   = extraction.ExtractionAnalysis.smallest[Op]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val extractor  = analysis.extractor[MyEGraph]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val bestTree   = extractor(eclassCall, egraphWithMetadata) // Tree[Op]
+</span></code></pre>
+                 <div class="buttons"></div>
+                </div>
+               </div>
+              </div>
+             </dd>
+            </dl>
+           </div>
           </div>
          </div>
         </div>

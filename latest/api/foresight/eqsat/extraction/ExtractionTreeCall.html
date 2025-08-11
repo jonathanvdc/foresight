@@ -12,7 +12,17 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A renamed extraction tree.</p>
+  <p>A cost-annotated extraction tree together with a total slot renaming.</p>
+  <p>This pairs an <a href="ExtractionTree.html">ExtractionTree</a> with a <a href="../SlotMap.html">SlotMap</a> that must map every slot appearing in the tree (<code>tree.slotSet</code>) to a (possibly different) slot. The renaming encodes alpha-renaming needed to place the tree in a caller's context.</p>
+  <p>Invariants:</p>
+  <ul>
+   <li><code>renaming</code> is total over <code>tree.slotSet</code> (checked by the constructor assertion).</li>
+   <li>Renaming preserves structure: only slot identities change, not shape, cost, size, or depth.</li>
+  </ul>
+  <p>Immutability:</p>
+  <ul>
+   <li>Methods return new values; neither the tree nor the renaming are modified in place.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,13 +31,13 @@
     C
    </dt>
    <dd class="body-medium">
-    <p>The type of the cost.</p>
+    <p>Cost type.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the tree.</p>
+    <p>Node/operator type.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -36,13 +46,13 @@
     renaming
    </dt>
    <dd class="body-medium">
-    <p>The renaming of the slots in the tree.</p>
+    <p>A total mapping for all slots in <code>tree</code>.</p>
    </dd>
    <dt class="body-small">
     tree
    </dt>
    <dd class="body-medium">
-    <p>The extraction tree that is renamed.</p>
+    <p>The underlying, immutable extraction tree.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -141,11 +151,17 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The tree with the renaming applied.</p>
+             <p>Applies the current renaming to produce a plain renamed <a href="ExtractionTree.html">ExtractionTree</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The tree with the renaming applied.</p>
+              <p>Applies the current renaming to produce a plain renamed <a href="ExtractionTree.html">ExtractionTree</a>.</p>
+              <p>This:</p>
+              <ul>
+               <li>Rewrites the root's <code>definitions</code> and <code>uses</code>.</li>
+               <li>Composes the same renaming into each child call, leaving their costs intact.</li>
+               <li>Preserves <code>cost</code>, <code>size</code>, and <code>depth</code>.</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -153,7 +169,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The tree with the renaming applied.</p>
+               <p>A structurally identical extraction tree with slots rewritten.</p>
               </dd>
              </dl>
             </div>
@@ -176,21 +192,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the cost of the tree.</p>
+             <p>Cost of the subtree (independent of renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the cost of the tree.</p>
+              <p>Cost of the subtree (independent of renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The cost of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -211,21 +220,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the depth of the tree.</p>
+             <p>Maximum depth (independent of renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the depth of the tree.</p>
+              <p>Maximum depth (independent of renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The depth of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -246,11 +248,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Renames the slots in the tree.</p>
+             <p>Composes this call's renaming with an additional renaming defined on its image.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Renames the slots in the tree.</p>
+              <p>Composes this call's renaming with an additional renaming defined on its image.</p>
+              <p>If <code>this.renaming</code> maps original slots to intermediate slots, <code>rename(r)</code> expects <code>r</code> to be defined for every intermediate slot (<code>this.renaming.valueSet</code>), ensuring the composed mapping remains total. Composition is performed with <code>composePartial</code>, which applies <code>r</code> where defined while retaining existing mappings elsewhere.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -258,7 +261,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the slots. The keys of the map are the slots as they appear in the tree, and the values are the slots to which they are renamed.</p>
+               <p>A renaming defined on <code>this.renaming</code>'s image.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -267,7 +270,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The tree with the slots renamed.</p>
+               <p>A new call with <code>this.renaming ∘ renaming</code> (applied to the image).</p>
               </dd>
              </dl>
             </div>
@@ -290,21 +293,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the size of the tree.</p>
+             <p>Total node count (independent of renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the size of the tree.</p>
+              <p>Total node count (independent of renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The size of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -325,21 +321,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The set of slots of the tree after applying the renaming.</p>
+             <p>The deduplicated set of slots of the tree after applying <code>renaming</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The set of slots of the tree after applying the renaming.</p>
+              <p>The deduplicated set of slots of the tree after applying <code>renaming</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The slots of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -360,21 +349,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The slots of the tree, in the order in which they appear, after applying the renaming.</p>
+             <p>All slots of the tree, in traversal order, after applying <code>renaming</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The slots of the tree, in the order in which they appear, after applying the renaming.</p>
+              <p>All slots of the tree, in traversal order, after applying <code>renaming</code>.</p>
+              <p>This sequence may contain duplicates if the same slot appears multiple times.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The slots of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

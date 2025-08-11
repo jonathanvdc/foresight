@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Companion object for the extraction analysis.</p>
+  <p>Constructors and presets for common extraction analyses.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -113,11 +113,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An extraction analysis that extracts the shallowest expression tree for each e-class.</p>
+             <p>An analysis that minimizes tree height (maximum depth).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An extraction analysis that extracts the shallowest expression tree for each e-class.</p>
+              <p>An analysis that minimizes tree height (maximum depth).</p>
+              <p>Cost model: <code>height(node) = 1 + max(child heights)</code>; leaf height is 1.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -125,7 +126,7 @@ node3 -> node2;
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>Node/operator type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -134,7 +135,7 @@ node3 -> node2;
                nodeOrdering
               </dt>
               <dd class="body-medium">
-               <p>An ordering for the nodes.</p>
+               <p>Implicit ordering to deterministically break cost ties.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -143,7 +144,22 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The extraction analysis.</p>
+               <p>An extraction analysis that prefers shallow trees.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>implicit val order: Ordering[Op] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val shallowest = ExtractionAnalysis.shallowest[Op]
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -166,11 +182,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An extraction analysis that extracts the smallest expression tree for each e-class.</p>
+             <p>An analysis that minimizes total node count (tree size).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An extraction analysis that extracts the smallest expression tree for each e-class.</p>
+              <p>An analysis that minimizes total node count (tree size).</p>
+              <p>Cost model: <code>size(node) = 1 + sum(child sizes)</code>.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -178,7 +195,7 @@ node3 -> node2;
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>Node/operator type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -187,7 +204,7 @@ node3 -> node2;
                nodeOrdering
               </dt>
               <dd class="body-medium">
-               <p>An ordering for the nodes.</p>
+               <p>Implicit ordering to deterministically break cost ties.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -196,7 +213,22 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The extraction analysis.</p>
+               <p>An extraction analysis that prefers the fewest nodes.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>implicit val order: Ordering[Op] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val smallest = ExtractionAnalysis.smallest[Op]
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>

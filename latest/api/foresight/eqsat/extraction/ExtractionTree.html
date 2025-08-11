@@ -12,7 +12,15 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A tree data structure for extraction.</p>
+  <p>Immutable, cost-annotated tree used by extraction analyses.</p>
+  <p>An <code>ExtractionTree</code> represents a concrete, fully expanded expression rooted at <code>nodeType</code>, annotated with:</p>
+  <ul>
+   <li><code>cost</code> — precomputed total cost for the subtree, according to a <a href="CostFunction.html">CostFunction</a>.</li>
+   <li><code>definitions</code> — slots bound/defined locally at this node.</li>
+   <li><code>uses</code> — slots referenced at this node but defined elsewhere.</li>
+   <li><code>args</code> — already-costed children, each an <a href="ExtractionTreeCall.html">ExtractionTreeCall</a>.</li>
+  </ul>
+  <p>The cost type <code>C</code> is abstract; it may be numeric, tuple-based, or any other ordered type usable for extraction ordering.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,13 +29,13 @@
     C
    </dt>
    <dd class="body-medium">
-    <p>The type of the cost.</p>
+    <p>The cost type.</p>
    </dd>
    <dt class="body-small">
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the nodes in the tree.</p>
+    <p>The node/operator type.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -36,31 +44,31 @@
     args
    </dt>
    <dd class="body-medium">
-    <p>The children of the root node.</p>
+    <p>Costed children, in evaluation order.</p>
    </dd>
    <dt class="body-small">
     cost
    </dt>
    <dd class="body-medium">
-    <p>The cost of the tree.</p>
+    <p>Total cost of this subtree (root + all descendants).</p>
    </dd>
    <dt class="body-small">
     definitions
    </dt>
    <dd class="body-medium">
-    <p>The slots of the root that are defined by the root itself.</p>
+    <p>Slots introduced by this node.</p>
    </dd>
    <dt class="body-small">
     nodeType
    </dt>
    <dd class="body-medium">
-    <p>The type of the tree's root.</p>
+    <p>Operator/type of the root node.</p>
    </dd>
    <dt class="body-small">
     uses
    </dt>
    <dd class="body-medium">
-    <p>The slots of the root that are used by the root and are defined elsewhere.</p>
+    <p>Slots consumed by this node that are defined externally.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -159,21 +167,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The slots of the tree, in the order in which they appear.</p>
+             <p>All slots appearing in this tree, in traversal order: definitions first, then uses, then recursively from children.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The slots of the tree, in the order in which they appear.</p>
+              <p>All slots appearing in this tree, in traversal order: definitions first, then uses, then recursively from children.</p>
+              <p>This sequence does not deduplicate slots.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The slots of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -194,11 +196,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Turns the extraction tree into an expression tree.</p>
+             <p>Converts this cost-annotated tree into a plain <a href="../Tree.html">Tree</a> by:</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Turns the extraction tree into an expression tree.</p>
+              <p>Converts this cost-annotated tree into a plain <a href="../Tree.html">Tree</a> by:</p>
+              <ul>
+               <li>Recursively applying each child's renaming.</li>
+               <li>Discarding cost annotations.</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -206,7 +212,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The expression tree.</p>
+               <p>A plain expression tree with the same structure and slots.</p>
               </dd>
              </dl>
             </div>
@@ -305,21 +311,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the depth of the tree.</p>
+             <p>Maximum depth of this tree (root has depth 1).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the depth of the tree.</p>
+              <p>Maximum depth of this tree (root has depth 1).</p>
+              <p>Computed as: <code>1 + max(child depths)</code>. If there are no children, the depth is 1.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The depth of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -340,21 +340,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the size of the tree.</p>
+             <p>Total number of nodes in this tree, including the root.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the size of the tree.</p>
+              <p>Total number of nodes in this tree, including the root.</p>
+              <p>Computed as: <code>1 + sum(child sizes)</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The size of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -375,21 +369,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The set of slots of the tree after applying the renaming.</p>
+             <p>All unique slots appearing in this tree (deduplicated, as a set).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The set of slots of the tree after applying the renaming.</p>
+              <p>All unique slots appearing in this tree (deduplicated, as a set).</p>
+              <p>Includes slots defined locally and in descendants.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The slots of the tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

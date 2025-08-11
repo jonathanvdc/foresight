@@ -10,6 +10,53 @@
   <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="extraction.html" t="n" class="documentableName ">foresight.eqsat.extraction</a>
  </div>
 </div>
+<div class="cover">
+ <div class="doc">
+  <p>Tools for turning e-graph e-classes into concrete expression trees using a pluggable, bottom-up cost model. This package is agnostic to the meaning of cost and to the concrete e-graph representation; it works with any immutable <code>EGraph</code> that provides the required metadata.</p>
+  <h2><a href="#design" id="design">Design</a></h2>
+  <p>Extraction is a two-step process. First, an analysis computes, for every e-class, a minimal (under a user-defined ordering) cost-annotated tree together with a total slot renaming that makes the tree valid in context. Second, an extractor projects that analysis result into a plain expression tree.</p>
+  <p>E-graphs in Foresight are immutable. All APIs return new values; nothing mutates in place. Slot renamings are explicit, total mappings applied during materialization.</p>
+  <h2><a href="#key-abstractions" id="key-abstractions">Key abstractions</a></h2>
+  <p><code>CostFunction[NodeT, C]</code> defines the node-local cost model. Given a node’s operator, its locally defined/used slots, and already-costed children, it returns a cost of type <code>C</code>. The cost may be numeric, tuple-based, or any type with an implicit <code>Ordering[C]</code>.</p>
+  <p><code>ExtractionAnalysis[NodeT, C]</code> runs over an e-graph to compute, per e-class, an <code>ExtractionTreeCall[NodeT, C]</code> that minimizes cost and then applies deterministic tie-breaking. The analysis requires <code>Ordering[C]</code> and <code>Ordering[NodeT]</code>. Helpers like <code>ExtractionAnalysis.smallest</code> and <code>ExtractionAnalysis.shallowest</code> are provided.</p>
+  <p><code>ExtractionTree[NodeT, C]</code> is an immutable, cost-annotated tree: it stores the root operator, definitions/uses, children, total cost, size, and depth.</p>
+  <p><code>ExtractionTreeCall[NodeT, C]</code> pairs an <code>ExtractionTree</code> with a total <code>SlotMap</code> (alpha-renaming) over the tree’s slots. It supports composition of renamings and applying them to produce a renamed tree.</p>
+  <p><code>ExtractionTreeOrdering[NodeT, C]</code> defines the total order used for selection and tie-breaking. Comparison is lexicographic over: cost → size → depth → nodeType → definitions → uses → args.</p>
+  <h2><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h2>
+  <ol>
+   <li>Define a <code>CostFunction</code> that reflects your objective (e.g., node count, height, latency).</li>
+   <li>Build an <code>ExtractionAnalysis(name, cost)</code> with implicit <code>Ordering[C]</code> and <code>Ordering[NodeT]</code> in scope.</li>
+   <li>Obtain an <code>Extractor</code> via <code>analysis.extractor</code>, then call it with an <code>EClassCall</code> (or a <code>MixedTree</code>, which gets added to a derived graph) to get a plain <code>Tree</code>.</li>
+  </ol>
+  <h2><a href="#determinism-and-tie-breaking" id="determinism-and-tie-breaking">Determinism and tie-breaking</a></h2>
+  <p>Two trees with equal cost are ordered by structure and <code>nodeType</code> using the provided <code>Ordering[NodeT]</code>, then by slot sequences and children, yielding deterministic results.</p>
+  <h2><a href="#slots-and-renaming" id="slots-and-renaming">Slots and renaming</a></h2>
+  <p>Slots bound at a node are listed in <code>definitions</code>; externally provided ones are in <code>uses</code>. An <code>ExtractionTreeCall</code> carries a total renaming over the tree’s <code>slotSet</code>. Composition methods ensure the mapping remains total when threading results through callers.</p>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>implicit val costOrd: Ordering[Int] = Ordering.Int
+</span><span line-number="2" class=""><span class="tooltip-container"></span>implicit val nodeOrd: Ordering[Op]  = Op.ordering
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val analysis   = extraction.ExtractionAnalysis.smallest[Op]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val extractor  = analysis.extractor[MyEGraph]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val bestTree   = extractor(eclassCall, egraphWithMetadata) // Tree[Op]
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
@@ -44,11 +91,25 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A cost function for extraction analyses.</p>
+             <p>A node-local cost model used during extraction.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A cost function for extraction analyses.</p>
+              <p>A node-local cost model used during extraction.</p>
+              <p>A <code>CostFunction</code> assigns a cost to a single node given:</p>
+              <ul>
+               <li>its operator/type (<code>nodeType</code>),</li>
+               <li>which slots it defines locally (<code>definitions</code>),</li>
+               <li>which slots it uses that are defined elsewhere (<code>uses</code>),</li>
+               <li>and the already-costed children (<code>args</code>).</li>
+              </ul>
+              <p>The cost is computed bottom-up: each <code>args</code> entry is an <a href="extraction/ExtractionTreeCall.html">ExtractionTreeCall</a> that already contains the child's cost, so implementations can simply aggregate child costs and add any node-local contribution.</p>
+              <p>This interface is deliberately minimal:</p>
+              <ul>
+               <li>It is agnostic to the meaning of <code>C</code> (numbers, tuples, custom records, etc.).</li>
+               <li>It does not prescribe how to combine costs; that policy lives in your implementation.</li>
+               <li>It assumes purity: for the same inputs, return the same cost.</li>
+              </ul>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -56,17 +117,42 @@
                C
               </dt>
               <dd class="body-medium">
-               <p>The type of the cost.</p>
+               <p>The cost type produced by the function.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
+               <p>The node/operator type used in the tree.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Simple additive cost: weight(node) + sum(child costs)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class NumCost(value: Int)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val weights: Map[Op, Int] = ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span>object AdditiveCost extends CostFunction[Op, NumCost] {
+</span><span line-number="5" class=""><span class="tooltip-container"></span> def apply(nodeType: Op,
+</span><span line-number="6" class=""><span class="tooltip-container"></span>           definitions: Seq[Slot],
+</span><span line-number="7" class=""><span class="tooltip-container"></span>           uses: Seq[Slot],
+</span><span line-number="8" class=""><span class="tooltip-container"></span>           args: Seq[ExtractionTreeCall[Op, NumCost]]): NumCost = {
+</span><span line-number="9" class=""><span class="tooltip-container"></span>   val childSum = args.iterator.map(_.tree.cost.value).sum
+</span><span line-number="10" class=""><span class="tooltip-container"></span>   NumCost(weights.getOrElse(nodeType, 1) + childSum)
+</span><span line-number="11" class=""><span class="tooltip-container"></span> }
+</span><span line-number="12" class=""><span class="tooltip-container"></span>}
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -104,11 +190,14 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An analysis that produces extraction trees with minimal cost.</p>
+             <p>An analysis that derives minimal-cost extraction results for each e-class.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An analysis that produces extraction trees with minimal cost.</p>
+              <p>An analysis that derives minimal-cost extraction results for each e-class.</p>
+              <p>This analysis computes an <a href="extraction/ExtractionTreeCall.html">ExtractionTreeCall</a> at every e-class using a user-provided <a href="extraction/CostFunction.html">CostFunction</a> and implicit orderings. The resulting value encodes both the chosen minimal-cost tree and the slot renaming needed to apply it in context.</p>
+              <p>The cost domain <code>C</code> is totally ordered by the implicit <code>Ordering[C]</code>. When multiple candidates have the same minimal cost, ties are broken deterministically using the implicit <code>Ordering[NodeT]</code> via <a href="extraction/ExtractionTreeOrdering.html">ExtractionTreeOrdering</a>.</p>
+              <p>Immutability: Foresight e-graphs are immutable. Running this analysis does not mutate the input; it produces results attached to the analysis view of the graph.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -116,13 +205,13 @@
                C
               </dt>
               <dd class="body-medium">
-               <p>The type of the cost.</p>
+               <p>Cost type produced by the cost function.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>Node/operator type stored in the e-graph.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -131,25 +220,25 @@
                cost
               </dt>
               <dd class="body-medium">
-               <p>The cost function for the analysis.</p>
+               <p>Node-local cost model used to score trees bottom-up.</p>
               </dd>
               <dt class="body-small">
                costOrdering
               </dt>
               <dd class="body-medium">
-               <p>The ordering for the cost.</p>
+               <p>(implicit) Total ordering over costs used to select minima.</p>
               </dd>
               <dt class="body-small">
                name
               </dt>
               <dd class="body-medium">
-               <p>The name of the analysis.</p>
+               <p>Human-readable name for diagnostics and debugging.</p>
               </dd>
               <dt class="body-small">
                nodeOrdering
               </dt>
               <dd class="body-medium">
-               <p>An ordering for the nodes.</p>
+               <p>(implicit) Tie-breaker over node types for deterministic selection.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -209,11 +298,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Companion object for the extraction analysis.</p>
+             <p>Constructors and presets for common extraction analyses.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Companion object for the extraction analysis.</p>
+              <p>Constructors and presets for common extraction analyses.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -271,11 +360,19 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A tree data structure for extraction.</p>
+             <p>Immutable, cost-annotated tree used by extraction analyses.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A tree data structure for extraction.</p>
+              <p>Immutable, cost-annotated tree used by extraction analyses.</p>
+              <p>An <code>ExtractionTree</code> represents a concrete, fully expanded expression rooted at <code>nodeType</code>, annotated with:</p>
+              <ul>
+               <li><code>cost</code> — precomputed total cost for the subtree, according to a <a href="extraction/CostFunction.html">CostFunction</a>.</li>
+               <li><code>definitions</code> — slots bound/defined locally at this node.</li>
+               <li><code>uses</code> — slots referenced at this node but defined elsewhere.</li>
+               <li><code>args</code> — already-costed children, each an <a href="extraction/ExtractionTreeCall.html">ExtractionTreeCall</a>.</li>
+              </ul>
+              <p>The cost type <code>C</code> is abstract; it may be numeric, tuple-based, or any other ordered type usable for extraction ordering.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -283,13 +380,13 @@
                C
               </dt>
               <dd class="body-medium">
-               <p>The type of the cost.</p>
+               <p>The cost type.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
+               <p>The node/operator type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -298,31 +395,31 @@
                args
               </dt>
               <dd class="body-medium">
-               <p>The children of the root node.</p>
+               <p>Costed children, in evaluation order.</p>
               </dd>
               <dt class="body-small">
                cost
               </dt>
               <dd class="body-medium">
-               <p>The cost of the tree.</p>
+               <p>Total cost of this subtree (root + all descendants).</p>
               </dd>
               <dt class="body-small">
                definitions
               </dt>
               <dd class="body-medium">
-               <p>The slots of the root that are defined by the root itself.</p>
+               <p>Slots introduced by this node.</p>
               </dd>
               <dt class="body-small">
                nodeType
               </dt>
               <dd class="body-medium">
-               <p>The type of the tree's root.</p>
+               <p>Operator/type of the root node.</p>
               </dd>
               <dt class="body-small">
                uses
               </dt>
               <dd class="body-medium">
-               <p>The slots of the root that are used by the root and are defined elsewhere.</p>
+               <p>Slots consumed by this node that are defined externally.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -373,11 +470,21 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A renamed extraction tree.</p>
+             <p>A cost-annotated extraction tree together with a total slot renaming.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A renamed extraction tree.</p>
+              <p>A cost-annotated extraction tree together with a total slot renaming.</p>
+              <p>This pairs an <a href="extraction/ExtractionTree.html">ExtractionTree</a> with a <a href="SlotMap.html">SlotMap</a> that must map every slot appearing in the tree (<code>tree.slotSet</code>) to a (possibly different) slot. The renaming encodes alpha-renaming needed to place the tree in a caller's context.</p>
+              <p>Invariants:</p>
+              <ul>
+               <li><code>renaming</code> is total over <code>tree.slotSet</code> (checked by the constructor assertion).</li>
+               <li>Renaming preserves structure: only slot identities change, not shape, cost, size, or depth.</li>
+              </ul>
+              <p>Immutability:</p>
+              <ul>
+               <li>Methods return new values; neither the tree nor the renaming are modified in place.</li>
+              </ul>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -385,13 +492,13 @@
                C
               </dt>
               <dd class="body-medium">
-               <p>The type of the cost.</p>
+               <p>Cost type.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
+               <p>Node/operator type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -400,13 +507,13 @@
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the slots in the tree.</p>
+               <p>A total mapping for all slots in <code>tree</code>.</p>
               </dd>
               <dt class="body-small">
                tree
               </dt>
               <dd class="body-medium">
-               <p>The extraction tree that is renamed.</p>
+               <p>The underlying, immutable extraction tree.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -457,11 +564,22 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An ordering for extraction trees.</p>
+             <p>Total ordering for <a href="extraction/ExtractionTree.html">ExtractionTree</a> values used during extraction tie-breaking.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An ordering for extraction trees.</p>
+              <p>Total ordering for <a href="extraction/ExtractionTree.html">ExtractionTree</a> values used during extraction tie-breaking.</p>
+              <p>Comparison is lexicographic over the following tuple: <code>(cost, size, depth, nodeType, definitions, uses, args)</code>.</p>
+              <ol>
+               <li><code>cost</code> — primary key, ordered by the implicit <code>Ordering[C]</code>.</li>
+               <li><code>size</code> — total node count; prefers smaller trees when costs tie.</li>
+               <li><code>depth</code> — tree height; prefers shallower trees after size.</li>
+               <li><code>nodeType</code> — ordered by the implicit <code>Ordering[NodeT]</code> for deterministic choice among structurally identical candidates.</li>
+               <li><code>definitions</code> — sequence of locally defined slots; compared lexicographically.</li>
+               <li><code>uses</code> — sequence of externally used slots; compared lexicographically.</li>
+               <li><code>args</code> — sequence of child trees; compared lexicographically (uses this ordering recursively).</li>
+              </ol>
+              <p>Performance: comparing two trees may traverse corresponding subtrees; worst-case is proportional to the size of the compared structures when earlier keys (cost/size/depth) do not decide quickly.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -469,13 +587,13 @@
                C
               </dt>
               <dd class="body-medium">
-               <p>The type of the cost.</p>
+               <p>The cost type.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes.</p>
+               <p>The node/operator type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -484,17 +602,35 @@
                costOrdering
               </dt>
               <dd class="body-medium">
-               <p>The ordering for the cost.</p>
+               <p>Implicit total ordering for the cost domain <code>C</code>.</p>
               </dd>
               <dt class="body-small">
                nodeOrdering
               </dt>
               <dd class="body-medium">
-               <p>The ordering for the nodes.</p>
+               <p>Implicit deterministic ordering for <code>NodeT</code>, used as a tie-breaker.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>implicit val costOrd: Ordering[Int] = Ordering.Int
+</span><span line-number="2" class=""><span class="tooltip-container"></span>implicit val nodeOrd: Ordering[Op]  = ...
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val ord = ExtractionTreeOrdering[Op, Int]()
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val best: ExtractionTreeCall[Op, Int] =
+</span><span line-number="5" class=""><span class="tooltip-container"></span> List(callA, callB, callC).min(ord.callOrdering)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -553,11 +689,12 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An extractor that extract expression trees from e-class calls.</p>
+             <p>An extractor that converts e-graph references (e-class calls) into concrete expression trees. Implementations define the extraction policy (e.g., cost-based or heuristic).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An extractor that extract expression trees from e-class calls.</p>
+              <p>An extractor that converts e-graph references (e-class calls) into concrete expression trees. Implementations define the extraction policy (e.g., cost-based or heuristic).</p>
+              <p>Determinism depends on the extractor and the e-graph contents. If multiple trees are equally optimal under the policy, the chosen tree may be implementation-defined.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -565,7 +702,13 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the e-graph.</p>
+               <p>The node type stored in the e-graph and produced in the resulting <a href="Tree.html">Tree</a>.</p>
+              </dd>
+              <dt class="body-small">
+               Repr
+              </dt>
+              <dd class="body-medium">
+               <p>The concrete e-graph type, which must implement both <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -599,4 +742,4 @@
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
