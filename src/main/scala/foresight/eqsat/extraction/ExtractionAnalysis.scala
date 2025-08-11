@@ -47,9 +47,11 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    * }}}
    */
   def extractor[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]]: Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] = {
-    (call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]) => {
-      val extractionTree = get(egraph)(call, egraph)
-      extractionTree.applied.toTree
+    new Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] {
+      override def apply(call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]): Tree[NodeT] = {
+        val extractionTree = get(egraph)(call, egraph)
+        extractionTree.applied.toTree
+      }
     }
   }
 
@@ -127,8 +129,13 @@ object ExtractionAnalysis {
   def smallest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
     ExtractionAnalysis(
       "SmallestExtractionAnalysis",
-      (nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, Int]]) => {
-        args.map(_.cost).sum + 1
+      new CostFunction[NodeT, Int] {
+        override def apply(nodeType: NodeT,
+                           definitions: Seq[Slot],
+                           uses: Seq[Slot],
+                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
+          args.map(_.cost).sum + 1
+        }
       })
   }
 
@@ -149,8 +156,13 @@ object ExtractionAnalysis {
   def shallowest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
     ExtractionAnalysis(
       "ShallowestExtractionAnalysis",
-      (nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, Int]]) => {
-        args.map(_.cost).max + 1
+      new CostFunction[NodeT, Int] {
+        override def apply(nodeType: NodeT,
+                           definitions: Seq[Slot],
+                           uses: Seq[Slot],
+                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
+          args.map(_.cost).max + 1
+        }
       })
   }
 }
