@@ -4,14 +4,25 @@ import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Slot, SlotMap, Tree}
 
 /**
- * An analysis that produces extraction trees with minimal cost.
+ * An analysis that derives minimal-cost extraction results for each e-class.
  *
- * @param name The name of the analysis.
- * @param cost The cost function for the analysis.
- * @param costOrdering The ordering for the cost.
- * @param nodeOrdering An ordering for the nodes.
- * @tparam NodeT The type of the nodes in the e-graph.
- * @tparam C The type of the cost.
+ * This analysis computes an [[ExtractionTreeCall]] at every e-class using a user-provided
+ * [[CostFunction]] and implicit orderings. The resulting value encodes both the chosen
+ * minimal-cost tree and the slot renaming needed to apply it in context.
+ *
+ * The cost domain `C` is totally ordered by the implicit `Ordering[C]`. When multiple candidates
+ * have the same minimal cost, ties are broken deterministically using the implicit `Ordering[NodeT]`
+ * via [[ExtractionTreeOrdering]].
+ *
+ * Immutability: Foresight e-graphs are immutable. Running this analysis does not mutate the input;
+ * it produces results attached to the analysis view of the graph.
+ *
+ * @param name          Human-readable name for diagnostics and debugging.
+ * @param cost          Node-local cost model used to score trees bottom-up.
+ * @param costOrdering  (implicit) Total ordering over costs used to select minima.
+ * @param nodeOrdering  (implicit) Tie-breaker over node types for deterministic selection.
+ * @tparam NodeT        Node/operator type stored in the e-graph.
+ * @tparam C            Cost type produced by the cost function.
  */
 final case class ExtractionAnalysis[NodeT, C](name: String,
                                               cost: CostFunction[NodeT, C])
@@ -20,31 +31,55 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
   extends Analysis[NodeT, ExtractionTreeCall[NodeT, C]] {
 
   /**
-   * The extractor corresponding to this extraction analysis.
-   * @tparam Repr The type of the underlying e-graph.
-   * @return The extractor for the analysis.
+   * Builds an [[Extractor]] that projects the analysis result at a given e-class into a concrete [[Tree]].
+   *
+   * The extractor reads this analysis's results from an [[EGraphWithMetadata]] and converts the chosen
+   * [[ExtractionTreeCall]] into a concrete tree (applying any accumulated renamings).
+   *
+   * @tparam Repr Concrete immutable e-graph representation.
+   * @return An extractor that uses this analysis's results.
+   *
+   * @example {{{
+   * val analysis = ExtractionAnalysis.smallest[Op]
+   * val egm: EGraphWithMetadata[Op, MyEGraph] = ...
+   * val ext = analysis.extractor[MyEGraph]
+   * val tree: Tree[Op] = ext(call, egm)  // materializes the chosen minimal tree
+   * }}}
    */
   def extractor[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]]: Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] = {
-    new Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] {
-      override def apply(call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]): Tree[NodeT] = {
-        val extractionTree = get(egraph)(call, egraph)
-        extractionTree.applied.toTree
-      }
+    (call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]) => {
+      val extractionTree = get(egraph)(call, egraph)
+      extractionTree.applied.toTree
     }
   }
 
   /**
-   * Renames the slots in an analysis result.
+   * Renames the slots in an analysis result without changing its chosen structure or cost.
    *
-   * @param result   The analysis result to rename.
-   * @param renaming The renaming to apply to the slots. The keys of the map are the slots as they appear in the result,
-   *                 and the values are the slots to which they are renamed.
-   * @return The analysis result with the slots renamed.
+   * This composes the result's existing renaming with the provided `renaming`. Composition is
+   * performed so that slots already mapped in the result are retained where appropriate.
+   *
+   * @param result   The analysis result to rebind.
+   * @param renaming A mapping from current slot IDs to their new IDs in the caller's context.
+   * @return A result equivalent up to alpha-renaming.
    */
   override def rename(result: ExtractionTreeCall[NodeT, C], renaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
     ExtractionTreeCall(result.tree, result.renaming.composeRetain(renaming))
   }
 
+  /**
+   * Constructs the analysis value for a node given already-computed child results.
+   *
+   * Computes the node's cost via the provided [[CostFunction]], builds an [[ExtractionTree]]
+   * carrying that cost and structure, asserts slot uniqueness, and wraps it as an
+   * [[ExtractionTreeCall]] with an identity renaming on the tree's slot set.
+   *
+   * @param node The operator/type at this node.
+   * @param defs Slots defined locally by this node.
+   * @param uses Slots used by this node but defined elsewhere.
+   * @param args Child analysis results (already scored and well-typed).
+   * @return The composed analysis result for the subtree.
+   */
   override def make(node: NodeT, defs: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
     val treeCost = cost(node, defs, uses, args)
     val tree = ExtractionTree(treeCost, node, defs, uses, args)
@@ -56,11 +91,13 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
   }
 
   /**
-   * Joins two analysis results.
+   * Joins two competing results by choosing the minimal one under the analysis ordering.
    *
-   * @param left  The left analysis result.
-   * @param right The right analysis result.
-   * @return The joined analysis result.
+   * Primary key: `costOrdering`. Tie-break: `nodeOrdering` (via [[ExtractionTreeOrdering]]).
+   *
+   * @param left  Candidate A.
+   * @param right Candidate B.
+   * @return The chosen minimal candidate.
    */
   override def join(left: ExtractionTreeCall[NodeT, C],
                     right: ExtractionTreeCall[NodeT, C]): ExtractionTreeCall[NodeT, C] = {
@@ -69,46 +106,51 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
 }
 
 /**
- * Companion object for the extraction analysis.
+ * Constructors and presets for common extraction analyses.
  */
 object ExtractionAnalysis {
+
   /**
-   * An extraction analysis that extracts the smallest expression tree for each e-class.
+   * An analysis that minimizes total node count (tree size).
    *
-   * @param nodeOrdering An ordering for the nodes.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @return The extraction analysis.
+   * Cost model: `size(node) = 1 + sum(child sizes)`.
+   *
+   * @param nodeOrdering Implicit ordering to deterministically break cost ties.
+   * @tparam NodeT       Node/operator type.
+   * @return An extraction analysis that prefers the fewest nodes.
+   *
+   * @example {{{
+   * implicit val order: Ordering[Op] = ...
+   * val smallest = ExtractionAnalysis.smallest[Op]
+   * }}}
    */
   def smallest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
     ExtractionAnalysis(
       "SmallestExtractionAnalysis",
-      new CostFunction[NodeT, Int] {
-        override def apply(nodeType: NodeT,
-                           definitions: Seq[Slot],
-                           uses: Seq[Slot],
-                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
-          args.map(_.cost).sum + 1
-        }
+      (nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, Int]]) => {
+        args.map(_.cost).sum + 1
       })
   }
 
   /**
-   * An extraction analysis that extracts the shallowest expression tree for each e-class.
+   * An analysis that minimizes tree height (maximum depth).
    *
-   * @param nodeOrdering An ordering for the nodes.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @return The extraction analysis.
+   * Cost model: `height(node) = 1 + max(child heights)`; leaf height is 1.
+   *
+   * @param nodeOrdering Implicit ordering to deterministically break cost ties.
+   * @tparam NodeT       Node/operator type.
+   * @return An extraction analysis that prefers shallow trees.
+   *
+   * @example {{{
+   * implicit val order: Ordering[Op] = ...
+   * val shallowest = ExtractionAnalysis.shallowest[Op]
+   * }}}
    */
   def shallowest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
     ExtractionAnalysis(
       "ShallowestExtractionAnalysis",
-      new CostFunction[NodeT, Int] {
-        override def apply(nodeType: NodeT,
-                           definitions: Seq[Slot],
-                           uses: Seq[Slot],
-                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
-          args.map(_.cost).max + 1
-        }
+      (nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, Int]]) => {
+        args.map(_.cost).max + 1
       })
   }
 }

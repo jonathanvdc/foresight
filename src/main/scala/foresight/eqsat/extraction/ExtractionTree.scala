@@ -3,48 +3,73 @@ package foresight.eqsat.extraction
 import foresight.eqsat.{Slot, Tree}
 
 /**
- * A tree data structure for extraction.
+ * Immutable, cost-annotated tree used by extraction analyses.
  *
- * @param cost The cost of the tree.
- * @param nodeType The type of the tree's root.
- * @param definitions The slots of the root that are defined by the root itself.
- * @param uses The slots of the root that are used by the root and are defined elsewhere.
- * @param args The children of the root node.
- * @tparam NodeT The type of the nodes in the tree.
- * @tparam C The type of the cost.
+ * An `ExtractionTree` represents a concrete, fully expanded expression
+ * rooted at `nodeType`, annotated with:
+ *   - `cost` — precomputed total cost for the subtree, according to a
+ *     [[CostFunction]].
+ *   - `definitions` — slots bound/defined locally at this node.
+ *   - `uses` — slots referenced at this node but defined elsewhere.
+ *   - `args` — already-costed children, each an [[ExtractionTreeCall]].
+ *
+ * The cost type `C` is abstract; it may be numeric, tuple-based, or any
+ * other ordered type usable for extraction ordering.
+ *
+ * @param cost         Total cost of this subtree (root + all descendants).
+ * @param nodeType     Operator/type of the root node.
+ * @param definitions  Slots introduced by this node.
+ * @param uses         Slots consumed by this node that are defined externally.
+ * @param args         Costed children, in evaluation order.
+ * @tparam NodeT       The node/operator type.
+ * @tparam C           The cost type.
  */
-final case class ExtractionTree[+NodeT, C](cost: C,
-                                           nodeType: NodeT,
-                                           definitions: Seq[Slot],
-                                           uses: Seq[Slot],
-                                           args: Seq[ExtractionTreeCall[NodeT, C]]) {
+final case class ExtractionTree[+NodeT, C](
+                                            cost: C,
+                                            nodeType: NodeT,
+                                            definitions: Seq[Slot],
+                                            uses: Seq[Slot],
+                                            args: Seq[ExtractionTreeCall[NodeT, C]]
+                                          ) {
+
   /**
-   * Gets the size of the tree.
-   * @return The size of the tree.
+   * Total number of nodes in this tree, including the root.
+   *
+   * Computed as: `1 + sum(child sizes)`.
    */
   val size: Int = args.map(_.size).sum + 1
 
   /**
-   * Gets the depth of the tree.
-   * @return The depth of the tree.
+   * Maximum depth of this tree (root has depth 1).
+   *
+   * Computed as: `1 + max(child depths)`. If there are no children,
+   * the depth is 1.
    */
   val depth: Int = (args.map(_.depth) :+ 0).max + 1
 
   /**
-   * The slots of the tree, in the order in which they appear.
-   * @return The slots of the tree.
+   * All slots appearing in this tree, in traversal order:
+   * definitions first, then uses, then recursively from children.
+   *
+   * This sequence does not deduplicate slots.
    */
-  def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.slots)
+  def slots: Seq[Slot] =
+    definitions ++ uses ++ args.flatMap(_.slots)
 
   /**
-   * The set of slots of the tree after applying the renaming.
-   * @return The slots of the tree.
+   * All unique slots appearing in this tree (deduplicated, as a set).
+   *
+   * Includes slots defined locally and in descendants.
    */
-  val slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.slotSet)
+  val slotSet: Set[Slot] =
+    definitions.toSet ++ uses ++ args.flatMap(_.slotSet)
 
   /**
-   * Turns the extraction tree into an expression tree.
-   * @return The expression tree.
+   * Converts this cost-annotated tree into a plain [[Tree]] by:
+   *   - Recursively applying each child's renaming.
+   *   - Discarding cost annotations.
+   *
+   * @return A plain expression tree with the same structure and slots.
    */
   def toTree: Tree[NodeT] = {
     val newArgs = args.map(_.applied.toTree)

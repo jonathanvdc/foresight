@@ -3,18 +3,56 @@ package foresight.eqsat.extraction
 import foresight.eqsat.{Slot, SlotMap, Tree}
 
 /**
- * A cost function for extraction analyses.
- * @tparam NodeT The type of the nodes in the tree.
- * @tparam C The type of the cost.
+ * A node-local cost model used during extraction.
+ *
+ * A `CostFunction` assigns a cost to a single node given:
+ *   - its operator/type (`nodeType`),
+ *   - which slots it defines locally (`definitions`),
+ *   - which slots it uses that are defined elsewhere (`uses`),
+ *   - and the already-costed children (`args`).
+ *
+ * The cost is computed bottom-up: each `args` entry is an [[ExtractionTreeCall]] that already
+ * contains the child's cost, so implementations can simply aggregate child costs and add any
+ * node-local contribution.
+ *
+ * This interface is deliberately minimal:
+ *   - It is agnostic to the meaning of `C` (numbers, tuples, custom records, etc.).
+ *   - It does not prescribe how to combine costs; that policy lives in your implementation.
+ *   - It assumes purity: for the same inputs, return the same cost.
+ *
+ * @tparam NodeT The node/operator type used in the tree.
+ * @tparam C     The cost type produced by the function.
+ *
+ * @example {{{
+ * // Simple additive cost: weight(node) + sum(child costs)
+ * final case class NumCost(value: Int)
+ *
+ * val weights: Map[Op, Int] = ...
+ *
+ * object AdditiveCost extends CostFunction[Op, NumCost] {
+ *   def apply(nodeType: Op,
+ *             definitions: Seq[Slot],
+ *             uses: Seq[Slot],
+ *             args: Seq[ExtractionTreeCall[Op, NumCost]]): NumCost = {
+ *     val childSum = args.iterator.map(_.tree.cost.value).sum
+ *     NumCost(weights.getOrElse(nodeType, 1) + childSum)
+ *   }
+ * }
+ * }}}
  */
 trait CostFunction[NodeT, C] {
+
   /**
-   * Applies the cost function to a tree.
-   * @param nodeType The type of the node.
-   * @param definitions The slots of the node that are defined by the node itself.
-   * @param uses The slots of the node that are used by the node and are defined elsewhere.
-   * @param args The children of the node.
-   * @return The cost of the tree.
+   * Computes the cost contribution of a single node, given its already-costed children.
+   *
+   * @param nodeType    The operator/type of the current node.
+   * @param definitions Slots defined by this node itself (e.g., outputs or bindings introduced here).
+   * @param uses        Slots used by this node but defined elsewhere (its external dependencies).
+   * @param args        Children as costed calls. Each child’s cost is available via
+   *                    `args(i).tree.cost`. If your cost is additive, you typically sum these.
+   * @return The total cost for the subtree rooted at this node (including children).
+   *
+   * @note Implementations are expected to be pure and total. Avoid relying on global state.
    */
   def apply(nodeType: NodeT,
             definitions: Seq[Slot],
@@ -22,19 +60,28 @@ trait CostFunction[NodeT, C] {
             args: Seq[ExtractionTreeCall[NodeT, C]]): C
 
   /**
-   * Applies the cost function to a tree.
-   * @param tree The tree to which the cost function is applied.
-   * @return The cost of the tree.
+   * Computes the cost of a whole [[Tree]] by recursively converting it to an
+   * [[ExtractionTree]] and reading its accumulated cost.
+   *
+   * @param tree The root tree to evaluate.
+   * @return The cost of the entire tree.
+   *
+   * @example {{{
+   * val cost: C = myCostFn(programTree)
+   * }}}
    */
   final def apply(tree: Tree[NodeT]): C = {
     toExtractionTree(tree).cost
   }
 
+  // Internal helpers: convert a plain Tree into cost-annotated extraction forms.
+
   private final def toExtractionTreeCall(tree: Tree[NodeT]): ExtractionTreeCall[NodeT, C] = {
     val extractionTree = toExtractionTree(tree)
     ExtractionTreeCall(
       extractionTree,
-      SlotMap.identity(extractionTree.slotSet))
+      SlotMap.identity(extractionTree.slotSet)
+    )
   }
 
   private final def toExtractionTree(tree: Tree[NodeT]): ExtractionTree[NodeT, C] = {
@@ -44,6 +91,7 @@ trait CostFunction[NodeT, C] {
       tree.nodeType,
       tree.definitions,
       tree.uses,
-      args)
+      args
+    )
   }
 }
