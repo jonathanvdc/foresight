@@ -3,12 +3,20 @@ package foresight.eqsat.commands
 import foresight.eqsat.EClassCall
 
 /**
- * A symbolic e-class application.
+ * Symbolic handle for an e-class in an e-graph.
+ *
+ * An [[EClassSymbol]] can be:
+ *   - a concrete reference to an existing e-class ([[EClassSymbol.Real]]), or
+ *   - a placeholder for an e-class not yet added ([[EClassSymbol.Virtual]]).
+ *
+ * Symbols are used by [[Command]] instances to refer to e-classes in a
+ * portable, reifiable way.
  */
 sealed trait EClassSymbol {
+
   /**
-   * Checks if the e-class symbol is a concrete e-class application.
-   * @return A Boolean value indicating whether the e-class symbol is a real e-class application.
+   * Returns `true` if this symbol refers to an existing e-class
+   * (i.e. is an [[EClassSymbol.Real]]).
    */
   final def isReal: Boolean = this match {
     case EClassSymbol.Real(_) => true
@@ -16,15 +24,26 @@ sealed trait EClassSymbol {
   }
 
   /**
-   * Checks if the e-class symbol is a virtual e-class application.
-   * @return A Boolean value indicating whether the e-class symbol is a virtual e-class application.
+   * Returns `true` if this symbol is a placeholder (i.e. an [[EClassSymbol.Virtual]]).
    */
   final def isVirtual: Boolean = !isReal
 
   /**
-   * Reifies the e-class symbol using the given reification.
-   * @param reification A map from virtual e-class symbols to e-class calls.
-   * @return The e-class call that the e-class symbol represents.
+   * Resolves this symbol to its [[EClassCall]].
+   *
+   * If this symbol is real, its call is returned directly.
+   * If it is virtual, the corresponding entry in `reification` must exist.
+   *
+   * @param reification Mapping from virtual symbols to concrete calls.
+   * @throws NoSuchElementException if this symbol is virtual and not found in `reification`.
+   * @return The concrete call for this symbol.
+   *
+   * @example
+   * {{{
+   * val v = EClassSymbol.virtual()
+   * val call = EClassCall(...)
+   * val realCall = v.reify(Map(v -> call)) // returns call
+   * }}}
    */
   final def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
     case EClassSymbol.Real(call) => call
@@ -32,10 +51,14 @@ sealed trait EClassSymbol {
   }
 
   /**
-   * Tries to reify the e-class symbol using the given reification.
-   * @param reification A map from virtual e-class symbols to e-class calls.
-   * @return The e-class call that the e-class symbol represents, if it is a real e-class symbol or a virtual symbol
-   *         that is in the reification map. Otherwise, `None`.
+   * Optionally resolves this symbol to its [[EClassCall]].
+   *
+   * If this symbol is real, its call is wrapped in `Some`.
+   * If it is virtual, returns the matching entry in `reification` if present,
+   * or `None` if missing.
+   *
+   * @param reification Mapping from virtual symbols to concrete calls.
+   * @return The resolved call, or `None` if unresolved.
    */
   final def tryReify(reification: Map[EClassSymbol.Virtual, EClassCall]): Option[EClassCall] = this match {
     case EClassSymbol.Real(call) => Some(call)
@@ -43,10 +66,14 @@ sealed trait EClassSymbol {
   }
 
   /**
-   * Refines the e-class symbol using the given reification.
-   * @param reification A map from virtual e-class symbols to e-class calls.
-   * @return The real e-class symbol that the e-class symbol represents, if one exists in the reification map. Otherwise,
-   *         the original e-class symbol.
+   * Replaces this symbol with an [[EClassSymbol.Real]] if resolvable.
+   *
+   * - If already real, returns an equivalent [[EClassSymbol.Real]].
+   * - If virtual and present in `reification`, returns a new [[EClassSymbol.Real]].
+   * - Otherwise, returns `this` unchanged.
+   *
+   * @param reification Mapping from virtual symbols to concrete calls.
+   * @return A real symbol if resolvable, else the original symbol.
    */
   final def refine(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassSymbol = this match {
     case EClassSymbol.Real(call) => EClassSymbol.real(call)
@@ -58,30 +85,32 @@ sealed trait EClassSymbol {
 }
 
 /**
- * A companion object for e-class symbols.
+ * Constructors and concrete types for [[EClassSymbol]].
  */
 object EClassSymbol {
+
   /**
-   * A real e-class application that is already in the graph.
-   * @param call The e-class call.
+   * Concrete reference to an e-class already in the e-graph.
+   *
+   * @param call The existing e-class call.
    */
   final case class Real(call: EClassCall) extends EClassSymbol
 
   /**
-   * A virtual e-class application, referring to a not-yet-added e-class.
+   * Placeholder reference for an e-class not yet added to the e-graph.
+   *
+   * Virtual symbols allow [[Command]] instances to describe edits that will
+   * produce new e-classes, without knowing their final IDs or calls in advance.
    */
   final class Virtual extends EClassSymbol
 
   /**
-   * Creates a new virtual e-class symbol.
-   * @return A new virtual e-class symbol.
+   * Creates a fresh [[Virtual]] symbol.
    */
   def virtual(): Virtual = new Virtual
 
   /**
-   * Creates a new real e-class symbol.
-   * @param call The e-class call.
-   * @return A new real e-class symbol.
+   * Wraps an [[EClassCall]] in a [[Real]] symbol.
    */
   def real(call: EClassCall): Real = Real(call)
 }

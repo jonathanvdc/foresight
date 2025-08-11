@@ -4,70 +4,129 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 
 /**
- * A command that can be applied to an e-graph.
+ * A [[Command]] encapsulates a single, replayable edit to an e-graph.
  *
- * @tparam NodeT The node type of the expressions that the e-graph represents.
+ * Commands are pure values that describe what to do; they don’t perform any mutation until applied.
+ * This design allows callers to build, simplify, batch, or reorder edits before committing them to
+ * an [[EGraph]].
+ *
+ * @tparam NodeT Node type for expressions represented by the e-graph.
  */
 trait Command[NodeT] {
+
   /**
-   * All e-class symbols that need to be reified to run the command.
+   * The e-class symbols this command expects to already exist when it runs.
+   *
+   * These are the external dependencies needed to interpret the command (e.g., “union the new class
+   * with this existing one”). Implementations list all required symbols so that callers can:
+   *   - validate a reification plan ahead of time
+   *   - topologically sort commands
    */
   def uses: Seq[EClassSymbol]
 
   /**
-   * All e-class symbols that are defined by the command.
+   * The virtual e-class symbols this command promises to define when executed.
+   *
+   * Each virtual symbol represents an e-class that will be materialized in the target e-graph and
+   * receive a concrete [[EClassCall]]. After a successful [[apply]], the returned reification map
+   * contains an entry for every symbol listed here.
    */
   def definitions: Seq[EClassSymbol.Virtual]
 
   /**
-   * Applies the command to the given e-graph.
-   * @param egraph The e-graph to which the command should be applied.
-   * @param reification A map from virtual e-class symbols to e-class calls that are used to reify the virtual e-class
-   *                    symbols.
-   * @param parallelize The parallelization strategy to use.
-   * @return The new e-graph, if it was changed, and a map from virtual e-class symbols to real e-class symbols.
-   *         The map contains an entry for each virtual e-class symbol that is created by the command.
+   * Executes the command against an e-graph.
+   *
+   * @param egraph
+   *   Destination e-graph. Implementations may either return it unchanged or produce a new immutable
+   *   e-graph snapshot.
+   * @param reification
+   *   Mapping from virtual symbols to concrete calls available before this command runs. This is used
+   *   to ground virtual references present in [[uses]].
+   * @param parallelize
+   *   Parallelization strategy to label and distribute any internal work.
+   * @return
+   *   A pair `(maybeNewGraph, outMap)` where:
+   *     - `maybeNewGraph` is `Some(newGraph)` if any change occurred, or `None` for a no-op.
+   *     - `outMap` binds every symbol in [[definitions]] to its realized [[EClassCall]].
    */
-  def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
+  def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
+                                                                 egraph: Repr,
+                                                                 reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                 parallelize: ParallelMap
+                                                               ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
 
   /**
-   * Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph.
-   * For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op.
-   * Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map
-   * assignment.
-   * @param egraph The e-graph for which the command is to be simplified.
-   * @param partialReification A map from virtual e-class symbols to e-class calls that are used to reify the virtual
-   *                           e-clas symbols.
-   * @return The simplified command and a partial reification map for this command.
+   * Returns a semantically equivalent command that is cheaper to execute on the given e-graph.
+   *
+   * Typical simplifications include:
+   *   - eliminating unions whose endpoints are already congruent
+   *   - dropping inserts of nodes already present
+   *   - narrowing work by pre-binding outputs in the returned partial reification
+   *
+   * The returned partial map contains bindings this command can prove without running, which callers
+   * may compose across multiple commands to reduce future work.
+   *
+   * @param egraph Target e-graph used as context for optimization.
+   * @param partialReification Known virtual-to-concrete bindings available upstream.
+   * @return A pair `(simplifiedCommand, partialBindings)` for this command.
    */
-  def simplify(egraph: EGraph[NodeT],
-               partialReification: Map[EClassSymbol.Virtual, EClassCall]): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall])
+  def simplify(
+                egraph: EGraph[NodeT],
+                partialReification: Map[EClassSymbol.Virtual, EClassCall]
+              ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall])
 
   /**
-   * Simplifies the command for a given e-graph. This method can be used to optimize the command for a specific e-graph.
-   * For example, a command that unions two e-classes that are already in the same e-class can be simplified to a no-op.
-   * Similarly, a command that adds an e-node that is already in the e-graph can be simplified to a reification map
-   * assignment.
-   * @param egraph The e-graph for which the command is to be simplified.
-   * @return The simplified command.
+   * Returns a semantically equivalent command that is cheaper to execute on the given e-graph.
+   * Assumes no prior reification information and does not return any partial bindings.
+   *
+   * Typical simplifications include:
+   *   - eliminating unions whose endpoints are already congruent
+   *   - dropping inserts of nodes already present
+   *   - narrowing work by pre-binding outputs in the returned partial reification
+   *
+   * @param egraph Target e-graph used as context for optimization.
+   * @return A simplified command.
    */
-  final def simplify(egraph: EGraph[NodeT]): Command[NodeT] = simplify(egraph, Map.empty)._1
+  final def simplify(egraph: EGraph[NodeT]): Command[NodeT] =
+    simplify(egraph, Map.empty)._1
 }
 
 /**
- * A companion object for [[Command]].
+ * Factory methods for constructing common [[Command]] instances.
  */
 object Command {
+
   /**
-   * Creates a command that unifies an e-class symbol with an expression tree.
-   * @param symbol The e-class symbol to unify.
-   * @param tree The expression tree to unify with the e-class symbol.
-   * @tparam NodeT The node type of the expression tree.
-   * @return The command that unifies the e-class symbol with the expression tree.
+   * Creates a [[Command]] that asserts an existing [[EClassSymbol]] is equivalent to a given
+   * expression tree.
+   *
+   * Internally, this:
+   *   1. Inserts the tree (creating a fresh virtual symbol for its root if needed)
+   *   2. Unions that root with `symbol`
+   *
+   * This is the canonical “add-and-unify” operation when you want to grow the e-graph with a
+   * concrete term and immediately equate it with an existing class.
+   *
+   * @param symbol E-class symbol to unify with the tree’s root.
+   * @param tree   Expression to insert/reuse and equate.
+   * @tparam NodeT Node type for the expression.
+   * @return A compound command performing the insert and the union.
+   *
+   * @example
+   * {{{
+   * import foresight.eqsat.commands.Command
+   *
+   * val cmd: Command[MyNode] =
+   *   Command.addEquivalentTree(existingSym, myTree)
+   *
+   * val (optGraph, out) =
+   *   cmd.simplify(egraph).apply(egraph, Map.empty, parallel)
+   * }}}
    */
-  def addEquivalentTree[NodeT](symbol: EClassSymbol, tree: MixedTree[NodeT, EClassSymbol]): Command[NodeT] = {
+  def addEquivalentTree[NodeT](
+                                symbol: EClassSymbol,
+                                tree: MixedTree[NodeT, EClassSymbol]
+                              ): Command[NodeT] = {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.add(tree)
     builder.union(symbol, c)

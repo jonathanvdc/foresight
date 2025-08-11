@@ -6,22 +6,62 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
 import scala.collection.mutable
 
 /**
- * A queue of commands to be applied to an e-graph. The queue can itself be applied as a command to an e-graph.
+ * A composable batch of [[Command]]s that itself behaves as a single [[Command]].
  *
- * @tparam NodeT The node type of the expressions that the e-graph represents.
- * @param commands The commands to be applied to the e-graph.
+ * Queues enable staging, simplification, and reordering of edits before applying them to an [[EGraph]].
+ * When applied, commands run in sequence, threading the evolving reification map through each step.
+ *
+ * @tparam NodeT Node type for expressions represented by the e-graph.
+ * @param commands The commands in execution order (prior to [[optimized]]).
+ *
+ * @example
+ * {{{
+ * val q0 = CommandQueue.empty[MyNode]
+ * val (x, q1) = q0.add(myTree)                  // add a tree, get its symbol
+ * val (y, q2) = q1.add(ENodeSymbol(op, Nil, Nil, Seq(x)))
+ * val q3 = q2.union(x, y).optimized             // merge unions, batch adds
+ * val (maybeGraph, refs) = q3(g, Map.empty, parallel)
+ * }}}
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
+
+  /** All symbols used by the commands in this queue. */
   override def uses: Seq[EClassSymbol] = commands.flatMap(_.uses)
+
+  /** All virtual symbols defined by the commands in this queue. */
   override def definitions: Seq[EClassSymbol.Virtual] = commands.flatMap(_.definitions)
 
-  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                         reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                         parallelize: ParallelMap): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+  /**
+   * Applies each command in order, threading the latest graph and reification.
+   *
+   * For each step, the current graph (updated only if the previous command returned `Some(newGraph)`)
+   * and the accumulated virtual-to-real bindings are passed to the next command.
+   *
+   * @param egraph Initial graph snapshot.
+   * @param reification Initial virtual-to-concrete bindings available to the first command.
+   * @param parallelize Strategy for distributing work across commands that can parallelize internally.
+   * @return
+   *   - `Some(newGraph)` if at least one command changed the graph, otherwise `None`.
+   *   - The final reification map, containing the union of all bindings produced by the sub-commands.
+   *
+   * @example
+   * {{{
+   * val (g1, r1) = {
+   *   val (maybeG, out) = queue.apply(g0, Map.empty, parallel)
+   *   (maybeG.getOrElse(g0), out)
+   * }
+   * }}}
+   */
+  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
+                                                                          egraph: Repr,
+                                                                          reification: Map[EClassSymbol.Virtual, EClassCall],
+                                                                          parallelize: ParallelMap
+                                                                        ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     var newEGraph: Option[Repr] = None
     var newReification = reification
     for (command <- commands) {
-      val (newEGraphOpt, newReificationPart) = command.apply(newEGraph.getOrElse(egraph), newReification, parallelize)
+      val (newEGraphOpt, newReificationPart) =
+        command.apply(newEGraph.getOrElse(egraph), newReification, parallelize)
       newEGraph = newEGraphOpt.orElse(newEGraph)
       newReification ++= newReificationPart
     }
@@ -29,9 +69,15 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   }
 
   /**
-   * Appends a command to the queue that adds a new e-node to the e-graph.
-   * @param node The e-node to add to the e-graph.
-   * @return The virtual e-class symbol that represents the added e-node and the new command queue.
+   * Appends an insertion of a single [[ENodeSymbol]] as an [[AddManyCommand]] of size 1.
+   *
+   * @param node Node to add.
+   * @return The fresh output symbol for the node and the extended queue.
+   *
+   * @example
+   * {{{
+   * val (sym, q2) = q1.add(ENodeSymbol(op, defs, uses, args))
+   * }}}
    */
   def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
     val result = EClassSymbol.virtual()
@@ -39,9 +85,19 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   }
 
   /**
-   * Appends a command to the queue that adds a new tree to the e-graph.
-   * @param tree The tree to add to the e-graph.
-   * @return The virtual e-class symbol that represents the added tree and the new command queue.
+   * Appends an insertion of a [[MixedTree]].
+   *
+   * Child subtrees are added first (depth-first), then a final node is inserted referencing
+   * their produced symbols. If the tree is a [[MixedTree.Call]], it is treated as already-real
+   * and no command is added.
+   *
+   * @param tree Tree to insert.
+   * @return The symbol for the tree's root and the extended queue.
+   *
+   * @example
+   * {{{
+   * val (root, q2) = q1.add(myTree)
+   * }}}
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
     tree match {
@@ -59,74 +115,111 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   }
 
   /**
-   * Appends a command to the queue that unions two e-classes in the e-graph.
-   * @param left The first e-class to union.
-   * @param right The second e-class to union.
-   * @return The new command queue.
+   * Appends a [[UnionManyCommand]] of size 1.
+   *
+   * @param left Left class symbol.
+   * @param right Right class symbol.
+   * @return The extended queue.
+   *
+   * @example
+   * {{{
+   * val q2 = q1.union(a, b)
+   * }}}
    */
-  def union(left: EClassSymbol, right: EClassSymbol): CommandQueue[NodeT] = {
+  def union(left: EClassSymbol, right: EClassSymbol): CommandQueue[NodeT] =
     CommandQueue(commands :+ UnionManyCommand(Seq((left, right))))
-  }
 
   /**
-   * Chains a command to the end of the queue.
-   * @param command The command to chain.
-   * @return The new command queue.
+   * Appends a single [[Command]] to the end of this queue.
+   *
+   * @param command Command to add.
+   * @return The extended queue.
    */
-  def chain(command: Command[NodeT]): CommandQueue[NodeT] = {
+  def chain(command: Command[NodeT]): CommandQueue[NodeT] =
     CommandQueue(commands :+ command)
-  }
 
   /**
-   * Chains a command queue to the end of the queue.
-   * @param commandQueue The command queue to chain.
-   * @return The new command queue.
+   * Concatenates another [[CommandQueue]] to the end of this queue.
+   *
+   * @param commandQueue Queue to append.
+   * @return The extended queue.
    */
-  def chain(commandQueue: CommandQueue[NodeT]): CommandQueue[NodeT] = {
+  def chain(commandQueue: CommandQueue[NodeT]): CommandQueue[NodeT] =
     CommandQueue(commands ++ commandQueue.commands)
-  }
 
   /**
-   * Optimizes the command queue by merging union commands. Commands may be reordered in order to facilitate this.
-   * @return The optimized command queue.
+   * Rewrites this queue into an equivalent but cheaper sequence by:
+   *   - flattening nested queues,
+   *   - merging adjacent [[UnionManyCommand]]s,
+   *   - batching independent [[AddManyCommand]]s and layering dependent ones.
+   *
+   * Commands may be reordered where independence permits.
+   *
+   * @return An optimized queue; does not modify this instance.
+   *
+   * @example
+   * {{{
+   * val qOptim = q.optimized
+   * }}}
    */
-  def optimized: CommandQueue[NodeT] = {
+  def optimized: CommandQueue[NodeT] =
     CommandQueue(CommandQueue.optimizeCommands(flatCommands))
-  }
 
   /**
-   * Recursively flattens the command queue into a sequence of commands.
-   * @return The sequence of commands.
+   * Recursively flattens nested [[CommandQueue]]s.
+   *
+   * @return A sequence of leaf commands in program order.
    */
-  private def flatCommands: Seq[Command[NodeT]] = {
+  private def flatCommands: Seq[Command[NodeT]] =
     commands.flatMap {
       case queue: CommandQueue[NodeT] => queue.flatCommands
       case command => Seq(command)
     }
-  }
 
-  override def simplify(egraph: EGraph[NodeT],
-                        partialReification: Map[EClassSymbol.Virtual, EClassCall]): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val (newQueue, newReification) = flatCommands.foldLeft((CommandQueue.empty[NodeT], partialReification)) {
-      case ((newQueue, reification), command) =>
-        val (simplified, newReification) = command.simplify(egraph, reification)
-        (newQueue.chain(simplified), reification ++ newReification)
-    }
+  /**
+   * Simplifies each command against the current e-graph and threads partial reification.
+   *
+   * Each command is simplified in sequence, accumulating any discovered bindings. The resulting queue
+   * is then [[optimized]] to merge unions and batch adds.
+   *
+   * @param egraph Context graph used by sub-command simplifications.
+   * @param partialReification Upstream bindings available prior to running this queue.
+   * @return The simplified-and-optimized queue and the accumulated partial bindings.
+   *
+   * @example
+   * {{{
+   * val (simp, partial) = q.simplify(g, Map.empty)
+   * val (maybeG, finalRefs) = simp.apply(g, partial, parallel)
+   * }}}
+   */
+  override def simplify(
+                         egraph: EGraph[NodeT],
+                         partialReification: Map[EClassSymbol.Virtual, EClassCall]
+                       ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
+    val (newQueue, newReification) =
+      flatCommands.foldLeft((CommandQueue.empty[NodeT], partialReification)) {
+        case ((newQueue, reification), command) =>
+          val (simplified, newReificationPart) = command.simplify(egraph, reification)
+          (newQueue.chain(simplified), reification ++ newReificationPart)
+      }
 
     (newQueue.optimized, newReification)
   }
 }
 
 /**
- * A companion object for command queues.
+ * Helpers for constructing and optimizing [[CommandQueue]]s.
  */
 object CommandQueue {
+
   /**
-   * An empty command queue.
-   * @tparam NodeT The node type of the expressions that the e-graph represents.
+   * Creates an empty queue.
+   *
+   * @tparam NodeT Node type for expressions represented by the e-graph.
    */
   def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
 
+  /** Applies union-merge and add-batching passes to a flat list of commands. */
   private def optimizeCommands[NodeT](commands: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
     mergeUnions(commands, others => {
       val adds = others.collect { case cmd: AddManyCommand[NodeT] => cmd }
@@ -138,8 +231,17 @@ object CommandQueue {
     })
   }
 
-  private def mergeUnions[NodeT](group: Seq[Command[NodeT]],
-                                 processRemaining: Seq[Command[NodeT]] => Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
+  /**
+   * Merges all [[UnionManyCommand]]s in a group into a single command, then processes the rest.
+   *
+   * @param group Flat list of commands.
+   * @param processRemaining Pass to handle non-union commands once unions are merged.
+   * @return Optimized sequence with at most one [[UnionManyCommand]] in the tail.
+   */
+  private def mergeUnions[NodeT](
+                                  group: Seq[Command[NodeT]],
+                                  processRemaining: Seq[Command[NodeT]] => Seq[Command[NodeT]]
+                                ): Seq[Command[NodeT]] = {
     // Partition the remaining commands into union commands and other commands.
     val (unionCommands, remainingCommands) = group.partition {
       case _: UnionManyCommand[NodeT] => true
@@ -151,11 +253,20 @@ object CommandQueue {
     // Merge all the union commands.
     val unionPairs = unionCommands.flatMap(_.pairs)
     unionPairs match {
-      case Seq() => processRemaining(remainingCommands)
+      case Seq()   => processRemaining(remainingCommands)
       case Seq(_*) => processRemaining(remainingCommands) :+ UnionManyCommand[NodeT](unionPairs)
     }
   }
 
+  /**
+   * Batches independent [[AddManyCommand]]s into layers based on their intra-batch dependencies.
+   *
+   * Nodes whose arguments are produced in earlier layers are scheduled in later layers; unrelated
+   * nodes share a layer and can be added together.
+   *
+   * @param group Only add-commands (pre-filtered).
+   * @return A sequence of batched [[AddManyCommand]]s in dependency order.
+   */
   private def optimizeAdds[NodeT](group: Seq[AddManyCommand[NodeT]]): Seq[Command[NodeT]] = {
     // Our aim is to partition the add commands into batches of independent additions. We do this by tracking the
     // batches in which each node is defined. When we encounter a fresh addition, we add it to batch i + 1 such that
@@ -185,6 +296,12 @@ object CommandQueue {
     batches.map(_.toSeq).map(AddManyCommand[NodeT]).toSeq
   }
 
+  /**
+   * Merges independent subgroups: batches adjacent [[AddManyCommand]]s and leaves others as-is.
+   *
+   * @param group A set of commands known to be independent of each other.
+   * @return Optimized sequence for that group.
+   */
   private def optimizeIndependentGroup[NodeT](group: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
     // Partition the commands into addition commands and other commands.
     val (addCommands, remainingCommands) = group.partition {
@@ -197,15 +314,19 @@ object CommandQueue {
     // Merge all the addition and union commands.
     val addPairs = addCommands.flatMap(_.nodes)
     addPairs match {
-      case Seq() => remainingCommands
-      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs.toSeq)
+      case Seq()   => remainingCommands
+      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs.toVector)
     }
   }
 
   /**
-   * Groups a sequence of commands into independent command groups. Within each group, the commands may run in any
-   * order.
-   * @return A sequence of independent command groups.
+   * Groups commands into independent sets using virtual-symbol dataflow.
+   *
+   * A command A depends on B if A uses a virtual symbol that B defines. The result is
+   * a topologically ordered partition where commands inside the same group have no such
+   * dependencies and may run in any order.
+   *
+   * @return A sequence of independent command groups in execution order.
    */
   private def independentGroups[NodeT](commands: Seq[Command[NodeT]]): Seq[Seq[Command[NodeT]]] = {
     val commandNumbers = commands.indices
