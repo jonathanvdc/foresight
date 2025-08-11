@@ -60,7 +60,7 @@ object TimingReport {
    * Merges multiple reports with the same conceptual root into a single tree.
    *
    * Semantics:
-   *   - Root [[nanos]] becomes the **sum** of all root nanos.
+   *   - Root nanos becomes the sum of all root nanos.
    *   - Children are grouped by [[TimingReport.name]]; groups are merged recursively.
    *   - Sibling groups are sorted by name for stable output.
    *
