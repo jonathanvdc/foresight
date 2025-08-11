@@ -2,133 +2,202 @@ package foresight.eqsat
 
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.saturation.EGraphWithRecordedApplications
 
 /**
- * An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.
+ * An e-graph*is a data structure for representing and maintaining equivalence classes of expressions.
+ * E-graphs support equality saturation, a powerful technique for exploring all equivalent forms of a term
+ * by exhaustively applying rewrite rules while avoiding redundant work by compacting equivalent subterms
+ * into shared e-classes.
  *
- * E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling
- * efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding,
- * and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable
- * style.
+ * In Foresight, an e-graph contains:
+ *  - **E-classes** ([[EClassRef]]/[[EClassCall]]): partitions of semantically equivalent expressions.
+ *  - **E-nodes** ([[ENode]]): operator/operand tuples representing a single application of a function or constructor.
+ *  - A **canonicalization invariant**: every e-class has a unique, canonical representative, and all queries
+ *    and updates are expressed in terms of these canonical forms.
  *
- * The split between [[EGraphLike]] and [[EGraph]] allows [[EGraph]] to be a simpler trait parameterized only by
- * `NodeT`, while [[EGraphLike]] is parameterized by both `NodeT` and the most derived type (`This`). This design
- * ensures that methods in [[EGraphLike]] can always return the most precise type of the implementing e-graph.
+ * ## Purpose of this trait
+ * [[EGraphLike]] defines the core API contract for e-graph implementations, parameterized by:
+ *  - The node payload type `NodeT` (the domain-specific symbol type your e-nodes use).
+ *  - The self-type `This`, so all operations that conceptually return "the same kind of e-graph"
+ *    return your most-derived type, preserving fluent, type-safe chaining.
  *
- * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
- * @tparam This The type of the e-graph that this trait is mixed into, which must be a subtype of [[EGraphLike]].
+ * This trait is deliberately minimal but powerful:
+ *  - **Query methods**: enumerate classes, retrieve nodes, check membership, canonicalize, resolve usage.
+ *  - **Construction methods**: add nodes and trees, bulk-add, merge e-classes (union), or create an empty graph.
+ *  - **Traversal methods**: find the e-class containing a given node or tree.
+ *
+ * Concrete e-graph variants (e.g., with metadata, recorded rule applications, or deferred unions) are built by
+ * wrapping or extending a base [[EGraphLike]] implementation.
+ *
+ * ## Immutability and functional style
+ * All e-graph operations return a **new** e-graph instance rather than mutating the receiver. This makes
+ * e-graphs:
+ *   - **Thread-safe by default** for read operations
+ *   - Naturally suited to speculative or branch-and-bound rewriting, where multiple alternate states can
+ *     be explored in parallel without interfering with each other
+ *
+ * As a consequence:
+ *   - Adding nodes or merging classes returns a *new* `This` instance with the updated structure.
+ *   - Query methods never modify the e-graph.
+ *
+ * ## Canonicalization
+ * Canonicalization is central to e-graph correctness and performance:
+ *   - Every e-class is identified by a canonical [[EClassRef]] (chosen representative).
+ *   - When adding or merging, all inputs are canonicalized so that the same equivalence is not represented twice.
+ *   - Queries that take non-canonical inputs will internally canonicalize them.
+ *
+ * ## Related types
+ *   - [[EGraph]] — a simpler, single-parameter variant of this trait.
+ *   - [[foresight.eqsat.metadata.EGraphWithMetadata]] — an [[EGraphLike]] augmented with per-class metadata storage.
+ *   - [[EGraphWithPendingUnions]] — a deferred-union wrapper for batching merges before a rebuild.
+ *   - [[ENode]], [[EClassRef]], [[EClassCall]], [[ShapeCall]] — fundamental building blocks.
+ *
+ * @tparam NodeT The type of the domain-specific symbol or operator stored in each e-node.
+ * @tparam This  The concrete e-graph type mixing in this trait, enabling precise return types for fluent APIs.
+ * @example Typical usage
+ * {{{
+ * val (classA, g1) = egraph.add(nodeA)
+ * val (classB, g2) = g1.add(nodeB)
+ * val g3 = g2.union(classA, classB).rebuilt // merge equivalences
+ * val allClasses: Iterable[EClassRef] = g3.classes
+ * }}}
  */
 trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   // Core API:
 
   /**
-   * Gets the current canonical reference to an e-class, if the e-class is defined in this e-graph; otherwise, returns
-   * None.
-   * @param ref The reference to canonicalize.
-   * @return The canonical reference to the e-class pointed to by ref, if the e-class is defined in this e-graph;
-   *         otherwise, None.
+   * Returns the current canonical reference of an e-class if it exists in this e-graph.
+   *
+   * Canonicalization follows all pending/recorded unions so that structurally equal or merged
+   * e-classes map to a stable representative.
+   *
+   * @param ref A possibly non-canonical e-class reference.
+   * @return Some(canonical reference) if `ref` exists in this e-graph; otherwise, None.
    */
   def tryCanonicalize(ref: EClassRef): Option[EClassCall]
 
   /**
-   * Canonicalizes an e-node, canonicalizing its arguments and decomposing it into a canonical shape and a renaming of
-   * the shape's parameter slots to argument slots.
+   * Canonicalizes an e-node: its argument calls are canonicalized, then the node is decomposed
+   * into a canonical shape with a slot renaming that maps the shape's parameters to the arguments.
+   *
    * @param node The e-node to canonicalize.
-   * @return The canonicalized e-node.
+   * @return A canonicalized shape application for `node`.
    */
   def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT]
 
   /**
-   * Enumerates all unique e-classes in this e-graph.
-   * @return All unique e-classes in the e-graph, represented as their canonical references.
+   * Enumerates all unique (canonical) e-classes in the e-graph.
+   *
+   * @return Each distinct e-class, represented by its canonical reference.
    */
   def classes: Iterable[EClassRef]
 
   /**
-   * The set of nodes of a given e-class application.
-   * @param call The e-class whose nodes to find.
-   * @return All nodes in the e-class pointed to by app.
+   * Returns the set of e-nodes contained in a given e-class.
+   *
+   * @param call The (possibly non-canonical) e-class application to inspect.
+   * @return All e-nodes stored in the canonical e-class targeted by `call`.
    */
   def nodes(call: EClassCall): Set[ENode[NodeT]]
 
   /**
-   * The set of all e-nodes that refer to an e-class.
-   * @param ref The e-class whose uses to find.
-   * @return All e-classes that point to ref through their e-nodes.
+   * Returns the set of e-nodes that refer to (use) the given e-class.
+   *
+   * This is an inverse-usage query: it finds all e-nodes whose arguments include `ref`.
+   *
+   * @param ref The e-class whose users to retrieve.
+   * @return All e-nodes in the graph that reference `ref`.
    */
   def users(ref: EClassRef): Set[ENode[NodeT]]
 
   /**
-   * Finds the e-class of a given e-node.
-   * @param node The e-node to find the e-class of.
-   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.
+   * Finds the e-class containing the given e-node, if present.
+   *
+   * @param node The e-node to look up.
+   * @return Some(e-class call) if the e-node exists in this e-graph; otherwise, None.
    */
   def find(node: ENode[NodeT]): Option[EClassCall]
 
   /**
-   * Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.
-   * @param first The first e-class to compare.
-   * @param second The second e-class to compare.
-   * @return True if the e-classes are the same; otherwise, false.
+   * Tests whether two e-class applications refer to the same canonical e-class.
+   *
+   * Both inputs are assumed to refer to e-classes in this e-graph.
+   *
+   * @param first  First e-class application.
+   * @param second Second e-class application.
+   * @return true if they canonicalize to the same e-class; false otherwise.
    */
   def areSame(first: EClassCall, second: EClassCall): Boolean
 
   /**
-   * Adds many e-nodes to this e-graph. If any of the e-nodes are already present, then they are not added, and the
-   * corresponding result is an e-class application that contains the e-node. Otherwise, the e-nodes are added to unique
-   * e-classes, whose references are returned along with the new e-graph.
-   * @param nodes The e-nodes to add to the e-graph.
-   * @param parallelize The parallelization strategy to use for parallel tasks in the addition operation.
-   * @return The results of adding each e-node, and the new e-graph with the e-nodes added.
+   * Adds many e-nodes in one pass.
+   *
+   * For each input:
+   *   - If the e-node already exists, the corresponding result is [[AddNodeResult.AlreadyThere]] with its e-class.
+   *   - Otherwise, the e-node is inserted into a fresh e-class and the result is [[AddNodeResult.Added]].
+   *
+   * The e-graph is immutable: this method returns a new e-graph reflecting all insertions.
+   *
+   * @param nodes        The e-nodes to add.
+   * @param parallelize  Strategy used for any parallel work within the addition.
+   * @return (Per-node results in input order, new e-graph containing the additions).
    */
   def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): (Seq[AddNodeResult], This)
 
   /**
-   * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
-   * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
-   * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
-   * @param pairs The pairs of e-classes to union.
-   * @param parallelize The parallel map to use for parallel tasks in the union operation.
-   * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
+   * Unions (merges) multiple pairs of e-classes.
+   *
+   * Merging combines the member e-nodes of each pair, possibly triggering upward merging and
+   * additional equivalences. The operation returns the updated e-graph and a partition of all
+   * e-classes that became newly equivalent because of the unions.
+   *
+   * The e-graph is immutable: this method returns a new e-graph with the merges applied.
+   *
+   * @param pairs        Pairs of e-class applications to union.
+   * @param parallelize  Parallel strategy used during merging/rebuild work.
+   * @return (Sets of newly equivalent classes, new e-graph after unions).
    */
   def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): (Set[Set[EClassCall]], This)
 
   /**
-   * Creates a new e-graph of this type that is empty, i.e., it contains no e-classes or e-nodes. While the contents
-   * of the e-graph are discard, its configuration (e.g., registered metadata) is preserved.
-   * @return An empty e-graph of this type.
+   * Creates an empty e-graph of the same concrete type and configuration (e.g., registered metadata),
+   * discarding all current e-classes and e-nodes.
+   *
+   * @return An empty e-graph with the same configuration.
    */
   def emptied: This
 
   // Helper methods:
 
   /**
-   * Gets the number of unique e-classes in this e-graph.
-   * @return The number of unique e-classes in the e-graph.
+   * Counts distinct e-classes in this e-graph.
+   * @return The number of distinct (canonical) e-classes in this e-graph.
    */
   final def classCount: Int = {
     classes.size
   }
 
   /**
-   * Gets the number of unique e-nodes in this e-graph.
-   * @return The number of e-nodes in the e-graph.
+   * Counts the total number of e-nodes across all e-classes in this e-graph.
+   * @return The total number of e-nodes across all e-classes.
    */
   final def nodeCount: Int = {
     classes.toSeq.map(ref => nodes(canonicalize(ref)).size).sum
   }
 
   /**
-   * Gets the current canonical reference to an e-class.
-   * @param ref The reference to canonicalize.
-   * @return The canonical reference to the e-class pointed to by ref.
+   * Canonicalizes an e-class reference.
+   *
+   * @throws NoSuchElementException if the e-class does not exist in this e-graph.
+   * @param ref The e-class to canonicalize.
+   * @return The canonical e-class application.
    */
   final def canonicalize(ref: EClassRef): EClassCall = tryCanonicalize(ref).get
 
   /**
-   * Canonicalizes an e-class application.
+   * Canonicalizes an e-class application by canonicalizing its reference and then reapplying
+   * the original argument renaming.
+   *
    * @param call The e-class application to canonicalize.
    * @return The canonicalized e-class application.
    */
@@ -137,37 +206,42 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
-   * Determines whether the e-graph contains a given e-class.
-   * @param ref The e-class to check for.
-   * @return True if the e-graph contains the e-class; otherwise, false.
+   * Checks whether the e-graph contains the given e-class reference.
+   *
+   * @param ref The e-class reference to check.
+   * @return true if the reference resolves to a canonical e-class; false otherwise.
    */
   final def contains(ref: EClassRef): Boolean = tryCanonicalize(ref).isDefined
 
   /**
-   * Determines whether the e-graph contains a given e-node.
-   * @param node The e-node to check for.
-   * @return True if the e-graph contains the e-node; otherwise, false.
+   * Checks whether the e-graph contains the given e-node.
+   *
+   * @param node The e-node to check.
+   * @return true if present; false otherwise.
    */
   final def contains(node: ENode[NodeT]): Boolean = find(node).isDefined
 
   /**
-   * Determines whether the e-graph contains a given mixed tree.
-   * @param tree The mixed tree to check for.
-   * @return True if the e-graph contains the tree; otherwise, false.
+   * Checks whether the e-graph contains the given mixed tree (all subcalls must exist).
+   *
+   * @param tree The mixed tree to check.
+   * @return true if the root resolves to an existing e-class; false otherwise.
    */
   final def contains(tree: MixedTree[NodeT, EClassCall]): Boolean = find(tree).isDefined
 
   /**
-   * Determines whether the e-graph contains a given tree.
-   * @param tree The tree to check for.
-   * @return True if the e-graph contains the tree; otherwise, false.
+   * Checks whether the e-graph contains the given pure tree (all subtrees must exist).
+   *
+   * @param tree The tree to check.
+   * @return true if the root resolves to an existing e-class; false otherwise.
    */
   final def contains(tree: Tree[NodeT]): Boolean = find(tree).isDefined
 
   /**
-   * Finds the e-class corresponding to the root of a mixed tree.
-   * @param tree The mixed tree to find in the e-graph.
-   * @return The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.
+   * Resolves the e-class corresponding to the root of a mixed tree, if all argument calls exist.
+   *
+   * @param tree The mixed tree to resolve.
+   * @return Some(e-class call) if all children exist and the root e-node exists; otherwise, None.
    */
   final def find(tree: MixedTree[NodeT, EClassCall]): Option[EClassCall] = {
     tree match {
@@ -184,9 +258,10 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
-   * Finds the e-class corresponding to the root of a tree.
-   * @param tree The tree to find in the e-graph.
-   * @return The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.
+   * Resolves the e-class corresponding to the root of a pure tree, if all subtrees exist.
+   *
+   * @param tree The pure tree to resolve.
+   * @return Some(e-class call) if all children exist and the root e-node exists; otherwise, None.
    */
   final def find(tree: Tree[NodeT]): Option[EClassCall] = {
     val args = tree.args.map(find).collect { case Some(call) => call }
@@ -198,10 +273,13 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
-   * Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of
-   * the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.
-   * @param node The e-node to add to the e-graph.
-   * @return The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.
+   * Adds a single e-node.
+   *
+   * If the e-node already exists, returns its e-class; otherwise inserts it into a fresh e-class.
+   * The e-graph is immutable: returns a new e-graph containing the result.
+   *
+   * @param node The e-node to add.
+   * @return (E-class of `node`, new e-graph).
    */
   final def add(node: ENode[NodeT]): (EClassCall, This) = {
     tryAddMany(Seq(node), ParallelMap.sequential) match {
@@ -213,16 +291,20 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
 
   /**
    * Adds a mixed tree to the e-graph.
-   * @param tree The tree to add.
-   * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
+   *
+   * Child calls (if any) are added/resolved first; then the root e-node is added or found.
+   * Returns a new e-graph containing the result.
+   *
+   * @param tree The mixed tree to add.
+   * @return (E-class of the root, new e-graph).
    */
   final def add(tree: MixedTree[NodeT, EClassCall]): (EClassCall, This) = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This]))((acc, arg) => {
+        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This])) { (acc, arg) =>
           val (node, egraph) = acc._2.add(arg)
           (acc._1 :+ node, egraph)
-        })
+        }
         graphWithArgs.add(ENode(t, defs, uses, newArgs))
 
       case MixedTree.Call(call) =>
@@ -231,54 +313,57 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
-   * Adds a tree to the e-graph.
-   * @param tree The tree to add.
-   * @return The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.
+   * Adds a pure tree to the e-graph.
+   *
+   * Child subtrees are added/resolved first; then the root e-node is added or found.
+   * Returns a new e-graph containing the result.
+   *
+   * @param tree The pure tree to add.
+   * @return (E-class of the root, new e-graph).
    */
   final def add(tree: Tree[NodeT]): (EClassCall, This) = {
-    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassCall], this))((acc, arg) => {
+    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassCall], this)) { (acc, arg) =>
       val (node, egraph) = acc._2.add(arg)
       (acc._1 :+ node, egraph)
-    })
+    }
     graphWithArgs.add(ENode(tree.nodeType, tree.definitions, tree.uses, args))
   }
 
   /**
-   * Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned.
-   * This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions.
-   * Both the updated e-graph and a set of all newly-equivalent e-classes are returned.
-   * @param pairs The pairs of e-classes to union.
-   * @return The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.
+   * Unions (merges) multiple pairs of e-classes using the default parallel strategy.
+   *
+   * @param pairs Pairs of e-class applications to union.
+   * @return (Sets of newly equivalent classes, new e-graph after unions).
+   * @see [[unionMany(pairs:Seq[(EClassCall,EClassCall)],parallelize:ParallelMap)*]]
    */
   final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], This) = {
     unionMany(pairs, ParallelMap.default)
   }
 
   /**
-   * Defers a union between two e-classes in this e-graph.
+   * Defers a union between two e-classes.
    *
-   * This method does not immediately merge the two e-classes. Instead, it returns an
-   * [[EGraphWithPendingUnions]] that records the union request. You can chain further
-   * unions on the result and apply them all at once later using [[EGraphWithPendingUnions.rebuild]]
-   * or [[EGraphWithPendingUnions.rebuilt]].
+   * This does not immediately mutate the e-graph. Instead it returns an [[EGraphWithPendingUnions]]
+   * that records the request. You can chain more unions on the result and apply them together later
+   * via [[EGraphWithPendingUnions.rebuild]] / [[EGraphWithPendingUnions.rebuilt]].
    *
-   * Internally, all deferred unions are eventually passed to [[unionMany]], which performs
-   * a full rebuild of the e-graph to apply the merges. Deferring unions in this way improves
-   * performance when many unions are expected, as it avoids rebuilding after each one.
+   * Internally, deferred unions are eventually passed to [[unionMany]], which performs a full rebuild.
+   * Deferral can be substantially faster when many unions are expected, by avoiding repeated rebuilds.
    *
-   * @param left A reference to the first e-class.
-   * @param right A reference to the second e-class.
-   * @return An [[EGraphWithPendingUnions]] containing this e-graph and the deferred union.
-   * @see [[EGraphWithPendingUnions]]
-   * @see [[EGraphWithPendingUnions.rebuild]]
-   * @see [[unionMany]]
+   * @param left  First e-class.
+   * @param right Second e-class.
+   * @return An [[EGraphWithPendingUnions]] wrapping this e-graph and the deferred union.
    */
   final def union(left: EClassCall, right: EClassCall): EGraphWithPendingUnions[NodeT, This] =
     EGraphWithPendingUnions[NodeT, This](this.asInstanceOf[This]).union(left, right)
 
   /**
-   * Enhances this e-graph with the ability to store metadata.
-   * @return The e-graph with metadata.
+   * Returns a view of this e-graph that can store and maintain per-e-class (and related) metadata.
+   *
+   * The returned instance preserves immutability: operations that would change metadata yield a new
+   * e-graph-with-metadata instance.
+   *
+   * @return An [[EGraphWithMetadata]] that wraps this e-graph.
    */
   final def withMetadata: EGraphWithMetadata[NodeT, This] = EGraphWithMetadata(this.asInstanceOf[This])
 }

@@ -3,33 +3,61 @@ package foresight.eqsat
 import foresight.eqsat.hashCons.HashConsEGraph
 
 /**
- * An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.
+ * An e-graph compactly represents many equivalent expressions at once by grouping structurally
+ * * compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration
+ * * without duplicating common substructure.
  *
- * E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling
- * efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding,
- * and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable
- * style.
+ * `EGraph` is a convenience alias of [[EGraphLike]] where the self type equals the trait itself:
+ * `EGraph[NodeT]` extends `EGraphLike[NodeT, EGraph[NodeT]]`. Use this when you don’t need a custom
+ * concrete e-graph subtype in your method signatures.
  *
- * @tparam NodeT The node type of the expressions that the e-graph represents.
+ * Semantics:
+ *   - **Immutable:** All mutating operations (add/union/etc.) return a new `EGraph[NodeT]`.
+ *   - **Canonicalization:** Queries and updates are expressed in terms of canonical e-classes.
+ *   - **Total API:** All core operations (query, add, union, find) are inherited from [[EGraphLike]].
+ *
+ * @tparam NodeT The domain-specific node type stored in e-nodes.
+ * @example Typical usage
+ * {{{
+ * val g0: EGraph[MyNode] = EGraph.empty
+ * val (c1, g1) = g0.add(ENode(Add, defs = SlotSet.empty, uses = SlotSet.empty, args = Seq(...)))
+ * val (c2, g2) = g1.add(ENode(Mul, defs = ..., uses = ..., args = Seq(...)))
+ * val g3 = g2.union(c1, c2).rebuilt
+ * }}}
  */
 trait EGraph[NodeT] extends EGraphLike[NodeT, EGraph[NodeT]]
 
 /**
- * A companion object for [[EGraph]].
+ * Constructors and helpers for [[EGraph]].
+ *
+ * Functions here return a plain `EGraph[NodeT]` backed by a hash-consing implementation.
  */
 object EGraph {
+
   /**
-   * Creates a new empty e-graph.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @return An empty e-graph.
+   * Creates a new, empty e-graph for the given node type backed by a hash-consing implementation.
+   *
+   * @tparam NodeT The node type that this e-graph will store.
+   * @return An empty `EGraph[NodeT]` backed by hash-consing.
    */
   def empty[NodeT]: EGraph[NodeT] = HashConsEGraph.empty[NodeT]
 
   /**
-   * Creates an e-graph from a tree.
-   * @param tree The tree to be added to the e-graph.
-   * @tparam NodeT The type of the nodes in the tree.
-   * @return
+   * Builds a new e-graph from a single tree, returning the e-class of its root.
+   *
+   * This is equivalent to:
+   * {{{
+   * val g = EGraph.empty[NodeT]
+   * g.add(tree)
+   * }}}
+   *
+   * The input is a `MixedTree[NodeT, Nothing]`, i.e., a tree that does not contain pre-existing
+   * `EClassCall`s. All children are inserted (or found) first, then the root e-node is inserted (or
+   * found), yielding the root e-class.
+   *
+   * @param tree The tree to insert into a fresh e-graph.
+   * @tparam NodeT The node type of the tree and resulting e-graph.
+   * @return (Root e-class of `tree`, new e-graph containing exactly the nodes added by `tree`.)
    */
   def from[NodeT](tree: MixedTree[NodeT, Nothing]): (EClassCall, EGraph[NodeT]) = {
     val egraph = empty[NodeT]

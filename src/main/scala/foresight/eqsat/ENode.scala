@@ -1,29 +1,40 @@
 package foresight.eqsat
 
 /**
- * An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a
- * sequence of e-class references that represent the arguments of the e-node.
+ * A node in a slotted e-graph.
  *
- * @param nodeType The node type of the e-node.
- * @param definitions The slots used by the e-node that are not visible outside the e-node. These slots are
- *                    redundant by construction. Their purpose is to allow e-nodes to introduce variable bindings, such
- *                    as in let expressions or lambda abstractions.
- * @param uses The slots used by the e-node that are visible outside the e-node. These slots refer to variables
- *             defined elsewhere.
- * @param args The arguments of the e-node.
- * @tparam NodeT The type of the node that the e-node represents. Node types contain all information required to form
- *               an expression aside from its slots and arguments.
+ * An e-node represents one operator application together with its slot usage and child e-class applications.
+ * Slots are partitioned into:
+ *   - `definitions`: slots introduced locally by this node (binder-internal slots that are not visible outside)
+ *   - `uses`: slots referenced by this node that come from its surrounding context (free with respect to this node)
+ * Child expressions are referenced via `args` as [[EClassCall]]s, which carry their own parameter-to-argument
+ * slot maps.
+ *
+ * Node types (`NodeT`) supply the operator and any non-structural payload. Slots and arguments are provided here.
+ *
+ * @param nodeType     Operator or symbol for this node.
+ * @param definitions  Slots introduced by this node that are scoped locally and invisible to parents. These are
+ *                     redundant by construction at the boundary of this node and exist to model binders such as
+ *                     lambda-abstraction or let.
+ * @param uses         Slots referenced by this node that are visible to its parent and must be satisfied by the
+ *                     surrounding e-class application.
+ * @param args         Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
+ * @tparam NodeT       The domain-specific node type. It defines operator identity and payload but not slots/children.
  */
 final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]) {
+
   /**
-   * All slots that appear in the e-node: definition slots, used slots and slots from arguments.
-   * @return An ordered sequence of slots used by the e-node.
+   * All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children.
+   * Order preserves definitions, then uses, then the values of each child's argument map in child order.
+   *
+   * @return An ordered sequence of slots used by this node.
    */
   def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.args.values)
 
   /**
-   * The set of all distinct slots in the e-node: definition slots, used slots and slots from arguments.
-   * @return The set of slots used by the e-node.
+   * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.
+   *
+   * @return A set of slots used by this node.
    */
   def slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.args.valueSet)
 
@@ -32,10 +43,16 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
   }
 
   /**
-   * Renames the slots of the e-node according to a renaming.
-   * @param renaming The renaming of the slots. The keys of the map are the slots as they appear in the e-node, and the
-   *                 values are the slots to which they are renamed.
-   * @return The e-node with the slots renamed.
+   * Renames every occurrence of the given slots throughout this node.
+   *
+   * The renaming applies uniformly to:
+   *   - definitions and uses
+   *   - each child's argument-slot map, composed via `composeRetain` so unmapped child entries are preserved
+   *
+   * All keys of `renaming` must occur in this node; extra keys are allowed but ignored.
+   *
+   * @param renaming Mapping from old to new slots.
+   * @return A node with slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
     require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
@@ -47,10 +64,14 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
   }
 
   /**
-   * Gets the e-node with the slots renamed to numeric slots in lexicographical order. The shape is augmented with a
-   * slot map that maps the renamed slots to the original slots.
+   * Returns the canonical shape of this node together with the inverse renaming from canonical to original slots.
    *
-   * @return The e-node with the slots renamed.
+   * Canonicalization replaces every slot that appears in this node with a numeric slot in lexicographic order
+   * (e.g., `$0`, `$1`, ...) producing a name-independent normal form. The accompanying [[SlotMap]] maps the canonical
+   * numeric slots back to the original slots. This decomposition underlies hash-consing and equality modulo renaming.
+   *
+   * @return A [[ShapeCall]] whose shape is this node in canonical slot form, and whose renaming maps canonical
+   *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
     val renamedSlots = SlotMap(slots.distinct.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
@@ -58,22 +79,32 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
   }
 
   /**
-   * Determines whether the e-node is a shape.
-   * @return True if the e-node is a shape; otherwise, false.
+   * Checks whether this node is already in canonical shape-normal form.
+   *
+   * @return True if equal to `asShapeCall.shape`; false otherwise.
    */
   def isShape: Boolean = this == asShapeCall.shape
 }
 
 /**
- * The companion object of the e-node class.
+ * Constructors and helpers for [[ENode]].
  */
 object ENode {
+
   /**
-   * Creates an e-node with no slots.
-   * @param nodeType The node type of the e-node.
-   * @param args The arguments of the e-node.
-   * @tparam NodeT The type of the node that the e-node represents.
-   * @return The e-node with the given node type and arguments.
+   * Builds an e-node that declares no local or free slots.
+   *
+   * Useful for ground nodes in languages without variables or when slot usage is expressed entirely in children.
+   *
+   * @param nodeType Operator or symbol.
+   * @param args     Child e-class applications.
+   * @tparam NodeT   Domain-specific node type.
+   * @return A slotless node with the given operator and children.
+   *
+   * @example
+   * {{{
+   * val n: ENode[Op] = ENode.unslotted(Add, Seq(leftCall, rightCall))
+   * }}}
    */
   def unslotted[NodeT](nodeType: NodeT, args: Seq[EClassCall]): ENode[NodeT] = {
     ENode(nodeType, Seq.empty, Seq.empty, args)
