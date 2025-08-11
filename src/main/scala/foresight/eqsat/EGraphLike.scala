@@ -301,10 +301,10 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   final def add(tree: MixedTree[NodeT, EClassCall]): (EClassCall, This) = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This])) { (acc, arg) =>
+        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This]))((acc, arg) => {
           val (node, egraph) = acc._2.add(arg)
           (acc._1 :+ node, egraph)
-        }
+        })
         graphWithArgs.add(ENode(t, defs, uses, newArgs))
 
       case MixedTree.Call(call) =>
@@ -322,10 +322,10 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * @return (E-class of the root, new e-graph).
    */
   final def add(tree: Tree[NodeT]): (EClassCall, This) = {
-    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassCall], this)) { (acc, arg) =>
+    val (args, graphWithArgs) = tree.args.foldLeft((Seq.empty[EClassCall], this))((acc, arg) => {
       val (node, egraph) = acc._2.add(arg)
       (acc._1 :+ node, egraph)
-    }
+    })
     graphWithArgs.add(ENode(tree.nodeType, tree.definitions, tree.uses, args))
   }
 
@@ -334,7 +334,6 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    *
    * @param pairs Pairs of e-class applications to union.
    * @return (Sets of newly equivalent classes, new e-graph after unions).
-   * @see [[unionMany(pairs:Seq[(EClassCall,EClassCall)],parallelize:ParallelMap)*]]
    */
   final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): (Set[Set[EClassCall]], This) = {
     unionMany(pairs, ParallelMap.default)
