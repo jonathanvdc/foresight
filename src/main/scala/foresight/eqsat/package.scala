@@ -16,34 +16,34 @@ package foresight
  *
  * ## Core Concepts
  *
- * At the heart of the API are symbolic identifiers and slot-based binding. An [[EClassRef]]
+ * At the heart of the API are symbolic identifiers and slot-based binding. An [[eqsat.EClassRef]]
  * is a reference to an e-class within a particular e-graph snapshot. Over time, merges
  * may cause multiple references to point to the same canonical e-class, so callers should
- * normalize them with [[EGraphLike.canonicalize]]. An [[EClassCall]] couples a root reference
+ * normalize them with [[eqsat.EGraphLike.canonicalize]]. An [[eqsat.EClassCall]] couples a root reference
  * with a total slot map, allowing the same structural e-class to be applied with different
- * bindings. A [[Slot]] identifies a bound variable in an expression, and a [[SlotMap]] gives a
+ * bindings. A [[eqsat.Slot]] identifies a bound variable in an expression, and a [[eqsat.SlotMap]] gives a
  * complete mapping from slots to other slots or values.
  *
  * ## EGraph and EGraphLike
  *
- * [[EGraphLike]] is the fundamental, immutable e-graph interface, F-bounded over its concrete
+ * [[eqsat.EGraphLike]] is the fundamental, immutable e-graph interface, F-bounded over its concrete
  * self type so that core operations like adding nodes, merging classes, and emptying the graph
  * return the most precise implementation type rather than a generic supertype. This enables
- * fluent, type-safe composition without casting. [[EGraph]] is the default public form of an
+ * fluent, type-safe composition without casting. [[eqsat.EGraph]] is the default public form of an
  * e-graph, defined simply as `EGraph[NodeT] extends EGraphLike[NodeT, EGraph[NodeT]]`. The
  * companion object offers convenient constructors such as `EGraph.empty` for building a new
- * graph, or `EGraph.from(tree)` for inserting a [[MixedTree]] into a fresh graph and returning
+ * graph, or `EGraph.from(tree)` for inserting a [[eqsat.MixedTree]] into a fresh graph and returning
  * its root call.
  *
  * Canonicalization and identity management are central to working with e-graphs. Methods like
- * `canonicalize(ref)` return the leader representative for an [[EClassRef]], reflecting all
+ * `canonicalize(ref)` return the leader representative for an [[eqsat.EClassRef]], reflecting all
  * unions so far. The graph can answer membership queries (`contains`) and retrieve the e-class
- * containing a given [[ENode]]. Batch operations like `tryAddMany` and `unionMany` allow for
+ * containing a given [[eqsat.ENode]]. Batch operations like `tryAddMany` and `unionMany` allow for
  * inserting multiple nodes or merging multiple classes in one pass, improving efficiency and
  * reducing intermediate rebuilding. For workflows where merges are staged, the simpler `union`
  * defers merging until the next rebuild.
  *
- * [[EGraphLike]] also supports interoperability and reuse. Wrapping an instance with `withMetadata`
+ * [[eqsat.EGraphLike]] also supports interoperability and reuse. Wrapping an instance with `withMetadata`
  * enables automatic tracking of registered metadata analyses. Calling `emptied` produces a
  * configuration-equivalent graph with all content removed, which is useful when repeating a
  * pipeline on fresh inputs without reconstructing the entire environment.
@@ -63,9 +63,10 @@ package foresight
  * incrementally updated. This includes both general-purpose metadata managers and semilattice-style
  * analyses. The `EGraphWithMetadata` wrapper ensures consistency after additions and merges.
  *
- * The `foresight.eqsat.parallel` package provides composable parallelism utilities. [[ParallelMap]]
- * defines the core mapping strategy interface, with sequential, parallel, and fixed-thread
- * variants, plus wrappers for cooperative cancellation and hierarchical timing.
+ * The `foresight.eqsat.parallel` package provides composable parallelism utilities.
+ * [[foresight.eqsat.parallel.ParallelMap]] defines the core mapping strategy interface,
+ * with sequential, parallel, and fixed-thread variants, plus wrappers for cooperative
+ * cancellation and hierarchical timing.
  *
  * The `foresight.eqsat.rewriting` package implements the search–apply pipeline for equality
  * saturation. Searchers find matches, appliers produce commands, and rules combine them into
@@ -73,8 +74,8 @@ package foresight
  * and cross-snapshot caching.
  *
  * The `foresight.eqsat.saturation` package orchestrates rewrite application at scale. A
- * [[Strategy]] composes search–apply steps into full saturation runs, with variants for maximal
- * application, stochastic selection, backoff quotas, caching, and rebasing.
+ * [[foresight.eqsat.saturation.Strategy]] composes search–apply steps into full saturation runs,
+ * with variants for maximal application, stochastic selection, backoff quotas, caching, and rebasing.
  *
  * ## Design Principles
  *
@@ -84,8 +85,8 @@ package foresight
  * mappings, making it possible to plan transformations before runtime IDs are known. Extraction,
  * rewriting, and saturation are parametric over cost types and node orderings, allowing the same
  * framework to target latency minimization, code size reduction, or other goals. Parallelism and
- * cooperative cancellation are explicit in the API: major batch operations accept a [[ParallelMap]],
- * avoiding hidden threading behavior.
+ * cooperative cancellation are explicit in the API: major batch operations accept a
+ * [[foresight.eqsat.parallel.ParallelMap]], avoiding hidden threading behavior.
  *
  * @example
  * {{{
