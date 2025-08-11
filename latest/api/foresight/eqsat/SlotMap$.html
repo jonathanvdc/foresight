@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the slot map data structure.</p>
+  <p>Constructors and utilities for building <a href="SlotMap.html">SlotMap</a>s.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,30 +210,15 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Create a bijection from a set of slots to fresh slots.</p>
+             <p>Builds a bijection from each key in <code>set</code> to a fresh unique slot.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Create a bijection from a set of slots to fresh slots.</p>
+              <p>Builds a bijection from each key in <code>set</code> to a fresh unique slot.</p>
+              <p>Useful for capturing without aliasing or for introducing fresh binders.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               set
-              </dt>
-              <dd class="body-medium">
-               <p>The set of slots that serve as keys in the bijection.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -254,11 +239,11 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An empty slot map.</p>
+             <p>The empty mapping.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An empty slot map.</p>
+              <p>The empty mapping.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -282,30 +267,14 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Create a slot map from a sequence of slot pairs.</p>
+             <p>Builds a map from <code>(key, value)</code> pairs. Later pairs overwrite earlier ones with the same key.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Create a slot map from a sequence of slot pairs.</p>
+              <p>Builds a map from <code>(key, value)</code> pairs. Later pairs overwrite earlier ones with the same key.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               pairs
-              </dt>
-              <dd class="body-medium">
-               <p>The slot pairs.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -326,30 +295,14 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Create an identity slot map for a set of slots. The identity slot map maps each slot to itself.</p>
+             <p>Identity mapping on the given set (<code>s -&gt; s</code> for all <code>s</code>).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Create an identity slot map for a set of slots. The identity slot map maps each slot to itself.</p>
+              <p>Identity mapping on the given set (<code>s -&gt; s</code> for all <code>s</code>).</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               set
-              </dt>
-              <dd class="body-medium">
-               <p>The slots to create an identity slot map for.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

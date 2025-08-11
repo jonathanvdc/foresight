@@ -15,16 +15,80 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
+  <p>A slot is a symbolic placeholder used to model variables and bindings in a slotted e-graph.</p>
+  <p>Two concrete kinds of slots exist:</p>
   <ul>
-   <li><a href="Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: slots with an integer identifier, considered equivalent if their numbers match.</li>
-   <li><a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: slots that are always distinct, even from other unique slots, unless they are the exact same object reference.</li>
+   <li><a href="Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: value-based slots identified by an integer (e.g., <code>$0</code>, <code>$1</code>, ...). Any two numbered slots with the same number are equal. These are primarily used for canonicalization and shape-normal forms.</li>
+   <li><a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: identity-based slots that are always distinct from every other slot unless they are the exact same object. These are appropriate for user- or pass-generated "fresh" variables.</li>
   </ul>
-  <p>For external users, prefer using <a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a> and <a href="Slot$.html#fresh-17f">Slot.fresh</a> to ensure slot uniqueness.</p>
+  <p>Equality semantics:</p>
+  <ul>
+   <li>Numbered slots compare equal if their numbers match.</li>
+   <li>Unique slots compare equal only by object identity (reference equality).</li>
+  </ul>
+  <p>Ordering semantics:</p>
+  <ul>
+   <li>All numbered slots sort before all unique slots.</li>
+   <li>Numbered slots are ordered by their integer <code>n</code>.</li>
+   <li>Unique slots use an implementation-defined, identity-derived ordering suitable for in-memory canonicalization but not for persistence. Do not rely on the absolute ordering of unique slots across processes or runs.</li>
+  </ul>
+  <p>Typical usage:</p>
+  <ul>
+   <li>External callers should prefer <code>Slot.fresh()</code> (a new <a href="Slot$$UniqueSlot.html">Slot.UniqueSlot</a>) for generating fresh variables.</li>
+   <li>Canonicalization and shape computation use <code>Slot.numeric(n)</code> (a <a href="Slot$$NumberedSlot.html">Slot.NumberedSlot</a>) to assign <code>$0, $1, ...</code>.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    See also
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p><a href="Slot$.html#numeric-fffff726">Slot.numeric</a> for canonical, numbered slots used in shapes</p>
+     </div>
+     <div>
+      <p><a href="Slot$.html#fresh-17f">Slot.fresh</a> for identity-unique slots suitable for user-facing variables</p>
+     </div>
+    </div>
+   </dd>
+   <dt class="body-small">
+    Note
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p>Slots are immutable labels; renaming is expressed separately via <code>SlotMap</code>.</p>
+     </div>
+    </div>
+   </dd>
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Fresh, identity-unique slots (never equal unless the same object):
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val x1: Slot = Slot.fresh()
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val x2: Slot = Slot.fresh()
+</span><span line-number="4" class=""><span class="tooltip-container"></span>assert(x1 != x2)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// Numbered slots used in canonical forms:
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val s0: Slot = Slot.numeric(0)  // `$0`
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val s1: Slot = Slot.numeric(1)  // `$1`
+</span><span line-number="8" class=""><span class="tooltip-container"></span>assert(s0 != s1)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>assert(Slot.numeric(0) == s0)   // same number =&gt; equal
+</span><span line-number="10" class=""><span class="tooltip-container"></span>// Ordering: numbered slots come before unique slots
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val sorted = List(x1, s1, x2, s0).sorted
+</span><span line-number="12" class=""><span class="tooltip-container"></span>assert(sorted.take(2) == List(s0, s1))
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -136,21 +200,14 @@ node7 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Tests whether this slot is a numbered slot. Numbered slots are equivalent if they have the same number. Unique slots are always distinct.</p>
+             <p>True if this is a numbered slot (<code>Slot.NumberedSlot</code>). Numbered slots are equal iff their numbers match. Unique slots are always distinct.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Tests whether this slot is a numbered slot. Numbered slots are equivalent if they have the same number. Unique slots are always distinct.</p>
+              <p>True if this is a numbered slot (<code>Slot.NumberedSlot</code>). Numbered slots are equal iff their numbers match. Unique slots are always distinct.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if this slot is a numbered slot, false otherwise.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -171,21 +228,14 @@ node7 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Tests whether this slot is a unique slot. Unique slots are distinct from all other slots, including other unique slots. Numbered slots are equivalent if they have the same number.</p>
+             <p>True if this is an identity-unique slot (<code>Slot.UniqueSlot</code>). Unique slots are distinct from all other slots, including other unique slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Tests whether this slot is a unique slot. Unique slots are distinct from all other slots, including other unique slots. Numbered slots are equivalent if they have the same number.</p>
+              <p>True if this is an identity-unique slot (<code>Slot.UniqueSlot</code>). Unique slots are distinct from all other slots, including other unique slots.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if this slot is a unique slot, false otherwise.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

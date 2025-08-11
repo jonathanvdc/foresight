@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Companion object for the <a href="Slot.html">Slot</a> trait.</p>
+  <p>Constructors and concrete slot types.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -113,11 +113,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A numbered slot. All slots with the same number are considered equivalent.</p>
+             <p>A value-based, numbered slot. All instances with the same <code>n</code> are equal.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A numbered slot. All slots with the same number are considered equivalent.</p>
+              <p>A value-based, numbered slot. All instances with the same <code>n</code> are equal.</p>
+              <p>Typical use: canonicalization and shape-normal forms assign <code>$0, $1, ...</code> using numbered slots.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -125,7 +126,7 @@ node3 -> node2;
                n
               </dt>
               <dd class="body-medium">
-               <p>The number of the slot.</p>
+               <p>The integer identifier for the slot.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -185,11 +186,13 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A unique slot. Each unique slot is considered distinct from all other slots.</p>
+             <p>An identity-unique slot. Two unique slots are equal only if they are the same object.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A unique slot. Each unique slot is considered distinct from all other slots.</p>
+              <p>An identity-unique slot. Two unique slots are equal only if they are the same object.</p>
+              <p>Typical use: generating fresh variables for user-visible terms or rewrites.</p>
+              <p>Ordering among unique slots is based on an identity-derived hash and is not stable across runs. Do not persist or externally rely on this relative ordering.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -254,11 +257,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new unique slot.</p>
+             <p>Creates a new identity-unique slot suitable for fresh variable generation.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new unique slot.</p>
+              <p>Creates a new identity-unique slot suitable for fresh variable generation.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -266,7 +269,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new unique slot.</p>
+               <p>A new <code>UniqueSlot</code>.</p>
               </dd>
              </dl>
             </div>
@@ -289,11 +292,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new numbered slot.</p>
+             <p>Creates a numbered slot for canonical forms (e.g., <code>$n</code>).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new numbered slot.</p>
+              <p>Creates a numbered slot for canonical forms (e.g., <code>$n</code>).</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -301,7 +304,7 @@ node3 -> node2;
                n
               </dt>
               <dd class="body-medium">
-               <p>The number of the slot.</p>
+               <p>The integer identifier.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -310,7 +313,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new numbered slot.</p>
+               <p>A <code>NumberedSlot(n)</code>.</p>
               </dd>
              </dl>
             </div>

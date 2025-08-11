@@ -10,6 +10,62 @@
   <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="eqsat.html" t="n" class="documentableName ">foresight.eqsat</a>
  </div>
 </div>
+<div class="cover">
+ <div class="doc">
+  <p>The root of Foresight's equality saturation framework. It provides immutable e-graph data structures, symbolic references, slot-based binding semantics, and core interfaces for search, application, and extraction.</p>
+  <p>An <strong>e-graph</strong> represents equivalence classes of expressions, or <em>e-classes</em>, each containing multiple <em>e-nodes</em> that differ in structure but are semantically equal. This representation supports efficient, parallel, and reversible rewrite-driven optimization, with explicit tracking of symbolic bindings (<em>slots</em>) and rich metadata.</p>
+  <p>E-graphs in Foresight are purely functional: every operation returns a new value rather than mutating in place. This immutability underpins reproducibility, concurrent analysis, and caching across snapshots.</p>
+  <h2><a href="#core-concepts" id="core-concepts">Core Concepts</a></h2>
+  <p>At the heart of the API are symbolic identifiers and slot-based binding. An <a href="eqsat/EClassRef.html">EClassRef</a> is a reference to an e-class within a particular e-graph snapshot. Over time, merges may cause multiple references to point to the same canonical e-class, so callers should normalize them with <a href="eqsat/EGraphLike.html#canonicalize-d24">EGraphLike.canonicalize</a>. An <a href="eqsat/EClassCall.html">EClassCall</a> couples a root reference with a total slot map, allowing the same structural e-class to be applied with different bindings. A <a href="eqsat/Slot.html">Slot</a> identifies a bound variable in an expression, and a <a href="eqsat/SlotMap.html">SlotMap</a> gives a complete mapping from slots to other slots or values.</p>
+  <h2><a href="#egraph-and-egraphlike" id="egraph-and-egraphlike">EGraph and EGraphLike</a></h2>
+  <p><a href="eqsat/EGraphLike.html">EGraphLike</a> is the fundamental, immutable e-graph interface, F-bounded over its concrete self type so that core operations like adding nodes, merging classes, and emptying the graph return the most precise implementation type rather than a generic supertype. This enables fluent, type-safe composition without casting. <a href="eqsat/EGraph.html">EGraph</a> is the default public form of an e-graph, defined simply as <code>EGraph[NodeT] extends EGraphLike[NodeT, EGraph[NodeT]]</code>. The companion object offers convenient constructors such as <code>EGraph.empty</code> for building a new graph, or <code>EGraph.from(tree)</code> for inserting a <a href="eqsat/MixedTree.html">MixedTree</a> into a fresh graph and returning its root call.</p>
+  <p>Canonicalization and identity management are central to working with e-graphs. Methods like <code>canonicalize(ref)</code> return the leader representative for an <a href="eqsat/EClassRef.html">EClassRef</a>, reflecting all unions so far. The graph can answer membership queries (<code>contains</code>) and retrieve the e-class containing a given <a href="eqsat/ENode.html">ENode</a>. Batch operations like <code>tryAddMany</code> and <code>unionMany</code> allow for inserting multiple nodes or merging multiple classes in one pass, improving efficiency and reducing intermediate rebuilding. For workflows where merges are staged, the simpler <code>union</code> defers merging until the next rebuild.</p>
+  <p><a href="eqsat/EGraphLike.html">EGraphLike</a> also supports interoperability and reuse. Wrapping an instance with <code>withMetadata</code> enables automatic tracking of registered metadata analyses. Calling <code>emptied</code> produces a configuration-equivalent graph with all content removed, which is useful when repeating a pipeline on fresh inputs without reconstructing the entire environment.</p>
+  <h2><a href="#subpackages" id="subpackages">Subpackages</a></h2>
+  <p>The <code>foresight.eqsat.commands</code> package defines a system for batching and replaying e-graph edits. Commands are immutable descriptions of insertions, merges, and other structural changes, which can be staged and optimized before execution.</p>
+  <p>The <code>foresight.eqsat.extraction</code> package turns e-classes into concrete expression trees using cost models. It computes minimal-cost trees for each class and carries a slot renaming to ensure context validity. These analyses are deterministic and fully parametric over cost type and node ordering.</p>
+  <p>The <code>foresight.eqsat.metadata</code> package attaches derived information to e-graphs and keeps it incrementally updated. This includes both general-purpose metadata managers and semilattice-style analyses. The <code>EGraphWithMetadata</code> wrapper ensures consistency after additions and merges.</p>
+  <p>The <code>foresight.eqsat.parallel</code> package provides composable parallelism utilities. <span data-unresolved-link="" title="Problem linking ParallelMap: No DRI found for query">ParallelMap</span> defines the core mapping strategy interface, with sequential, parallel, and fixed-thread variants, plus wrappers for cooperative cancellation and hierarchical timing.</p>
+  <p>The <code>foresight.eqsat.rewriting</code> package implements the search–apply pipeline for equality saturation. Searchers find matches, appliers produce commands, and rules combine them into optimized batches. Features like reversal and match portability enable bidirectional reasoning and cross-snapshot caching.</p>
+  <p>The <code>foresight.eqsat.saturation</code> package orchestrates rewrite application at scale. A <span data-unresolved-link="" title="Problem linking Strategy: No DRI found for query">Strategy</span> composes search–apply steps into full saturation runs, with variants for maximal application, stochastic selection, backoff quotas, caching, and rebasing.</p>
+  <h2><a href="#design-principles" id="design-principles">Design Principles</a></h2>
+  <p>All core data types are persistent values: applying a command, running a rule, or performing extraction yields a new e-graph or analysis result without modifying the original. Symbolic planning is encouraged—commands and calls are constructed over symbolic identifiers and slot mappings, making it possible to plan transformations before runtime IDs are known. Extraction, rewriting, and saturation are parametric over cost types and node orderings, allowing the same framework to target latency minimization, code size reduction, or other goals. Parallelism and cooperative cancellation are explicit in the API: major batch operations accept a <span data-unresolved-link="" title="Problem linking ParallelMap: No DRI found for query">ParallelMap</span>, avoiding hidden threading behavior.</p>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat._
+</span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands._
+</span><span line-number="3" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting._
+</span><span line-number="4" class=""><span class="tooltip-container"></span>import foresight.eqsat.saturation._
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// Create an empty e-graph for a custom node type
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val g0: EGraph[MyNode] = EGraph.empty
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Build a command queue
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val builder = new CommandQueueBuilder[MyNode]
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val root    = builder.add(myENode)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val queue   = builder.queue.optimized
+</span><span line-number="11" class=""><span class="tooltip-container"></span>// Apply commands to produce a new graph
+</span><span line-number="12" class=""><span class="tooltip-container"></span>val (g1, reif) = queue(g0, Map.empty, ParallelMap.sequential)
+</span><span line-number="13" class=""><span class="tooltip-container"></span>// Run a saturation strategy
+</span><span line-number="14" class=""><span class="tooltip-container"></span>val rules: Seq[Rule[MyNode, MyMatch, MyEGraph]] = Seq(r1, r2)
+</span><span line-number="15" class=""><span class="tooltip-container"></span>val strat = MaximalRuleApplicationWithCaching(rules).repeatUntilStable
+</span><span line-number="16" class=""><span class="tooltip-container"></span>val result = strat.run(g1)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
@@ -692,11 +748,18 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An application of an <a href="eqsat/EClassRef.html">EClassRef</a> to arguments. These arguments come in the form of a <a href="eqsat/SlotMap.html">SlotMap</a>, where the keys are the parameter slots of the e-class and the values are the arguments.</p>
+             <p>Represents the application of an <a href="eqsat/EClassRef.html">EClassRef</a> to a set of argument slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An application of an <a href="eqsat/EClassRef.html">EClassRef</a> to arguments. These arguments come in the form of a <a href="eqsat/SlotMap.html">SlotMap</a>, where the keys are the parameter slots of the e-class and the values are the arguments.</p>
+              <p>Represents the application of an <a href="eqsat/EClassRef.html">EClassRef</a> to a set of argument slots.</p>
+              <p>An e-class application combines:</p>
+              <ul>
+               <li>A reference to an e-class (<code>ref</code>), which may have parameter slots.</li>
+               <li>A <a href="eqsat/SlotMap.html">SlotMap</a> mapping each parameter slot to a corresponding argument slot.</li>
+              </ul>
+              <p>Slots are a generalization of term variables that allow the e-graph to represent parameterized e-classes and maintain consistent argument binding across multiple occurrences. This enables advanced rewriting techniques such as those described in Schneider et al., "E-Graphs with Classes and Slots: Reasoning with Parameterized Equivalence Classes" (Proc. ACM Program. Lang., OOPSLA 2024).</p>
+              <p>The argument slot map (<code>args</code>) specifies, for each parameter slot in the e-class, which argument slot should be used when this e-class is applied. This supports sharing, renaming, and partial instantiation of e-classes within larger expressions.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -704,17 +767,33 @@
                args
               </dt>
               <dd class="body-medium">
-               <p>The arguments applied to the e-class, described as a slot map. The slot map's keys are the e-class's parameter slots and the values are the arguments.</p>
+               <p>The mapping from the e-class's parameter slots to argument slots.</p>
               </dd>
               <dt class="body-small">
                ref
               </dt>
               <dd class="body-medium">
-               <p>The reference to the e-class.</p>
+               <p>The reference to the e-class being applied.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// EClassRef `subXY` has parameter slots (x, y) representing "x - y"
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val call1 = EClassCall(subXY, SlotMap(x -&gt; a, y -&gt; b)) // represents "a - b"
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val call2 = EClassCall(subXY, SlotMap(x -&gt; b, y -&gt; a)) // represents "b - a"
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -761,14 +840,22 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Represents a reference to an e-class within an e-graph.</p>
+             <p>A stable handle identifying an e-class in an e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Represents a reference to an e-class within an e-graph.</p>
-              <p>An e-class is a set of equivalent expressions grouped together in an e-graph, a data structure used for representing and manipulating equivalence relations between expressions.</p>
-              <p>When a new e-class is created, a unique <code>EClassRef</code> is generated for it. Over time, as equivalence relations are discovered and e-classes are merged, multiple <code>EClassRef</code> instances may refer to the same underlying e-class.</p>
-              <p>To resolve ambiguity and obtain a single, canonical reference for an e-class, use <a href="eqsat/EGraphLike.html">Repr].canonicalize(foresight.eqsat.EClassRef)</a>.</p>
+              <p>A stable handle identifying an e-class in an e-graph.</p>
+              <p>An e-class is a set of equivalent expressions (e-nodes) maintained by the e-graph as part of its congruence-closure structure. Each e-class may be parameterized by slots (see Schneider et al., "E-Graphs with Classes and Slots: Reasoning with Parameterized Equivalence Classes", Proc. ACM Program. Lang., OOPSLA 2024, extended version).</p>
+              <p>When a new e-class is created, the e-graph generates a fresh <code>EClassRef</code> as its identity. This reference is stable across transformations, but the equivalence relation maintained by the e-graph may cause multiple <code>EClassRef</code> instances to represent the same underlying e-class if merges occur.</p>
+              <p>Because merges are common in equality saturation, <code>EClassRef</code> values are not guaranteed to be canonical. To obtain a canonical representative of the current equivalence class, use:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>egraph.canonicalize(ref)
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <p>This returns an <code>EClassRef</code> that is the unique canonical handle for the merged class in the given e-graph state.</p>
+              <p><code>EClassRef</code> is used both directly for identifying classes and indirectly in parameterized applications via <a href="eqsat/EClassCall.html">EClassCall</a>, where it is paired with a mapping from the class's parameter slots to argument slots in the caller's context.</p>
+              <p>Equality and hashing of <code>EClassRef</code> instances are based solely on their internal identity, not on the current structure of the e-graph. This allows them to be used as keys in maps or sets, but note that their equivalence meaning may change as the e-graph evolves.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -809,12 +896,22 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.</p>
+             <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.</p>
-              <p>E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding, and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable style.</p>
+              <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally</p>
+              <ul>
+               <li>compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration</li>
+               <li>without duplicating common substructure.</li>
+              </ul>
+              <p><code>EGraph</code> is a convenience alias of <a href="eqsat/EGraphLike.html">EGraphLike</a> where the self type equals the trait itself: <code>EGraph[NodeT]</code> extends <code>EGraphLike[NodeT, EGraph[NodeT]]</code>. Use this when you don’t need a custom concrete e-graph subtype in your method signatures.</p>
+              <p>Semantics:</p>
+              <ul>
+               <li><strong>Immutable:</strong> All mutating operations (add/union/etc.) return a new <code>EGraph[NodeT]</code>.</li>
+               <li><strong>Canonicalization:</strong> Queries and updates are expressed in terms of canonical e-classes.</li>
+               <li><strong>Total API:</strong> All core operations (query, add, union, find) are inherited from <a href="eqsat/EGraphLike.html">EGraphLike</a>.</li>
+              </ul>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -822,11 +919,29 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The node type of the expressions that the e-graph represents.</p>
+               <p>The domain-specific node type stored in e-nodes.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Typical usage</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val g0: EGraph[MyNode] = EGraph.empty
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val (c1, g1) = g0.add(ENode(Add, defs = SlotSet.empty, uses = SlotSet.empty, args = Seq(...)))
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val (c2, g2) = g1.add(ENode(Mul, defs = ..., uses = ..., args = Seq(...)))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val g3 = g2.union(c1, c2).rebuilt
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -886,11 +1001,12 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for <a href="eqsat/EGraph.html">EGraph</a>.</p>
+             <p>Constructors and helpers for <a href="eqsat/EGraph.html">EGraph</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for <a href="eqsat/EGraph.html">EGraph</a>.</p>
+              <p>Constructors and helpers for <a href="eqsat/EGraph.html">EGraph</a>.</p>
+              <p>Functions here return a plain <code>EGraph[NodeT]</code> backed by a hash-consing implementation.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -948,13 +1064,55 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.</p>
+             <p>An e-graph*is a data structure for representing and maintaining equivalence classes of expressions. E-graphs support equality saturation, a powerful technique for exploring all equivalent forms of a term by exhaustively applying rewrite rules while avoiding redundant work by compacting equivalent subterms into shared e-classes.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An immutable e-graph structure that provides a core API for working with e-classes and e-nodes.</p>
-              <p>E-graphs are data structures used for representing and manipulating equivalence classes of expressions, enabling efficient equality saturation and term rewriting. This trait defines the essential operations for querying, adding, and merging e-classes and e-nodes, as well as for traversing and transforming the e-graph in a functional, immutable style.</p>
-              <p>The split between <a href="eqsat/EGraphLike.html">EGraphLike</a> and <a href="eqsat/EGraph.html">EGraph</a> allows <a href="eqsat/EGraph.html">EGraph</a> to be a simpler trait parameterized only by <code>NodeT</code>, while <a href="eqsat/EGraphLike.html">EGraphLike</a> is parameterized by both <code>NodeT</code> and the most derived type (<code>This</code>). This design ensures that methods in <a href="eqsat/EGraphLike.html">EGraphLike</a> can always return the most precise type of the implementing e-graph.</p>
+              <p>An e-graph*is a data structure for representing and maintaining equivalence classes of expressions. E-graphs support equality saturation, a powerful technique for exploring all equivalent forms of a term by exhaustively applying rewrite rules while avoiding redundant work by compacting equivalent subterms into shared e-classes.</p>
+              <p>In Foresight, an e-graph contains:</p>
+              <ul>
+               <li><strong>E-classes</strong> (<a href="eqsat/EClassRef.html">EClassRef</a>/<a href="eqsat/EClassCall.html">EClassCall</a>): partitions of semantically equivalent expressions.</li>
+               <li><strong>E-nodes</strong> (<a href="eqsat/ENode.html">ENode</a>): operator/operand tuples representing a single application of a function or constructor.</li>
+               <li>A <strong>canonicalization invariant</strong>: every e-class has a unique, canonical representative, and all queries and updates are expressed in terms of these canonical forms.</li>
+              </ul>
+              <h2><a href="#purpose-of-this-trait" id="purpose-of-this-trait">Purpose of this trait</a></h2>
+              <p><a href="eqsat/EGraphLike.html">EGraphLike</a> defines the core API contract for e-graph implementations, parameterized by:</p>
+              <ul>
+               <li>The node payload type <code>NodeT</code> (the domain-specific symbol type your e-nodes use).</li>
+               <li>The self-type <code>This</code>, so all operations that conceptually return "the same kind of e-graph" return your most-derived type, preserving fluent, type-safe chaining.</li>
+              </ul>
+              <p>This trait is deliberately minimal but powerful:</p>
+              <ul>
+               <li><strong>Query methods</strong>: enumerate classes, retrieve nodes, check membership, canonicalize, resolve usage.</li>
+               <li><strong>Construction methods</strong>: add nodes and trees, bulk-add, merge e-classes (union), or create an empty graph.</li>
+               <li><strong>Traversal methods</strong>: find the e-class containing a given node or tree.</li>
+              </ul>
+              <p>Concrete e-graph variants (e.g., with metadata, recorded rule applications, or deferred unions) are built by wrapping or extending a base <a href="eqsat/EGraphLike.html">EGraphLike</a> implementation.</p>
+              <h2><a href="#immutability-and-functional-style" id="immutability-and-functional-style">Immutability and functional style</a></h2>
+              <p>All e-graph operations return a <strong>new</strong> e-graph instance rather than mutating the receiver. This makes e-graphs:</p>
+              <ul>
+               <li><strong>Thread-safe by default</strong> for read operations</li>
+               <li>Naturally suited to speculative or branch-and-bound rewriting, where multiple alternate states can be explored in parallel without interfering with each other</li>
+              </ul>
+              <p>As a consequence:</p>
+              <ul>
+               <li>Adding nodes or merging classes returns a <em>new</em> <code>This</code> instance with the updated structure.</li>
+               <li>Query methods never modify the e-graph.</li>
+              </ul>
+              <h2><a href="#canonicalization" id="canonicalization">Canonicalization</a></h2>
+              <p>Canonicalization is central to e-graph correctness and performance:</p>
+              <ul>
+               <li>Every e-class is identified by a canonical <a href="eqsat/EClassRef.html">EClassRef</a> (chosen representative).</li>
+               <li>When adding or merging, all inputs are canonicalized so that the same equivalence is not represented twice.</li>
+               <li>Queries that take non-canonical inputs will internally canonicalize them.</li>
+              </ul>
+              <h2><a href="#related-types" id="related-types">Related types</a></h2>
+              <ul>
+               <li><a href="eqsat/EGraph.html">EGraph</a> — a simpler, single-parameter variant of this trait.</li>
+               <li><span data-unresolved-link="">foresight.eqsat.metadata.EGraphWithMetadata</span> — an <a href="eqsat/EGraphLike.html">EGraphLike</a> augmented with per-class metadata storage.</li>
+               <li><a href="eqsat/EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> — a deferred-union wrapper for batching merges before a rebuild.</li>
+               <li><a href="eqsat/ENode.html">ENode</a>, <a href="eqsat/EClassRef.html">EClassRef</a>, <a href="eqsat/EClassCall.html">EClassCall</a>, <a href="eqsat/ShapeCall.html">ShapeCall</a> — fundamental building blocks.</li>
+              </ul>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -962,17 +1120,35 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes described by the e-nodes in the e-graph.</p>
+               <p>The type of the domain-specific symbol or operator stored in each e-node.</p>
               </dd>
               <dt class="body-small">
                This
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-graph that this trait is mixed into, which must be a subtype of <a href="eqsat/EGraphLike.html">EGraphLike</a>.</p>
+               <p>The concrete e-graph type mixing in this trait, enabling precise return types for fluent APIs.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Typical usage</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val (classA, g1) = egraph.add(nodeA)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val (classB, g2) = g1.add(nodeB)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val g3 = g2.union(classA, classB).rebuilt // merge equivalences
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val allClasses: Iterable[EClassRef] = g3.classes
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -1196,11 +1372,17 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a sequence of e-class references that represent the arguments of the e-node.</p>
+             <p>A node in a slotted e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a sequence of e-class references that represent the arguments of the e-node.</p>
+              <p>A node in a slotted e-graph.</p>
+              <p>An e-node represents one operator application together with its slot usage and child e-class applications. Slots are partitioned into:</p>
+              <ul>
+               <li><code>definitions</code>: slots introduced locally by this node (binder-internal slots that are not visible outside)</li>
+               <li><code>uses</code>: slots referenced by this node that come from its surrounding context (free with respect to this node) Child expressions are referenced via <code>args</code> as <a href="eqsat/EClassCall.html">EClassCall</a>s, which carry their own parameter-to-argument slot maps.</li>
+              </ul>
+              <p>Node types (<code>NodeT</code>) supply the operator and any non-structural payload. Slots and arguments are provided here.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -1208,7 +1390,7 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the node that the e-node represents. Node types contain all information required to form an expression aside from its slots and arguments.</p>
+               <p>The domain-specific node type. It defines operator identity and payload but not slots/children.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -1217,25 +1399,25 @@
                args
               </dt>
               <dd class="body-medium">
-               <p>The arguments of the e-node.</p>
+               <p>Child e-class applications, each with its own parameter-to-argument <a href="eqsat/SlotMap.html">SlotMap</a>.</p>
               </dd>
               <dt class="body-small">
                definitions
               </dt>
               <dd class="body-medium">
-               <p>The slots used by the e-node that are not visible outside the e-node. These slots are redundant by construction. Their purpose is to allow e-nodes to introduce variable bindings, such as in let expressions or lambda abstractions.</p>
+               <p>Slots introduced by this node that are scoped locally and invisible to parents. These are redundant by construction at the boundary of this node and exist to model binders such as lambda-abstraction or let.</p>
               </dd>
               <dt class="body-small">
                nodeType
               </dt>
               <dd class="body-medium">
-               <p>The node type of the e-node.</p>
+               <p>Operator or symbol for this node.</p>
               </dd>
               <dt class="body-small">
                uses
               </dt>
               <dd class="body-medium">
-               <p>The slots used by the e-node that are visible outside the e-node. These slots refer to variables defined elsewhere.</p>
+               <p>Slots referenced by this node that are visible to its parent and must be satisfied by the surrounding e-class application.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1292,11 +1474,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The companion object of the e-node class.</p>
+             <p>Constructors and helpers for <a href="eqsat/ENode.html">ENode</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The companion object of the e-node class.</p>
+              <p>Constructors and helpers for <a href="eqsat/ENode.html">ENode</a>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1360,11 +1542,15 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A mixed tree that can contain both nodes and e-class calls.</p>
+             <p>A heterogeneous term tree that interleaves node-typed interiors with leaf "calls".</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A mixed tree that can contain both nodes and e-class calls.</p>
+              <p>A heterogeneous term tree that interleaves node-typed interiors with leaf "calls".</p>
+              <p><code>MixedTree[NodeT, CallT]</code> represents a recursive structure where each branch is either a <a href="eqsat/MixedTree$$Node.html">MixedTree.Node</a> containing a <code>nodeType</code>, slot information, and child subtrees, or a <a href="eqsat/MixedTree$$Call.html">MixedTree.Call</a> containing a single leaf payload of type <code>CallT</code>. While every <a href="eqsat/MixedTree$$Call.html">MixedTree.Call</a> is necessarily a leaf, a <a href="eqsat/MixedTree$$Node.html">MixedTree.Node</a> can also be a leaf if it has no children. In such cases, the <a href="eqsat/MixedTree$$Node.html">MixedTree.Node</a> still participates in slot definitions and uses, but terminates the recursion.</p>
+              <p>The type parameter <code>CallT</code> abstracts over the kind of leaf the tree carries. When <code>CallT</code> is <a href="eqsat/EClassCall.html">EClassCall</a>, leaves reference e-classes already present in an e-graph. When <code>CallT</code> is <a href="eqsat/rewriting/patterns/Pattern.html">foresight.eqsat.rewriting.patterns.Pattern</a>, the structure represents a rewrite pattern where leaves can be pattern variables or other atomic constructs. This design allows the same tree shape to serve multiple purposes: representing extracted terms from an e-graph, rewrite patterns for e-matching, or other specialized term-like structures.</p>
+              <p>Slot semantics match those in <a href="eqsat/Tree.html">Tree</a> and <a href="eqsat/ENode.html">ENode</a>. The <code>definitions</code> sequence lists slots introduced by a <a href="eqsat/MixedTree$$Node.html">MixedTree.Node</a> that are not visible to its parents, while the <code>uses</code> sequence lists slots referenced by the <a href="eqsat/MixedTree$$Node.html">MixedTree.Node</a> that are defined elsewhere in the tree.</p>
+              <p>This abstraction is useful when some subtrees must be treated as opaque handles rather than fully expanded node structures, allowing mixed granularity in the same representation.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -1372,17 +1558,49 @@
                CallT
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-class calls in the tree.</p>
+               <p>The type used to represent leaf payloads.</p>
               </dd>
               <dt class="body-small">
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
+               <p>The type used to represent interior nodes.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Mixed tree whose leaves are e-class calls:
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val cA: EClassCall = ...
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val cB: EClassCall = ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val t1: MixedTree[String, EClassCall] =
+</span><span line-number="5" class=""><span class="tooltip-container"></span> MixedTree.Node("add", Seq.empty, Seq.empty,
+</span><span line-number="6" class=""><span class="tooltip-container"></span>   Seq(MixedTree.Call(cA), MixedTree.Call(cB)))
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// A Node leaf (no children):
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val lit: MixedTree[String, EClassCall] =
+</span><span line-number="9" class=""><span class="tooltip-container"></span> MixedTree.Node("const42", Seq.empty, Seq.empty, Seq.empty)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>// Mixed tree whose leaves are pattern fragments:
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val x: Pattern[String] = Pattern.Var.fresh()
+</span><span line-number="12" class=""><span class="tooltip-container"></span>val y: Pattern[String] = Pattern.Var.fresh()
+</span><span line-number="13" class=""><span class="tooltip-container"></span>val pat: MixedTree[String, Pattern[String]] =
+</span><span line-number="14" class=""><span class="tooltip-container"></span> MixedTree.Node("mul", Seq.empty, Seq.empty,
+</span><span line-number="15" class=""><span class="tooltip-container"></span>   Seq(MixedTree.Call(x), MixedTree.Call(y)))
+</span><span line-number="16" class=""><span class="tooltip-container"></span>// Transform just the node labels:
+</span><span line-number="17" class=""><span class="tooltip-container"></span>val upper = pat.mapNodes(_.toUpperCase)
+</span><span line-number="18" class=""><span class="tooltip-container"></span>// Transform just the leaves:
+</span><span line-number="19" class=""><span class="tooltip-container"></span>val renamed = t1.mapCalls(_.rename(SlotMap.identity(_.slotSet)))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -1439,11 +1657,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for mixed trees.</p>
+             <p>Companion object for <a href="eqsat/MixedTree.html">MixedTree</a>, containing constructors, cases, and utility operations.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for mixed trees.</p>
+              <p>Companion object for <a href="eqsat/MixedTree.html">MixedTree</a>, containing constructors, cases, and utility operations.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1565,11 +1783,18 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An e-node that has been decomposed into a shape and a renaming map that assigns argument slots to the shape's numeric slots.</p>
+             <p>A canonicalized e-node paired with a renaming from its canonical slots back to the original slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An e-node that has been decomposed into a shape and a renaming map that assigns argument slots to the shape's numeric slots.</p>
+              <p>A canonicalized e-node paired with a renaming from its canonical slots back to the original slots.</p>
+              <p>A shape is the name-independent normal form of an <a href="eqsat/ENode.html">ENode</a>: all slots that occur in the node are replaced by numbered slots in lexicographic order (<code>$0</code>, <code>$1</code>, ...). The <code>renaming</code> then maps those canonical slots back to the original (caller-context) slots so that applying it to <code>shape</code> reconstructs the original node.</p>
+              <p>Typical construction is via <code>ENode.asShapeCall</code>, which guarantees that:</p>
+              <ul>
+               <li><code>shape</code> is in canonical slot form (all slots numeric, in order).</li>
+               <li><code>renaming</code> maps each canonical numeric slot to the original slot it replaced.</li>
+              </ul>
+              <p>This decomposition underpins hash-consing and equality modulo renaming: equal-up-to-renaming nodes share the same <code>shape</code> and differ only in the <code>renaming</code>.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -1577,7 +1802,7 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the e-node.</p>
+               <p>The domain-specific node type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -1586,17 +1811,40 @@
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the slots. The keys of the map are the slots as they appear in node, and the values are the slots to which they are renamed.</p>
+               <p>A map from the shape's numeric slots to the original slots. Applying it to <code>shape</code> yields the original node.</p>
               </dd>
               <dt class="body-small">
                shape
               </dt>
               <dd class="body-medium">
-               <p>The e-node.</p>
+               <p>The canonical e-node (slots are numeric and ordered).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Start with a non-canonical node `n` that uses arbitrary slots:
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val n: ENode[Op] = ...
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Decompose into canonical shape and a renaming back to the original slots:
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val sc: ShapeCall[Op] = n.asShapeCall
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// `sc.shape` has numeric slots (`$0`, `$1`, ...), and applying `sc.renaming` reconstructs `n`:
+</span><span line-number="6" class=""><span class="tooltip-container"></span>assert(sc.asNode == n)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// To retarget the original slots to fresh ones:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val freshen = SlotMap.bijectionFromSetToFresh(sc.asNode.slotSet)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val scFresh = sc.rename(freshen)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val nFresh  = scFresh.asNode
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Supertypes
               </dt>
@@ -1643,19 +1891,83 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
+             <p>A slot is a symbolic placeholder used to model variables and bindings in a slotted e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Represents a slot in an e-graph, serving as a unique identifier for variable bindings. There are two types of slots:</p>
+              <p>A slot is a symbolic placeholder used to model variables and bindings in a slotted e-graph.</p>
+              <p>Two concrete kinds of slots exist:</p>
               <ul>
-               <li><a href="eqsat/Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: slots with an integer identifier, considered equivalent if their numbers match.</li>
-               <li><a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: slots that are always distinct, even from other unique slots, unless they are the exact same object reference.</li>
+               <li><a href="eqsat/Slot$$NumberedSlot.html">Slot.NumberedSlot</a>: value-based slots identified by an integer (e.g., <code>$0</code>, <code>$1</code>, ...). Any two numbered slots with the same number are equal. These are primarily used for canonicalization and shape-normal forms.</li>
+               <li><a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a>: identity-based slots that are always distinct from every other slot unless they are the exact same object. These are appropriate for user- or pass-generated "fresh" variables.</li>
               </ul>
-              <p>For external users, prefer using <a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a> and <a href="eqsat/Slot$.html#fresh-17f">Slot.fresh</a> to ensure slot uniqueness.</p>
+              <p>Equality semantics:</p>
+              <ul>
+               <li>Numbered slots compare equal if their numbers match.</li>
+               <li>Unique slots compare equal only by object identity (reference equality).</li>
+              </ul>
+              <p>Ordering semantics:</p>
+              <ul>
+               <li>All numbered slots sort before all unique slots.</li>
+               <li>Numbered slots are ordered by their integer <code>n</code>.</li>
+               <li>Unique slots use an implementation-defined, identity-derived ordering suitable for in-memory canonicalization but not for persistence. Do not rely on the absolute ordering of unique slots across processes or runs.</li>
+              </ul>
+              <p>Typical usage:</p>
+              <ul>
+               <li>External callers should prefer <code>Slot.fresh()</code> (a new <a href="eqsat/Slot$$UniqueSlot.html">Slot.UniqueSlot</a>) for generating fresh variables.</li>
+               <li>Canonicalization and shape computation use <code>Slot.numeric(n)</code> (a <a href="eqsat/Slot$$NumberedSlot.html">Slot.NumberedSlot</a>) to assign <code>$0, $1, ...</code>.</li>
+              </ul>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               See also
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p><a href="eqsat/Slot$.html#numeric-fffff726">Slot.numeric</a> for canonical, numbered slots used in shapes</p>
+                </div>
+                <div>
+                 <p><a href="eqsat/Slot$.html#fresh-17f">Slot.fresh</a> for identity-unique slots suitable for user-facing variables</p>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Note
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Slots are immutable labels; renaming is expressed separately via <code>SlotMap</code>.</p>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Fresh, identity-unique slots (never equal unless the same object):
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val x1: Slot = Slot.fresh()
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val x2: Slot = Slot.fresh()
+</span><span line-number="4" class=""><span class="tooltip-container"></span>assert(x1 != x2)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// Numbered slots used in canonical forms:
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val s0: Slot = Slot.numeric(0)  // `$0`
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val s1: Slot = Slot.numeric(1)  // `$1`
+</span><span line-number="8" class=""><span class="tooltip-container"></span>assert(s0 != s1)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>assert(Slot.numeric(0) == s0)   // same number =&gt; equal
+</span><span line-number="10" class=""><span class="tooltip-container"></span>// Ordering: numbered slots come before unique slots
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val sorted = List(x1, s1, x2, s0).sorted
+</span><span line-number="12" class=""><span class="tooltip-container"></span>assert(sorted.take(2) == List(s0, s1))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -1718,11 +2030,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Companion object for the <a href="eqsat/Slot.html">Slot</a> trait.</p>
+             <p>Constructors and concrete slot types.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Companion object for the <a href="eqsat/Slot.html">Slot</a> trait.</p>
+              <p>Constructors and concrete slot types.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1780,11 +2092,26 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A mapping of parameter slots to argument slots.</p>
+             <p>A total map from parameter slots (keys) to argument slots (values).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A mapping of parameter slots to argument slots.</p>
+              <p>A total map from parameter slots (keys) to argument slots (values).</p>
+              <p>In slotted e-graphs, <code>SlotMap</code> carries the binding from an e-class's parameter slots to the caller's argument slots (e.g., inside <a href="eqsat/EClassCall.html">EClassCall</a>), and is also used for renaming during canonicalization.</p>
+              <p>Conventions and terminology:</p>
+              <ul>
+               <li>Bijection: every key maps to a unique value (no two keys map to the same value).</li>
+               <li>Permutation: a bijection whose key set equals its value set (i.e., a re-labeling of the same set).</li>
+              </ul>
+              <p>Ordering and iteration:</p>
+              <ul>
+               <li>Iteration (<code>iterator</code>, <code>keys</code>, <code>values</code>) is key-sorted (<code>Ordered[Slot]</code>), making listings deterministic.</li>
+               <li><code>Ordered[SlotMap]</code> provides lexicographic order by sorted keys, then by corresponding values.</li>
+              </ul>
+              <p>Composition model:</p>
+              <ul>
+               <li>Viewing slot maps as functions on slots, <code>this.compose(other)</code> corresponds to <code>other ∘ this</code>. That is, apply <code>this</code> first, then <code>other</code>.</li>
+              </ul>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1792,7 +2119,7 @@
                map
               </dt>
               <dd class="body-medium">
-               <p>The mapping of slots to slots.</p>
+               <p>The underlying immutable mapping from parameter to argument slots.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1858,11 +2185,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the slot map data structure.</p>
+             <p>Constructors and utilities for building <a href="eqsat/SlotMap.html">SlotMap</a>s.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the slot map data structure.</p>
+              <p>Constructors and utilities for building <a href="eqsat/SlotMap.html">SlotMap</a>s.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1926,11 +2253,20 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A tree data structure.</p>
+             <p>An immutable, slot-aware, ordered tree representation of a term.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A tree data structure.</p>
+              <p>An immutable, slot-aware, ordered tree representation of a term.</p>
+              <p>Each node contains:</p>
+              <ul>
+               <li><code>nodeType</code>: The domain-specific operator or constructor at this position in the tree.</li>
+               <li><code>definitions</code>: The slots bound by this node (e.g., local variables it introduces).</li>
+               <li><code>uses</code>: The slots referenced by this node that are defined elsewhere in the tree.</li>
+               <li><code>args</code>: A sequence of child subtrees.</li>
+              </ul>
+              <p><code>Tree</code> is the structural (non-hash-consed) analogue to <a href="eqsat/MixedTree.html">MixedTree</a> and <a href="eqsat/ENode.html">ENode</a>. Unlike an e-graph, which merges equivalent subterms, a <code>Tree</code> retains explicit duplication and hierarchy, making it suitable for parsing, printing, and intermediate transformations prior to e-graph insertion.</p>
+              <p>Slot information makes the <code>Tree</code> representation aware of variable binding and usage sites, enabling correct handling of alpha-equivalence and scoping-sensitive rewrites.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -1938,7 +2274,7 @@
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the node.</p>
+               <p>The type used to represent operators/constructors.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -1947,29 +2283,50 @@
                args
               </dt>
               <dd class="body-medium">
-               <p>The children of the node.</p>
+               <p>Ordered children of this node.</p>
               </dd>
               <dt class="body-small">
                definitions
               </dt>
               <dd class="body-medium">
-               <p>The slots of the node that are defined by the node itself.</p>
+               <p>Slots bound/introduced by this node itself.</p>
               </dd>
               <dt class="body-small">
                nodeType
               </dt>
               <dd class="body-medium">
-               <p>The type of the node.</p>
+               <p>The operator or constructor at this node.</p>
               </dd>
               <dt class="body-small">
                uses
               </dt>
               <dd class="body-medium">
-               <p>The slots of the node that are used by the node and are defined elsewhere.</p>
+               <p>Slots consumed by this node but defined elsewhere.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Construct a simple tree for: λx. x
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val xSlot = Slot.fresh()
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val body  = Tree("var", definitions = Seq.empty, uses = Seq(xSlot), args = Seq.empty)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val lam   = Tree("lambda", definitions = Seq(xSlot), uses = Seq.empty, args = Seq(body))
+</span><span line-number="5" class=""><span class="tooltip-container"></span>assert(lam.definitions == Seq(xSlot))
+</span><span line-number="6" class=""><span class="tooltip-container"></span>assert(lam.args.head.uses.contains(xSlot))
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Map over node types to produce a pretty-printed label:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val labeled = lam.map(op =&gt; s"&lt;$op&gt;")
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -2022,11 +2379,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A companion object for the tree data structure.</p>
+             <p>Companion utilities for <a href="eqsat/Tree.html">Tree</a>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A companion object for the tree data structure.</p>
+              <p>Companion utilities for <a href="eqsat/Tree.html">Tree</a>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -2082,4 +2439,4 @@
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

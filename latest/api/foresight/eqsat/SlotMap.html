@@ -15,7 +15,22 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A mapping of parameter slots to argument slots.</p>
+  <p>A total map from parameter slots (keys) to argument slots (values).</p>
+  <p>In slotted e-graphs, <code>SlotMap</code> carries the binding from an e-class's parameter slots to the caller's argument slots (e.g., inside <a href="EClassCall.html">EClassCall</a>), and is also used for renaming during canonicalization.</p>
+  <p>Conventions and terminology:</p>
+  <ul>
+   <li>Bijection: every key maps to a unique value (no two keys map to the same value).</li>
+   <li>Permutation: a bijection whose key set equals its value set (i.e., a re-labeling of the same set).</li>
+  </ul>
+  <p>Ordering and iteration:</p>
+  <ul>
+   <li>Iteration (<code>iterator</code>, <code>keys</code>, <code>values</code>) is key-sorted (<code>Ordered[Slot]</code>), making listings deterministic.</li>
+   <li><code>Ordered[SlotMap]</code> provides lexicographic order by sorted keys, then by corresponding values.</li>
+  </ul>
+  <p>Composition model:</p>
+  <ul>
+   <li>Viewing slot maps as functions on slots, <code>this.compose(other)</code> corresponds to <code>other ∘ this</code>. That is, apply <code>this</code> first, then <code>other</code>.</li>
+  </ul>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -24,7 +39,7 @@
     map
    </dt>
    <dd class="body-medium">
-    <p>The mapping of slots to slots.</p>
+    <p>The underlying immutable mapping from parameter to argument slots.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -147,29 +162,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Apply the slot map to a slot.</p>
+             <p>Applies this mapping to a slot, returning the image or the slot itself if unmapped.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Apply the slot map to a slot.</p>
+              <p>Applies this mapping to a slot, returning the image or the slot itself if unmapped.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               slot
-              </dt>
-              <dd class="body-medium">
-               <p>The slot to apply the slot map to.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The result of applying the slot map.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -199,29 +199,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Compare two slot maps.</p>
+             <p>Lexicographic order by sorted keys, then by the values at those keys.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Compare two slot maps.</p>
+              <p>Lexicographic order by sorted keys, then by the values at those keys.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               that
-              </dt>
-              <dd class="body-medium">
-               <p>The other slot map.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>-1 if this slot map is less than the other, 0 if they are equal, and 1 if this slot map is greater.</p>
-              </dd>
               <dt class="body-small">
                Definition Classes
               </dt>
@@ -251,28 +236,25 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Throws an exception if the slot maps are not composable.</p>
+             <p>Composition <code>other ∘ this</code> with a totality check.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Throws an exception if the slot maps are not composable.</p>
+              <p>Composition <code>other ∘ this</code> with a totality check.</p>
+              <p>Requires that every value produced by <code>this</code> appears as a key in <code>other</code> (<code>valueSet == other.keySet</code>). Result maps <code>a -&gt; c</code> when <code>a -&gt; b</code> in <code>this</code> and <code>b -&gt; c</code> in <code>other</code>.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               other
-              </dt>
-              <dd class="body-medium">
-               <p>The other slot map.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
-               Returns
+               Throws
               </dt>
               <dd class="body-medium">
-               <p>A new slot map.</p>
+               <div>
+                <div>
+                 <span data-unresolved-link="">IllegalArgumentException</span>
+                 <p>if <code>valueSet != other.keySet</code>.</p>
+                </div>
+               </div>
               </dd>
              </dl>
             </div>
@@ -295,30 +277,15 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. If b is not in the other slot map, it is replaced with a fresh slot.</p>
+             <p>Freshening composition <code>other ∘ this</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. If b is not in the other slot map, it is replaced with a fresh slot.</p>
+              <p>Freshening composition <code>other ∘ this</code>.</p>
+              <p>Like <code>compose</code>, but if an intermediate value <code>b</code> is not a key in <code>other</code>, replaces it with a fresh slot. Useful for isolating unmapped bindings so they cannot alias existing slots.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               other
-              </dt>
-              <dd class="body-medium">
-               <p>The other slot map.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map with fresh slots.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -339,30 +306,15 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Discards any slots that are not in the other slot map.</p>
+             <p>Partial composition <code>other ∘ this</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Discards any slots that are not in the other slot map.</p>
+              <p>Partial composition <code>other ∘ this</code>.</p>
+              <p>Like <code>compose</code>, but drops entries whose intermediate value is not a key in <code>other</code>. Useful for projecting a mapping into a smaller codomain.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               other
-              </dt>
-              <dd class="body-medium">
-               <p>The other slot map.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -383,30 +335,15 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Retains the original mapping a -&gt; b if b is not in the other slot map.</p>
+             <p>Retaining composition <code>other ∘ this</code> with fallback.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Compose with another slot map. For a, b, c such that a -&gt; b in this slot map and b -&gt; c in the other slot map, the result will contain a -&gt; c. Retains the original mapping a -&gt; b if b is not in the other slot map.</p>
+              <p>Retaining composition <code>other ∘ this</code> with fallback.</p>
+              <p>Like <code>compose</code>, but if an intermediate value <code>b</code> is not a key in <code>other</code>, keeps the original <code>a -&gt; b</code>. Useful when you want to apply a renaming where defined, but leave other bindings unchanged.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               other
-              </dt>
-              <dd class="body-medium">
-               <p>The other slot map.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -427,30 +364,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Check if the slot map contains a slot.</p>
+             <p>True if <code>k</code> is present as a key.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Check if the slot map contains a slot.</p>
+              <p>True if <code>k</code> is present as a key.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               k
-              </dt>
-              <dd class="body-medium">
-               <p>The slot to check for.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if the slot map contains the slot.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -471,30 +392,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Filters the slot map by a predicate on the keys.</p>
+             <p>Keeps only entries whose key satisfies <code>p</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Filters the slot map by a predicate on the keys.</p>
+              <p>Keeps only entries whose key satisfies <code>p</code>.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               p
-              </dt>
-              <dd class="body-medium">
-               <p>The predicate to filter the keys by.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map with only the keys that satisfy the predicate.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -515,30 +420,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Get the value to which a key slot maps.</p>
+             <p>Returns the value bound to <code>k</code>, if any.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Get the value to which a key slot maps.</p>
+              <p>Returns the value bound to <code>k</code>, if any.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               k
-              </dt>
-              <dd class="body-medium">
-               <p>The key.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The value, if it exists.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -559,36 +448,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Insert a slot mapping into the slot map.</p>
+             <p>Returns a copy with an extra mapping <code>k -&gt; v</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Insert a slot mapping into the slot map.</p>
+              <p>Returns a copy with an extra mapping <code>k -&gt; v</code>.</p>
              </div>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               k
-              </dt>
-              <dd class="body-medium">
-               <p>The key.</p>
-              </dd>
-              <dt class="body-small">
-               v
-              </dt>
-              <dd class="body-medium">
-               <p>The value.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>A new slot map with the mapping inserted.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -609,11 +476,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Invert the slot map. For a, b in the slot map, the result will contain b -&gt; a.</p>
+             <p>Inverts the mapping by swapping keys and values.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Invert the slot map. For a, b in the slot map, the result will contain b -&gt; a.</p>
+              <p>Inverts the mapping by swapping keys and values.</p>
+              <p>Only meaningful when this map is a bijection. If multiple keys map to the same value, later entries overwrite earlier ones in the result.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -621,7 +489,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The inverted slot map.</p>
+               <p>The inverted map (<code>v -&gt; k</code> for each <code>k -&gt; v</code>).</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -652,21 +520,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Check if the slot map is a bijection. A bijection is a mapping where each key maps to a unique value.</p>
+             <p>True if each key maps to a unique value (no collisions in <code>values</code>).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Check if the slot map is a bijection. A bijection is a mapping where each key maps to a unique value.</p>
+              <p>True if each key maps to a unique value (no collisions in <code>values</code>).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if the slot map is a bijection.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -687,11 +548,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Check if the slot map is empty.</p>
+             <p>True if the map has no entries.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Check if the slot map is empty.</p>
+              <p>True if the map has no entries.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -715,21 +576,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Check if the slot map is a permutation. A permutation is a bijection where the keys and values are the same.</p>
+             <p>True if this is a bijection and <code>keySet == valueSet</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Check if the slot map is a permutation. A permutation is a bijection where the keys and values are the same.</p>
+              <p>True if this is a bijection and <code>keySet == valueSet</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if the slot map is a permutation.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -750,21 +604,14 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Iterates over the slots in the permutation.</p>
+             <p>Entries in ascending key order.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Iterates over the slots in the permutation.</p>
+              <p>Entries in ascending key order.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>An iterator over the slots in the permutation.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -772,18 +619,56 @@ node9 -> node2;
         </div>
         <div class="documentableElement" id="keySet-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="SlotMap.html#keySet-0" t="n" class="documentableName ">keySet</a>: <span data-unresolved-link="" t="t">Set</span>[<a href="Slot.html" t="t">Slot</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The set of keys.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The set of keys.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="keys-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="SlotMap.html#keys-0" t="n" class="documentableName ">keys</a>: <span data-unresolved-link="" t="t">Seq</span>[<a href="Slot.html" t="t">Slot</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Keys in ascending order.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Keys in ascending order.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -803,11 +688,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The number of slots in the slot map.</p>
+             <p>The number of entries in this map.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The number of slots in the slot map.</p>
+              <p>The number of entries in this map.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -818,18 +703,56 @@ node9 -> node2;
         </div>
         <div class="documentableElement" id="valueSet-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="SlotMap.html#valueSet-0" t="n" class="documentableName ">valueSet</a>: <span data-unresolved-link="" t="t">Set</span>[<a href="Slot.html" t="t">Slot</a>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The set of values (distinct).</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The set of values (distinct).</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="values-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="SlotMap.html#values-0" t="n" class="documentableName ">values</a>: <span data-unresolved-link="" t="t">Seq</span>[<a href="Slot.html" t="t">Slot</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Values in the order of their sorted keys.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Values in the order of their sorted keys.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>

@@ -12,7 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A unique slot. Each unique slot is considered distinct from all other slots.</p>
+  <p>An identity-unique slot. Two unique slots are equal only if they are the same object.</p>
+  <p>Typical use: generating fresh variables for user-visible terms or rewrites.</p>
+  <p>Ordering among unique slots is based on an identity-derived hash and is not stable across runs. Do not persist or externally rely on this relative ordering.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -301,20 +303,14 @@ node6 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Tests whether this slot is a numbered slot. Numbered slots are equivalent if they have the same number. Unique slots are always distinct.</p>
+             <p>True if this is a numbered slot (<code>Slot.NumberedSlot</code>). Numbered slots are equal iff their numbers match. Unique slots are always distinct.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Tests whether this slot is a numbered slot. Numbered slots are equivalent if they have the same number. Unique slots are always distinct.</p>
+              <p>True if this is a numbered slot (<code>Slot.NumberedSlot</code>). Numbered slots are equal iff their numbers match. Unique slots are always distinct.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if this slot is a numbered slot, false otherwise.</p>
-              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -342,20 +338,14 @@ node6 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Tests whether this slot is a unique slot. Unique slots are distinct from all other slots, including other unique slots. Numbered slots are equivalent if they have the same number.</p>
+             <p>True if this is an identity-unique slot (<code>Slot.UniqueSlot</code>). Unique slots are distinct from all other slots, including other unique slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Tests whether this slot is a unique slot. Unique slots are distinct from all other slots, including other unique slots. Numbered slots are equivalent if they have the same number.</p>
+              <p>True if this is an identity-unique slot (<code>Slot.UniqueSlot</code>). Unique slots are distinct from all other slots, including other unique slots.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>True if this slot is a unique slot, false otherwise.</p>
-              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>

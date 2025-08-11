@@ -215,11 +215,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.</p>
+             <p>Tests whether two e-class applications refer to the same canonical e-class.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.</p>
+              <p>Tests whether two e-class applications refer to the same canonical e-class.</p>
+              <p>Both inputs are assumed to refer to e-classes in this e-graph.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -227,13 +228,13 @@ node9 -> node2;
                first
               </dt>
               <dd class="body-medium">
-               <p>The first e-class to compare.</p>
+               <p>First e-class application.</p>
               </dd>
               <dt class="body-small">
                second
               </dt>
               <dd class="body-medium">
-               <p>The second e-class to compare.</p>
+               <p>Second e-class application.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -242,7 +243,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-classes are the same; otherwise, false.</p>
+               <p>true if they canonicalize to the same e-class; false otherwise.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -273,11 +274,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Canonicalizes an e-node, canonicalizing its arguments and decomposing it into a canonical shape and a renaming of the shape's parameter slots to argument slots.</p>
+             <p>Canonicalizes an e-node: its argument calls are canonicalized, then the node is decomposed into a canonical shape with a slot renaming that maps the shape's parameters to the arguments.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Canonicalizes an e-node, canonicalizing its arguments and decomposing it into a canonical shape and a renaming of the shape's parameter slots to argument slots.</p>
+              <p>Canonicalizes an e-node: its argument calls are canonicalized, then the node is decomposed into a canonical shape with a slot renaming that maps the shape's parameters to the arguments.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -294,7 +295,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The canonicalized e-node.</p>
+               <p>A canonicalized shape application for <code>node</code>.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -325,11 +326,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Enumerates all unique e-classes in this e-graph.</p>
+             <p>Enumerates all unique (canonical) e-classes in the e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Enumerates all unique e-classes in this e-graph.</p>
+              <p>Enumerates all unique (canonical) e-classes in the e-graph.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -337,7 +338,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>All unique e-classes in the e-graph, represented as their canonical references.</p>
+               <p>Each distinct e-class, represented by its canonical reference.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -368,11 +369,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new e-graph of this type that is empty, i.e., it contains no e-classes or e-nodes. While the contents of the e-graph are discard, its configuration (e.g., registered metadata) is preserved.</p>
+             <p>Creates an empty e-graph of the same concrete type and configuration (e.g., registered metadata), discarding all current e-classes and e-nodes.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new e-graph of this type that is empty, i.e., it contains no e-classes or e-nodes. While the contents of the e-graph are discard, its configuration (e.g., registered metadata) is preserved.</p>
+              <p>Creates an empty e-graph of the same concrete type and configuration (e.g., registered metadata), discarding all current e-classes and e-nodes.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -380,7 +381,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An empty e-graph of this type.</p>
+               <p>An empty e-graph with the same configuration.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -411,11 +412,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Finds the e-class of a given e-node.</p>
+             <p>Finds the e-class containing the given e-node, if present.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Finds the e-class of a given e-node.</p>
+              <p>Finds the e-class containing the given e-node, if present.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -423,7 +424,7 @@ node9 -> node2;
                node
               </dt>
               <dd class="body-medium">
-               <p>The e-node to find the e-class of.</p>
+               <p>The e-node to look up.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -432,7 +433,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class of the e-node, if it is defined in this e-graph; otherwise, None.</p>
+               <p>Some(e-class call) if the e-node exists in this e-graph; otherwise, None.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -516,11 +517,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The set of nodes of a given e-class application.</p>
+             <p>Returns the set of e-nodes contained in a given e-class.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The set of nodes of a given e-class application.</p>
+              <p>Returns the set of e-nodes contained in a given e-class.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -528,7 +529,7 @@ node9 -> node2;
                call
               </dt>
               <dd class="body-medium">
-               <p>The e-class whose nodes to find.</p>
+               <p>The (possibly non-canonical) e-class application to inspect.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -537,7 +538,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>All nodes in the e-class pointed to by app.</p>
+               <p>All e-nodes stored in the canonical e-class targeted by <code>call</code>.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -612,11 +613,17 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Adds many e-nodes to this e-graph. If any of the e-nodes are already present, then they are not added, and the corresponding result is an e-class application that contains the e-node. Otherwise, the e-nodes are added to unique e-classes, whose references are returned along with the new e-graph.</p>
+             <p>Adds many e-nodes in one pass.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Adds many e-nodes to this e-graph. If any of the e-nodes are already present, then they are not added, and the corresponding result is an e-class application that contains the e-node. Otherwise, the e-nodes are added to unique e-classes, whose references are returned along with the new e-graph.</p>
+              <p>Adds many e-nodes in one pass.</p>
+              <p>For each input:</p>
+              <ul>
+               <li>If the e-node already exists, the corresponding result is <a href="../AddNodeResult$$AlreadyThere.html">AddNodeResult.AlreadyThere</a> with its e-class.</li>
+               <li>Otherwise, the e-node is inserted into a fresh e-class and the result is <a href="../AddNodeResult$$Added.html">AddNodeResult.Added</a>.</li>
+              </ul>
+              <p>The e-graph is immutable: this method returns a new e-graph reflecting all insertions.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -624,13 +631,13 @@ node9 -> node2;
                nodes
               </dt>
               <dd class="body-medium">
-               <p>The e-nodes to add to the e-graph.</p>
+               <p>The e-nodes to add.</p>
               </dd>
               <dt class="body-small">
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallelization strategy to use for parallel tasks in the addition operation.</p>
+               <p>Strategy used for any parallel work within the addition.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -639,7 +646,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The results of adding each e-node, and the new e-graph with the e-nodes added.</p>
+               <p>(Per-node results in input order, new e-graph containing the additions).</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -670,11 +677,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the current canonical reference to an e-class, if the e-class is defined in this e-graph; otherwise, returns None.</p>
+             <p>Returns the current canonical reference of an e-class if it exists in this e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the current canonical reference to an e-class, if the e-class is defined in this e-graph; otherwise, returns None.</p>
+              <p>Returns the current canonical reference of an e-class if it exists in this e-graph.</p>
+              <p>Canonicalization follows all pending/recorded unions so that structurally equal or merged e-classes map to a stable representative.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -682,7 +690,7 @@ node9 -> node2;
                ref
               </dt>
               <dd class="body-medium">
-               <p>The reference to canonicalize.</p>
+               <p>A possibly non-canonical e-class reference.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -691,7 +699,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The canonical reference to the e-class pointed to by ref, if the e-class is defined in this e-graph; otherwise, None.</p>
+               <p>Some(canonical reference) if <code>ref</code> exists in this e-graph; otherwise, None.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -722,11 +730,13 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned. This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions. Both the updated e-graph and a set of all newly-equivalent e-classes are returned.</p>
+             <p>Unions (merges) multiple pairs of e-classes.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned. This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions. Both the updated e-graph and a set of all newly-equivalent e-classes are returned.</p>
+              <p>Unions (merges) multiple pairs of e-classes.</p>
+              <p>Merging combines the member e-nodes of each pair, possibly triggering upward merging and additional equivalences. The operation returns the updated e-graph and a partition of all e-classes that became newly equivalent because of the unions.</p>
+              <p>The e-graph is immutable: this method returns a new e-graph with the merges applied.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -734,13 +744,13 @@ node9 -> node2;
                pairs
               </dt>
               <dd class="body-medium">
-               <p>The pairs of e-classes to union.</p>
+               <p>Pairs of e-class applications to union.</p>
               </dd>
               <dt class="body-small">
                parallelize
               </dt>
               <dd class="body-medium">
-               <p>The parallel map to use for parallel tasks in the union operation.</p>
+               <p>Parallel strategy used during merging/rebuild work.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -749,7 +759,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.</p>
+               <p>(Sets of newly equivalent classes, new e-graph after unions).</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -780,11 +790,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The set of all e-nodes that refer to an e-class.</p>
+             <p>Returns the set of e-nodes that refer to (use) the given e-class.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The set of all e-nodes that refer to an e-class.</p>
+              <p>Returns the set of e-nodes that refer to (use) the given e-class.</p>
+              <p>This is an inverse-usage query: it finds all e-nodes whose arguments include <code>ref</code>.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -792,7 +803,7 @@ node9 -> node2;
                ref
               </dt>
               <dd class="body-medium">
-               <p>The e-class whose uses to find.</p>
+               <p>The e-class whose users to retrieve.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -801,7 +812,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>All e-classes that point to ref through their e-nodes.</p>
+               <p>All e-nodes in the graph that reference <code>ref</code>.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
@@ -840,11 +851,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Adds a tree to the e-graph.</p>
+             <p>Adds a pure tree to the e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Adds a tree to the e-graph.</p>
+              <p>Adds a pure tree to the e-graph.</p>
+              <p>Child subtrees are added/resolved first; then the root e-node is added or found. Returns a new e-graph containing the result.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -852,7 +864,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The tree to add.</p>
+               <p>The pure tree to add.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -861,7 +873,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.</p>
+               <p>(E-class of the root, new e-graph).</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -895,6 +907,7 @@ node9 -> node2;
             <div class="cover">
              <div class="doc">
               <p>Adds a mixed tree to the e-graph.</p>
+              <p>Child calls (if any) are added/resolved first; then the root e-node is added or found. Returns a new e-graph containing the result.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -902,7 +915,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The tree to add.</p>
+               <p>The mixed tree to add.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -911,7 +924,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class reference of the tree's root in the e-graph, and the new e-graph with the tree added.</p>
+               <p>(E-class of the root, new e-graph).</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -940,11 +953,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.</p>
+             <p>Adds a single e-node.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Adds an e-node to this e-graph If it is already present, then the e-node is not added, and the e-class reference of the existing e-node is returned. Otherwise, the e-node is added to a unique e-class, whose reference is returned.</p>
+              <p>Adds a single e-node.</p>
+              <p>If the e-node already exists, returns its e-class; otherwise inserts it into a fresh e-class. The e-graph is immutable: returns a new e-graph containing the result.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -952,7 +966,7 @@ node9 -> node2;
                node
               </dt>
               <dd class="body-medium">
-               <p>The e-node to add to the e-graph.</p>
+               <p>The e-node to add.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -961,7 +975,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class reference of the e-node in the e-graph, and the new e-graph with the e-node added.</p>
+               <p>(E-class of <code>node</code>, new e-graph).</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -990,11 +1004,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Canonicalizes an e-class application.</p>
+             <p>Canonicalizes an e-class application by canonicalizing its reference and then reapplying the original argument renaming.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Canonicalizes an e-class application.</p>
+              <p>Canonicalizes an e-class application by canonicalizing its reference and then reapplying the original argument renaming.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1040,11 +1054,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the current canonical reference to an e-class.</p>
+             <p>Canonicalizes an e-class reference.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the current canonical reference to an e-class.</p>
+              <p>Canonicalizes an e-class reference.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1052,7 +1066,7 @@ node9 -> node2;
                ref
               </dt>
               <dd class="body-medium">
-               <p>The reference to canonicalize.</p>
+               <p>The e-class to canonicalize.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1061,7 +1075,18 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The canonical reference to the e-class pointed to by ref.</p>
+               <p>The canonical e-class application.</p>
+              </dd>
+              <dt class="body-small">
+               Throws
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <span data-unresolved-link="">NoSuchElementException</span>
+                 <p>if the e-class does not exist in this e-graph.</p>
+                </div>
+               </div>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1090,11 +1115,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the number of unique e-classes in this e-graph.</p>
+             <p>Counts distinct e-classes in this e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the number of unique e-classes in this e-graph.</p>
+              <p>Counts distinct e-classes in this e-graph.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1102,7 +1127,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The number of unique e-classes in the e-graph.</p>
+               <p>The number of distinct (canonical) e-classes in this e-graph.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1131,11 +1156,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-graph contains a given tree.</p>
+             <p>Checks whether the e-graph contains the given pure tree (all subtrees must exist).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-graph contains a given tree.</p>
+              <p>Checks whether the e-graph contains the given pure tree (all subtrees must exist).</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1143,7 +1168,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The tree to check for.</p>
+               <p>The tree to check.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1152,7 +1177,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-graph contains the tree; otherwise, false.</p>
+               <p>true if the root resolves to an existing e-class; false otherwise.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1181,11 +1206,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-graph contains a given mixed tree.</p>
+             <p>Checks whether the e-graph contains the given mixed tree (all subcalls must exist).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-graph contains a given mixed tree.</p>
+              <p>Checks whether the e-graph contains the given mixed tree (all subcalls must exist).</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1193,7 +1218,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The mixed tree to check for.</p>
+               <p>The mixed tree to check.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1202,7 +1227,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-graph contains the tree; otherwise, false.</p>
+               <p>true if the root resolves to an existing e-class; false otherwise.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1231,11 +1256,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-graph contains a given e-node.</p>
+             <p>Checks whether the e-graph contains the given e-node.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-graph contains a given e-node.</p>
+              <p>Checks whether the e-graph contains the given e-node.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1243,7 +1268,7 @@ node9 -> node2;
                node
               </dt>
               <dd class="body-medium">
-               <p>The e-node to check for.</p>
+               <p>The e-node to check.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1252,7 +1277,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-graph contains the e-node; otherwise, false.</p>
+               <p>true if present; false otherwise.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1281,11 +1306,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-graph contains a given e-class.</p>
+             <p>Checks whether the e-graph contains the given e-class reference.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-graph contains a given e-class.</p>
+              <p>Checks whether the e-graph contains the given e-class reference.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1293,7 +1318,7 @@ node9 -> node2;
                ref
               </dt>
               <dd class="body-medium">
-               <p>The e-class to check for.</p>
+               <p>The e-class reference to check.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1302,7 +1327,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-graph contains the e-class; otherwise, false.</p>
+               <p>true if the reference resolves to a canonical e-class; false otherwise.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1331,11 +1356,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Finds the e-class corresponding to the root of a tree.</p>
+             <p>Resolves the e-class corresponding to the root of a pure tree, if all subtrees exist.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Finds the e-class corresponding to the root of a tree.</p>
+              <p>Resolves the e-class corresponding to the root of a pure tree, if all subtrees exist.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1343,7 +1368,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The tree to find in the e-graph.</p>
+               <p>The pure tree to resolve.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1352,7 +1377,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.</p>
+               <p>Some(e-class call) if all children exist and the root e-node exists; otherwise, None.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1381,11 +1406,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Finds the e-class corresponding to the root of a mixed tree.</p>
+             <p>Resolves the e-class corresponding to the root of a mixed tree, if all argument calls exist.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Finds the e-class corresponding to the root of a mixed tree.</p>
+              <p>Resolves the e-class corresponding to the root of a mixed tree, if all argument calls exist.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1393,7 +1418,7 @@ node9 -> node2;
                tree
               </dt>
               <dd class="body-medium">
-               <p>The mixed tree to find in the e-graph.</p>
+               <p>The mixed tree to resolve.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1402,7 +1427,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-class of the tree's root, if it is defined in this e-graph; otherwise, None.</p>
+               <p>Some(e-class call) if all children exist and the root e-node exists; otherwise, None.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1431,11 +1456,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the number of unique e-nodes in this e-graph.</p>
+             <p>Counts the total number of e-nodes across all e-classes in this e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the number of unique e-nodes in this e-graph.</p>
+              <p>Counts the total number of e-nodes across all e-classes in this e-graph.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1443,7 +1468,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The number of e-nodes in the e-graph.</p>
+               <p>The total number of e-nodes across all e-classes.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1532,13 +1557,13 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Defers a union between two e-classes in this e-graph.</p>
+             <p>Defers a union between two e-classes.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Defers a union between two e-classes in this e-graph.</p>
-              <p>This method does not immediately merge the two e-classes. Instead, it returns an <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> that records the union request. You can chain further unions on the result and apply them all at once later using <a href="../EGraphWithPendingUnions.html#rebuild-ffffff99">EGraphWithPendingUnions.rebuild</a> or <a href="../EGraphWithPendingUnions.html#rebuilt-0">EGraphWithPendingUnions.rebuilt</a>.</p>
-              <p>Internally, all deferred unions are eventually passed to <a href="../EGraphLike.html#unionMany-fffff0dd">unionMany</a>, which performs a full rebuild of the e-graph to apply the merges. Deferring unions in this way improves performance when many unions are expected, as it avoids rebuilding after each one.</p>
+              <p>Defers a union between two e-classes.</p>
+              <p>This does not immediately mutate the e-graph. Instead it returns an <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> that records the request. You can chain more unions on the result and apply them together later via <a href="../EGraphWithPendingUnions.html#rebuild-ffffff99">EGraphWithPendingUnions.rebuild</a> / <a href="../EGraphWithPendingUnions.html#rebuilt-0">EGraphWithPendingUnions.rebuilt</a>.</p>
+              <p>Internally, deferred unions are eventually passed to <a href="../EGraphLike.html#unionMany-fffff0dd">unionMany</a>, which performs a full rebuild. Deferral can be substantially faster when many unions are expected, by avoiding repeated rebuilds.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1546,13 +1571,13 @@ node9 -> node2;
                left
               </dt>
               <dd class="body-medium">
-               <p>A reference to the first e-class.</p>
+               <p>First e-class.</p>
               </dd>
               <dt class="body-small">
                right
               </dt>
               <dd class="body-medium">
-               <p>A reference to the second e-class.</p>
+               <p>Second e-class.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1561,23 +1586,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> containing this e-graph and the deferred union.</p>
-              </dd>
-              <dt class="body-small">
-               See also
-              </dt>
-              <dd class="body-medium">
-               <div>
-                <div>
-                 <p><a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a></p>
-                </div>
-                <div>
-                 <p><a href="../EGraphWithPendingUnions.html#rebuild-ffffff99">EGraphWithPendingUnions.rebuild</a></p>
-                </div>
-                <div>
-                 <p><a href="../EGraphLike.html#unionMany-fffff0dd">unionMany</a></p>
-                </div>
-               </div>
+               <p>An <a href="../EGraphWithPendingUnions.html">EGraphWithPendingUnions</a> wrapping this e-graph and the deferred union.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1606,11 +1615,11 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned. This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions. Both the updated e-graph and a set of all newly-equivalent e-classes are returned.</p>
+             <p>Unions (merges) multiple pairs of e-classes using the default parallel strategy.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Unions many e-classes in this e-graph. The resulting e-classes contain all e-nodes from the e-classes being unioned. This operation builds a new e-graph with the e-classes unioned. Upward merging may produce further unions. Both the updated e-graph and a set of all newly-equivalent e-classes are returned.</p>
+              <p>Unions (merges) multiple pairs of e-classes using the default parallel strategy.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -1618,7 +1627,7 @@ node9 -> node2;
                pairs
               </dt>
               <dd class="body-medium">
-               <p>The pairs of e-classes to union.</p>
+               <p>Pairs of e-class applications to union.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -1627,7 +1636,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-classes resulting from the unions, and the new e-graph with the e-classes unioned.</p>
+               <p>(Sets of newly equivalent classes, new e-graph after unions).</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -1656,11 +1665,12 @@ node9 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Enhances this e-graph with the ability to store metadata.</p>
+             <p>Returns a view of this e-graph that can store and maintain per-e-class (and related) metadata.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Enhances this e-graph with the ability to store metadata.</p>
+              <p>Returns a view of this e-graph that can store and maintain per-e-class (and related) metadata.</p>
+              <p>The returned instance preserves immutability: operations that would change metadata yield a new e-graph-with-metadata instance.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -1668,7 +1678,7 @@ node9 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-graph with metadata.</p>
+               <p>An <span data-unresolved-link="" title="Problem linking EGraphWithMetadata: No DRI found for query">EGraphWithMetadata</span> that wraps this e-graph.</p>
               </dd>
               <dt class="body-small">
                Inherited from:

@@ -12,51 +12,9 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A node in a mixed tree.</p>
+  <p>A <code>Node</code> in a mixed tree, which may be an interior or a leaf depending on whether <code>children</code> is empty.</p>
  </div>
  <section id="attributes">
-  <h2 class="h500">Type parameters</h2>
-  <dl class="attributes">
-   <dt class="body-small">
-    CallT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the e-class calls.</p>
-   </dd>
-   <dt class="body-small">
-    NodeT
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the node.</p>
-   </dd>
-  </dl>
-  <h2 class="h500">Value parameters</h2>
-  <dl class="attributes">
-   <dt class="body-small">
-    children
-   </dt>
-   <dd class="body-medium">
-    <p>The children of the node.</p>
-   </dd>
-   <dt class="body-small">
-    definitions
-   </dt>
-   <dd class="body-medium">
-    <p>The slots that are defined directly by the node.</p>
-   </dd>
-   <dt class="body-small">
-    nodeType
-   </dt>
-   <dd class="body-medium">
-    <p>The type of the node.</p>
-   </dd>
-   <dt class="body-small">
-    uses
-   </dt>
-   <dd class="body-medium">
-    <p>The slots that are used directly by the node.</p>
-   </dd>
-  </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
    <dt class="body-small">
@@ -159,11 +117,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Maps the e-class calls in the tree.</p>
+             <p>Applies a transformation to every <code>CallT</code> leaf, preserving the node structure and slots. Node leaves (empty <code>children</code>) are unaffected because they do not carry a <code>CallT</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Maps the e-class calls in the tree.</p>
+              <p>Applies a transformation to every <code>CallT</code> leaf, preserving the node structure and slots. Node leaves (empty <code>children</code>) are unaffected because they do not carry a <code>CallT</code>.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -171,7 +129,7 @@ node7 -> node2;
                NewCallT
               </dt>
               <dd class="body-medium">
-               <p>The type of the new e-class calls.</p>
+               <p>The resulting leaf type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -180,17 +138,11 @@ node7 -> node2;
                f
               </dt>
               <dd class="body-medium">
-               <p>The function to map the e-class calls.</p>
+               <p>Function applied to each leaf payload.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The tree with the e-class calls mapped.</p>
-              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -218,11 +170,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Maps the nodes in the tree.</p>
+             <p>Applies a transformation to every interior node's <code>nodeType</code>, preserving slots and structure. Leaves remain leaves: <code>Call</code> leaves are untouched, and <code>Node</code> leaves are mapped in place.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Maps the nodes in the tree.</p>
+              <p>Applies a transformation to every interior node's <code>nodeType</code>, preserving slots and structure. Leaves remain leaves: <code>Call</code> leaves are untouched, and <code>Node</code> leaves are mapped in place.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -230,7 +182,7 @@ node7 -> node2;
                NewNodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the new nodes.</p>
+               <p>The resulting node type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -239,17 +191,11 @@ node7 -> node2;
                f
               </dt>
               <dd class="body-medium">
-               <p>The function to map the nodes.</p>
+               <p>Function applied to each <code>nodeType</code>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The tree with the nodes mapped.</p>
-              </dd>
               <dt class="body-small">
                Inherited from:
               </dt>
@@ -329,4 +275,4 @@ node7 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

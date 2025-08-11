@@ -15,7 +15,13 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>An e-node in an e-graph. E-nodes are used to represent expressions in an e-graph. Each e-node has a node type and a sequence of e-class references that represent the arguments of the e-node.</p>
+  <p>A node in a slotted e-graph.</p>
+  <p>An e-node represents one operator application together with its slot usage and child e-class applications. Slots are partitioned into:</p>
+  <ul>
+   <li><code>definitions</code>: slots introduced locally by this node (binder-internal slots that are not visible outside)</li>
+   <li><code>uses</code>: slots referenced by this node that come from its surrounding context (free with respect to this node) Child expressions are referenced via <code>args</code> as <a href="EClassCall.html">EClassCall</a>s, which carry their own parameter-to-argument slot maps.</li>
+  </ul>
+  <p>Node types (<code>NodeT</code>) supply the operator and any non-structural payload. Slots and arguments are provided here.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,7 +30,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the node that the e-node represents. Node types contain all information required to form an expression aside from its slots and arguments.</p>
+    <p>The domain-specific node type. It defines operator identity and payload but not slots/children.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -33,25 +39,25 @@
     args
    </dt>
    <dd class="body-medium">
-    <p>The arguments of the e-node.</p>
+    <p>Child e-class applications, each with its own parameter-to-argument <a href="SlotMap.html">SlotMap</a>.</p>
    </dd>
    <dt class="body-small">
     definitions
    </dt>
    <dd class="body-medium">
-    <p>The slots used by the e-node that are not visible outside the e-node. These slots are redundant by construction. Their purpose is to allow e-nodes to introduce variable bindings, such as in let expressions or lambda abstractions.</p>
+    <p>Slots introduced by this node that are scoped locally and invisible to parents. These are redundant by construction at the boundary of this node and exist to model binders such as lambda-abstraction or let.</p>
    </dd>
    <dt class="body-small">
     nodeType
    </dt>
    <dd class="body-medium">
-    <p>The node type of the e-node.</p>
+    <p>Operator or symbol for this node.</p>
    </dd>
    <dt class="body-small">
     uses
    </dt>
    <dd class="body-medium">
-    <p>The slots used by the e-node that are visible outside the e-node. These slots refer to variables defined elsewhere.</p>
+    <p>Slots referenced by this node that are visible to its parent and must be satisfied by the surrounding e-class application.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
@@ -156,11 +162,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the e-node with the slots renamed to numeric slots in lexicographical order. The shape is augmented with a slot map that maps the renamed slots to the original slots.</p>
+             <p>Returns the canonical shape of this node together with the inverse renaming from canonical to original slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the e-node with the slots renamed to numeric slots in lexicographical order. The shape is augmented with a slot map that maps the renamed slots to the original slots.</p>
+              <p>Returns the canonical shape of this node together with the inverse renaming from canonical to original slots.</p>
+              <p>Canonicalization replaces every slot that appears in this node with a numeric slot in lexicographic order (e.g., <code>$0</code>, <code>$1</code>, ...) producing a name-independent normal form. The accompanying <a href="SlotMap.html">SlotMap</a> maps the canonical numeric slots back to the original slots. This decomposition underlies hash-consing and equality modulo renaming.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -168,7 +175,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-node with the slots renamed.</p>
+               <p>A <a href="ShapeCall.html">ShapeCall</a> whose shape is this node in canonical slot form, and whose renaming maps canonical slots back to the original slots of this node.</p>
               </dd>
              </dl>
             </div>
@@ -191,11 +198,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Determines whether the e-node is a shape.</p>
+             <p>Checks whether this node is already in canonical shape-normal form.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Determines whether the e-node is a shape.</p>
+              <p>Checks whether this node is already in canonical shape-normal form.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -203,7 +210,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the e-node is a shape; otherwise, false.</p>
+               <p>True if equal to <code>asShapeCall.shape</code>; false otherwise.</p>
               </dd>
              </dl>
             </div>
@@ -226,11 +233,17 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Renames the slots of the e-node according to a renaming.</p>
+             <p>Renames every occurrence of the given slots throughout this node.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Renames the slots of the e-node according to a renaming.</p>
+              <p>Renames every occurrence of the given slots throughout this node.</p>
+              <p>The renaming applies uniformly to:</p>
+              <ul>
+               <li>definitions and uses</li>
+               <li>each child's argument-slot map, composed via <code>composeRetain</code> so unmapped child entries are preserved</li>
+              </ul>
+              <p>All keys of <code>renaming</code> must occur in this node; extra keys are allowed but ignored.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -238,7 +251,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the slots. The keys of the map are the slots as they appear in the e-node, and the values are the slots to which they are renamed.</p>
+               <p>Mapping from old to new slots.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -247,7 +260,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-node with the slots renamed.</p>
+               <p>A node with slots renamed.</p>
               </dd>
              </dl>
             </div>
@@ -270,11 +283,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The set of all distinct slots in the e-node: definition slots, used slots and slots from arguments.</p>
+             <p>The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The set of all distinct slots in the e-node: definition slots, used slots and slots from arguments.</p>
+              <p>The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -282,7 +295,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The set of slots used by the e-node.</p>
+               <p>A set of slots used by this node.</p>
               </dd>
              </dl>
             </div>
@@ -305,11 +318,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>All slots that appear in the e-node: definition slots, used slots and slots from arguments.</p>
+             <p>All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children. Order preserves definitions, then uses, then the values of each child's argument map in child order.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>All slots that appear in the e-node: definition slots, used slots and slots from arguments.</p>
+              <p>All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children. Order preserves definitions, then uses, then the values of each child's argument map in child order.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
@@ -317,7 +330,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An ordered sequence of slots used by the e-node.</p>
+               <p>An ordered sequence of slots used by this node.</p>
               </dd>
              </dl>
             </div>

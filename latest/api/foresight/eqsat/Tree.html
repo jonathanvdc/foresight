@@ -15,7 +15,16 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A tree data structure.</p>
+  <p>An immutable, slot-aware, ordered tree representation of a term.</p>
+  <p>Each node contains:</p>
+  <ul>
+   <li><code>nodeType</code>: The domain-specific operator or constructor at this position in the tree.</li>
+   <li><code>definitions</code>: The slots bound by this node (e.g., local variables it introduces).</li>
+   <li><code>uses</code>: The slots referenced by this node that are defined elsewhere in the tree.</li>
+   <li><code>args</code>: A sequence of child subtrees.</li>
+  </ul>
+  <p><code>Tree</code> is the structural (non-hash-consed) analogue to <a href="MixedTree.html">MixedTree</a> and <a href="ENode.html">ENode</a>. Unlike an e-graph, which merges equivalent subterms, a <code>Tree</code> retains explicit duplication and hierarchy, making it suitable for parsing, printing, and intermediate transformations prior to e-graph insertion.</p>
+  <p>Slot information makes the <code>Tree</code> representation aware of variable binding and usage sites, enabling correct handling of alpha-equivalence and scoping-sensitive rewrites.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -24,7 +33,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the node.</p>
+    <p>The type used to represent operators/constructors.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -33,29 +42,50 @@
     args
    </dt>
    <dd class="body-medium">
-    <p>The children of the node.</p>
+    <p>Ordered children of this node.</p>
    </dd>
    <dt class="body-small">
     definitions
    </dt>
    <dd class="body-medium">
-    <p>The slots of the node that are defined by the node itself.</p>
+    <p>Slots bound/introduced by this node itself.</p>
    </dd>
    <dt class="body-small">
     nodeType
    </dt>
    <dd class="body-medium">
-    <p>The type of the node.</p>
+    <p>The operator or constructor at this node.</p>
    </dd>
    <dt class="body-small">
     uses
    </dt>
    <dd class="body-medium">
-    <p>The slots of the node that are used by the node and are defined elsewhere.</p>
+    <p>Slots consumed by this node but defined elsewhere.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Construct a simple tree for: λx. x
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val xSlot = Slot.fresh()
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val body  = Tree("var", definitions = Seq.empty, uses = Seq(xSlot), args = Seq.empty)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val lam   = Tree("lambda", definitions = Seq(xSlot), uses = Seq.empty, args = Seq(body))
+</span><span line-number="5" class=""><span class="tooltip-container"></span>assert(lam.definitions == Seq(xSlot))
+</span><span line-number="6" class=""><span class="tooltip-container"></span>assert(lam.args.head.uses.contains(xSlot))
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Map over node types to produce a pretty-printed label:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val labeled = lam.map(op =&gt; s"&lt;$op&gt;")
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -156,11 +186,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Maps the nodes of the tree to new nodes.</p>
+             <p>Transform the <code>nodeType</code> at every position in the tree.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Maps the nodes of the tree to new nodes.</p>
+              <p>Transform the <code>nodeType</code> at every position in the tree.</p>
+              <p>This is a pure top-down map that preserves slot structure and argument order.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -168,7 +199,7 @@ node6 -> node2;
                NewNodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of new node.</p>
+               <p>The resulting node type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -177,7 +208,7 @@ node6 -> node2;
                f
               </dt>
               <dd class="body-medium">
-               <p>The function to apply to the nodes of the tree.</p>
+               <p>Function to transform the <code>nodeType</code> at each node.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -186,7 +217,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The tree with the nodes replaced by new nodes.</p>
+               <p>A structurally identical tree with <code>nodeType</code> replaced according to <code>f</code>.</p>
               </dd>
              </dl>
             </div>

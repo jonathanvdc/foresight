@@ -12,10 +12,18 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>Represents a reference to an e-class within an e-graph.</p>
-  <p>An e-class is a set of equivalent expressions grouped together in an e-graph, a data structure used for representing and manipulating equivalence relations between expressions.</p>
-  <p>When a new e-class is created, a unique <code>EClassRef</code> is generated for it. Over time, as equivalence relations are discovered and e-classes are merged, multiple <code>EClassRef</code> instances may refer to the same underlying e-class.</p>
-  <p>To resolve ambiguity and obtain a single, canonical reference for an e-class, use <a href="EGraphLike.html">Repr].canonicalize(foresight.eqsat.EClassRef)</a>.</p>
+  <p>A stable handle identifying an e-class in an e-graph.</p>
+  <p>An e-class is a set of equivalent expressions (e-nodes) maintained by the e-graph as part of its congruence-closure structure. Each e-class may be parameterized by slots (see Schneider et al., "E-Graphs with Classes and Slots: Reasoning with Parameterized Equivalence Classes", Proc. ACM Program. Lang., OOPSLA 2024, extended version).</p>
+  <p>When a new e-class is created, the e-graph generates a fresh <code>EClassRef</code> as its identity. This reference is stable across transformations, but the equivalence relation maintained by the e-graph may cause multiple <code>EClassRef</code> instances to represent the same underlying e-class if merges occur.</p>
+  <p>Because merges are common in equality saturation, <code>EClassRef</code> values are not guaranteed to be canonical. To obtain a canonical representative of the current equivalence class, use:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>egraph.canonicalize(ref)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>This returns an <code>EClassRef</code> that is the unique canonical handle for the merged class in the given e-graph state.</p>
+  <p><code>EClassRef</code> is used both directly for identifying classes and indirectly in parameterized applications via <a href="EClassCall.html">EClassCall</a>, where it is paired with a mapping from the class's parameter slots to argument slots in the caller's context.</p>
+  <p>Equality and hashing of <code>EClassRef</code> instances are based solely on their internal identity, not on the current structure of the e-graph. This allows them to be used as keys in maps or sets, but note that their equivalence meaning may change as the e-graph evolves.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>

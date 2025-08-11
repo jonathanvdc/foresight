@@ -12,7 +12,14 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>An application of an <a href="EClassRef.html">EClassRef</a> to arguments. These arguments come in the form of a <a href="SlotMap.html">SlotMap</a>, where the keys are the parameter slots of the e-class and the values are the arguments.</p>
+  <p>Represents the application of an <a href="EClassRef.html">EClassRef</a> to a set of argument slots.</p>
+  <p>An e-class application combines:</p>
+  <ul>
+   <li>A reference to an e-class (<code>ref</code>), which may have parameter slots.</li>
+   <li>A <a href="SlotMap.html">SlotMap</a> mapping each parameter slot to a corresponding argument slot.</li>
+  </ul>
+  <p>Slots are a generalization of term variables that allow the e-graph to represent parameterized e-classes and maintain consistent argument binding across multiple occurrences. This enables advanced rewriting techniques such as those described in Schneider et al., "E-Graphs with Classes and Slots: Reasoning with Parameterized Equivalence Classes" (Proc. ACM Program. Lang., OOPSLA 2024).</p>
+  <p>The argument slot map (<code>args</code>) specifies, for each parameter slot in the e-class, which argument slot should be used when this e-class is applied. This supports sharing, renaming, and partial instantiation of e-classes within larger expressions.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Value parameters</h2>
@@ -21,17 +28,33 @@
     args
    </dt>
    <dd class="body-medium">
-    <p>The arguments applied to the e-class, described as a slot map. The slot map's keys are the e-class's parameter slots and the values are the arguments.</p>
+    <p>The mapping from the e-class's parameter slots to argument slots.</p>
    </dd>
    <dt class="body-small">
     ref
    </dt>
    <dd class="body-medium">
-    <p>The reference to the e-class.</p>
+    <p>The reference to the e-class being applied.</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// EClassRef `subXY` has parameter slots (x, y) representing "x - y"
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val call1 = EClassCall(subXY, SlotMap(x -&gt; a, y -&gt; b)) // represents "a - b"
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val call2 = EClassCall(subXY, SlotMap(x -&gt; b, y -&gt; a)) // represents "b - a"
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -126,11 +149,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Checks if the applied e-class is well-formed in the given e-graph. An applied e-class is well-formed if all the class's slots appear as keys in the argument slot map.</p>
+             <p>Checks whether this application is well-formed in the given e-graph. An application is well-formed if all parameter slots of the target e-class are bound in its argument slot map.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Checks if the applied e-class is well-formed in the given e-graph. An applied e-class is well-formed if all the class's slots appear as keys in the argument slot map.</p>
+              <p>Checks whether this application is well-formed in the given e-graph. An application is well-formed if all parameter slots of the target e-class are bound in its argument slot map.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -138,7 +161,7 @@ node6 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>The e-graph in which to check the e-class application.</p>
+               <p>The e-graph in which to check.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -147,7 +170,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>True if the application is well-formed in the e-graph; false otherwise.</p>
+               <p>True if well-formed, false otherwise.</p>
               </dd>
              </dl>
             </div>
@@ -170,11 +193,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Renames the argument slots of the applied reference.</p>
+             <p>Renames all argument slots in this application according to a given mapping. All argument slots must be present in the renaming map.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Renames the argument slots of the applied reference.</p>
+              <p>Renames all argument slots in this application according to a given mapping. All argument slots must be present in the renaming map.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -182,7 +205,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the argument slots.</p>
+               <p>The mapping from old argument slots to new argument slots.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -191,7 +214,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The applied reference with the arguments renamed.</p>
+               <p>A new application with arguments renamed.</p>
               </dd>
              </dl>
             </div>
@@ -214,11 +237,11 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Renames the argument slots of the e-class application. Argument slots that are not in the renaming are dropped.</p>
+             <p>Renames argument slots in this application according to a given mapping. Argument slots not in the mapping are dropped.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Renames the argument slots of the e-class application. Argument slots that are not in the renaming are dropped.</p>
+              <p>Renames argument slots in this application according to a given mapping. Argument slots not in the mapping are dropped.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -226,7 +249,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The renaming of the argument slots.</p>
+               <p>The mapping from old argument slots to new argument slots.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -235,7 +258,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The applied e-class with the arguments renamed.</p>
+               <p>A new application with arguments renamed (possibly dropping some).</p>
               </dd>
              </dl>
             </div>
@@ -258,21 +281,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the argument slots of the applied reference.</p>
+             <p>The set of distinct slots used as arguments in this application.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the argument slots of the applied reference.</p>
+              <p>The set of distinct slots used as arguments in this application.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The argument slots of the applied reference.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -293,21 +309,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the slots used by the applied reference. These are the slots used by the applied reference's arguments, not parameter slots of the e-class reference.</p>
+             <p>The set of slots used as arguments in this application, in sequence order. These are the slots referenced by the argument values, not the parameter slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the slots used by the applied reference. These are the slots used by the applied reference's arguments, not parameter slots of the e-class reference.</p>
+              <p>The set of slots used as arguments in this application, in sequence order. These are the slots referenced by the argument values, not the parameter slots.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The slots used by the applied reference.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for mixed trees.</p>
+  <p>Companion object for <a href="MixedTree.html">MixedTree</a>, containing constructors, cases, and utility operations.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -113,36 +113,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A call in a mixed tree.</p>
+             <p>A <code>Call</code> in a mixed tree, which is always a leaf and wraps a <code>CallT</code> payload.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A call in a mixed tree.</p>
+              <p>A <code>Call</code> in a mixed tree, which is always a leaf and wraps a <code>CallT</code> payload.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               CallT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-class calls.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               call
-              </dt>
-              <dd class="body-medium">
-               <p>The e-class call.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -193,8 +169,13 @@ node3 -> node2;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Extension methods for <code>MixedTree</code>s whose leaves are <code>EClassCall</code>s.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Extension methods for <code>MixedTree</code>s whose leaves are <code>EClassCall</code>s.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -234,30 +215,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Extension methods for mixed trees of patterns.</p>
+             <p>Extension methods for <code>MixedTree</code>s whose leaves are patterns.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Extension methods for mixed trees of patterns.</p>
+              <p>Extension methods for <code>MixedTree</code>s whose leaves are patterns.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               tree
-              </dt>
-              <dd class="body-medium">
-               <p>The mixed tree of patterns.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -297,54 +260,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>A node in a mixed tree.</p>
+             <p>A <code>Node</code> in a mixed tree, which may be an interior or a leaf depending on whether <code>children</code> is empty.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>A node in a mixed tree.</p>
+              <p>A <code>Node</code> in a mixed tree, which may be an interior or a leaf depending on whether <code>children</code> is empty.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               CallT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-class calls.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the node.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               children
-              </dt>
-              <dd class="body-medium">
-               <p>The children of the node.</p>
-              </dd>
-              <dt class="body-small">
-               definitions
-              </dt>
-              <dd class="body-medium">
-               <p>The slots that are defined directly by the node.</p>
-              </dd>
-              <dt class="body-small">
-               nodeType
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the node.</p>
-              </dd>
-              <dt class="body-small">
-               uses
-              </dt>
-              <dd class="body-medium">
-               <p>The slots that are used directly by the node.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -411,51 +332,14 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a slot-free node in a mixed tree.</p>
+             <p>Constructs a node with no bound or used slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a slot-free node in a mixed tree.</p>
+              <p>Constructs a node with no bound or used slots.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               CallT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the e-class calls.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the node.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               children
-              </dt>
-              <dd class="body-medium">
-               <p>The children of the node.</p>
-              </dd>
-              <dt class="body-small">
-               nodeType
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the node.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The created node.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -478,9 +362,28 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="MixedTreeOfEClassCallOps-fffff4f1" data-f-keywords="final,implicit">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">final implicit </span></span><span class="kind"><span t="k">def </span></span><a href="MixedTree$.html#MixedTreeOfEClassCallOps-fffff4f1" t="n" class="documentableName ">MixedTreeOfEClassCallOps</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">tree</span>: <a href="MixedTree.html" t="t">MixedTree</a>[<span t="t">NodeT</span>, <a href="EClassCall.html" t="t">EClassCall</a>]): <a href="MixedTree$$MixedTreeOfEClassCallOps.html" t="t">MixedTreeOfEClassCallOps</a>[<span data-unresolved-link="" t="t">NodeT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Extension methods for <code>MixedTree</code>s whose leaves are <code>EClassCall</code>s.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Extension methods for <code>MixedTree</code>s whose leaves are <code>EClassCall</code>s.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -500,30 +403,12 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Extension methods for mixed trees of patterns.</p>
+             <p>Extension methods for <code>MixedTree</code>s whose leaves are patterns.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Extension methods for mixed trees of patterns.</p>
+              <p>Extension methods for <code>MixedTree</code>s whose leaves are patterns.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               tree
-              </dt>
-              <dd class="body-medium">
-               <p>The mixed tree of patterns.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
             </div>
@@ -546,39 +431,14 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Converts an e-node to a mixed tree.</p>
+             <p>Implicitly converts an <code>ENode</code> into a <code>MixedTree</code> whose leaves are <code>EClassCall</code>s.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Converts an e-node to a mixed tree.</p>
+              <p>Implicitly converts an <code>ENode</code> into a <code>MixedTree</code> whose leaves are <code>EClassCall</code>s.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the node.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               node
-              </dt>
-              <dd class="body-medium">
-               <p>The e-node to convert.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The converted mixed tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -599,45 +459,14 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Converts a tree to a mixed tree.</p>
+             <p>Implicitly converts a <code>Tree</code> into a <code>MixedTree</code> with the same shape, keeping all nodes as <code>Node</code>s.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Converts a tree to a mixed tree.</p>
+              <p>Implicitly converts a <code>Tree</code> into a <code>MixedTree</code> with the same shape, keeping all nodes as <code>Node</code>s.</p>
              </div>
-             <h2 class="h200">Type parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               A
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the arguments in the tree.</p>
-              </dd>
-              <dt class="body-small">
-               NodeT
-              </dt>
-              <dd class="body-medium">
-               <p>The type of the nodes in the tree.</p>
-              </dd>
-             </dl>
-             <h2 class="h200">Value parameters</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               tree
-              </dt>
-              <dd class="body-medium">
-               <p>The tree to convert.</p>
-              </dd>
-             </dl>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The converted mixed tree.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

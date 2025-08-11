@@ -12,7 +12,14 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>An e-node that has been decomposed into a shape and a renaming map that assigns argument slots to the shape's numeric slots.</p>
+  <p>A canonicalized e-node paired with a renaming from its canonical slots back to the original slots.</p>
+  <p>A shape is the name-independent normal form of an <a href="ENode.html">ENode</a>: all slots that occur in the node are replaced by numbered slots in lexicographic order (<code>$0</code>, <code>$1</code>, ...). The <code>renaming</code> then maps those canonical slots back to the original (caller-context) slots so that applying it to <code>shape</code> reconstructs the original node.</p>
+  <p>Typical construction is via <code>ENode.asShapeCall</code>, which guarantees that:</p>
+  <ul>
+   <li><code>shape</code> is in canonical slot form (all slots numeric, in order).</li>
+   <li><code>renaming</code> maps each canonical numeric slot to the original slot it replaced.</li>
+  </ul>
+  <p>This decomposition underpins hash-consing and equality modulo renaming: equal-up-to-renaming nodes share the same <code>shape</code> and differ only in the <code>renaming</code>.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -21,7 +28,7 @@
     NodeT
    </dt>
    <dd class="body-medium">
-    <p>The type of the e-node.</p>
+    <p>The domain-specific node type.</p>
    </dd>
   </dl>
   <h2 class="h500">Value parameters</h2>
@@ -30,17 +37,40 @@
     renaming
    </dt>
    <dd class="body-medium">
-    <p>The renaming of the slots. The keys of the map are the slots as they appear in node, and the values are the slots to which they are renamed.</p>
+    <p>A map from the shape's numeric slots to the original slots. Applying it to <code>shape</code> yields the original node.</p>
    </dd>
    <dt class="body-small">
     shape
    </dt>
    <dd class="body-medium">
-    <p>The e-node.</p>
+    <p>The canonical e-node (slots are numeric and ordered).</p>
    </dd>
   </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Start with a non-canonical node `n` that uses arbitrary slots:
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val n: ENode[Op] = ...
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Decompose into canonical shape and a renaming back to the original slots:
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val sc: ShapeCall[Op] = n.asShapeCall
+</span><span line-number="5" class=""><span class="tooltip-container"></span>// `sc.shape` has numeric slots (`$0`, `$1`, ...), and applying `sc.renaming` reconstructs `n`:
+</span><span line-number="6" class=""><span class="tooltip-container"></span>assert(sc.asNode == n)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// To retarget the original slots to fresh ones:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val freshen = SlotMap.bijectionFromSetToFresh(sc.asNode.slotSet)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val scFresh = sc.rename(freshen)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val nFresh  = scFresh.asNode
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Graph
    </dt>
@@ -135,21 +165,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the arguments of the e-node after renaming.</p>
+             <p>Arguments of <code>asNode</code> (after applying the renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the arguments of the e-node after renaming.</p>
+              <p>Arguments of <code>asNode</code> (after applying the renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The arguments of the e-node.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -170,21 +193,15 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the e-node with the slots renamed according to the renaming.</p>
+             <p>The shape interpreted back into the original slot space using <code>renaming</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the e-node with the slots renamed according to the renaming.</p>
+              <p>The shape interpreted back into the original slot space using <code>renaming</code>.</p>
+              <p>Equivalent to <code>shape.rename(renaming)</code>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The e-node with the slots renamed.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -205,21 +222,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the e-node's slot definitions after renaming.</p>
+             <p>Definitions of <code>asNode</code> (after applying the renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the e-node's slot definitions after renaming.</p>
+              <p>Definitions of <code>asNode</code> (after applying the renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The e-node's slot definitions.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -240,21 +250,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the node type of the e-node.</p>
+             <p>The node type carried by the shape.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the node type of the e-node.</p>
+              <p>The node type carried by the shape.</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The node type of the e-node.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>
@@ -275,11 +278,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Composes the renaming with another renaming.</p>
+             <p>Post-compose the current renaming with another mapping.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Composes the renaming with another renaming.</p>
+              <p>Post-compose the current renaming with another mapping.</p>
+              <p>Composition follows <code>other ∘ current</code>: first apply the existing <code>renaming</code>, then the provided mapping. Concretely, this updates the mapping from the shape's numeric slots to a new target slot space.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -287,7 +291,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The new renaming with which to compose the original renaming.</p>
+               <p>The additional renaming to apply after the current one.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -296,7 +300,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-node application that results from composing the renaming with another renaming.</p>
+               <p>A <code>ShapeCall</code> with <code>this.renaming</code> composed with the provided mapping.</p>
               </dd>
              </dl>
             </div>
@@ -319,11 +323,12 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Composes the renaming with another renaming, but only for the slots that are present in the original and new renaming.</p>
+             <p>Partial post-composition of the current renaming with another mapping.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Composes the renaming with another renaming, but only for the slots that are present in the original and new renaming.</p>
+              <p>Partial post-composition of the current renaming with another mapping.</p>
+              <p>Like <code>rename</code>, but only applies to entries whose image appears as a key in the provided mapping; others are kept. Useful for projecting into a smaller slot space.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -331,7 +336,7 @@ node6 -> node2;
                renaming
               </dt>
               <dd class="body-medium">
-               <p>The new renaming with which to compose the original renaming.</p>
+               <p>The partial mapping to apply after the current one.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -340,7 +345,7 @@ node6 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The e-node application that results from composing the renaming with another renaming.</p>
+               <p>A <code>ShapeCall</code> with partially composed renaming.</p>
               </dd>
              </dl>
             </div>
@@ -363,21 +368,14 @@ node6 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Gets the e-node's slot uses after renaming.</p>
+             <p>Uses of <code>asNode</code> (after applying the renaming).</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Gets the e-node's slot uses after renaming.</p>
+              <p>Uses of <code>asNode</code> (after applying the renaming).</p>
              </div>
              <h2 class="h200">Attributes</h2>
-             <dl class="attributes attributes-small">
-              <dt class="body-small">
-               Returns
-              </dt>
-              <dd class="body-medium">
-               <p>The e-node's slot uses.</p>
-              </dd>
-             </dl>
+             <dl class="attributes attributes-small"></dl>
             </div>
            </div>
           </div>

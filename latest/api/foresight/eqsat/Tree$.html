@@ -15,7 +15,7 @@
 </div>
 <div class="cover">
  <div class="doc">
-  <p>A companion object for the tree data structure.</p>
+  <p>Companion utilities for <a href="Tree.html">Tree</a>.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
@@ -210,11 +210,12 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Creates a new tree with no slots.</p>
+             <p>Construct a <code>Tree</code> node with no bound or used slots.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Creates a new tree with no slots.</p>
+              <p>Construct a <code>Tree</code> node with no bound or used slots.</p>
+              <p>This is useful for building trees in contexts without any slot bindings.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -222,7 +223,7 @@ node5 -> node1;
                NodeT
               </dt>
               <dd class="body-medium">
-               <p>The type of the node.</p>
+               <p>The type used to represent operators/constructors.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -231,13 +232,13 @@ node5 -> node1;
                args
               </dt>
               <dd class="body-medium">
-               <p>The children of the node.</p>
+               <p>The ordered children of the node.</p>
               </dd>
               <dt class="body-small">
                nodeType
               </dt>
               <dd class="body-medium">
-               <p>The type of the node.</p>
+               <p>The operator or constructor at this node.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -246,7 +247,7 @@ node5 -> node1;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>A new tree with no slots.</p>
+               <p>A new <code>Tree</code> with empty <code>definitions</code> and <code>uses</code>.</p>
               </dd>
              </dl>
             </div>
