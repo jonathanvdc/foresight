@@ -85,7 +85,7 @@
 </span><span line-number="11" class=""><span class="tooltip-container"></span>// Apply commands to produce a new graph
 </span><span line-number="12" class=""><span class="tooltip-container"></span>val (g1, reif) = queue(g0, Map.empty, ParallelMap.sequential)
 </span><span line-number="13" class=""><span class="tooltip-container"></span>// Run a saturation strategy
-</span><span line-number="14" class=""><span class="tooltip-container"></span>val rules: Seq[Rule[MyNode, MyMatch, MyEGraph]] = Seq(r1, r2)
+</span><span line-number="14" class=""><span class="tooltip-container"></span>val rules: Seq[Rule[MyNode, MyMatch, EGraph[MyNode]]] = Seq(r1, r2)
 </span><span line-number="15" class=""><span class="tooltip-container"></span>val strat = MaximalRuleApplicationWithCaching(rules).repeatUntilStable
 </span><span line-number="16" class=""><span class="tooltip-container"></span>val result = strat.run(g1)
 </span></code></pre>
