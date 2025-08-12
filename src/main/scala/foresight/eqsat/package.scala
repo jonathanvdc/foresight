@@ -107,7 +107,7 @@ package foresight
  * val (g1, reif) = queue(g0, Map.empty, ParallelMap.sequential)
  *
  * // Run a saturation strategy
- * val rules: Seq[Rule[MyNode, MyMatch, MyEGraph]] = Seq(r1, r2)
+ * val rules: Seq[Rule[MyNode, MyMatch, EGraph[MyNode]]] = Seq(r1, r2)
  * val strat = MaximalRuleApplicationWithCaching(rules).repeatUntilStable
  * val result = strat.run(g1)
  * }}}
