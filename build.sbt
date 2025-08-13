@@ -81,7 +81,7 @@ lazy val foresight = (project in file("."))
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 11)) => Seq(base / "scala-2.11")
         case Some((2, 13)) => Seq(base / "scala-2.13+")
-        case Some((3, _))  => Seq(base / "scala-2.13+")
+        case Some((3, _))  => Seq(base / "scala-2.13+", base / "scala-3")
         case _             => Nil
       }
     },
