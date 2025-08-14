@@ -3,11 +3,85 @@ package foresight.eqsat.lang
 import scala.deriving.*
 import foresight.eqsat.{MixedTree, Slot}
 
-import scala.compiletime.{erasedValue, summonAll, summonInline}
+import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
+import scala.util.NotGiven
 
 // Mark Slot fields: use vs binder
 final case class Use[A](value: A) extends AnyVal
 final case class Defn[A](value: A) extends AnyVal
+
+trait AsMixin[T, B]:
+  def toMixin(t: T): B
+  def fromMixin(b: B): T
+
+object AsMixin:
+  inline def apply[T, B](using ev: AsMixin[T, B]): AsMixin[T, B] = ev
+
+  /** Helper to build a two-way codec. */
+  def codec[T, B](to: T => B, from: B => T): AsMixin[T, B] =
+    new AsMixin[T, B]:
+      override def toMixin(t: T): B = to(t)
+      override def fromMixin(b: B): T = from(b)
+
+// ---------- Registries ----------
+object Registries:
+  opaque type CallEncoder[E, A] = (E, Int) => Option[A]
+  opaque type CallDecoder[E, A] = A => Option[E]
+
+  def encode[E, A](encoder: CallEncoder[E, A], value: E, ord: Int): Option[A] =
+    encoder(value, ord)
+  def decode[E, A](decoder: CallDecoder[E, A], call: A): Option[E] =
+    decoder(call)
+
+  object CallEncoder:
+    // Build a *closed* encoder at summon time: capture AsMixin per case into the returned function.
+    inline given derived[E, A](using s: Mirror.SumOf[E]): CallEncoder[E, A] =
+      buildEncoder[E, A, s.MirroredElemTypes](start = 0)
+
+    // For one case type `H`, either capture its AsMixin into a tiny function, or return a no-op.
+    private inline def encoderForCase[E, A, H](caseIndex: Int): CallEncoder[E, A] =
+      summonFrom {
+        case ev: AsMixin[H, A] =>
+          // capture `ev` here; no summoning will happen later
+          (e: E, ord: Int) =>
+            if ord == caseIndex then Some(ev.toMixin(e.asInstanceOf[H])) else None
+        case _ =>
+          // no AsMixin -> no-op for this case
+          (_: E, _: Int) => None
+      }
+
+    // Fold all cases into a single function that tries head, then tail.
+    private inline def buildEncoder[E, A, Elems <: Tuple](start: Int): CallEncoder[E, A] =
+      inline erasedValue[Elems] match
+        case _: (h *: t) =>
+          val head: CallEncoder[E, A] = encoderForCase[E, A, h](start)
+          val tail: CallEncoder[E, A] = buildEncoder[E, A, t](start + 1)
+          (e: E, ord: Int) => head(e, ord).orElse(tail(e, ord))
+        case _: EmptyTuple =>
+          (_: E, _: Int) => None
+
+  object CallDecoder:
+    // Build a *closed* decoder at summon time: capture AsMixin per case.
+    inline given derived[E, A](using s: Mirror.SumOf[E]): CallDecoder[E, A] =
+      buildDecoder[E, A, s.MirroredElemTypes]
+
+    private inline def decoderForCase[E, A, H]: CallDecoder[E, A] =
+      summonFrom {
+        case ev: AsMixin[H, A] =>
+          // capture `ev` here
+          (a: A) => Some(ev.fromMixin(a).asInstanceOf[E])
+        case _ =>
+          (_: A) => None
+      }
+
+    private inline def buildDecoder[E, A, Elems <: Tuple]: CallDecoder[E, A] =
+      inline erasedValue[Elems] match
+        case _: (h *: t) =>
+          val head: CallDecoder[E, A] = decoderForCase[E, A, h]
+          val tail: CallDecoder[E, A] = buildDecoder[E, A, t]
+          (a: A) => head(a).orElse(tail(a))
+        case _: EmptyTuple =>
+          (_: A) => None
 
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
@@ -15,10 +89,10 @@ trait Language[E]:
   type Node[A] = MixedTree[Op, A]
 
   /** Encode surface AST into the core tree. */
-  def toTree[A](e: E): Node[A]
+  def toTree[A](e: E)(using enc: Registries.CallEncoder[E, A]): Node[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: Node[A]): E
+  def fromTree[A](n: Node[A])(using dec: Registries.CallDecoder[E, A]): E
 
 object Language:
 
@@ -30,7 +104,7 @@ object Language:
         ctorArray[E](using m)
 
       /** Encode one constructor instance. */
-      private def encodeCase[A](ord: Int, e: E): Node[A] =
+      private def encodeCase[A](ord: Int, e: E)(using enc: Registries.CallEncoder[E, A]): Node[A] =
         val p = e.asInstanceOf[Product]
         val binders = scala.collection.mutable.ArrayBuffer.empty[Slot]
         val slots   = scala.collection.mutable.ArrayBuffer.empty[Slot]
@@ -59,11 +133,21 @@ object Language:
           kids.toSeq
         )
 
-      def toTree[A](e: E): Node[A] =
-        encodeCase(m.ordinal(e), e)
+      def toTree[A](e: E)(using enc: Registries.CallEncoder[E, A]): Node[A] =
+        Registries.encode(enc, e, m.ordinal(e)) match
+          case Some(payload) => MixedTree.Call(payload)
+          case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: Node[A]): E =
+      def fromTree[A](n: Node[A])(using dec: Registries.CallDecoder[E, A]): E =
         n match
+          case MixedTree.Call(b) =>
+            // Rebuild a concrete case C <: E from the call payload, if possible
+            Registries.decode(dec, b).getOrElse {
+              throw new IllegalArgumentException(
+                s"fromTree: no decoder for call payload: $b"
+              )
+            }
+
           case MixedTree.Node(op, binders, slots, kids) =>
             val schema = op.schema
             val eb = binders.iterator
@@ -78,25 +162,25 @@ object Language:
               (schema(i): @annotation.switch) match
                 case 1 => elems(i) = Defn(eb.next())
                 case 2 => elems(i) = Use(es.next())
-                case 3 => elems(i) = fromTree(ek.next())  // recurse
+                case 3 => elems(i) = fromTree(ek.next())(using dec)  // recurse
                 case 4 => elems(i) = ep.next()
               i += 1
 
             // Feed them to the right case constructor
             ctors(op.ord)(Tuple.fromArray(elems))
 
-// === helpers ===
+  // === helpers ===
 
-// ctor table
-private inline def ctorArray[E](using m: Mirror.SumOf[E]): Array[Product => E] =
-  mirrorsToCtors[E](
-    summonAll[Tuple.Map[m.MirroredElemTypes, [c] =>> Mirror.ProductOf[c]]]
-  )
+  // ctor table
+  private inline def ctorArray[E](using m: Mirror.SumOf[E]): Array[Product => E] =
+    mirrorsToCtors[E](
+      summonAll[Tuple.Map[m.MirroredElemTypes, [c] =>> Mirror.ProductOf[c]]]
+    )
 
-private def mirrorsToCtors[E](ms: Tuple): Array[Product => E] =
-  ms.productIterator
-    .map { pc =>
-      val pco = pc.asInstanceOf[Mirror.ProductOf[Any]]
-      (p: Product) => pco.fromProduct(p).asInstanceOf[E]
-    }
-    .toArray
+  private def mirrorsToCtors[E](ms: Tuple): Array[Product => E] =
+    ms.productIterator
+      .map { pc =>
+        val pco = pc.asInstanceOf[Mirror.ProductOf[Any]]
+        (p: Product) => pco.fromProduct(p).asInstanceOf[E]
+      }
+      .toArray
