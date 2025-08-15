@@ -81,7 +81,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"root","t":"root","d":"","k":"s
 {"l":"foresight/eqsat/lang/AtomEncoder$.html#","e":false,"i":"","n":"AtomEncoder","t":"AtomEncoder","d":"foresight.eqsat.lang","k":"object","x":""},
 {"l":"foresight/eqsat/lang/AtomEncoder$.html#derived-8e0","e":false,"i":"","n":"derived","t":"derived[E, A](using s: SumOf[E]): E => A","d":"foresight.eqsat.lang.AtomEncoder","k":"given","x":""},
 {"l":"foresight/eqsat/lang/AtomEncoder$.html#encode-d11","e":false,"i":"","n":"encode","t":"encode[E, A](encoder: E => A, value: E, ord: Int): Option[A]","d":"foresight.eqsat.lang.AtomEncoder","k":"def","x":""},
-{"l":"foresight/eqsat/lang/Defn.html#","e":false,"i":"","n":"Defn","t":"Defn[A](value: A) extends AnyVal","d":"foresight.eqsat.lang","k":"class","x":""},
+{"l":"foresight/eqsat/lang/Def.html#","e":false,"i":"","n":"Def","t":"Def[A](value: A) extends AnyVal","d":"foresight.eqsat.lang","k":"class","x":""},
 {"l":"foresight/eqsat/lang/Language.html#","e":false,"i":"","n":"Language","t":"Language[E]","d":"foresight.eqsat.lang","k":"trait","x":""},
 {"l":"foresight/eqsat/lang/Language.html#MTree-0","e":false,"i":"","n":"MTree","t":"MTree[A] = MixedTree[Op, A]","d":"foresight.eqsat.lang.Language","k":"type","x":""},
 {"l":"foresight/eqsat/lang/Language.html#fromTree-afd","e":false,"i":"","n":"fromTree","t":"fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E","d":"foresight.eqsat.lang.Language","k":"def","x":""},
