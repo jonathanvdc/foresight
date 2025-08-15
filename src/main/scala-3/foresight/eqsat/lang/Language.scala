@@ -4,7 +4,6 @@ import scala.deriving.*
 import foresight.eqsat.{MixedTree, Slot}
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
-import scala.util.NotGiven
 
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
@@ -39,7 +38,7 @@ object Language:
         val n = p.productArity
         while i < n do
           p.productElement(i) match
-            case Defn(s: Slot) =>
+            case Def(s: Slot) =>
               binders += s; schema += 1
             case Use(s: Slot)  =>
               slots   += s; schema += 2
@@ -83,7 +82,7 @@ object Language:
             var i = 0
             while i < schema.length do
               (schema(i): @annotation.switch) match
-                case 1 => elems(i) = Defn(eb.next())
+                case 1 => elems(i) = Def(eb.next())
                 case 2 => elems(i) = Use(es.next())
                 case 3 => elems(i) = fromTree(ek.next())(using dec)  // recurse
                 case 4 => elems(i) = ep.next()
