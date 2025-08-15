@@ -25,60 +25,60 @@ object AsAtom:
 
 // ---------- Registries ----------
 object Registries:
-  opaque type CallEncoder[E, A] = (E, Int) => Option[A]
-  opaque type CallDecoder[E, A] = A => Option[E]
+  opaque type AtomEncoder[E, A] = (E, Int) => Option[A]
+  opaque type AtomDecoder[E, A] = A => Option[E]
 
-  def encode[E, A](encoder: CallEncoder[E, A], value: E, ord: Int): Option[A] =
+  def encode[E, A](encoder: AtomEncoder[E, A], value: E, ord: Int): Option[A] =
     encoder(value, ord)
-  def decode[E, A](decoder: CallDecoder[E, A], call: A): Option[E] =
+  def decode[E, A](decoder: AtomDecoder[E, A], call: A): Option[E] =
     decoder(call)
 
-  object CallEncoder:
-    // Build a *closed* encoder at summon time: capture AsMixin per case into the returned function.
-    inline given derived[E, A](using s: Mirror.SumOf[E]): CallEncoder[E, A] =
+  object AtomEncoder:
+    // Build a *closed* encoder at summon time: capture AsAtom per case into the returned function.
+    inline given derived[E, A](using s: Mirror.SumOf[E]): AtomEncoder[E, A] =
       buildEncoder[E, A, s.MirroredElemTypes](start = 0)
 
-    // For one case type `H`, either capture its AsMixin into a tiny function, or return a no-op.
-    private inline def encoderForCase[E, A, H](caseIndex: Int): CallEncoder[E, A] =
+    // For one case type `H`, either capture its AsAtom into a tiny function, or return a no-op.
+    private inline def encoderForCase[E, A, H](caseIndex: Int): AtomEncoder[E, A] =
       summonFrom {
         case ev: AsAtom[H, A] =>
           // capture `ev` here; no summoning will happen later
           (e: E, ord: Int) =>
-            if ord == caseIndex then Some(ev.toMixin(e.asInstanceOf[H])) else None
+            if ord == caseIndex then Some(ev.toAtom(e.asInstanceOf[H])) else None
         case _ =>
-          // no AsMixin -> no-op for this case
+          // no AsAtom -> no-op for this case
           (_: E, _: Int) => None
       }
 
     // Fold all cases into a single function that tries head, then tail.
-    private inline def buildEncoder[E, A, Elems <: Tuple](start: Int): CallEncoder[E, A] =
+    private inline def buildEncoder[E, A, Elems <: Tuple](start: Int): AtomEncoder[E, A] =
       inline erasedValue[Elems] match
         case _: (h *: t) =>
-          val head: CallEncoder[E, A] = encoderForCase[E, A, h](start)
-          val tail: CallEncoder[E, A] = buildEncoder[E, A, t](start + 1)
+          val head: AtomEncoder[E, A] = encoderForCase[E, A, h](start)
+          val tail: AtomEncoder[E, A] = buildEncoder[E, A, t](start + 1)
           (e: E, ord: Int) => head(e, ord).orElse(tail(e, ord))
         case _: EmptyTuple =>
           (_: E, _: Int) => None
 
-  object CallDecoder:
+  object AtomDecoder:
     // Build a *closed* decoder at summon time: capture AsMixin per case.
-    inline given derived[E, A](using s: Mirror.SumOf[E]): CallDecoder[E, A] =
+    inline given derived[E, A](using s: Mirror.SumOf[E]): AtomDecoder[E, A] =
       buildDecoder[E, A, s.MirroredElemTypes]
 
-    private inline def decoderForCase[E, A, H]: CallDecoder[E, A] =
+    private inline def decoderForCase[E, A, H]: AtomDecoder[E, A] =
       summonFrom {
         case ev: AsAtom[H, A] =>
           // capture `ev` here
-          (a: A) => Some(ev.fromMixin(a).asInstanceOf[E])
+          (a: A) => Some(ev.fromAtom(a).asInstanceOf[E])
         case _ =>
           (_: A) => None
       }
 
-    private inline def buildDecoder[E, A, Elems <: Tuple]: CallDecoder[E, A] =
+    private inline def buildDecoder[E, A, Elems <: Tuple]: AtomDecoder[E, A] =
       inline erasedValue[Elems] match
         case _: (h *: t) =>
-          val head: CallDecoder[E, A] = decoderForCase[E, A, h]
-          val tail: CallDecoder[E, A] = buildDecoder[E, A, t]
+          val head: AtomDecoder[E, A] = decoderForCase[E, A, h]
+          val tail: AtomDecoder[E, A] = buildDecoder[E, A, t]
           (a: A) => head(a).orElse(tail(a))
         case _: EmptyTuple =>
           (_: A) => None
@@ -89,10 +89,10 @@ trait Language[E]:
   type Node[A] = MixedTree[Op, A]
 
   /** Encode surface AST into the core tree. */
-  def toTree[A](e: E)(using enc: Registries.CallEncoder[E, A]): Node[A]
+  def toTree[A](e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: Node[A])(using dec: Registries.CallDecoder[E, A]): E
+  def fromTree[A](n: Node[A])(using dec: Registries.AtomDecoder[E, A]): E
 
 object Language:
 
@@ -104,7 +104,7 @@ object Language:
         ctorArray[E](using m)
 
       /** Encode one constructor instance. */
-      private def encodeCase[A](ord: Int, e: E)(using enc: Registries.CallEncoder[E, A]): Node[A] =
+      private def encodeCase[A](ord: Int, e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A] =
         val p = e.asInstanceOf[Product]
         val binders = scala.collection.mutable.ArrayBuffer.empty[Slot]
         val slots   = scala.collection.mutable.ArrayBuffer.empty[Slot]
@@ -133,12 +133,12 @@ object Language:
           kids.toSeq
         )
 
-      def toTree[A](e: E)(using enc: Registries.CallEncoder[E, A]): Node[A] =
+      def toTree[A](e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A] =
         Registries.encode(enc, e, m.ordinal(e)) match
           case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: Node[A])(using dec: Registries.CallDecoder[E, A]): E =
+      def fromTree[A](n: Node[A])(using dec: Registries.AtomDecoder[E, A]): E =
         n match
           case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
