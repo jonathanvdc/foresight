@@ -10,89 +10,16 @@ import scala.util.NotGiven
 final case class Use[A](value: A) extends AnyVal
 final case class Defn[A](value: A) extends AnyVal
 
-trait AsAtom[T, B]:
-  def toAtom(t: T): B
-  def fromAtom(b: B): T
-
-object AsAtom:
-  inline def apply[T, B](using ev: AsAtom[T, B]): AsAtom[T, B] = ev
-
-  /** Helper to build a two-way codec. */
-  def codec[T, B](to: T => B, from: B => T): AsAtom[T, B] =
-    new AsAtom[T, B]:
-      override def toAtom(t: T): B = to(t)
-      override def fromAtom(b: B): T = from(b)
-
-// ---------- Registries ----------
-object Registries:
-  opaque type AtomEncoder[E, A] = (E, Int) => Option[A]
-  opaque type AtomDecoder[E, A] = A => Option[E]
-
-  def encode[E, A](encoder: AtomEncoder[E, A], value: E, ord: Int): Option[A] =
-    encoder(value, ord)
-  def decode[E, A](decoder: AtomDecoder[E, A], call: A): Option[E] =
-    decoder(call)
-
-  object AtomEncoder:
-    // Build a *closed* encoder at summon time: capture AsAtom per case into the returned function.
-    inline given derived[E, A](using s: Mirror.SumOf[E]): AtomEncoder[E, A] =
-      buildEncoder[E, A, s.MirroredElemTypes](start = 0)
-
-    // For one case type `H`, either capture its AsAtom into a tiny function, or return a no-op.
-    private inline def encoderForCase[E, A, H](caseIndex: Int): AtomEncoder[E, A] =
-      summonFrom {
-        case ev: AsAtom[H, A] =>
-          // capture `ev` here; no summoning will happen later
-          (e: E, ord: Int) =>
-            if ord == caseIndex then Some(ev.toAtom(e.asInstanceOf[H])) else None
-        case _ =>
-          // no AsAtom -> no-op for this case
-          (_: E, _: Int) => None
-      }
-
-    // Fold all cases into a single function that tries head, then tail.
-    private inline def buildEncoder[E, A, Elems <: Tuple](start: Int): AtomEncoder[E, A] =
-      inline erasedValue[Elems] match
-        case _: (h *: t) =>
-          val head: AtomEncoder[E, A] = encoderForCase[E, A, h](start)
-          val tail: AtomEncoder[E, A] = buildEncoder[E, A, t](start + 1)
-          (e: E, ord: Int) => head(e, ord).orElse(tail(e, ord))
-        case _: EmptyTuple =>
-          (_: E, _: Int) => None
-
-  object AtomDecoder:
-    // Build a *closed* decoder at summon time: capture AsMixin per case.
-    inline given derived[E, A](using s: Mirror.SumOf[E]): AtomDecoder[E, A] =
-      buildDecoder[E, A, s.MirroredElemTypes]
-
-    private inline def decoderForCase[E, A, H]: AtomDecoder[E, A] =
-      summonFrom {
-        case ev: AsAtom[H, A] =>
-          // capture `ev` here
-          (a: A) => Some(ev.fromAtom(a).asInstanceOf[E])
-        case _ =>
-          (_: A) => None
-      }
-
-    private inline def buildDecoder[E, A, Elems <: Tuple]: AtomDecoder[E, A] =
-      inline erasedValue[Elems] match
-        case _: (h *: t) =>
-          val head: AtomDecoder[E, A] = decoderForCase[E, A, h]
-          val tail: AtomDecoder[E, A] = buildDecoder[E, A, t]
-          (a: A) => head(a).orElse(tail(a))
-        case _: EmptyTuple =>
-          (_: A) => None
-
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
   final case class Op(ord: Int, schema: IArray[Byte], payload: IArray[Any])
   type Node[A] = MixedTree[Op, A]
 
   /** Encode surface AST into the core tree. */
-  def toTree[A](e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A]
+  def toTree[A](e: E)(using enc: AtomEncoder[E, A]): Node[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: Node[A])(using dec: Registries.AtomDecoder[E, A]): E
+  def fromTree[A](n: Node[A])(using dec: AtomDecoder[E, A]): E
 
 object Language:
 
@@ -104,7 +31,7 @@ object Language:
         ctorArray[E](using m)
 
       /** Encode one constructor instance. */
-      private def encodeCase[A](ord: Int, e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A] =
+      private def encodeCase[A](ord: Int, e: E)(using enc: AtomEncoder[E, A]): Node[A] =
         val p = e.asInstanceOf[Product]
         val binders = scala.collection.mutable.ArrayBuffer.empty[Slot]
         val slots   = scala.collection.mutable.ArrayBuffer.empty[Slot]
@@ -133,16 +60,16 @@ object Language:
           kids.toSeq
         )
 
-      def toTree[A](e: E)(using enc: Registries.AtomEncoder[E, A]): Node[A] =
-        Registries.encode(enc, e, m.ordinal(e)) match
+      def toTree[A](e: E)(using enc: AtomEncoder[E, A]): Node[A] =
+        AtomEncoder.encode(enc, e, m.ordinal(e)) match
           case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: Node[A])(using dec: Registries.AtomDecoder[E, A]): E =
+      def fromTree[A](n: Node[A])(using dec: AtomDecoder[E, A]): E =
         n match
           case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
-            Registries.decode(dec, b).getOrElse {
+            AtomDecoder.decode(dec, b).getOrElse {
               throw new IllegalArgumentException(
                 s"fromTree: no decoder for call payload: $b"
               )

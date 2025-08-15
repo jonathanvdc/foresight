@@ -27,7 +27,7 @@ class ArithTest {
   @Test
   def testExample(): Unit = {
     val (c, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
-    println(Registries.decode(summon[Registries.AtomDecoder[ArithExpr, EClassCall]], c))
+    println(AtomDecoder.decode(summon[AtomDecoder[ArithExpr, EClassCall]], c))
     println(summon[Language[ArithExpr]].toTree[EClassCall](Ref(c)))
     println(summon[AsAtom[Ref, EClassCall]].toAtom(Ref(c)))
     println(summon[AsAtom[Ref, EClassCall]].fromAtom(c))
