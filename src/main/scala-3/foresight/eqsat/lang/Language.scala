@@ -11,8 +11,8 @@ final case class Use[A](value: A) extends AnyVal
 final case class Defn[A](value: A) extends AnyVal
 
 trait AsAtom[T, B]:
-  def toMixin(t: T): B
-  def fromMixin(b: B): T
+  def toAtom(t: T): B
+  def fromAtom(b: B): T
 
 object AsAtom:
   inline def apply[T, B](using ev: AsAtom[T, B]): AsAtom[T, B] = ev
@@ -20,8 +20,8 @@ object AsAtom:
   /** Helper to build a two-way codec. */
   def codec[T, B](to: T => B, from: B => T): AsAtom[T, B] =
     new AsAtom[T, B]:
-      override def toMixin(t: T): B = to(t)
-      override def fromMixin(b: B): T = from(b)
+      override def toAtom(t: T): B = to(t)
+      override def fromAtom(b: B): T = from(b)
 
 // ---------- Registries ----------
 object Registries:

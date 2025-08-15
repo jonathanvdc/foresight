@@ -29,8 +29,8 @@ class ArithTest {
     val (c, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
     println(Registries.decode(summon[Registries.CallDecoder[ArithExpr, EClassCall]], c))
     println(summon[Language[ArithExpr]].toTree[EClassCall](Ref(c)))
-    println(summon[AsAtom[Ref, EClassCall]].toMixin(Ref(c)))
-    println(summon[AsAtom[Ref, EClassCall]].fromMixin(c))
+    println(summon[AsAtom[Ref, EClassCall]].toAtom(Ref(c)))
+    println(summon[AsAtom[Ref, EClassCall]].fromAtom(c))
     println(summon[Language[ArithExpr]].fromTree[EClassCall](MixedTree.Atom(c)))
 
     val (tree, expr) = example
