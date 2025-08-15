@@ -8,7 +8,7 @@ opaque type AtomDecoder[E, A] = A => Option[E]
 object AtomDecoder:
   def decode[E, A](decoder: AtomDecoder[E, A], call: A): Option[E] =
     decoder(call)
-  
+
   // Build a decoder at summon time: capture AsAtom per case.
   inline given derived[E, A](using s: Mirror.SumOf[E]): AtomDecoder[E, A] =
     buildDecoder[E, A, s.MirroredElemTypes]

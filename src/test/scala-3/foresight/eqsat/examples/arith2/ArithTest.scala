@@ -17,7 +17,7 @@ final case class Ref(eClass: EClassCall) extends ArithExpr
 object Ref:
   given AsAtom[Ref, EClassCall] = AsAtom.codec(to = _.eClass, from = Ref(_))
 
-def example(using L: Language[ArithExpr]): (L.Node[EClassCall], ArithExpr) =
+def example(using L: Language[ArithExpr]): (L.MTree[EClassCall], ArithExpr) =
   val (c, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
   val x = Slot.numeric(0)
   val expr = Lam(Defn(x), Add(Add(Var(Use(x)), Number(3)), Ref(c)))

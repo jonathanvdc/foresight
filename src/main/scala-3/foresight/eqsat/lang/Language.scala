@@ -6,20 +6,16 @@ import foresight.eqsat.{MixedTree, Slot}
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 import scala.util.NotGiven
 
-// Mark Slot fields: use vs binder
-final case class Use[A](value: A) extends AnyVal
-final case class Defn[A](value: A) extends AnyVal
-
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
   final case class Op(ord: Int, schema: IArray[Byte], payload: IArray[Any])
-  type Node[A] = MixedTree[Op, A]
+  type MTree[A] = MixedTree[Op, A]
 
   /** Encode surface AST into the core tree. */
-  def toTree[A](e: E)(using enc: AtomEncoder[E, A]): Node[A]
+  def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: Node[A])(using dec: AtomDecoder[E, A]): E
+  def fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E
 
 object Language:
 
@@ -31,11 +27,11 @@ object Language:
         ctorArray[E](using m)
 
       /** Encode one constructor instance. */
-      private def encodeCase[A](ord: Int, e: E)(using enc: AtomEncoder[E, A]): Node[A] =
+      private def encodeCase[A](ord: Int, e: E)(using enc: AtomEncoder[E, A]): MTree[A] =
         val p = e.asInstanceOf[Product]
         val binders = scala.collection.mutable.ArrayBuffer.empty[Slot]
         val slots   = scala.collection.mutable.ArrayBuffer.empty[Slot]
-        val kids    = scala.collection.mutable.ArrayBuffer.empty[Node[A]]
+        val kids    = scala.collection.mutable.ArrayBuffer.empty[MTree[A]]
         val payload = scala.collection.mutable.ArrayBuffer.empty[Any]
         val schema  = scala.collection.mutable.ArrayBuffer.empty[Byte]
 
@@ -60,12 +56,12 @@ object Language:
           kids.toSeq
         )
 
-      def toTree[A](e: E)(using enc: AtomEncoder[E, A]): Node[A] =
+      def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A] =
         AtomEncoder.encode(enc, e, m.ordinal(e)) match
           case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: Node[A])(using dec: AtomDecoder[E, A]): E =
+      def fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E =
         n match
           case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
