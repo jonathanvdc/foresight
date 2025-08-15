@@ -40,8 +40,8 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
   private def instantiate(pattern: MixedTree[NodeT, Pattern[NodeT]],
                           m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
-      case MixedTree.Call(p) => p match {
-        case v: Pattern.Var[NodeT] => m(v).mapCalls(EClassSymbol.real)
+      case MixedTree.Atom(p) => p match {
+        case v: Pattern.Var[NodeT] => m(v).mapAtoms(EClassSymbol.real)
       }
 
       case MixedTree.Node(t, defs, uses, args) =>

@@ -54,7 +54,7 @@ final class CommandQueueBuilder[NodeT] {
    * Appends an insertion of a [[MixedTree]].
    *
    * Child subtrees are inserted first, then a final node referencing their
-   * symbols is added. If the tree is a [[MixedTree.Call]], no new command
+   * symbols is added. If the tree is a [[MixedTree.Atom]], no new command
    * is added and the existing [[EClassSymbol.Real]] is returned.
    *
    * @param tree Tree to insert.

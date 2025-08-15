@@ -37,13 +37,13 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "build N (λi. 0.0) -> memset N 0",
       Build(
-        MixedTree.Call(N),
+        MixedTree.Atom(N),
         Lambda(
           i,
           Int32Type.toTree,
           ConstDouble(0.0).toTree))
         .toSearcher[MetadataEGraph],
-      BlasIdioms.Memset(MixedTree.Call(N), zero).toApplier)
+      BlasIdioms.Memset(MixedTree.Atom(N), zero).toApplier)
   }
 
   val detectDot: LiarRule = {
@@ -59,26 +59,26 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "ifold N (λi acc. xs[i] * ys[i] + acc) 0.0 -> ddot xs ys",
       Ifold(
-        MixedTree.Call(N),
+        MixedTree.Atom(N),
         ConstDouble(0.0).toTree,
         Lambda(
           i,
           Int32Type.toTree,
           Lambda(
             acc,
-            MixedTree.Call(scalarType),
+            MixedTree.Atom(scalarType),
             Add(
               Mul(
-                IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree)),
-                IndexAt(MixedTree.Call(ys), Var(i, Int32Type.toTree))),
-              Var(acc, MixedTree.Call(scalarType))))))
+                IndexAt(MixedTree.Atom(xs), Var(i, Int32Type.toTree)),
+                IndexAt(MixedTree.Atom(ys), Var(i, Int32Type.toTree))),
+              Var(acc, MixedTree.Atom(scalarType))))))
         .toSearcher[MetadataEGraph]
         .requireIndependent(xs, i, acc)
         .requireIndependent(ys, i, acc)
         .requireTypes(Map(
-          xs -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)))),
-      BlasIdioms.Dot(MixedTree.Call(xs), MixedTree.Call(ys)).toApplier)
+          xs -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)),
+          ys -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)))),
+      BlasIdioms.Dot(MixedTree.Atom(xs), MixedTree.Atom(ys)).toApplier)
   }
 
   val detectAxpy: LiarRule = {
@@ -94,24 +94,24 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "build N (λi. a * xs[i] + ys[i]) -> axpy a xs ys",
       Build(
-        MixedTree.Call(N),
+        MixedTree.Atom(N),
         Lambda(
           i,
           Int32Type.toTree,
           Add(
             Mul(
-              MixedTree.Call(a),
-              IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree))),
-            IndexAt(MixedTree.Call(ys), Var(i, Int32Type.toTree)))))
+              MixedTree.Atom(a),
+              IndexAt(MixedTree.Atom(xs), Var(i, Int32Type.toTree))),
+            IndexAt(MixedTree.Atom(ys), Var(i, Int32Type.toTree)))))
         .toSearcher[MetadataEGraph]
         .requireIndependent(a, i)
         .requireIndependent(xs, i)
         .requireIndependent(ys, i)
         .requireTypes(Map(
-          a -> MixedTree.Call(scalarType),
-          xs -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)))),
-      BlasIdioms.Axpy(MixedTree.Call(a), MixedTree.Call(xs), MixedTree.Call(ys)).toApplier)
+          a -> MixedTree.Atom(scalarType),
+          xs -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)),
+          ys -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)))),
+      BlasIdioms.Axpy(MixedTree.Atom(a), MixedTree.Atom(xs), MixedTree.Atom(ys)).toApplier)
   }
 
   val detectGemv: LiarRule = {
@@ -131,17 +131,17 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "build K (λi. alpha * (dot a[i] x) + beta * y[i]) -> gemv alpha a x beta y",
       Build(
-        MixedTree.Call(K),
+        MixedTree.Atom(K),
         Lambda(
           i,
           Int32Type.toTree,
           Add(
             Mul(
-              MixedTree.Call(alpha),
-              BlasIdioms.Dot(IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)), MixedTree.Call(x))),
+              MixedTree.Atom(alpha),
+              BlasIdioms.Dot(IndexAt(MixedTree.Atom(a), Var(i, Int32Type.toTree)), MixedTree.Atom(x))),
             Mul(
-              MixedTree.Call(beta),
-              IndexAt(MixedTree.Call(y), Var(i, Int32Type.toTree))))))
+              MixedTree.Atom(beta),
+              IndexAt(MixedTree.Atom(y), Var(i, Int32Type.toTree))))))
         .toSearcher[MetadataEGraph]
         .requireIndependent(alpha, i)
         .requireIndependent(a, i)
@@ -149,17 +149,17 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
         .requireIndependent(beta, i)
         .requireIndependent(y, i)
         .requireTypes(Map(
-          alpha -> MixedTree.Call(scalarType),
-          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(K)),
-          x -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          beta -> MixedTree.Call(scalarType),
-          y -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)))),
+          alpha -> MixedTree.Atom(scalarType),
+          a -> ArrayType(ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)), MixedTree.Atom(K)),
+          x -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)),
+          beta -> MixedTree.Atom(scalarType),
+          y -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(K)))),
       BlasIdioms.Gemv(false)(
-        MixedTree.Call(alpha),
-        MixedTree.Call(a),
-        MixedTree.Call(x),
-        MixedTree.Call(beta),
-        MixedTree.Call(y)).toApplier)
+        MixedTree.Atom(alpha),
+        MixedTree.Atom(a),
+        MixedTree.Atom(x),
+        MixedTree.Atom(beta),
+        MixedTree.Atom(y)).toApplier)
   }
 
   val detectGemm: LiarRule = {
@@ -180,16 +180,16 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "build M (λi. gemvN alpha b a[i] beta c[i]) -> gemmNT alpha a b beta c",
       Build(
-        MixedTree.Call(M),
+        MixedTree.Atom(M),
         Lambda(
           i,
           Int32Type.toTree,
           BlasIdioms.Gemv(false)(
-            MixedTree.Call(alpha),
-            MixedTree.Call(b),
-            IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)),
-            MixedTree.Call(beta),
-            IndexAt(MixedTree.Call(c), Var(i, Int32Type.toTree)))))
+            MixedTree.Atom(alpha),
+            MixedTree.Atom(b),
+            IndexAt(MixedTree.Atom(a), Var(i, Int32Type.toTree)),
+            MixedTree.Atom(beta),
+            IndexAt(MixedTree.Atom(c), Var(i, Int32Type.toTree)))))
         .toSearcher[MetadataEGraph]
         .requireIndependent(alpha, i)
         .requireIndependent(a, i)
@@ -197,17 +197,17 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
         .requireIndependent(beta, i)
         .requireIndependent(c, i)
         .requireTypes(Map(
-          alpha -> MixedTree.Call(scalarType),
-          a -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(M)),
-          b -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)), MixedTree.Call(K)),
-          beta -> MixedTree.Call(scalarType),
-          c -> ArrayType(ArrayType(MixedTree.Call(scalarType), MixedTree.Call(K)), MixedTree.Call(M)))),
+          alpha -> MixedTree.Atom(scalarType),
+          a -> ArrayType(ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)), MixedTree.Atom(M)),
+          b -> ArrayType(ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)), MixedTree.Atom(K)),
+          beta -> MixedTree.Atom(scalarType),
+          c -> ArrayType(ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(K)), MixedTree.Atom(M)))),
       BlasIdioms.Gemm(aTransposed = false, bTransposed = true)(
-        MixedTree.Call(alpha),
-        MixedTree.Call(a),
-        MixedTree.Call(b),
-        MixedTree.Call(beta),
-        MixedTree.Call(c)).toApplier)
+        MixedTree.Atom(alpha),
+        MixedTree.Atom(a),
+        MixedTree.Atom(b),
+        MixedTree.Atom(beta),
+        MixedTree.Atom(c)).toApplier)
   }
 
   def detectTranspose: LiarRule = {
@@ -224,21 +224,21 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     Rule(
       "build N (λi. build M (λj. a[i][j])) -> transpose a",
       Build(
-        MixedTree.Call(N),
+        MixedTree.Atom(N),
         Lambda(
           i,
           Int32Type.toTree,
           Build(
-            MixedTree.Call(M),
+            MixedTree.Atom(M),
             Lambda(
               j,
               Int32Type.toTree,
-              IndexAt(IndexAt(MixedTree.Call(a), Var(i, Int32Type.toTree)), Var(j, Int32Type.toTree))))))
+              IndexAt(IndexAt(MixedTree.Atom(a), Var(i, Int32Type.toTree)), Var(j, Int32Type.toTree))))))
         .toSearcher[MetadataEGraph]
         .requireIndependent(a, i, j)
         .requireTypes(Map(
-          a -> ArrayType(ArrayType(DoubleType.toTree, MixedTree.Call(N)), MixedTree.Call(M)))),
-      BlasIdioms.Transpose(MixedTree.Call(a)).toApplier)
+          a -> ArrayType(ArrayType(DoubleType.toTree, MixedTree.Atom(N)), MixedTree.Atom(M)))),
+      BlasIdioms.Transpose(MixedTree.Atom(a)).toApplier)
   }
 
   def hoistLhsMulFromDot: LiarRule = {
@@ -256,22 +256,22 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
       "dot (build N (λi. a * xs[i])) ys -> a * (dot xs ys)",
       BlasIdioms.Dot(
         Build(
-          MixedTree.Call(N),
+          MixedTree.Atom(N),
           Lambda(
             i,
             Int32Type.toTree,
             Mul(
-              MixedTree.Call(a),
-              IndexAt(MixedTree.Call(xs), Var(i, Int32Type.toTree))))),
-        MixedTree.Call(ys))
+              MixedTree.Atom(a),
+              IndexAt(MixedTree.Atom(xs), Var(i, Int32Type.toTree))))),
+        MixedTree.Atom(ys))
         .toSearcher[MetadataEGraph]
         .requireIndependent(a, i)
         .requireIndependent(xs, i)
         .requireTypes(Map(
-          a -> MixedTree.Call(scalarType),
-          xs -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)),
-          ys -> ArrayType(MixedTree.Call(scalarType), MixedTree.Call(N)))),
-      Mul(MixedTree.Call(a), BlasIdioms.Dot(MixedTree.Call(xs), MixedTree.Call(ys))).toApplier)
+          a -> MixedTree.Atom(scalarType),
+          xs -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)),
+          ys -> ArrayType(MixedTree.Atom(scalarType), MixedTree.Atom(N)))),
+      Mul(MixedTree.Atom(a), BlasIdioms.Dot(MixedTree.Atom(xs), MixedTree.Atom(ys))).toApplier)
   }
 
   def foldTransposeIntoGemv: Seq[LiarRule] = {
@@ -290,18 +290,18 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
       Rule(
         s"gemv$transposed alpha (transpose a) x beta y -> gemv$notTransposed alpha a x beta y",
         BlasIdioms.Gemv(transposition)(
-            MixedTree.Call(alpha),
-            BlasIdioms.Transpose(MixedTree.Call(a)),
-            MixedTree.Call(x),
-            MixedTree.Call(beta),
-            MixedTree.Call(y))
+            MixedTree.Atom(alpha),
+            BlasIdioms.Transpose(MixedTree.Atom(a)),
+            MixedTree.Atom(x),
+            MixedTree.Atom(beta),
+            MixedTree.Atom(y))
           .toSearcher[MetadataEGraph],
         BlasIdioms.Gemv(!transposition)(
-          MixedTree.Call(alpha),
-          MixedTree.Call(a),
-          MixedTree.Call(x),
-          MixedTree.Call(beta),
-          MixedTree.Call(y))
+          MixedTree.Atom(alpha),
+          MixedTree.Atom(a),
+          MixedTree.Atom(x),
+          MixedTree.Atom(beta),
+          MixedTree.Atom(y))
           .toApplier[MetadataEGraph])
     }
   }
@@ -322,18 +322,18 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
       Rule(
         s"gemm$transpositionA$transpositionB alpha (transpose a) b beta c -> gemm$notTranspositionA$transpositionB alpha a b beta c",
         BlasIdioms.Gemm(aTransposed, bTransposed)(
-          MixedTree.Call(alpha),
-          BlasIdioms.Transpose(MixedTree.Call(a)),
-          MixedTree.Call(b),
-          MixedTree.Call(beta),
-          MixedTree.Call(c))
+          MixedTree.Atom(alpha),
+          BlasIdioms.Transpose(MixedTree.Atom(a)),
+          MixedTree.Atom(b),
+          MixedTree.Atom(beta),
+          MixedTree.Atom(c))
           .toSearcher[MetadataEGraph],
         BlasIdioms.Gemm(!aTransposed, bTransposed)(
-          MixedTree.Call(alpha),
-          MixedTree.Call(a),
-          MixedTree.Call(b),
-          MixedTree.Call(beta),
-          MixedTree.Call(c))
+          MixedTree.Atom(alpha),
+          MixedTree.Atom(a),
+          MixedTree.Atom(b),
+          MixedTree.Atom(beta),
+          MixedTree.Atom(c))
           .toApplier[MetadataEGraph])
     }
   }
@@ -354,18 +354,18 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
       Rule(
         s"gemm$transpositionA$transpositionB alpha a (transpose b) beta c -> gemm$transpositionA$notTranspositionB alpha a b beta c",
         BlasIdioms.Gemm(aTransposed, bTransposed)(
-            MixedTree.Call(alpha),
-            MixedTree.Call(a),
-            BlasIdioms.Transpose(MixedTree.Call(b)),
-            MixedTree.Call(beta),
-            MixedTree.Call(c))
+            MixedTree.Atom(alpha),
+            MixedTree.Atom(a),
+            BlasIdioms.Transpose(MixedTree.Atom(b)),
+            MixedTree.Atom(beta),
+            MixedTree.Atom(c))
           .toSearcher[MetadataEGraph],
         BlasIdioms.Gemm(aTransposed, !bTransposed)(
-            MixedTree.Call(alpha),
-            MixedTree.Call(a),
-            MixedTree.Call(b),
-            MixedTree.Call(beta),
-            MixedTree.Call(c))
+            MixedTree.Atom(alpha),
+            MixedTree.Atom(a),
+            MixedTree.Atom(b),
+            MixedTree.Atom(beta),
+            MixedTree.Atom(c))
           .toApplier[MetadataEGraph])
     }
   }

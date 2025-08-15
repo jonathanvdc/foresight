@@ -35,8 +35,8 @@ object Rules {
     val t = Pattern.Var.fresh[ArithIR]()
     Rule(
       "beta",
-      App(Lam(x, MixedTree.Call(b)), MixedTree.Call(t)).toSearcher,
-      MixedTree.Call[ArithIR, Pattern[ArithIR]](b)
+      App(Lam(x, MixedTree.Atom(b)), MixedTree.Atom(t)).toSearcher,
+      MixedTree.Atom[ArithIR, Pattern[ArithIR]](b)
         .toApplier[ArithEGraph]
         .substitute(b, x, t, b)
     )
@@ -44,7 +44,7 @@ object Rules {
 
   val etaExpansion: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
     val x = Slot.fresh()
-    val b = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val b = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "eta-expansion",
       b.toSearcher,
@@ -56,7 +56,7 @@ object Rules {
     val x = Pattern.Var.fresh[ArithIR]()
     Rule(
       "constant-propagation",
-      MixedTree.Call[ArithIR, Pattern[ArithIR]](x).toSearcher[ArithEGraph].flatMap({
+      MixedTree.Atom[ArithIR, Pattern[ArithIR]](x).toSearcher[ArithEGraph].flatMap({
         case (subst, egraph) =>
           // Use the ConstantAnalysis to find the constant value of the expression, if available.
           val result = ConstantAnalysis.get(egraph)(subst(x), egraph)
@@ -66,13 +66,13 @@ object Rules {
             subst.bind(x, Number(value))
           }
       }),
-      MixedTree.Call[ArithIR, Pattern[ArithIR]](x).toApplier
+      MixedTree.Atom[ArithIR, Pattern[ArithIR]](x).toApplier
     )
   }
 
   val addCommutativity: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "x + y = y + x",
       Add(x, y).toSearcher,
@@ -80,9 +80,9 @@ object Rules {
   }
 
   val addAssociativity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val z = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val z = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "(x + y) + z = x + (y + z)",
       Add(Add(x, y), z).toSearcher,
@@ -90,9 +90,9 @@ object Rules {
   }
 
   val addAssociativity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val z = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val z = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "x + (y + z) = (x + y) + z",
       Add(x, Add(y, z)).toSearcher,
@@ -100,8 +100,8 @@ object Rules {
   }
 
   val mulCommutativity: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "x * y = y * x",
       Mul(x, y).toSearcher,
@@ -109,9 +109,9 @@ object Rules {
   }
 
   val mulAssociativity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val z = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val z = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "(x * y) * z = x * (y * z)",
       Mul(Mul(x, y), z).toSearcher,
@@ -119,9 +119,9 @@ object Rules {
   }
 
   val mulAssociativity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val z = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val z = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "x * (y * z) = (x * y) * z",
       Mul(x, Mul(y, z)).toSearcher,
@@ -129,9 +129,9 @@ object Rules {
   }
 
   val distributivity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val y = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val z = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val y = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val z = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "x * (y + z) = x * y + x * z",
       Mul(x, Add(y, z)).toSearcher,
@@ -139,9 +139,9 @@ object Rules {
   }
 
   val distributivity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val a = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val b = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
-    val c = MixedTree.Call(Pattern.Var.fresh[ArithIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val b = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
+    val c = MixedTree.Atom(Pattern.Var.fresh[ArithIR]())
     Rule(
       "a * b + a * c = a * (b + c)",
       Add(Mul(a, b), Mul(a, c)).toSearcher,

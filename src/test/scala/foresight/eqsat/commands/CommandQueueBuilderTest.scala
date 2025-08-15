@@ -87,7 +87,7 @@ class CommandQueueBuilderTest {
     val egraph = EGraph.empty[Int]
     val (call, egraph2) = egraph.add(ENode(0, Seq.empty, Seq.empty, Seq.empty))
 
-    val tree = MixedTree.Call[Int, EClassSymbol](EClassSymbol.real(call))
+    val tree = MixedTree.Atom[Int, EClassSymbol](EClassSymbol.real(call))
     builder.add(tree)
 
     val queue = builder.queue
@@ -185,7 +185,7 @@ class CommandQueueBuilderTest {
 
     val tree1 = builder.add(MixedTree.Node(2, Seq.empty, Seq(y), Seq.empty))
     val tree2 = builder.add(
-      MixedTree.Node(0, Seq(x), Seq.empty, Seq(MixedTree.Node(1, Seq.empty, Seq(x), Seq(MixedTree.Call(tree1))))))
+      MixedTree.Node(0, Seq(x), Seq.empty, Seq(MixedTree.Node(1, Seq.empty, Seq(x), Seq(MixedTree.Atom(tree1))))))
 
     for (queue <- Seq(builder.queue, builder.queue.optimized)) {
       val (Some(egraph), reification) = queue(EGraph.empty[Int], Map.empty, ParallelMap.sequential)
@@ -196,7 +196,7 @@ class CommandQueueBuilderTest {
 
       assert(!egraph.contains(
         MixedTree.Node(0, Seq(x), Seq.empty, Seq(
-          MixedTree.Node(1, Seq.empty, Seq(y), Seq(MixedTree.Call(tree1.reify(reification))))))))
+          MixedTree.Node(1, Seq.empty, Seq(y), Seq(MixedTree.Atom(tree1.reify(reification))))))))
     }
   }
 }

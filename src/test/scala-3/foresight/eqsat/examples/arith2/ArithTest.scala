@@ -31,7 +31,7 @@ class ArithTest {
     println(summon[Language[ArithExpr]].toTree[EClassCall](Ref(c)))
     println(summon[AsMixin[Ref, EClassCall]].toMixin(Ref(c)))
     println(summon[AsMixin[Ref, EClassCall]].fromMixin(c))
-    println(summon[Language[ArithExpr]].fromTree[EClassCall](MixedTree.Call(c)))
+    println(summon[Language[ArithExpr]].fromTree[EClassCall](MixedTree.Atom(c)))
 
     val (tree, expr) = example
     println(tree)

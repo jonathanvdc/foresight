@@ -36,7 +36,7 @@ private final class PatternCompiler[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
 
   def compile(pattern: MixedTree[NodeT, Pattern[NodeT]], out: Int): List[Instruction[NodeT, EGraphT]] = {
     pattern match {
-      case MixedTree.Call(p) => p match {
+      case MixedTree.Atom(p) => p match {
         // If we encountered a wildcard, then we want to either bind the wildcard to a concrete expression *or*
         // ensure that the wildcard is bound consistently.
         case w: Pattern.Var[NodeT] =>

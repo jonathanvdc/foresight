@@ -253,7 +253,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
           None
         }
 
-      case MixedTree.Call(call) => Some(call)
+      case MixedTree.Atom(call) => Some(call)
     }
   }
 
@@ -307,7 +307,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
         })
         graphWithArgs.add(ENode(t, defs, uses, newArgs))
 
-      case MixedTree.Call(call) =>
+      case MixedTree.Atom(call) =>
         (call, this.asInstanceOf[This])
     }
   }

@@ -88,12 +88,11 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * Appends an insertion of a [[MixedTree]].
    *
    * Child subtrees are added first (depth-first), then a final node is inserted referencing
-   * their produced symbols. If the tree is a [[MixedTree.Call]], it is treated as already-real
+   * their produced symbols. If the tree is a [[MixedTree.Atom]], it is treated as already-real
    * and no command is added.
    *
    * @param tree Tree to insert.
    * @return The symbol for the tree's root and the extended queue.
-   *
    * @example
    * {{{
    * val (root, q2) = q1.add(myTree)
@@ -109,7 +108,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
         }
         newQueue.add(ENodeSymbol(t, defs, uses, addedArgs))
 
-      case MixedTree.Call(call) =>
+      case MixedTree.Atom(call) =>
         (call, this)
     }
   }

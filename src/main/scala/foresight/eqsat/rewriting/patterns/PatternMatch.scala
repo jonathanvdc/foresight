@@ -73,7 +73,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
 
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
-    val newVarMapping = varMapping.mapValuesStrict(_.mapCalls(egraph.canonicalize))
+    val newVarMapping = varMapping.mapValuesStrict(_.mapAtoms(egraph.canonicalize))
     val newSlotMapping = slotMapping
     PatternMatch(newRoot, newVarMapping, newSlotMapping)
   }

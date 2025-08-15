@@ -46,7 +46,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
   def apply(tree: MixedTree[NodeT, EClassCall],
             egraph: EGraph[NodeT]): A = {
     tree match {
-      case MixedTree.Call(call: EClassCall) => apply(call, egraph)
+      case MixedTree.Atom(call: EClassCall) => apply(call, egraph)
 
       case MixedTree.Node(node, defs, uses, args) =>
         val argsResults = args.map(apply(_, egraph))

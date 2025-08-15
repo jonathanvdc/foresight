@@ -135,12 +135,12 @@ object Language:
 
       def toTree[A](e: E)(using enc: Registries.CallEncoder[E, A]): Node[A] =
         Registries.encode(enc, e, m.ordinal(e)) match
-          case Some(payload) => MixedTree.Call(payload)
+          case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
       def fromTree[A](n: Node[A])(using dec: Registries.CallDecoder[E, A]): E =
         n match
-          case MixedTree.Call(b) =>
+          case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
             Registries.decode(dec, b).getOrElse {
               throw new IllegalArgumentException(

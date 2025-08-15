@@ -9,8 +9,8 @@ import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatc
 object SearcherOps {
   private def functionTypePattern = {
     FunctionType(
-      MixedTree.Call(Pattern.Var.fresh[ArrayIR]()),
-      MixedTree.Call(Pattern.Var.fresh[ArrayIR]())).compiled[EGraph[ArrayIR]]
+      MixedTree.Atom(Pattern.Var.fresh[ArrayIR]()),
+      MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())).compiled[EGraph[ArrayIR]]
   }
 
   private def int32TypePattern = {
@@ -64,7 +64,7 @@ object SearcherOps {
       searcher.filter((m, egraph) => {
         values.forall(v => {
           m(v) match {
-            case MixedTree.Call(c) => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
+            case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
             case MixedTree.Node(nodeType, _, _, _) => nodeType.isInstanceOf[Value]
           }
         })

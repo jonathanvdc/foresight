@@ -66,7 +66,7 @@ object ApplierOps {
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
           val tree = applier.instantiate(m)
-          inferType(tree.mapCalls(_.asInstanceOf[EClassSymbol.Real].call), egraph)
+          inferType(tree.mapAtoms(_.asInstanceOf[EClassSymbol.Real].call), egraph)
           Command.addEquivalentTree(EClassSymbol.real(m.root), tree)
         }
       }
