@@ -10,16 +10,16 @@ import scala.util.NotGiven
 final case class Use[A](value: A) extends AnyVal
 final case class Defn[A](value: A) extends AnyVal
 
-trait AsMixin[T, B]:
+trait AsAtom[T, B]:
   def toMixin(t: T): B
   def fromMixin(b: B): T
 
-object AsMixin:
-  inline def apply[T, B](using ev: AsMixin[T, B]): AsMixin[T, B] = ev
+object AsAtom:
+  inline def apply[T, B](using ev: AsAtom[T, B]): AsAtom[T, B] = ev
 
   /** Helper to build a two-way codec. */
-  def codec[T, B](to: T => B, from: B => T): AsMixin[T, B] =
-    new AsMixin[T, B]:
+  def codec[T, B](to: T => B, from: B => T): AsAtom[T, B] =
+    new AsAtom[T, B]:
       override def toMixin(t: T): B = to(t)
       override def fromMixin(b: B): T = from(b)
 
@@ -41,7 +41,7 @@ object Registries:
     // For one case type `H`, either capture its AsMixin into a tiny function, or return a no-op.
     private inline def encoderForCase[E, A, H](caseIndex: Int): CallEncoder[E, A] =
       summonFrom {
-        case ev: AsMixin[H, A] =>
+        case ev: AsAtom[H, A] =>
           // capture `ev` here; no summoning will happen later
           (e: E, ord: Int) =>
             if ord == caseIndex then Some(ev.toMixin(e.asInstanceOf[H])) else None
@@ -67,7 +67,7 @@ object Registries:
 
     private inline def decoderForCase[E, A, H]: CallDecoder[E, A] =
       summonFrom {
-        case ev: AsMixin[H, A] =>
+        case ev: AsAtom[H, A] =>
           // capture `ev` here
           (a: A) => Some(ev.fromMixin(a).asInstanceOf[E])
         case _ =>

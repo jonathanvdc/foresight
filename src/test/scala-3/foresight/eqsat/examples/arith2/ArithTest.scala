@@ -15,7 +15,7 @@ final case class Number(value: BigInt) extends ArithExpr
 
 final case class Ref(eClass: EClassCall) extends ArithExpr
 object Ref:
-  given AsMixin[Ref, EClassCall] = AsMixin.codec(to = _.eClass, from = Ref(_))
+  given AsAtom[Ref, EClassCall] = AsAtom.codec(to = _.eClass, from = Ref(_))
 
 def example(using L: Language[ArithExpr]): (L.Node[EClassCall], ArithExpr) =
   val (c, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
@@ -29,8 +29,8 @@ class ArithTest {
     val (c, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
     println(Registries.decode(summon[Registries.CallDecoder[ArithExpr, EClassCall]], c))
     println(summon[Language[ArithExpr]].toTree[EClassCall](Ref(c)))
-    println(summon[AsMixin[Ref, EClassCall]].toMixin(Ref(c)))
-    println(summon[AsMixin[Ref, EClassCall]].fromMixin(c))
+    println(summon[AsAtom[Ref, EClassCall]].toMixin(Ref(c)))
+    println(summon[AsAtom[Ref, EClassCall]].fromMixin(c))
     println(summon[Language[ArithExpr]].fromTree[EClassCall](MixedTree.Atom(c)))
 
     val (tree, expr) = example
