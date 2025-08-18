@@ -7,7 +7,7 @@ import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
-  final case class Op(ord: Int, schema: IArray[Byte], payload: IArray[Any])
+  final case class Op(ord: Int, schema: Seq[Byte], payload: Seq[Any])
   type MTree[A] = MixedTree[Op, A]
 
   /** Encode surface AST into the core tree. */
@@ -49,7 +49,7 @@ object Language:
           i += 1
 
         MixedTree.Node(
-          Op(ord, IArray.from(schema), IArray.from(payload)),
+          Op(ord, Seq.from(schema), Seq.from(payload)),
           binders.toSeq,
           slots.toSeq,
           kids.toSeq
