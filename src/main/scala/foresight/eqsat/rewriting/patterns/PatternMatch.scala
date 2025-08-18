@@ -13,7 +13,7 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class PatternMatch[NodeT](root: EClassCall,
-                                     varMapping: Map[Pattern.Var[NodeT], MixedTree[NodeT, EClassCall]],
+                                     varMapping: Map[Pattern.Var, MixedTree[NodeT, EClassCall]],
                                      slotMapping: Map[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
 
   /**
@@ -21,7 +21,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @param variable The variable.
    * @return The tree.
    */
-  def apply(variable: Pattern.Var[NodeT]): MixedTree[NodeT, EClassCall] = varMapping(variable)
+  def apply(variable: Pattern.Var): MixedTree[NodeT, EClassCall] = varMapping(variable)
 
   /**
    * Gets the slot that corresponds to a slot variable.
@@ -36,7 +36,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @param value The value to bind the variable to.
    * @return The updated match with the new binding.
    */
-  def bind(variable: Pattern.Var[NodeT], value: MixedTree[NodeT, EClassCall]): PatternMatch[NodeT] = {
+  def bind(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): PatternMatch[NodeT] = {
     val newVarMapping = varMapping + (variable -> value)
     PatternMatch(root, newVarMapping, slotMapping)
   }
@@ -85,7 +85,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @param slots The slots to check.
    * @return True if the expression is independent of the slots, false otherwise.
    */
-  def isIndependent(expr: Pattern.Var[NodeT], slots: Set[Slot]): Boolean = {
+  def isIndependent(expr: Pattern.Var, slots: Set[Slot]): Boolean = {
     varMapping.get(expr) match {
       case Some(tree) =>
         val exprSlots = tree.slotSet

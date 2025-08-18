@@ -26,7 +26,7 @@ class EncodeDecodeTest {
     infix def +(rhs: ArithExpr): ArithExpr = Add(lhs, rhs)
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
-  val (classCall, _) = EGraph.from[Int] (MixedTree.unslotted(0, Seq ()))
+  val (classCall, _) = EGraph.from[Int](MixedTree.unslotted(0, Seq()))
 
   @Test
   def asAtomWorks(): Unit = {

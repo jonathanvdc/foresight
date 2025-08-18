@@ -29,7 +29,7 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   val detectMemsetZero: LiarRule = {
     // build N (λi. 0.0) -> memset N 0.0
-    val N = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
 
     val zero = ConstDouble(0.0).toTree
     val i = Slot.fresh()
@@ -48,11 +48,11 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   val detectDot: LiarRule = {
     // ifold N (λi acc. xs[i] * ys[i] + acc) 0.0 -> ddot xs ys
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
+    val scalarType = Pattern.Var.fresh()
 
-    val xs = Pattern.Var.fresh[ArrayIR]()
-    val ys = Pattern.Var.fresh[ArrayIR]()
+    val xs = Pattern.Var.fresh()
+    val ys = Pattern.Var.fresh()
     val acc = Slot.fresh()
     val i = Slot.fresh()
 
@@ -83,12 +83,12 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   val detectAxpy: LiarRule = {
     // build N (λi. a * xs[i] + ys[i]) -> axpy a xs ys
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
+    val scalarType = Pattern.Var.fresh()
 
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val xs = Pattern.Var.fresh[ArrayIR]()
-    val ys = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh()
+    val xs = Pattern.Var.fresh()
+    val ys = Pattern.Var.fresh()
     val i = Slot.fresh()
 
     Rule(
@@ -116,15 +116,15 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   val detectGemv: LiarRule = {
     // build N (λi. alpha * (dot a[i] x) + beta * y[i]) -> gemv alpha a x beta y
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val K = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
+    val K = Pattern.Var.fresh()
+    val scalarType = Pattern.Var.fresh()
 
-    val alpha = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val x = Pattern.Var.fresh[ArrayIR]()
-    val beta = Pattern.Var.fresh[ArrayIR]()
-    val y = Pattern.Var.fresh[ArrayIR]()
+    val alpha = Pattern.Var.fresh()
+    val a = Pattern.Var.fresh()
+    val x = Pattern.Var.fresh()
+    val beta = Pattern.Var.fresh()
+    val y = Pattern.Var.fresh()
 
     val i = Slot.fresh()
 
@@ -164,16 +164,16 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   val detectGemm: LiarRule = {
     // build M (λi. gemvN alpha b a[i] beta c[i]) -> gemmNT alpha a b beta c
-    val M = Pattern.Var.fresh[ArrayIR]()
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val K = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+    val M = Pattern.Var.fresh()
+    val N = Pattern.Var.fresh()
+    val K = Pattern.Var.fresh()
+    val scalarType = Pattern.Var.fresh()
 
-    val alpha = Pattern.Var.fresh[ArrayIR]()
-    val b = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val beta = Pattern.Var.fresh[ArrayIR]()
-    val c = Pattern.Var.fresh[ArrayIR]()
+    val alpha = Pattern.Var.fresh()
+    val b = Pattern.Var.fresh()
+    val a = Pattern.Var.fresh()
+    val beta = Pattern.Var.fresh()
+    val c = Pattern.Var.fresh()
 
     val i = Slot.fresh()
 
@@ -213,10 +213,10 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
   def detectTranspose: LiarRule = {
     // build N (λi. build M (λj. a[i][j])) -> transpose a
 
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val M = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
+    val M = Pattern.Var.fresh()
 
-    val a = Pattern.Var.fresh[ArrayIR]()
+    val a = Pattern.Var.fresh()
 
     val i = Slot.fresh()
     val j = Slot.fresh()
@@ -243,12 +243,12 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   def hoistLhsMulFromDot: LiarRule = {
     // dot (build N (λi. a * xs[i])) ys -> a * (dot xs ys)
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val scalarType = Pattern.Var.fresh[ArrayIR]()
+    val N = Pattern.Var.fresh()
+    val scalarType = Pattern.Var.fresh()
 
-    val xs = Pattern.Var.fresh[ArrayIR]()
-    val ys = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
+    val xs = Pattern.Var.fresh()
+    val ys = Pattern.Var.fresh()
+    val a = Pattern.Var.fresh()
 
     val i = Slot.fresh()
 
@@ -278,11 +278,11 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
     // gemvX alpha (transpose a) x beta y -> gemv(not X) alpha a x beta y
 
     for (transposition <- Seq(true, false)) yield {
-      val alpha = Pattern.Var.fresh[ArrayIR]()
-      val a = Pattern.Var.fresh[ArrayIR]()
-      val x = Pattern.Var.fresh[ArrayIR]()
-      val beta = Pattern.Var.fresh[ArrayIR]()
-      val y = Pattern.Var.fresh[ArrayIR]()
+      val alpha = Pattern.Var.fresh()
+      val a = Pattern.Var.fresh()
+      val x = Pattern.Var.fresh()
+      val beta = Pattern.Var.fresh()
+      val y = Pattern.Var.fresh()
 
       val transposed = BlasIdioms.transpositionToString(transposition)
       val notTransposed = BlasIdioms.transpositionToString(!transposition)
@@ -308,11 +308,11 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   def foldTransposeAIntoGemm: Seq[LiarRule] = {
     // gemmXY alpha (transpose a) b beta c -> gemm(not X)Y alpha a b beta c
-    val alpha = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val b = Pattern.Var.fresh[ArrayIR]()
-    val beta = Pattern.Var.fresh[ArrayIR]()
-    val c = Pattern.Var.fresh[ArrayIR]()
+    val alpha = Pattern.Var.fresh()
+    val a = Pattern.Var.fresh()
+    val b = Pattern.Var.fresh()
+    val beta = Pattern.Var.fresh()
+    val c = Pattern.Var.fresh()
 
     for ((aTransposed, bTransposed) <- Seq((false, false), (false, true), (true, false), (true, true))) yield {
       val transpositionA = BlasIdioms.transpositionToString(aTransposed)
@@ -340,11 +340,11 @@ final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] wi
 
   def foldTransposeBIntoGemm: Seq[LiarRule] = {
     // gemmXY alpha a (transpose b) beta c -> gemmX(not Y) alpha a b beta c
-    val alpha = Pattern.Var.fresh[ArrayIR]()
-    val a = Pattern.Var.fresh[ArrayIR]()
-    val b = Pattern.Var.fresh[ArrayIR]()
-    val beta = Pattern.Var.fresh[ArrayIR]()
-    val c = Pattern.Var.fresh[ArrayIR]()
+    val alpha = Pattern.Var.fresh()
+    val a = Pattern.Var.fresh()
+    val b = Pattern.Var.fresh()
+    val beta = Pattern.Var.fresh()
+    val c = Pattern.Var.fresh()
 
     for ((aTransposed, bTransposed) <- Seq((false, false), (false, true), (true, false), (true, true))) yield {
       val transpositionA = BlasIdioms.transpositionToString(aTransposed)

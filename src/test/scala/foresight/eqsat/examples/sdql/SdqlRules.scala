@@ -35,9 +35,9 @@ object SdqlRules {
   )
 
   val multAssoc1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val c = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
+    val c = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "mult-assoc1",
       Mult(Mult(a, b), c).toSearcher,
@@ -46,9 +46,9 @@ object SdqlRules {
   }
 
   val multAssoc2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val c = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
+    val c = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "mult-assoc2",
       Mult(a, Mult(b, c)).toSearcher,
@@ -57,7 +57,7 @@ object SdqlRules {
   }
 
   val subIdentity: SdqlRule = {
-    val e = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sub-identity",
       Sub(e, e).toSearcher,
@@ -66,7 +66,7 @@ object SdqlRules {
   }
 
   val addZero: SdqlRule = {
-    val e = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "add-zero",
       Add(e, Num(0)()).toSearcher,
@@ -75,7 +75,7 @@ object SdqlRules {
   }
 
   val subZero: SdqlRule = {
-    val e = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sub-zero",
       Sub(e, Num(0)()).toSearcher,
@@ -84,8 +84,8 @@ object SdqlRules {
   }
 
   val eqComm: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "eq-comm",
       Equality(a, b).toSearcher,
@@ -94,8 +94,8 @@ object SdqlRules {
   }
 
   val multApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "mult-app1",
       Mult(a, b).toSearcher,
@@ -104,8 +104,8 @@ object SdqlRules {
   }
 
   val multApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "mult-app2",
       Binop(Symbol("mult")(), a, b).toSearcher,
@@ -114,8 +114,8 @@ object SdqlRules {
   }
 
   val addApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "add-app1",
       Add(a, b).toSearcher,
@@ -124,8 +124,8 @@ object SdqlRules {
   }
 
   val addApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "add-app2",
       Binop(Symbol("add")(), a, b).toSearcher,
@@ -134,8 +134,8 @@ object SdqlRules {
   }
 
   val subApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sub-app1",
       Sub(a, b).toSearcher,
@@ -144,8 +144,8 @@ object SdqlRules {
   }
 
   val subApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sub-app2",
       Binop(Symbol("sub")(), a, b).toSearcher,
@@ -154,8 +154,8 @@ object SdqlRules {
   }
 
   val getApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "get-app1",
       Get(a, b).toSearcher,
@@ -164,8 +164,8 @@ object SdqlRules {
   }
 
   val getApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "get-app2",
       Binop(Symbol("getf")(), a, b).toSearcher,
@@ -174,8 +174,8 @@ object SdqlRules {
   }
 
   val singApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-app1",
       Sing(a, b).toSearcher,
@@ -184,8 +184,8 @@ object SdqlRules {
   }
 
   val singApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-app2",
       Binop(Symbol("singf")(), a, b).toSearcher,
@@ -194,7 +194,7 @@ object SdqlRules {
   }
 
   val uniqueApp1: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "unique-app1",
       Unique(a).toSearcher,
@@ -203,7 +203,7 @@ object SdqlRules {
   }
 
   val uniqueApp2: SdqlRule = {
-    val a = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "unique-app2",
       App(Symbol("uniquef")(), a).toSearcher,
@@ -212,11 +212,11 @@ object SdqlRules {
   }
 
   val letBinop3: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
-    val f = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val f = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "let-binop3",
       Let(x, e1, Binop(f, e2, e3)).toSearcher,
@@ -225,11 +225,11 @@ object SdqlRules {
   }
 
   val letBinop4: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
-    val f = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val f = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "let-binop4",
       Binop(f, Let(x, e1, e2), Let(x, e1, e3)).toSearcher,
@@ -238,9 +238,9 @@ object SdqlRules {
   }
 
   val letApply1: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     Rule(
       "let-apply1",
@@ -250,9 +250,9 @@ object SdqlRules {
   }
 
   val letApply2: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     Rule(
       "let-apply2",
@@ -262,9 +262,9 @@ object SdqlRules {
   }
 
   val ifMult2: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "if-mult2",
       Mult(e1, IfThen(e2, e3)).toSearcher,
@@ -273,8 +273,8 @@ object SdqlRules {
   }
 
   val ifToMult: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "if-to-mult",
       IfThen(e1, e2).toSearcher,
@@ -283,9 +283,9 @@ object SdqlRules {
   }
 
   val multToIf: SdqlRule = {
-    val e1_1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e1_2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1_1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e1_2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "mult-to-if",
       Mult(Equality(e1_1, e1_2), e2).toSearcher,
@@ -294,8 +294,8 @@ object SdqlRules {
   }
 
   val beta: SdqlRule = {
-    val t = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val body = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val t = MixedTree.Atom(Pattern.Var.fresh())
+    val body = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     Rule(
       "beta",
@@ -307,11 +307,11 @@ object SdqlRules {
   }
 
   val sumFact1: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     val y = Slot.fresh()
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-fact-1",
       Sum(x, y, r, Mult(e1, e2))
@@ -325,11 +325,11 @@ object SdqlRules {
   }
 
   val sumFact2: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     val y = Slot.fresh()
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-fact-2",
       Sum(x, y, r, Mult(e1, e2))
@@ -343,11 +343,11 @@ object SdqlRules {
   }
 
   val sumFact3: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
     val y = Slot.fresh()
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-fact-3",
       Sum(x, y, r, Sing(e1, e2))
@@ -361,9 +361,9 @@ object SdqlRules {
   }
 
   val singMult1: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-mult-1",
       Sing(e1, Mult(e2, e3)).toSearcher,
@@ -372,9 +372,9 @@ object SdqlRules {
   }
 
   val singMult2: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-mult-2",
       Sing(e1, Mult(e2, e3)).toSearcher,
@@ -383,9 +383,9 @@ object SdqlRules {
   }
 
   val singMult3: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-mult-3",
       Mult(Sing(e1, e2), e3).toSearcher,
@@ -394,9 +394,9 @@ object SdqlRules {
   }
 
   val singMult4: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e3 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
+    val e3 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sing-mult-4",
       Mult(e2, Sing(e1, e3)).toSearcher,
@@ -405,11 +405,11 @@ object SdqlRules {
   }
 
   val sumFactInv1: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-fact-inv-1",
       Mult(e1, Sum(k, v, r, e2)).toSearcher,
@@ -418,11 +418,11 @@ object SdqlRules {
   }
 
   val sumFactInv3: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val e2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
+    val e2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-fact-inv-3",
       Sing(e1, Sum(k, v, r, e2)).toSearcher,
@@ -431,13 +431,13 @@ object SdqlRules {
   }
 
   val sumSumVertFuse1: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val k1 = Slot.fresh()
     val v1 = Slot.fresh()
     val k2 = Slot.fresh()
     val v2 = Slot.fresh()
-    val body1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val body2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val body1 = MixedTree.Atom(Pattern.Var.fresh())
+    val body2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-sum-vert-fuse-1",
       Sum(k1, v1, Sum(k2, v2, r, Sing(Var(k2), body1)), body2).toSearcher,
@@ -446,14 +446,14 @@ object SdqlRules {
   }
 
   val sumSumVertFuse2: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
     val k1 = Slot.fresh()
     val v1 = Slot.fresh()
     val k2 = Slot.fresh()
     val v2 = Slot.fresh()
-    val key = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val body1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val body2 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val key = MixedTree.Atom(Pattern.Var.fresh())
+    val body1 = MixedTree.Atom(Pattern.Var.fresh())
+    val body2 = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-sum-vert-fuse-2",
       Sum(k1, v1, Sum(k2, v2, r, Sing(Unique(key), body1)), body2).toSearcher,
@@ -462,12 +462,12 @@ object SdqlRules {
   }
 
   val sumRange1: SdqlRule = {
-    val st = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val en = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val st = MixedTree.Atom(Pattern.Var.fresh())
+    val en = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
-    val key = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val body = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val key = MixedTree.Atom(Pattern.Var.fresh())
+    val body = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-range-1",
       Sum(k, v, Range(st, en), IfThen(Equality(Var(v), key), body)).toSearcher,
@@ -481,13 +481,13 @@ object SdqlRules {
   }
 
   val sumMerge: SdqlRule = {
-    val r = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val s = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val r = MixedTree.Atom(Pattern.Var.fresh())
+    val s = MixedTree.Atom(Pattern.Var.fresh())
     val k1 = Slot.fresh()
     val v1 = Slot.fresh()
     val k2 = Slot.fresh()
     val v2 = Slot.fresh()
-    val body = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val body = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-merge",
       Sum(k1, v1, r, Sum(k2, v2, s, IfThen(Equality(Var(v1), Var(v2)), body))).toSearcher,
@@ -496,8 +496,8 @@ object SdqlRules {
   }
 
   val getToSum: SdqlRule = {
-    val dict = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val key = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val dict = MixedTree.Atom(Pattern.Var.fresh())
+    val key = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
     Rule(
@@ -508,11 +508,11 @@ object SdqlRules {
   }
 
   val sumToGet: SdqlRule = {
-    val dict = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val key = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val dict = MixedTree.Atom(Pattern.Var.fresh())
+    val key = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
-    val body = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val body = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "sum-to-get",
       Sum(k, v, dict, IfThen(Equality(Var(k), key), body))
@@ -526,9 +526,9 @@ object SdqlRules {
   }
 
   val getRange: SdqlRule = {
-    val st = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val en = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
-    val idx = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val st = MixedTree.Atom(Pattern.Var.fresh())
+    val en = MixedTree.Atom(Pattern.Var.fresh())
+    val idx = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "get-range",
       Get(Range(st, en), idx).toSearcher,
@@ -537,7 +537,7 @@ object SdqlRules {
   }
 
   val sumSing: SdqlRule = {
-    val e1 = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e1 = MixedTree.Atom(Pattern.Var.fresh())
     val k = Slot.fresh()
     val v = Slot.fresh()
     Rule(
@@ -548,7 +548,7 @@ object SdqlRules {
   }
 
   val uniqueRm: SdqlRule = {
-    val e = MixedTree.Atom(Pattern.Var.fresh[SdqlIR]())
+    val e = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "unique-rm",
       Unique(e).toSearcher,

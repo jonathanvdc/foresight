@@ -7,10 +7,10 @@ import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 
 object SearcherOps {
-  private def functionTypePattern = {
+  private def functionTypePattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]] = {
     FunctionType(
-      MixedTree.Atom(Pattern.Var.fresh[ArrayIR]()),
-      MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())).compiled[EGraph[ArrayIR]]
+      MixedTree.Atom(Pattern.Var.fresh()),
+      MixedTree.Atom(Pattern.Var.fresh())).compiled[EGraph[ArrayIR]]
   }
 
   private def int32TypePattern = {
@@ -30,7 +30,7 @@ object SearcherOps {
      * @param types A mapping of already-bound values, referred to by their variables, to their yet unbound types.
      * @return The searcher that binds the types to the variables.
      */
-    def bindTypes(types: Map[Pattern.Var[ArrayIR], Pattern.Var[ArrayIR]]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+    def bindTypes(types: Map[Pattern.Var, Pattern.Var]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]] = {
       searcher.map((m, egraph) => {
         val newVarMapping = m.varMapping ++ types.map {
           case (value, t) =>
@@ -47,7 +47,7 @@ object SearcherOps {
      * @param types A mapping of variables to type patterns.
      * @return The searcher that filters out matches where the variables are not bound to the given type patterns.
      */
-    def requireTypes(types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]]): ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+    def requireTypes(types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]]): ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
       TypeRequirements.SearcherWithRequirements(searcher, types)
     }
   }
@@ -60,7 +60,7 @@ object SearcherOps {
      * @param values The variables to check.
      * @return The searcher that filters out matches where the variables are not values.
      */
-    def requireValues(values: Pattern.Var[ArrayIR]*): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+    def requireValues(values: Pattern.Var*): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
         values.forall(v => {
           m(v) match {
@@ -77,7 +77,7 @@ object SearcherOps {
      * @param t The variable to check.
      * @return The searcher that filters out matches where the variable is a function type.
      */
-    def requireNonFunctionType(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+    def requireNonFunctionType(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
         !functionTypePattern.matches(m(t), egraph)
       })
@@ -88,7 +88,7 @@ object SearcherOps {
      * @param t The variable to check.
      * @return The searcher that filters out matches where the variable is not an int32 type.
      */
-    def requireInt32Type(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+    def requireInt32Type(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
         int32TypePattern.matches(m(t), egraph)
       })
@@ -99,7 +99,7 @@ object SearcherOps {
      * @param t The variable to check.
      * @return The searcher that filters out matches where the variable is not a double type.
      */
-    def requireDoubleType(t: Pattern.Var[ArrayIR]): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
+    def requireDoubleType(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
         doubleTypePattern.matches(m(t), egraph)
       })

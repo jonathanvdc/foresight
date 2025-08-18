@@ -62,8 +62,8 @@ class SaturateArithTest {
     )
 
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x + y = y + x",
         Add(x, y).toSearcher,
@@ -71,9 +71,9 @@ class SaturateArithTest {
     }
 
     val addAssociativity1: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val z = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
+      val z = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "(x + y) + z = x + (y + z)",
         Add(Add(x, y), z).toSearcher,
@@ -81,9 +81,9 @@ class SaturateArithTest {
     }
 
     val addAssociativity2: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val z = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
+      val z = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x + (y + z) = (x + y) + z",
         Add(x, Add(y, z)).toSearcher,
@@ -91,8 +91,8 @@ class SaturateArithTest {
     }
 
     val mulCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x * y = y * x",
         Mul(x, y).toSearcher,
@@ -100,9 +100,9 @@ class SaturateArithTest {
     }
 
     val mulAssociativity1: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val z = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
+      val z = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "(x * y) * z = x * (y * z)",
         Mul(Mul(x, y), z).toSearcher,
@@ -110,9 +110,9 @@ class SaturateArithTest {
     }
 
     val mulAssociativity2: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val z = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
+      val z = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x * (y * z) = (x * y) * z",
         Mul(x, Mul(y, z)).toSearcher,
@@ -120,9 +120,9 @@ class SaturateArithTest {
     }
 
     val distributivity1: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val y = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val z = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
+      val y = MixedTree.Atom(Pattern.Var.fresh())
+      val z = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x * (y + z) = x * y + x * z",
         Mul(x, Add(y, z)).toSearcher,
@@ -130,9 +130,9 @@ class SaturateArithTest {
     }
 
     val distributivity2: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
-      val a = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val b = MixedTree.Atom(Pattern.Var.fresh[Arith]())
-      val c = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val a = MixedTree.Atom(Pattern.Var.fresh())
+      val b = MixedTree.Atom(Pattern.Var.fresh())
+      val c = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "a * b + a * c = a * (b + c)",
         Add(Mul(a, b), Mul(a, c)).toSearcher,

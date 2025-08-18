@@ -42,7 +42,7 @@ class RewriteArithTest {
     }
 
     val xMinusXEqualsZeroWithPatternVars: Rule[Arith, _, EGraph[Arith]] = {
-      val x = MixedTree.Atom(Pattern.Var.fresh[Arith]())
+      val x = MixedTree.Atom(Pattern.Var.fresh())
       Rule(
         "x - x = 0",
         Minus(x, x).toSearcher,

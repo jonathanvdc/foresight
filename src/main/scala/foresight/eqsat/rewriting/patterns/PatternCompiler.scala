@@ -13,7 +13,7 @@ object PatternCompiler {
    * @param pattern The pattern to compile.
    * @return The list of instructions.
    */
-  def compile[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]]): List[Instruction[NodeT, EGraphT]] = {
+  def compile[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): List[Instruction[NodeT, EGraphT]] = {
     val compiler = new PatternCompiler[NodeT, EGraphT]()
     compiler.compile(pattern, 0)
   }
@@ -27,19 +27,19 @@ private final class PatternCompiler[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT]
   /**
    * A mapping from expression variable IDs to registers.
    */
-  private val varToReg = new mutable.ListMap[Pattern.Var[NodeT], Int]()
+  private val varToReg = new mutable.ListMap[Pattern.Var, Int]()
 
   /**
    * The current length of the tape.
    */
   private var tapeLength: Int = 0
 
-  def compile(pattern: MixedTree[NodeT, Pattern[NodeT]], out: Int): List[Instruction[NodeT, EGraphT]] = {
+  def compile(pattern: MixedTree[NodeT, Pattern.Var], out: Int): List[Instruction[NodeT, EGraphT]] = {
     pattern match {
       case MixedTree.Atom(p) => p match {
         // If we encountered a wildcard, then we want to either bind the wildcard to a concrete expression *or*
         // ensure that the wildcard is bound consistently.
-        case w: Pattern.Var[NodeT] =>
+        case w: Pattern.Var =>
           varToReg get w match {
             case None =>
               varToReg.put(w, out)

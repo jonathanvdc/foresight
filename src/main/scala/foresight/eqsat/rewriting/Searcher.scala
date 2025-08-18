@@ -345,7 +345,7 @@ object Searcher {
      * val safe = s.requireIndependent(loopVar, iSlot, jSlot)
      * }}}
      */
-    def requireIndependent(expr: Pattern.Var[NodeT], slots: Slot*): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
+    def requireIndependent(expr: Pattern.Var, slots: Slot*): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
       searcher.filter((m, _) => m.isIndependent(expr, slots.toSet))
     }
   }

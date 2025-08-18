@@ -11,7 +11,7 @@ import foresight.eqsat.rewriting.{Applier, ReversibleApplier, Searcher}
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
-final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]])
+final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
@@ -37,11 +37,11 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
    * @param m The match to use for instantiation.
    * @return The instantiated pattern.
    */
-  private def instantiate(pattern: MixedTree[NodeT, Pattern[NodeT]],
+  private def instantiate(pattern: MixedTree[NodeT, Pattern.Var],
                           m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
       case MixedTree.Atom(p) => p match {
-        case v: Pattern.Var[NodeT] => m(v).mapAtoms(EClassSymbol.real)
+        case v: Pattern.Var => m(v).mapAtoms(EClassSymbol.real)
       }
 
       case MixedTree.Node(t, defs, uses, args) =>

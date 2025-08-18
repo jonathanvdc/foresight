@@ -163,7 +163,7 @@ object MixedTree {
   }
 
   /** Extension methods for `MixedTree`s whose leaves are patterns. */
-  implicit class MixedTreeOfPatternOps[NodeT](val tree: MixedTree[NodeT, Pattern[NodeT]]) extends AnyVal {
+  implicit class MixedTreeOfPatternOps[NodeT](val tree: MixedTree[NodeT, Pattern.Var]) extends AnyVal {
     def compiled[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: CompiledPattern[NodeT, EGraphT] =
       CompiledPattern(tree)
     def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: ReversibleSearcher[NodeT, PatternMatch[NodeT], EGraphT] =

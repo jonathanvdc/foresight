@@ -12,7 +12,7 @@ import foresight.eqsat.{EClassCall, ENode, Slot}
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class MachineState[NodeT](registers: Seq[EClassCall],
-                                     boundVars: Map[Pattern.Var[NodeT], EClassCall],
+                                     boundVars: Map[Pattern.Var, EClassCall],
                                      boundSlots: Map[Slot, Slot],
                                      boundNodes: Seq[ENode[NodeT]]) {
 
@@ -35,7 +35,7 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    * @param value The value to bind the variable to.
    * @return The new machine state.
    */
-  def bindVar(variable: Pattern.Var[NodeT], value: EClassCall): MachineState[NodeT] = {
+  def bindVar(variable: Pattern.Var, value: EClassCall): MachineState[NodeT] = {
     val newBoundVars = boundVars + (variable -> value)
     MachineState(registers, newBoundVars, boundSlots, boundNodes)
   }

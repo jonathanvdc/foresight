@@ -29,30 +29,30 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val introduceConstArray: LiarRule = {
     // e -> (build (λi. e) N)[j]
-    val e = Pattern.Var.fresh[ArrayIR]()
-    val eType = Pattern.Var.fresh[ArrayIR]()
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val j = Pattern.Var.fresh[ArrayIR]()
+    val e = Pattern.Var.fresh()
+    val eType = Pattern.Var.fresh()
+    val N = Pattern.Var.fresh()
+    val j = Pattern.Var.fresh()
 
     val i = Slot.fresh()
 
     Rule(
       "e -> (build (λi. e) N)[j]",
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](e)
+      MixedTree.Atom[ArrayIR, Pattern.Var](e)
         .toSearcher[BaseEGraph]
         .requireValues(e)
         .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
-          MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](j)
+          MixedTree.Atom[ArrayIR, Pattern.Var](j)
             .toSearcher[BaseEGraph]
             .requireValues(j)
             .requireMetadata
             .requireTypes(Map(j -> Int32Type.toTree)))
         .merge
         .product(
-          ArrayType(MixedTree.Atom(Pattern.Var.fresh[ArrayIR]()), MixedTree.Atom(N))
+          ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
             .toSearcher
             .requireMetadata)
         .merge,
@@ -63,21 +63,21 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val introduceLambda: LiarRule = {
     // e -> (λx. e) y
-    val e = Pattern.Var.fresh[ArrayIR]()
-    val eType = Pattern.Var.fresh[ArrayIR]()
-    val y = Pattern.Var.fresh[ArrayIR]()
-    val yType = Pattern.Var.fresh[ArrayIR]()
+    val e = Pattern.Var.fresh()
+    val eType = Pattern.Var.fresh()
+    val y = Pattern.Var.fresh()
+    val yType = Pattern.Var.fresh()
     val x = Slot.fresh()
     Rule(
       "e -> (λx. e) y",
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](e)
+      MixedTree.Atom[ArrayIR, Pattern.Var](e)
         .toSearcher[BaseEGraph]
         .requireValues(e)
         .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
-          MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](y)
+          MixedTree.Atom[ArrayIR, Pattern.Var](y)
             .toSearcher[BaseEGraph]
             .requireValues(y)
             .requireMetadata
@@ -91,10 +91,10 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val introduceIndexBuild: LiarRule = {
     // f i -> (build f N)[i]
-    val f = Pattern.Var.fresh[ArrayIR]()
-    val N = Pattern.Var.fresh[ArrayIR]()
-    val i = Pattern.Var.fresh[ArrayIR]()
-    val iType = Pattern.Var.fresh[ArrayIR]()
+    val f = Pattern.Var.fresh()
+    val N = Pattern.Var.fresh()
+    val i = Pattern.Var.fresh()
+    val iType = Pattern.Var.fresh()
     Rule(
       "f i -> (build f N)[i]",
       Apply(MixedTree.Atom(f), MixedTree.Atom(i))
@@ -103,7 +103,7 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
         .bindTypes(Map(i -> iType))
         .requireInt32Type(iType)
         .product(
-          ArrayType(MixedTree.Atom(Pattern.Var.fresh[ArrayIR]()), MixedTree.Atom(N))
+          ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
             .toSearcher
             .requireMetadata)
         .merge,
@@ -114,14 +114,14 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateLambda: LiarRule = {
     // (λx. e) y -> e[x/y]
-    val e = Pattern.Var.fresh[ArrayIR]()
-    val t = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val e = Pattern.Var.fresh()
+    val t = MixedTree.Atom(Pattern.Var.fresh())
     val x = Slot.fresh()
-    val y = Pattern.Var.fresh[ArrayIR]()
+    val y = Pattern.Var.fresh()
     Rule(
       "(λx. e) y -> e[x/y]",
       Apply(Lambda(x, t, MixedTree.Atom(e)), MixedTree.Atom(y)).toSearcher,
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](e)
+      MixedTree.Atom[ArrayIR, Pattern.Var](e)
         .toApplier[MetadataEGraph]
         .typeChecked
         .substitute(e, x, y, e))
@@ -129,9 +129,9 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateIndexBuild: LiarRule = {
     // (build f N)[i] -> f i
-    val f = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val N = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val i = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val f = MixedTree.Atom(Pattern.Var.fresh())
+    val N = MixedTree.Atom(Pattern.Var.fresh())
+    val i = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "(build f N)[i] -> f i",
       IndexAt(Build(N, f), i).toSearcher,
@@ -142,8 +142,8 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateFstTuple: LiarRule = {
     // fst (tuple a b) -> a
-    val a = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "fst (tuple a b) -> a",
       Fst(Tuple(a, b)).toSearcher,
@@ -153,8 +153,8 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateSndTuple: LiarRule = {
     // snd (tuple a b) -> b
-    val a = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val b = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val a = MixedTree.Atom(Pattern.Var.fresh())
+    val b = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "snd (tuple a b) -> b",
       Snd(Tuple(a, b)).toSearcher,

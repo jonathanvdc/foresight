@@ -19,10 +19,10 @@ object ApplierOps {
      * @param destination A variable to store the substituted result in within the pattern match.
      * @return An applier that performs the substitution.
      */
-    def substitute(source: Pattern.Var[ArrayIR],
+    def substitute(source: Pattern.Var,
                    from: Slot,
-                   to: Pattern.Var[ArrayIR],
-                   destination: Pattern.Var[ArrayIR]): Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+                   to: Pattern.Var,
+                   destination: Pattern.Var): Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
 
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {

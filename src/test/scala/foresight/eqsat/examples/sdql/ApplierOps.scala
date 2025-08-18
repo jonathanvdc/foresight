@@ -18,10 +18,10 @@ object ApplierOps {
      * @param destination A variable to store the substituted result in within the pattern match.
      * @return An applier that performs the substitution.
      */
-    def substitute(source: Pattern.Var[SdqlIR],
+    def substitute(source: Pattern.Var,
                    from: Slot,
-                   to: Pattern.Var[SdqlIR],
-                   destination: Pattern.Var[SdqlIR]): Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] = {
+                   to: Pattern.Var,
+                   destination: Pattern.Var): Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] = {
 
       new Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] {
         override def apply(m: PatternMatch[SdqlIR], egraph: EGraphWithMetadata[SdqlIR, EGraphT]): Command[SdqlIR] = {

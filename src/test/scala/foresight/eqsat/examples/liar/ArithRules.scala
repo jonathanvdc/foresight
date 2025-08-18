@@ -31,7 +31,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyAddZeroRight: LiarRule = {
     // x + 0 -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "x + 0 -> x",
       Add(x, ConstDouble(0.0).toTree).toSearcher,
@@ -40,7 +40,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyMulOneRight: LiarRule = {
     // x * 1 -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "x * 1 -> x",
       Mul(x, ConstDouble(1.0).toTree).toSearcher,
@@ -49,7 +49,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyMulOneLeft: LiarRule = {
     // 1 * x -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "1 * x -> x",
       Mul(ConstInt32(1).toTree, x).toSearcher,
@@ -58,7 +58,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyMulZeroLeft: LiarRule = {
     // 0 * x -> 0
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "0 * x -> 0",
       Mul(ConstDouble(0.0).toTree, x).toSearcher,
@@ -69,11 +69,11 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val introduceAddZero: LiarRule = {
     // x -> x + 0
-    val x = Pattern.Var.fresh[ArrayIR]()
-    val xType = Pattern.Var.fresh[ArrayIR]()
+    val x = Pattern.Var.fresh()
+    val xType = Pattern.Var.fresh()
     Rule(
       "x -> x + 0",
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](x)
+      MixedTree.Atom[ArrayIR, Pattern.Var](x)
         .toSearcher
         .requireMetadata
         .bindTypes(Map(x -> xType)).requireDoubleType(xType),
@@ -84,11 +84,11 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val introduceMulOneLeft: LiarRule = {
     // x -> 1 * x
-    val x = Pattern.Var.fresh[ArrayIR]()
-    val xType = Pattern.Var.fresh[ArrayIR]()
+    val x = Pattern.Var.fresh()
+    val xType = Pattern.Var.fresh()
     Rule(
       "x -> 1 * x",
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](x)
+      MixedTree.Atom[ArrayIR, Pattern.Var](x)
         .toSearcher
         .requireMetadata
         .bindTypes(Map(x -> xType))
@@ -100,11 +100,11 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val introduceMulOneRight: LiarRule = {
     // x -> x * 1
-    val x = Pattern.Var.fresh[ArrayIR]()
-    val xType = Pattern.Var.fresh[ArrayIR]()
+    val x = Pattern.Var.fresh()
+    val xType = Pattern.Var.fresh()
     Rule(
       "x -> x * 1",
-      MixedTree.Atom[ArrayIR, Pattern[ArrayIR]](x)
+      MixedTree.Atom[ArrayIR, Pattern.Var](x)
         .toSearcher
         .requireMetadata
         .bindTypes(Map(x -> xType))
@@ -116,8 +116,8 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val mulCommutativity: LiarRule = {
     // x * y -> y * x
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val y = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val y = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "x * y -> y * x",
       Mul(x, y).toSearcher,
@@ -126,9 +126,9 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val mulAssociativity1: LiarRule = {
     // x * (y * z) -> (x * y) * z
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val y = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val z = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val y = MixedTree.Atom(Pattern.Var.fresh())
+    val z = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "x * (y * z) -> (x * y) * z",
       Mul(x, Mul(y, z)).toSearcher,
@@ -137,9 +137,9 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val mulAssociativity2: LiarRule = {
     // (x * y) * z -> x * (y * z)
-    val x = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val y = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
-    val z = MixedTree.Atom(Pattern.Var.fresh[ArrayIR]())
+    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val y = MixedTree.Atom(Pattern.Var.fresh())
+    val z = MixedTree.Atom(Pattern.Var.fresh())
     Rule(
       "(x * y) * z -> x * (y * z)",
       Mul(Mul(x, y), z).toSearcher,

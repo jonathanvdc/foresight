@@ -8,7 +8,7 @@ import foresight.eqsat.rewriting.{Applier, ReversibleApplier, ReversibleSearcher
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 
 object TypeRequirements {
-  private def tryMatchVariableToTypePattern[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](variable: Pattern.Var[ArrayIR],
+  private def tryMatchVariableToTypePattern[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](variable: Pattern.Var,
                                                                                                           pattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]],
                                                                                                           m: PatternMatch[ArrayIR],
                                                                                                           egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
@@ -20,7 +20,7 @@ object TypeRequirements {
   }
 
   private def checkMatch[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](m: PatternMatch[ArrayIR],
-                                                                                       compiledPatterns: Map[Pattern.Var[ArrayIR], CompiledPattern[ArrayIR, EGraph[ArrayIR]]],
+                                                                                       compiledPatterns: Map[Pattern.Var, CompiledPattern[ArrayIR, EGraph[ArrayIR]]],
                                                                                        egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Option[PatternMatch[ArrayIR]] = {
     compiledPatterns.foldLeft(Option(m)) {
       case (Some(newMatch), (variable, pattern)) =>
@@ -31,7 +31,7 @@ object TypeRequirements {
   }
 
   final case class SearcherWithRequirements[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]],
-                                                                                                          types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]])
+                                                                                                          types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
     extends ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
 
     // Precompile the patterns.
@@ -54,7 +54,7 @@ object TypeRequirements {
   }
 
   final case class ApplierWithRequirements[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]],
-                                                                                                          types: Map[Pattern.Var[ArrayIR], MixedTree[ArrayIR, Pattern[ArrayIR]]])
+                                                                                                          types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
     extends ReversibleApplier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
 
     // Precompile the patterns.

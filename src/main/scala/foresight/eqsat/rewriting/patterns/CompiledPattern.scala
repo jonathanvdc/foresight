@@ -10,7 +10,7 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
-final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]],
+final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
                                                                                                   instructions: List[Instruction[NodeT, EGraphT]]) {
   /**
    * Searches for matches of the pattern in an e-graph.
@@ -60,7 +60,7 @@ object CompiledPattern {
    * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
    * @return The compiled pattern.
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern[NodeT]]): CompiledPattern[NodeT, EGraphT] = {
+  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): CompiledPattern[NodeT, EGraphT] = {
     CompiledPattern(pattern, PatternCompiler.compile[NodeT, EGraphT](pattern))
   }
 }

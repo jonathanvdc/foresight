@@ -70,7 +70,7 @@ object Instruction {
    * @tparam EGraphT The type of the e-graph.
    */
   final case class BindVar[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register: Int,
-                                                                                            variable: Pattern.Var[NodeT])
+                                                                                            variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
