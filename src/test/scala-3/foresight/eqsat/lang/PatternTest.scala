@@ -2,7 +2,7 @@ package foresight.eqsat.lang
 
 import scala.language.implicitConversions
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Slot}
+import foresight.eqsat.{EClassCall, EGraph, Slot}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import org.junit.Test
@@ -16,8 +16,8 @@ class PatternTest {
   final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
   final case class Number(value: BigInt) extends ArithExpr
 
-  final case class Ref(eClass: EClassCall) extends ArithExpr
-  final case class PatternVar(variable: Pattern.Var) extends ArithExpr
+  final case class Ref(eClass: EClassCall) extends ArithExpr derives Atom
+  final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Atom
   object PatternVar {
     def fresh(): PatternVar = PatternVar(Pattern.Var.fresh())
   }

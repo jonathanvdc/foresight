@@ -13,7 +13,7 @@ class EncodeDecodeTest {
   final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
   final case class Number(value: BigInt) extends ArithExpr
 
-  final case class Ref(eClass: EClassCall) extends ArithExpr
+  final case class Ref(eClass: EClassCall) extends ArithExpr derives Atom
 
   // Implicit conversion: Int => ArithExpr (Number)
   given Conversion[Int, ArithExpr] with

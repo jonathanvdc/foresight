@@ -15,11 +15,14 @@ object AsAtom:
       override def toAtom(t: T): B = to(t)
       override def fromAtom(b: B): T = from(b)
 
-  /** Auto-generate AsAtom for any 1-field case class A whose sole field is of type B. */
-  inline given singleField[A, B](using m: Mirror.ProductOf[A], ev: m.MirroredElemTypes =:= (B *: EmptyTuple)): AsAtom[A, B] =
-    new AsAtom[A, B]:
-      def toAtom(a: A): B =
-        a.asInstanceOf[Product].productElement(0).asInstanceOf[B]
+  inline given derivedAsAtom[A, B](using d: Atom.Aux[A, B]): AsAtom[A, B] =
+    d.asAtom
 
-      def fromAtom(b: B): A =
-        m.fromProduct(Tuple1(b))
+//  /** Auto-generate AsAtom for any 1-field case class A whose sole field is of type B. */
+//  inline given singleField[A, B](using m: Mirror.ProductOf[A], ev: m.MirroredElemTypes =:= (B *: EmptyTuple)): AsAtom[A, B] =
+//    new AsAtom[A, B]:
+//      def toAtom(a: A): B =
+//        a.asInstanceOf[Product].productElement(0).asInstanceOf[B]
+//
+//      def fromAtom(b: B): A =
+//        m.fromProduct(Tuple1(b))
