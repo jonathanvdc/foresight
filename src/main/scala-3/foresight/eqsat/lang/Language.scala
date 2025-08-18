@@ -1,13 +1,11 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.rewriting.{ReversibleSearcher, Rule, Searcher}
+import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
-
-import scala.deriving.*
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 
+import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
-import scala.quoted.*
 
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
