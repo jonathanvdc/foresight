@@ -14,8 +14,6 @@ class EncodeDecodeTest {
   final case class Number(value: BigInt) extends ArithExpr
 
   final case class Ref(eClass: EClassCall) extends ArithExpr
-  object Ref:
-    given AsAtom[Ref, EClassCall] = AsAtom.codec(to = _.eClass, from = Ref(_))
 
   // Implicit conversion: Int => ArithExpr (Number)
   given Conversion[Int, ArithExpr] with
