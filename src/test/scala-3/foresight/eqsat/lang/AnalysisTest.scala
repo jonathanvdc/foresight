@@ -32,14 +32,14 @@ class AnalysisTest {
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
   val Lang: Language[ArithExpr] = summon[Language[ArithExpr]]
-  type ArithIR = Lang.Op
+  type ArithIR = Language[ArithExpr]#Op
 
-  object ConstantAnalysis extends Analysis[ArithIR, Option[BigInt]] {
+  object ConstantAnalysis extends LanguageAnalysis[ArithExpr, Option[BigInt]] {
     def name: String = "ConstantAnalysis"
     def rename(result: Option[BigInt], renaming: SlotMap): Option[BigInt] = result
 
-    def make(node: ArithIR, defs: Seq[Slot], uses: Seq[Slot], args: Seq[Option[BigInt]]): Option[BigInt] = {
-      Lang.fromAnalysisNode[Option[BigInt]](node, defs, uses, args) match {
+    def make(expr: ArithExpr): Option[BigInt] = {
+      expr match {
         case Add(Fact(Some(left: BigInt)), Fact(Some(right: BigInt))) => Some(left + right)
         case Mul(Fact(Some(left: BigInt)), Fact(Some(right: BigInt))) => Some(left * right)
         case Number(value) => Some(value)

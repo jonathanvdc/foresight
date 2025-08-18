@@ -18,7 +18,7 @@ trait Language[E]:
   def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E
+  def fromTree[A](n: MixedTree[Language[E]#Op, A])(using dec: AtomDecoder[E, A]): E
 
   def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
@@ -33,7 +33,7 @@ trait Language[E]:
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
   }
 
-  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E = {
+  def fromAnalysisNode[A](node: Language[E]#Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E = {
     fromTree[AnalysisFact[A]](MixedTree.Node(node, defs, uses, args.map(AnalysisFact(_)).map(MixedTree.Atom(_))))(using dec)
   }
 
@@ -82,7 +82,7 @@ object Language:
           case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E =
+      def fromTree[A](n: MixedTree[Language[E]#Op, A])(using dec: AtomDecoder[E, A]): E =
         n match
           case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
