@@ -3,6 +3,7 @@ package foresight.eqsat.lang
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.util.ordering.SeqOrdering
 
 import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
@@ -57,34 +58,29 @@ object Language:
       private val payComps: Array[Array[(Any, Any) => Int]] =
         payloadComparatorsFor[E](using m)
 
-      given opOrdering: Ordering[Op] with
+      def opOrdering: Ordering[Op] = new Ordering[Op]:
         def compare(a: Op, b: Op): Int =
-          val c1 = Integer.compare(a.ord, b.ord)
+          // 1) ord
+          val c1 = java.lang.Integer.compare(a.ord, b.ord)
           if c1 != 0 then return c1
 
-          // compare schema lexicographically
-          val as = a.schema;
-          val bs = b.schema
-          val n = math.min(as.length, bs.length)
-          var i = 0
-          while i < n do
-            val c = java.lang.Byte.compare(as(i), bs(i))
-            if c != 0 then return c
-            i += 1
-          val c2 = Integer.compare(as.length, bs.length)
+          // 2) schema (lexicographic)
+          val c2 = SeqOrdering.lexOrdering.compare(a.schema, b.schema)
           if c2 != 0 then return c2
 
-          // compare payload with precomputed per-ordinal comparators
-          val ap = a.payload;
-          val bp = b.payload
+          // 3) payload via precomputed per-ordinal comparators
           val cs = payComps(a.ord)
-          val m = math.min(math.min(ap.length, bp.length), cs.length)
-          var j = 0
-          while j < m do
-            val c = cs(j)(ap(j), bp(j))
+          val len = math.min(math.min(a.payload.length, b.payload.length), cs.length)
+
+          // find first non-zero comparison
+          var i = 0
+          while i < len do
+            val c = cs(i)(a.payload(i), b.payload(i))
             if c != 0 then return c
-            j += 1
-          Integer.compare(ap.length, bp.length)
+            i += 1
+
+          // tie-break on length
+          java.lang.Integer.compare(a.payload.length, b.payload.length)
 
       // Build per-constructor builders: Product => E
       private val ctors: Array[Product => E] =
@@ -201,7 +197,6 @@ object Language:
     inline erasedValue[Cases] match
       case _: EmptyTuple => Nil
       case _: (c *: cs) =>
-        // Critically: summonInline here, pass as `using`, do NOT store in a val.
         compsForCase[c](using summonInline[Mirror.ProductOf[c]]) :: compsForCasesList[cs]
 
   inline def payloadComparatorsFor[E](using s: Mirror.SumOf[E]): Array[Array[(Any, Any) => Int]] =
