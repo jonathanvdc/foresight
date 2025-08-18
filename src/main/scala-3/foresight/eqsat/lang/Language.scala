@@ -12,6 +12,8 @@ trait Language[E]:
   final case class Op(ord: Int, schema: Seq[Byte], payload: Seq[Any])
   type MTree[A] = MixedTree[Op, A]
 
+  def opOrdering: Ordering[Op]
+
   /** Encode surface AST into the core tree. */
   def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A]
 
@@ -38,8 +40,51 @@ trait Language[E]:
 
 object Language:
 
+  /** If a Language[E] is in scope, its Op ordering is summonable. */
+  given opOrderingFor[E](using L: Language[E]): Ordering[L.Op] =
+    L.opOrdering
+
+  // Bridge for the projected type Language[E]#Op
+  // Prefer the L.Op version above to avoid cross-instance mixing.
+  given projectedOpOrdering[E](using L: Language[E]): Ordering[Language[E]#Op] =
+  new Ordering[Language[E]#Op]:
+    def compare(a: Language[E]#Op, b: Language[E]#Op): Int =
+      // Unsafe if a,b come from different Language[E] instances.
+      L.opOrdering.compare(a.asInstanceOf[L.Op], b.asInstanceOf[L.Op])
+
   inline given derived[E](using m: Mirror.SumOf[E]): Language[E] =
     new Language[E]:
+      private val payComps: Array[Array[(Any, Any) => Int]] =
+        payloadComparatorsFor[E](using m)
+
+      given opOrdering: Ordering[Op] with
+        def compare(a: Op, b: Op): Int =
+          val c1 = Integer.compare(a.ord, b.ord)
+          if c1 != 0 then return c1
+
+          // compare schema lexicographically
+          val as = a.schema;
+          val bs = b.schema
+          val n = math.min(as.length, bs.length)
+          var i = 0
+          while i < n do
+            val c = java.lang.Byte.compare(as(i), bs(i))
+            if c != 0 then return c
+            i += 1
+          val c2 = Integer.compare(as.length, bs.length)
+          if c2 != 0 then return c2
+
+          // compare payload with precomputed per-ordinal comparators
+          val ap = a.payload;
+          val bp = b.payload
+          val cs = payComps(a.ord)
+          val m = math.min(math.min(ap.length, bp.length), cs.length)
+          var j = 0
+          while j < m do
+            val c = cs(j)(ap(j), bp(j))
+            if c != 0 then return c
+            j += 1
+          Integer.compare(ap.length, bp.length)
 
       // Build per-constructor builders: Product => E
       private val ctors: Array[Product => E] =
@@ -126,3 +171,39 @@ object Language:
         (p: Product) => pco.fromProduct(p).asInstanceOf[E]
       }
       .toArray
+
+  // -------- helpers to build per-constructor payload comparators --------
+
+  private inline def summonComparator[T]: (Any, Any) => Int =
+    summonFrom {
+      case ord: Ordering[T] =>
+        (a: Any, b: Any) => ord.compare(a.asInstanceOf[T], b.asInstanceOf[T])
+      case _ =>
+        (a: Any, b: Any) => a.toString.compareTo(b.toString) // total fallback
+    }
+
+  private inline def compsForElems[Elems <: Tuple, Rec]: List[(Any, Any) => Int] =
+    inline erasedValue[Elems] match
+      case _: EmptyTuple => Nil
+      case _: (h *: t) =>
+        val head: List[(Any, Any) => Int] =
+          inline erasedValue[h] match
+            case _: Def[?] => Nil
+            case _: Use[?] => Nil
+            case _: Rec => Nil // skip recursive fields of the same case type
+            case _ => summonComparator[h] :: Nil
+        head ::: compsForElems[t, Rec]
+
+  private inline def compsForCase[C](using p: Mirror.ProductOf[C]): Array[(Any, Any) => Int] =
+    compsForElems[p.MirroredElemTypes, C].toArray
+
+  private inline def compsForCasesList[Cases <: Tuple]: List[Array[(Any, Any) => Int]] =
+    inline erasedValue[Cases] match
+      case _: EmptyTuple => Nil
+      case _: (c *: cs) =>
+        // Critically: summonInline here, pass as `using`, do NOT store in a val.
+        compsForCase[c](using summonInline[Mirror.ProductOf[c]]) :: compsForCasesList[cs]
+
+  inline def payloadComparatorsFor[E](using s: Mirror.SumOf[E]): Array[Array[(Any, Any) => Int]] =
+    type Cases = s.MirroredElemTypes
+    compsForCasesList[Cases].toArray
