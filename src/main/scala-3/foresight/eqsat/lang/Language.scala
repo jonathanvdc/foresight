@@ -1,7 +1,10 @@
 package foresight.eqsat.lang
 
+import foresight.eqsat.rewriting.ReversibleSearcher
+import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
+
 import scala.deriving.*
-import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 
@@ -15,6 +18,12 @@ trait Language[E]:
 
   /** Decode core tree back to the surface AST. */
   def fromTree[A](n: MTree[A])(using dec: AtomDecoder[E, A]): E
+
+  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
+    toTree(e).toSearcher
+
+  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
+    toTree(e).toApplier
 
 object Language:
 

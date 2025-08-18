@@ -39,8 +39,8 @@ class PatternTest {
     val y = PatternVar.fresh()
     Rule(
       "x + y = y + x",
-      Lang.toTree[Pattern.Var](x + y).toSearcher,
-      Lang.toTree[Pattern.Var](y + x).toApplier)
+      Lang.toSearcher(x + y),
+      Lang.toApplier(y + x))
   }
 
   def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] = {
