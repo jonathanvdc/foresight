@@ -1,7 +1,5 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.metadata.Analysis
-
 import scala.language.implicitConversions
 import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot, SlotMap}
 import org.junit.Test
