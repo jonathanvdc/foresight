@@ -37,10 +37,7 @@ class PatternTest {
   def associativityRule: Rule[ArithIR, PatternMatch[ArithIR], EGraph[ArithIR]] = {
     val x = PatternVar.fresh()
     val y = PatternVar.fresh()
-    Rule(
-      "x + y = y + x",
-      Lang.toSearcher(x + y),
-      Lang.toApplier(y + x))
+    Lang.rule("assoc", x + y, y + x)
   }
 
   def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] = {

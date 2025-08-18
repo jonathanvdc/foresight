@@ -1,12 +1,13 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.rewriting.ReversibleSearcher
+import foresight.eqsat.rewriting.{ReversibleSearcher, Rule, Searcher}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 
 import scala.deriving.*
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
+import scala.quoted.*
 
 trait Language[E]:
   /** Compact operator tag: (constructor ordinal, field schema, payloads). */
@@ -24,6 +25,14 @@ trait Language[E]:
 
   def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
+
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String, lhs: E, rhs: E)
+  (using enc: AtomEncoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] = {
+    Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
+  }
+
 
 object Language:
 
