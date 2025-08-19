@@ -9,8 +9,8 @@ import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import org.junit.Test
 
 class RuleTests {
-  val L = summon[Language[ArithExpr]]
-  val R = Rules()(using L)
+  val L: Language[ArithExpr] = summon[Language[ArithExpr]]
+  val R: Rules = Rules()(using L)
   type ArithRule = R.ArithRule
 
   private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
