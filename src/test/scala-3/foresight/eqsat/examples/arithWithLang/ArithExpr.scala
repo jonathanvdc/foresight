@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.arithWithLang
 
-import foresight.eqsat.Slot
+import foresight.eqsat.{EClassCall, Slot}
 import foresight.eqsat.lang.{AnalysisBox, Atom, Def, Language, LanguageOp, Use}
 import foresight.eqsat.rewriting.patterns.Pattern
 
@@ -11,6 +11,8 @@ final case class App(fun: ArithExpr, arg: ArithExpr) extends ArithExpr
 final case class Add(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
 final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
 final case class Number(value: BigInt) extends ArithExpr
+
+final case class Ref(eClass: EClassCall) extends ArithExpr derives Atom
 
 final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Atom
 object PatternVar {
