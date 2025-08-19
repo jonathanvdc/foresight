@@ -15,15 +15,12 @@ import scala.deriving.*
  * @tparam A surface type to be treated as an atom (leaf).
  * @example Typical usage (single-field wrapper as an atom)
  * {{{
- * final case class Ref(id: EClassCall) derives Atom
+ * sealed trait Expr derives Language
+ * final case class Ref(id: EClassCall) extends Expr derives Atom
  *
- * // Payload is EClassCall:
- * summon[Atom.Aux[Ref, EClassCall]]
- *
- * val inst  = summon[Atom[Ref]]
- * val ref   = Ref(id)
- * val id2   = inst.asAtom.toAtom(ref)     // Ref -> EClassCall
- * val ref2  = inst.asAtom.fromAtom(id2)   // EClassCall -> Ref
+ * val L = summon[Language[Expr]]
+ * val ref = Ref(id)
+ * val tree = L.toTree[EClassCall](ref) // yields MixedTree.Atom(id)
  * }}}
  */
 trait Atom[A]:
