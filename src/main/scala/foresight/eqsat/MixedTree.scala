@@ -2,6 +2,7 @@ package foresight.eqsat
 
 import foresight.eqsat.rewriting.ReversibleSearcher
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, MachineSearcherPhase, Pattern, PatternApplier, PatternMatch}
+import foresight.util.ordering.SeqOrdering
 
 /**
  * A heterogeneous term tree that interleaves node-typed interiors with leaf atoms.
@@ -170,5 +171,42 @@ object MixedTree {
       ReversibleSearcher(MachineSearcherPhase(compiled))
     def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: PatternApplier[NodeT, EGraphT] =
       PatternApplier(tree)
+  }
+
+
+  /**
+   * Compares Nodes by (nodeType, defs, uses, children), toms by atom payload. Atoms come before Nodes.
+   * This ordering is useful for sorting mixed trees in a way that respects both
+   * the structure of nodes and the payloads of atoms.
+   * @param oNode The ordering for node types.
+   * @param oAtom The ordering for atom payloads.
+   * @param oSlot The ordering for slots.
+   * @tparam NodeT The type used to represent interior nodes.
+   * @tparam AtomT The type used to represent leaf payloads.
+   * @return An `Ordering` that compares mixed trees by their node types, slot definitions, slot uses, and children.
+   *         Atoms are ordered before Nodes.
+   */
+  implicit def orderingWithSlots[NodeT, AtomT](
+                                                implicit oNode: Ordering[NodeT],
+                                                oAtom: Ordering[AtomT],
+                                                oSlot: Ordering[Slot]
+                                              ): Ordering[MixedTree[NodeT, AtomT]] = new Ordering[MixedTree[NodeT, AtomT]] {
+
+    val slotSeqOrd: Ordering[Seq[Slot]] = SeqOrdering.lexOrdering[Slot](oSlot)
+
+    def compare(a: MixedTree[NodeT, AtomT], b: MixedTree[NodeT, AtomT]): Int = (a, b) match {
+      case (MixedTree.Atom(x), MixedTree.Atom(y)) =>
+        oAtom.compare(x, y)
+
+      case (MixedTree.Node(nt1, defs1, uses1, ch1), MixedTree.Node(nt2, defs2, uses2, ch2)) =>
+        val c0 = oNode.compare(nt1, nt2); if (c0 != 0) return c0
+        val c1 = slotSeqOrd.compare(defs1, defs2); if (c1 != 0) return c1
+        val c2 = slotSeqOrd.compare(uses1,  uses2); if (c2 != 0) return c2
+        val childSeqOrd = SeqOrdering.lexOrdering[MixedTree[NodeT, AtomT]](this)
+        childSeqOrd.compare(ch1, ch2)
+
+      case (_: MixedTree.Atom[_, _], _: MixedTree.Node[_, _]) => -1
+      case (_: MixedTree.Node[_, _], _: MixedTree.Atom[_, _]) => 1
+    }
   }
 }
