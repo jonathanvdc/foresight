@@ -46,10 +46,11 @@ final case class Rules()(using L: Language[ArithExpr]) {
     )
   }
 
-  val etaExpansion: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
+  val etaExpansion: ArithRule = {
     val x = Slot.fresh()
-    val b = PatternVar.fresh()
-    rule("eta-expansion", b, Lam(x, App(b, Var(x))))
+    rule("eta-expansion") { b =>
+      b -> Lam(x, App(b, Var(x)))
+    }
   }
 
   val constantPropagation: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
