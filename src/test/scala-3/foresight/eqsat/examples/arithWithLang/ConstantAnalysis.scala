@@ -23,7 +23,7 @@ import foresight.eqsat.lang.LanguageAnalysis
  *
  * ## How this plugs into the example
  *   - The companion of [[ArithExpr]] provides an [[foresight.eqsat.lang.AnalysisBox AnalysisBox]]
- *     using `Fact[A]`. Rules (like constant propagation) can inject or consult facts.
+ *     using `Fact[A]`.
  *   - In `make`, we specifically match on `Fact(Some(v))` subtrees: this leverages the
  *     child-facts invariant described above.
  *   - Tests wire this analysis alongside `ExtractionAnalysis.smallest` to enable rules
