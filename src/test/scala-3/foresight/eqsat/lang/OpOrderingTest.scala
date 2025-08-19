@@ -1,9 +1,10 @@
 package foresight.eqsat.lang
 
 import scala.language.implicitConversions
-
 import foresight.eqsat.Slot
 import org.junit.Test
+
+import scala.math.Ordered.orderingToOrdered
 
 class OpOrderingTest {
   sealed trait ArithExpr derives Language
@@ -23,19 +24,35 @@ class OpOrderingTest {
     infix def +(rhs: ArithExpr): ArithExpr = Add(lhs, rhs)
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
-  val Lang: Language[ArithExpr] = summon[Language[ArithExpr]]
-  type ArithIR = Lang.Op
+  val L: Language[ArithExpr] = summon[Language[ArithExpr]]
+  type ArithIR = L.Op
 
   @Test
   def opOrderingWorks(): Unit = {
-    val L = summon[Language[ArithExpr]]
     val x = Slot.numeric(0)
     val expr1 = Lam(Def(x), Var(Use(x)) + 3 + 4)
     val expr2 = Lam(Def(x), Var(Use(x)) + 7 + 8)
-//
-//    // Check that the order of operations is preserved
-//    assert(L.toTree(expr1) < L.toTree(expr2))
-//    assert(L.fromTree(L.toTree(expr1)) == expr1)
-//    assert(L.fromTree(L.toTree(expr2)) == expr2)
+
+    assert(L.toTree(expr1) < L.toTree(expr2))
+    assert(L.fromTree(L.toTree(expr1)) == expr1)
+    assert(L.fromTree(L.toTree(expr2)) == expr2)
+  }
+
+  @Test
+  def numberOrderingWorks(): Unit = {
+    val numbers = Seq.range(0, 200).map(Number(_))
+
+    for (i <- 0 until numbers.length - 1) {
+      for (j <- 0 until i) {
+        val a = numbers(i)
+        val b = numbers(j)
+        assert(L.toTree(a) > L.toTree(b), s"Expected $a > $b but got ${L.toTree(a)} > ${L.toTree(b)}")
+      }
+      for (j <- i + 1 until numbers.length) {
+        val a = numbers(i)
+        val b = numbers(j)
+        assert(L.toTree(a) < L.toTree(b), s"Expected $a < $b but got ${L.toTree(a)} < ${L.toTree(b)}")
+      }
+    }
   }
 }
