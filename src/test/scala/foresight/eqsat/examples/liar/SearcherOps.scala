@@ -10,7 +10,9 @@ object SearcherOps {
   private def functionTypePattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]] = {
     FunctionType(
       MixedTree.Atom(Pattern.Var.fresh()),
-      MixedTree.Atom(Pattern.Var.fresh())).compiled[EGraph[ArrayIR]]
+      MixedTree.Atom(Pattern.Var.fresh()))
+      .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
+      .compiled[EGraph[ArrayIR]]
   }
 
   private def int32TypePattern = {

@@ -294,8 +294,8 @@ object SdqlRules {
   }
 
   val beta: SdqlRule = {
-    val t = MixedTree.Atom(Pattern.Var.fresh())
-    val body = MixedTree.Atom(Pattern.Var.fresh())
+    val t = MixedTree.Atom[SdqlIR, Pattern.Var](Pattern.Var.fresh())
+    val body = MixedTree.Atom[SdqlIR, Pattern.Var](Pattern.Var.fresh())
     val x = Slot.fresh()
     Rule(
       "beta",

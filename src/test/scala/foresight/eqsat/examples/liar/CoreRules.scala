@@ -53,6 +53,7 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
         .merge
         .product(
           ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
+            .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
             .toSearcher
             .requireMetadata)
         .merge,
@@ -104,6 +105,7 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
         .requireInt32Type(iType)
         .product(
           ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
+            .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
             .toSearcher
             .requireMetadata)
         .merge,
@@ -142,8 +144,8 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateFstTuple: LiarRule = {
     // fst (tuple a b) -> a
-    val a = MixedTree.Atom(Pattern.Var.fresh())
-    val b = MixedTree.Atom(Pattern.Var.fresh())
+    val a = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
+    val b = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
     Rule(
       "fst (tuple a b) -> a",
       Fst(Tuple(a, b)).toSearcher,
@@ -153,8 +155,8 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
 
   val eliminateSndTuple: LiarRule = {
     // snd (tuple a b) -> b
-    val a = MixedTree.Atom(Pattern.Var.fresh())
-    val b = MixedTree.Atom(Pattern.Var.fresh())
+    val a = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
+    val b = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
     Rule(
       "snd (tuple a b) -> b",
       Snd(Tuple(a, b)).toSearcher,

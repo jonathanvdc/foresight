@@ -31,7 +31,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyAddZeroRight: LiarRule = {
     // x + 0 -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val x = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
     Rule(
       "x + 0 -> x",
       Add(x, ConstDouble(0.0).toTree).toSearcher,
@@ -40,7 +40,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyMulOneRight: LiarRule = {
     // x * 1 -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val x = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
     Rule(
       "x * 1 -> x",
       Mul(x, ConstDouble(1.0).toTree).toSearcher,
@@ -49,7 +49,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
 
   val simplifyMulOneLeft: LiarRule = {
     // 1 * x -> x
-    val x = MixedTree.Atom(Pattern.Var.fresh())
+    val x = MixedTree.Atom[ArrayIR, Pattern.Var](Pattern.Var.fresh())
     Rule(
       "1 * x -> x",
       Mul(ConstInt32(1).toTree, x).toSearcher,
