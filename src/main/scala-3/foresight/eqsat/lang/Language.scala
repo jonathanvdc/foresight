@@ -130,6 +130,166 @@ trait Language[E]:
   : Rule[Op, PatternMatch[Op], EGraphT] =
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
 
+  /** Generate a fresh [[foresight.eqsat.rewriting.patterns.Pattern.Var]] and decode it back to a surface `E` value. */
+  private def freshPatternVar(using dec: AtomDecoder[E, Pattern.Var]): E =
+    fromTree(MixedTree.Atom[Op, Pattern.Var](Pattern.Var.fresh()))
+
+  /**
+   * Create a rewrite rule by supplying a lambda that receives one fresh pattern variable.
+   *
+   * This overload is useful when the rule needs just a single variable and you prefer not to
+   * predeclare `Pattern.Var`s or name variables explicitly.
+   *
+   * The implementation generates a fresh [[foresight.eqsat.rewriting.patterns.Pattern.Var]],
+   * decodes it back into a surface `E` via the given [[AtomDecoder]], and passes that value to `f`.
+   * The pair `(lhs, rhs)` returned by `f` is then compiled into a [[foresight.eqsat.rewriting.Rule]].
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function that receives one fresh `E` standing for a pattern variable,
+   *             and returns `(lhs, rhs)` built in surface syntax.
+   * @param enc  Encoder for `Pattern.Var` leaves (used to compile `lhs`/`rhs`).
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E` (used to supply the lambda arg).
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * // β-reduction for a single-argument lambda, schematically: (λx. body)(x) → body
+   * val beta =
+   *   Lang.rule("beta") { x =>
+   *     (App(Lam(Def(param), body = x), arg = x),
+   *      x) // simplified example
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String)
+  (f: E => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar)
+    rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a rewrite rule by supplying a lambda that receives two fresh pattern variables.
+   *
+   * Use this when your rule naturally refers to two variables, without having to
+   * allocate or manage them explicitly.
+   *
+   * Fresh variables are generated as [[foresight.eqsat.rewriting.patterns.Pattern.Var]]s
+   * and decoded to surface `E` values using the given [[AtomDecoder]] before being
+   * passed to `f`.
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function of two fresh variables that returns `(lhs, rhs)`.
+   * @param enc  Encoder for `Pattern.Var` leaves.
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E`.
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * // Commutativity: x + y → y + x
+   * val addComm =
+   *   Lang.rule("comm-add") { (x, y) =>
+   *     (Add(x, y), Add(y, x))
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String)
+  (f: (E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar)
+    rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a rewrite rule by supplying a lambda that receives three fresh pattern variables.
+   *
+   * Choose this overload when your rule template references three variables.
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function of three fresh variables that returns `(lhs, rhs)`.
+   * @param enc  Encoder for `Pattern.Var` leaves.
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E`.
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * // Associativity (one direction): (x + y) + z → x + (y + z)
+   * val addAssoc1 =
+   *   Lang.rule("assoc-add-1") { (x, y, z) =>
+   *     (Add(Add(x, y), z), Add(x, Add(y, z)))
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String)
+  (f: (E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar)
+    rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a rewrite rule by supplying a lambda that receives four fresh pattern variables.
+   *
+   * This is helpful for distributivity and similar rules with four bind sites.
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function of four fresh variables that returns `(lhs, rhs)`.
+   * @param enc  Encoder for `Pattern.Var` leaves.
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E`.
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * // Distributivity: x * (y + z) → (x * y) + (x * z)
+   * val mulDistOverAdd =
+   *   Lang.rule("mul-dist-add") { (x, y, z, w) =>
+   *     // (example with four vars just to illustrate arity)
+   *     (Mul(x, Add(y, z)), Add(Mul(x, y), Mul(x, z)))
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar)
+    rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a rewrite rule by supplying a lambda that receives five fresh pattern variables.
+   *
+   * This highest-arity overload avoids manual variable pluming in complex rules.
+   * If you need more than five variables, consider building helper tuples or
+   * switching to the explicit `(name, lhs, rhs)` overload.
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function of five fresh variables that returns `(lhs, rhs)`.
+   * @param enc  Encoder for `Pattern.Var` leaves.
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E`.
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * val fancy =
+   *   Lang.rule("five-var-demo") { (a, b, c, d, e) =>
+   *     (F(a, b, c, d, e), F(e, d, c, b, a))
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(
+      freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar
+    )
+    rule[EGraphT](name, lhs, rhs)
+
   /**
    * Reconstruct a surface expression `E` from an *analysis-view* of a single node.
    *

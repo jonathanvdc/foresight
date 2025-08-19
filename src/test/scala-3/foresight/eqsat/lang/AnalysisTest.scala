@@ -61,7 +61,6 @@ class AnalysisTest {
     val expr = Fact(Some(BigInt(42)): Option[BigInt])
     val atom = AnalysisFact(Some(BigInt(42)): Option[BigInt])
     val decoder = summon[AtomDecoder[ArithExpr, AnalysisFact[Option[BigInt]]]]
-    println(AtomDecoder.decode(decoder, atom))
     assert(AtomDecoder.decode(decoder, atom).contains(expr))
   }
 

@@ -16,6 +16,8 @@ final case class Rules()(using L: Language[ArithExpr]) {
   type ArithEGraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]]
   type ArithRule = Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph]
 
+  import L.rule
+
   /**
    * Returns all arithmetic rules.
    */
@@ -47,7 +49,7 @@ final case class Rules()(using L: Language[ArithExpr]) {
   val etaExpansion: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
     val x = Slot.fresh()
     val b = PatternVar.fresh()
-    L.rule("eta-expansion", b, Lam(x, App(b, Var(x))))
+    rule("eta-expansion", b, Lam(x, App(b, Var(x))))
   }
 
   val constantPropagation: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
@@ -68,57 +70,43 @@ final case class Rules()(using L: Language[ArithExpr]) {
     )
   }
 
-  val addCommutativity: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    L.rule("add-commutativity", x + y, y + x)
-  }
+  val addCommutativity: ArithRule =
+    rule("add-commutativity") { (x, y) =>
+      (x + y) -> (y + x)
+    }
 
-  val addAssociativity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    val z = PatternVar.fresh()
-    L.rule("add-associativity1", (x + y) + z, x + (y + z))
-  }
+  val addAssociativity1: ArithRule =
+    rule("add-associativity1") { (x, y, z) =>
+      ((x + y) + z) -> (x + (y + z))
+    }
 
-  val addAssociativity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    val z = PatternVar.fresh()
-    L.rule("add-associativity2", x + (y + z), (x + y) + z)
-  }
+  val addAssociativity2: ArithRule =
+    rule("add-associativity2") { (x, y, z) =>
+      (x + (y + z)) -> ((x + y) + z)
+    }
 
-  val mulCommutativity: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    L.rule("mul-commutativity", x * y, y * x)
-  }
+  val mulCommutativity: ArithRule =
+    rule("mul-commutativity") { (x, y) =>
+      (x * y) -> (y * x)
+    }
 
-  val mulAssociativity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    val z = PatternVar.fresh()
-    L.rule("mul-associativity1", (x * y) * z, x * (y * z))
-  }
+  val mulAssociativity1: ArithRule =
+    rule("mul-associativity1") { (x, y, z) =>
+      ((x * y) * z) -> (x * (y * z))
+    }
 
-  val mulAssociativity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    val z = PatternVar.fresh()
-    L.rule("mul-associativity2", x * (y * z), (x * y) * z)
-  }
+  val mulAssociativity2: ArithRule =
+    rule("mul-associativity2") { (x, y, z) =>
+      (x * (y * z)) -> ((x * y) * z)
+    }
 
-  val distributivity1: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val x = PatternVar.fresh()
-    val y = PatternVar.fresh()
-    val z = PatternVar.fresh()
-    L.rule("distributivity1", x * (y + z), (x * y) + (x * z))
-  }
+  val distributivity1: ArithRule =
+    rule("distributivity1") { (x, y, z) =>
+      (x * (y + z)) -> ((x * y) + (x * z))
+    }
 
-  val distributivity2: Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph] = {
-    val a = PatternVar.fresh()
-    val b = PatternVar.fresh()
-    val c = PatternVar.fresh()
-    L.rule("distributivity2", (a * b) + (a * c), a * (b + c))
-  }
+  val distributivity2: ArithRule =
+    rule("distributivity2") { (a, b, c) =>
+      ((a * b) + (a * c)) -> (a * (b + c))
+    }
 }
