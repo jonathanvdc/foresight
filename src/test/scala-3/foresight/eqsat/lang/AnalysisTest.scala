@@ -30,7 +30,7 @@ class AnalysisTest {
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
   val Lang: Language[ArithExpr] = summon[Language[ArithExpr]]
-  type ArithIR = Language[ArithExpr]#Op
+  type ArithIR = LanguageOp[ArithExpr]
 
   object ConstantAnalysis extends LanguageAnalysis[ArithExpr, Option[BigInt]] {
     def name: String = "ConstantAnalysis"

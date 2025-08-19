@@ -25,7 +25,7 @@ class OpOrderingTest {
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
-  type ArithIR = L.Op
+  type ArithIR = LanguageOp[ArithExpr]
 
   @Test
   def opOrderingWorks(): Unit = {

@@ -18,25 +18,25 @@ object ApplierOps {
      * @param destination A variable to store the substituted result in within the pattern match.
      * @return An applier that performs the substitution.
      */
-    def substitute(source: Pattern.Var,
+    def substitute(source: PatternVar,
                    from: Slot,
-                   to: Pattern.Var,
-                   destination: Pattern.Var): Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] = {
+                   to: PatternVar,
+                   destination: PatternVar): Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] = {
 
       new Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] {
         override def apply(m: PatternMatch[ArithIR], egraph: EGraphWithMetadata[ArithIR, EGraphT]): Command[ArithIR] = {
-          val extracted = ExtractionAnalysis.smallest[ArithIR].extractor(m(source), egraph)
+          val extracted = ExtractionAnalysis.smallest[ArithIR].extractor(m(source.variable), egraph)
 
           def subst(tree: Tree[ArithIR]): MixedTree[ArithIR, EClassCall] = {
             tree match {
-              case Tree(Var, Seq(), Seq(use), Seq()) if use == m(from) => m(to)
+              case Tree(Var, Seq(), Seq(use), Seq()) if use == m(from) => m(to.variable)
               case Tree(nodeType, defs, uses, args) =>
                 MixedTree.Node(nodeType, defs, uses, args.map(subst))
             }
           }
 
           val substituted = subst(extracted)
-          val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
+          val newMatch = m.copy(varMapping = m.varMapping + (destination.variable -> substituted))
           applier.apply(newMatch, egraph)
         }
       }

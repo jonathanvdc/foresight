@@ -31,7 +31,7 @@ class PatternTest {
     infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
   val Lang: Language[ArithExpr] = summon[Language[ArithExpr]]
-  type ArithIR = Lang.Op
+  type ArithIR = LanguageOp[ArithExpr]
 
   def associativityRule: Rule[ArithIR, PatternMatch[ArithIR], EGraph[ArithIR]] = {
     val x = PatternVar.fresh()

@@ -17,7 +17,7 @@ import foresight.eqsat.metadata.Analysis
   * @tparam E The view type provided by the Language.
   * @tparam A The result type of the analysis.
   */
-trait LanguageAnalysis[E, A](using Language[E], AtomDecoder[E, AnalysisFact[A]]) extends Analysis[Language[E]#Op, A] {
+trait LanguageAnalysis[E, A](using Language[E], AtomDecoder[E, AnalysisFact[A]]) extends Analysis[LanguageOp[E], A] {
   private inline def Lang: Language[E] = summon[Language[E]]
 
   /**
@@ -27,6 +27,6 @@ trait LanguageAnalysis[E, A](using Language[E], AtomDecoder[E, AnalysisFact[A]])
    */
   def make(expr: E): A
 
-  final def make(node: Language[E]#Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A]): A =
+  final def make(node: LanguageOp[E], defs: Seq[Slot], uses: Seq[Slot], args: Seq[A]): A =
     make(Lang.fromAnalysisNode[A](node, defs, uses, args))
 }

@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.arithWithLang
 
 import foresight.eqsat.Slot
-import foresight.eqsat.lang.{AnalysisBox, Atom, Def, Language, Use}
+import foresight.eqsat.lang.{AnalysisBox, Atom, Def, Language, LanguageOp, Use}
 import foresight.eqsat.rewriting.patterns.Pattern
 
 sealed trait ArithExpr derives Language
@@ -33,4 +33,4 @@ extension (lhs: ArithExpr)
   infix def +(rhs: ArithExpr): ArithExpr = Add(lhs, rhs)
   infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
 
-type ArithIR = Language[ArithExpr]#Op
+type ArithIR = LanguageOp[ArithExpr]
