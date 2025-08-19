@@ -11,7 +11,10 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Implicitly lift a raw <a href="../Slot.html">Slot</a> into a <a href="Def.html">Def</a>[Slot].</p>
+  <p>Keeps call sites concise where a <code>Def[Slot]</code> is expected but you have a <code>Slot</code>. If both <code>Def[Slot]</code> and <code>Use[Slot]</code> are applicable at the same call site, disambiguate explicitly with <code>Def(s)</code> or <code>Use(s)</code>.</p>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">

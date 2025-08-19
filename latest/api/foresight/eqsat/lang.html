@@ -10,6 +10,92 @@
   <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="lang.html" t="n" class="documentableName ">foresight.eqsat.lang</a>
  </div>
 </div>
+<div class="cover">
+ <div class="doc">
+  <p>Defines the type classes and data types that connect a surface AST (your domain language) to Foresight’s core e-graph representation. It lets you describe how your AST maps to e-graph nodes, mark which wrappers are leaf atoms, encode and decode between surface terms and mixed trees, build rules from surface syntax, and embed analysis results back into the surface language.</p>
+  <p>The API is intentionally minimal and strongly typed. In practice most users only derive <a href="lang/Language.html">foresight.eqsat.lang.Language</a> and add <code>derives Atom</code> to a few case classes.</p>
+  <h2><a href="#core-abstractions" id="core-abstractions">Core abstractions</a></h2>
+  <p><a href="lang/Language.html">foresight.eqsat.lang.Language</a> defines the bridge for a surface language <code>E</code>. It provides:</p>
+  <ul>
+   <li><code>toTree</code> and <code>fromTree</code>: conversion between surface expressions and core trees.</li>
+   <li><code>toSearcher</code>, <code>toApplier</code>, and <code>rule</code>: ways to build rewrite patterns directly from surface syntax.</li>
+   <li><code>opOrdering</code>: a deterministic ordering over nodes for reproducibility.</li>
+  </ul>
+  <p><a href="lang/LanguageOp.html">foresight.eqsat.lang.LanguageOp</a> is the canonical node representation the e-graph stores for a given language. You never construct it directly; obtain it through a <code>Language[E]</code>. An <code>Ordering[LanguageOp[E]]</code> is summonable whenever a <code>Language[E]</code> is in scope.</p>
+  <p><a href="lang/Atom.html">foresight.eqsat.lang.Atom</a> and <a href="lang/AsAtom.html">foresight.eqsat.lang.AsAtom</a> mark a wrapper type <code>A</code> as a leaf atom, whose stored payload type is <code>Payload</code>. You can write <code>derives Atom</code> on single-field case classes to derive this automatically, and the corresponding <code>AsAtom[A, Payload]</code> bridge will be provided.</p>
+  <p><a href="lang.html#AtomEncoder-0">foresight.eqsat.lang.AtomEncoder</a> and <a href="lang.html#AtomDecoder-0">foresight.eqsat.lang.AtomDecoder</a> handle encoding and decoding between surface values and payloads. These are usually derived automatically from <code>Atom</code> and <code>AsAtom</code> instances.</p>
+  <p><a href="lang/AnalysisBox.html">foresight.eqsat.lang.AnalysisBox</a> is evidence that your language can box an analysis result <code>A</code> into an <code>E</code> node (for example, <code>Fact[A]</code>). This enables reconstruction of surface terms from analysis results.</p>
+  <p><a href="lang/Use.html">foresight.eqsat.lang.Use</a> and <a href="lang/Def.html">foresight.eqsat.lang.Def</a> are lightweight wrappers to distinguish between read sites and binder sites, commonly over <a href="Slot.html">Slot</a>. Implicit conversions from <code>Slot</code> keep call sites clean.</p>
+  <h2><a href="#getting-started" id="getting-started">Getting started</a></h2>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.lang.*
+</span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting.{Rule, ReversibleSearcher}
+</span><span line-number="3" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting.patterns.Pattern
+</span><span line-number="4" class=""><span class="tooltip-container"></span>
+</span><span line-number="5" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="6" class=""><span class="tooltip-container"></span>final case class Lit(i: Int)           extends Expr derives Atom
+</span><span line-number="7" class=""><span class="tooltip-container"></span>final case class Add(x: Expr, y: Expr) extends Expr
+</span><span line-number="8" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall)   extends Expr derives Atom
+</span><span line-number="9" class=""><span class="tooltip-container"></span>
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val Lang = summon[Language[Expr]]
+</span><span line-number="11" class=""><span class="tooltip-container"></span>
+</span><span line-number="12" class=""><span class="tooltip-container"></span>val pat: Lang.MTree[Pattern.Var] =
+</span><span line-number="13" class=""><span class="tooltip-container"></span> Lang.toTree(Add(Ref(ec1), Ref(ec2)))
+</span><span line-number="14" class=""><span class="tooltip-container"></span>
+</span><span line-number="15" class=""><span class="tooltip-container"></span>val r: Rule[Lang.Op, PatternMatch[Lang.Op], ?] =
+</span><span line-number="16" class=""><span class="tooltip-container"></span> Lang.rule("comm-add", Add(x, y), Add(y, x))
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <h2><a href="#atoms" id="atoms">Atoms</a></h2>
+  <p>Single-field wrappers, such as handles or IDs, can be made first-class <a href="MixedTree.html">MixedTree</a> atoms by deriving <code>Atom</code>.</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>If a case is not a single-field product, provide a manual <code>Atom</code> and <code>AsAtom</code> instance.</p>
+  <h2><a href="#encoding-and-decoding" id="encoding-and-decoding">Encoding and decoding</a></h2>
+  <p>Encoders and decoders are derived when possible. For example:</p>
+  <ul>
+   <li><code>AtomEncoder[Expr, Int]</code> succeeds on <code>Lit(i)</code> and yields <code>i</code>.</li>
+   <li><code>AtomDecoder[Expr, EClassCall]</code> succeeds on <code>Ref(id)</code> and yields <code>Ref(id)</code>.</li>
+  </ul>
+  <p>You rarely need to implement these by hand. Add <code>derives Atom</code> to your single-field wrappers and let the compiler summon the right instances.</p>
+  <h2><a href="#analysis-integration" id="analysis-integration">Analysis integration</a></h2>
+  <p>If your language can wrap analysis results, such as <code>Fact[A] &lt;: Expr</code>, provide an <code>AnalysisBox</code>:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>given AnalysisBox[Expr] with
+</span><span line-number="2" class=""><span class="tooltip-container"></span> type Box[X] = Fact[X]
+</span><span line-number="3" class=""><span class="tooltip-container"></span> def box[X](x: X) = Fact(x)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>This enables decoders like <code>AtomDecoder[Expr, AnalysisFact[A]]</code> and allows utilities such as <code>Language.fromAnalysisNode</code> to reconstruct surface terms from analysis views.</p>
+  <h2><a href="#slots-binders-and-uses" id="slots-binders-and-uses">Slots, binders, and uses</a></h2>
+  <p>Use <code>Def[Slot]</code> to represent binders and <code>Use[Slot]</code> for read sites. Implicit conversions from <code>Slot</code> keep code concise:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def let(param: Def[Slot], body: Expr): Expr = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val s: Slot = ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span>let(s, body)        // Slot =&gt; Def[Slot]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>read(Use(s))        // explicit
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <h2><a href="#checklist" id="checklist">Checklist</a></h2>
+  <ul>
+   <li>Add <code>derives Atom</code> to single-field wrappers.</li>
+   <li>Implement or derive a single <code>Language[E]</code> for your AST.</li>
+   <li>Build rules and patterns with surface terms through <code>Language</code>.</li>
+   <li>Provide an <code>AnalysisBox[E]</code> if analyses should appear as surface nodes.</li>
+  </ul>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes"></dl>
+ </section>
+</div>
 <section id="members-list">
  <h2 class="h500">Members list</h2>
  <div class="documentableFilter">
@@ -653,10 +739,44 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Labels a value as a binder/definition site in the AST or IR.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Labels a value as a binder/definition site in the AST or IR.</p>
+              <p>In slotted e-graphs, both binders and uses are represented as raw <a href="Slot.html">Slot</a>s. Wrapping them as <code>Def[A]</code> (and its counterpart <code>Use[A]</code>) makes intent explicit in type signatures and constructors, while staying allocation-free at runtime (<code>AnyVal</code>).</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>the underlying payload (commonly <a href="Slot.html">Slot</a>)</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lambda(param: Use[Slot], body: Expr) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Var(slot: Use[Slot]) extends Expr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val x = Slot.fresh()
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Lambda(Def(x), Var(Use(x))) // defines slot x
+</span><span line-number="6" class=""><span class="tooltip-container"></span>Lambda(x, Var(x))           // also defines slot x, but less explicit
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -1178,10 +1298,43 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Labels a value as a use/read site in the AST or IR.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Labels a value as a use/read site in the AST or IR.</p>
+              <p>In slotted e-graphs, binders and uses are often both represented as <a href="Slot.html">Slot</a>s. Wrapping them in <code>Use[A]</code> (and its counterpart <code>Def[A]</code>) makes intent explicit in type signatures and constructors while remaining allocation-free at runtime (<code>AnyVal</code>).</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>the underlying payload (often <a href="Slot.html">Slot</a>)</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Var(param: Use[Slot]) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val x = Slot.fresh()
+</span><span line-number="4" class=""><span class="tooltip-container"></span>Var(Use(x)) // a use of slot x
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Var(x)      // also a use of slot x, but less explicit
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -1514,4 +1667,4 @@
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li><li><a href="#Types">Types</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Extensions">Extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li><li><a href="#Types">Types</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Extensions">Extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
