@@ -133,11 +133,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The <em>core</em> tree shape for this language.</p>
+             <p>The core tree shape for this language.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The <em>core</em> tree shape for this language.</p>
+              <p>The core tree shape for this language.</p>
               <p><code>MTree[A]</code> is a mixed tree whose internal nodes are <a href="Language.html#Op-0">Op</a> and whose leaves are atoms of type <code>A</code>. Different choices of <code>A</code> let the same surface syntax serve distinct purposes (e.g., patterns vs. concrete calls).</p>
              </div>
              <h2 class="h200">Attributes</h2>
@@ -217,7 +217,7 @@ node3 -> node2;
                A
               </dt>
               <dd class="body-medium">
-               <p>the atom payload type present at the leaves</p>
+               <p>The atom payload type present at the leaves.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -226,13 +226,13 @@ node3 -> node2;
                dec
               </dt>
               <dd class="body-medium">
-               <p>a given <a href="../lang.html#AtomDecoder-0">AtomDecoder</a> that knows how to turn <code>A</code> atoms back into <code>E</code> fragments</p>
+               <p>A given <a href="../lang.html#AtomDecoder-0">AtomDecoder</a> that knows how to turn <code>A</code> atoms back into <code>E</code> fragments.</p>
               </dd>
               <dt class="body-small">
                n
               </dt>
               <dd class="body-medium">
-               <p>a mixed tree with <a href="Language.html#Op-0">Op</a> internal nodes and <code>A</code> atoms</p>
+               <p>A mixed tree with <a href="Language.html#Op-0">Op</a> internal nodes and <code>A</code> atoms.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -241,7 +241,7 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>the reconstructed surface expression Note: decoding is typically partial in the presence of analysis-only atoms; see <a href="Language.html#fromAnalysisNode-bfc">fromAnalysisNode</a>.</p>
+               <p>The reconstructed surface expression. Note: decoding is typically partial in the presence of analysis-only atoms; see <a href="Language.html#fromAnalysisNode-bfc">fromAnalysisNode</a>.</p>
               </dd>
              </dl>
             </div>
@@ -305,7 +305,7 @@ node3 -> node2;
                A
               </dt>
               <dd class="body-medium">
-               <p>the atom payload type at the leaves (e.g., <span data-unresolved-link="" title="Problem linking Pattern.Var: No DRI found for query">Pattern.Var</span>, <a href="../EClassCall.html">EClassCall</a>, etc.)</p>
+               <p>The atom payload type at the leaves (e.g., <a href="../rewriting/patterns/Pattern$$Var.html">foresight.eqsat.rewriting.patterns.Pattern.Var</a>, <a href="../EClassCall.html">EClassCall</a>, etc.).</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -314,13 +314,13 @@ node3 -> node2;
                e
               </dt>
               <dd class="body-medium">
-               <p>a surface AST node</p>
+               <p>A surface AST node.</p>
               </dd>
               <dt class="body-small">
                enc
               </dt>
               <dd class="body-medium">
-               <p>a given <a href="../lang.html#AtomEncoder-0">AtomEncoder</a> that knows how to encode the leaf atoms for <code>A</code></p>
+               <p>A given <a href="../lang.html#AtomEncoder-0">AtomEncoder</a> that knows how to encode the leaf atoms for <code>A</code>.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -329,11 +329,20 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>a mixed core tree equivalent to <code>e</code> Example (to a pattern tree):</p>
-               <div class="snippet mono-small-block">
-                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val patTree: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](surfaceExpr)
+               <p>A mixed core tree equivalent to <code>e</code>.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val patTree: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](surfaceExpr)
 </span></code></pre>
-                <div class="buttons"></div>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
                </div>
               </dd>
              </dl>
@@ -379,7 +388,7 @@ node3 -> node2;
                A
               </dt>
               <dd class="body-medium">
-               <p>the analysis result type</p>
+               <p>The analysis result type.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -388,31 +397,31 @@ node3 -> node2;
                args
               </dt>
               <dd class="body-medium">
-               <p>analysis results for the node’s children, in order</p>
+               <p>Analysis results for the node’s children, in order.</p>
               </dd>
               <dt class="body-small">
                dec
               </dt>
               <dd class="body-medium">
-               <p>a decoder from <a href="AnalysisFact.html">AnalysisFact</a> atoms back to surface <code>E</code></p>
+               <p>A decoder from <a href="AnalysisFact.html">AnalysisFact</a> atoms back to surface <code>E</code>.</p>
               </dd>
               <dt class="body-small">
                defs
               </dt>
               <dd class="body-medium">
-               <p>slots defined by this node (binders)</p>
+               <p>Slots defined by this node (binders).</p>
               </dd>
               <dt class="body-small">
                node
               </dt>
               <dd class="body-medium">
-               <p>the core node payload (<a href="Language.html#Op-0">Op</a>)</p>
+               <p>The core node payload (<a href="Language.html#Op-0">Op</a>).</p>
               </dd>
               <dt class="body-small">
                uses
               </dt>
               <dd class="body-medium">
-               <p>slots used by this node (reads)</p>
+               <p>Slots used by this node (reads).</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -421,12 +430,101 @@ node3 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>the surface expression reconstructed from this node’s analysis view Example:</p>
-               <div class="snippet mono-small-block">
-                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val surf: E =
+               <p>The surface expression reconstructed from this node’s analysis view.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val surf: E =
 </span><span line-number="2" class=""><span class="tooltip-container"></span> Lang.fromAnalysisNode(resultNode, defs, uses, childFacts)(using analysisFactDecoder)
 </span></code></pre>
-                <div class="buttons"></div>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="rule-d98">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-d98" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>, <span t="k"></span><span data-unresolved-link="" t="n">lhs</span>: <span t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="n">rhs</span>: <span t="t">E</span>)(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Construct a rewrite rule directly from surface syntax.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Construct a rewrite rule directly from surface syntax.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <a href="../rewriting/patterns/Pattern$$Var.html">foresight.eqsat.rewriting.patterns.Pattern.Var</a> leaves.</p>
+              </dd>
+              <dt class="body-small">
+               lhs
+              </dt>
+              <dd class="body-medium">
+               <p>Surface pattern to match.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name (used in logs/diagnostics).</p>
+              </dd>
+              <dt class="body-small">
+               rhs
+              </dt>
+              <dd class="body-medium">
+               <p>Surface template to build.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val r =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> Lang.rule("comm-add", Add(x, y), Add(y, x))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
                </div>
               </dd>
              </dl>
@@ -463,7 +561,7 @@ node3 -> node2;
                EGraphT
               </dt>
               <dd class="body-medium">
-               <p>an e-graph type that supports this language</p>
+               <p>An e-graph type that supports this language.</p>
               </dd>
              </dl>
              <h2 class="h200">Value parameters</h2>
@@ -472,7 +570,54 @@ node3 -> node2;
                e
               </dt>
               <dd class="body-medium">
-               <p>surface-side template for rewriting</p>
+               <p>Surface-side template for rewriting.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="toSearcher-fffff2be">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#toSearcher-fffff2be" t="n" class="documentableName ">toSearcher</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">e</span>: <span t="t">E</span>)(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <a href="../rewriting/ReversibleSearcher.html" t="t">ReversibleSearcher</a>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Build a reversible searcher from a surface expression, by first encoding to a pattern tree.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Build a reversible searcher from a surface expression, by first encoding to a pattern tree.</p>
+              <p>Requires an encoder for <a href="../rewriting/patterns/Pattern$$Var.html">foresight.eqsat.rewriting.patterns.Pattern.Var</a> leaves, i.e., a way to turn surface leaves into pattern variables.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               e
+              </dt>
+              <dd class="body-medium">
+               <p>Surface-side pattern.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
