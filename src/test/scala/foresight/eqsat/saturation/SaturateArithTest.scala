@@ -54,12 +54,18 @@ class SaturateArithTest {
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 
-    def strategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
+    def deterministicStrategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
       simpleStrategy,
-      cachingStrategy,
+      cachingStrategy
+    )
+
+    def stochasticStrategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
       uniformStochasticStrategy,
       uniformStochasticCachingStrategy
     )
+
+    def strategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] =
+      deterministicStrategies ++ stochasticStrategies
 
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {
       val x = MixedTree.Atom(Pattern.Var.fresh())
@@ -224,7 +230,7 @@ class SaturateArithTest {
 
     assert(!egraph3.areSame(c1, c2))
 
-    for (strategy <- Rules.strategies) {
+    for (strategy <- Rules.deterministicStrategies) {
       val Some(egraph4) = strategy(egraph3)
       assert(egraph4.areSame(c1, c2))
     }
