@@ -533,6 +533,429 @@ node3 -> node2;
           </div>
          </div>
         </div>
+        <div class="documentableElement" id="rule-fffffcfc">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-fffffcfc" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>)(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: <span t="t">E</span><span t="k"> =&gt; </span>(<span t="t">E</span>, <span t="t">E</span>))(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Create a rewrite rule by supplying a lambda that receives one fresh pattern variable.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Create a rewrite rule by supplying a lambda that receives one fresh pattern variable.</p>
+              <p>This overload is useful when the rule needs just a single variable and you prefer not to predeclare <code>Pattern.Var</code>s or name variables explicitly.</p>
+              <p>The implementation generates a fresh <a href="../rewriting/patterns/Pattern$$Var.html">foresight.eqsat.rewriting.patterns.Pattern.Var</a>, decodes it back into a surface <code>E</code> via the given <a href="../lang.html#AtomDecoder-0">AtomDecoder</a>, and passes that value to <code>f</code>. The pair <code>(lhs, rhs)</code> returned by <code>f</code> is then compiled into a <span data-unresolved-link="">foresight.eqsat.rewriting.Rule</span>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder from <code>Pattern.Var</code> atoms back to surface <code>E</code> (used to supply the lambda arg).</p>
+              </dd>
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <code>Pattern.Var</code> leaves (used to compile <code>lhs</code>/<code>rhs</code>).</p>
+              </dd>
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>A function that receives one fresh <code>E</code> standing for a pattern variable, and returns <code>(lhs, rhs)</code> built in surface syntax.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// β-reduction for a single-argument lambda, schematically: (λx. body)(x) → body
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val beta =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Lang.rule("beta") { x =&gt;
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   (App(Lam(Def(param), body = x), arg = x),
+</span><span line-number="5" class=""><span class="tooltip-container"></span>    x) // simplified example
+</span><span line-number="6" class=""><span class="tooltip-container"></span> }
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="rule-d7d">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-d7d" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>)(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: (<span t="t">E</span>, <span t="t">E</span>)<span t="k"> =&gt; </span>(<span t="t">E</span>, <span t="t">E</span>))(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Create a rewrite rule by supplying a lambda that receives two fresh pattern variables.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Create a rewrite rule by supplying a lambda that receives two fresh pattern variables.</p>
+              <p>Use this when your rule naturally refers to two variables, without having to allocate or manage them explicitly.</p>
+              <p>Fresh variables are generated as <a href="../rewriting/patterns/Pattern$$Var.html">foresight.eqsat.rewriting.patterns.Pattern.Var</a>s and decoded to surface <code>E</code> values using the given <a href="../lang.html#AtomDecoder-0">AtomDecoder</a> before being passed to <code>f</code>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder from <code>Pattern.Var</code> atoms back to surface <code>E</code>.</p>
+              </dd>
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <code>Pattern.Var</code> leaves.</p>
+              </dd>
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>A function of two fresh variables that returns <code>(lhs, rhs)</code>.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Commutativity: x + y → y + x
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val addComm =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Lang.rule("comm-add") { (x, y) =&gt;
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   (Add(x, y), Add(y, x))
+</span><span line-number="5" class=""><span class="tooltip-container"></span> }
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="rule-dfe">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-dfe" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>)(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: (<span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>)<span t="k"> =&gt; </span>(<span t="t">E</span>, <span t="t">E</span>))(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Create a rewrite rule by supplying a lambda that receives three fresh pattern variables.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Create a rewrite rule by supplying a lambda that receives three fresh pattern variables.</p>
+              <p>Choose this overload when your rule template references three variables.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder from <code>Pattern.Var</code> atoms back to surface <code>E</code>.</p>
+              </dd>
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <code>Pattern.Var</code> leaves.</p>
+              </dd>
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>A function of three fresh variables that returns <code>(lhs, rhs)</code>.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Associativity (one direction): (x + y) + z → x + (y + z)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val addAssoc1 =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Lang.rule("assoc-add-1") { (x, y, z) =&gt;
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   (Add(Add(x, y), z), Add(x, Add(y, z)))
+</span><span line-number="5" class=""><span class="tooltip-container"></span> }
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="rule-fffffe7f">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-fffffe7f" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>)(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: (<span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>)<span t="k"> =&gt; </span>(<span t="t">E</span>, <span t="t">E</span>))(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Create a rewrite rule by supplying a lambda that receives four fresh pattern variables.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Create a rewrite rule by supplying a lambda that receives four fresh pattern variables.</p>
+              <p>This is helpful for distributivity and similar rules with four bind sites.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder from <code>Pattern.Var</code> atoms back to surface <code>E</code>.</p>
+              </dd>
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <code>Pattern.Var</code> leaves.</p>
+              </dd>
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>A function of four fresh variables that returns <code>(lhs, rhs)</code>.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>// Distributivity: x * (y + z) → (x * y) + (x * z)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val mulDistOverAdd =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Lang.rule("mul-dist-add") { (x, y, z, w) =&gt;
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   // (example with four vars just to illustrate arity)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   (Mul(x, Add(y, z)), Add(Mul(x, y), Mul(x, z)))
+</span><span line-number="6" class=""><span class="tooltip-container"></span> }
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="rule-ffffff00">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Language.html#rule-ffffff00" t="n" class="documentableName ">rule</a>[<span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<a href="Language.html#Op-0" t="t">Op</a>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<a href="Language.html#Op-0" t="t">Op</a>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">name</span>: <span data-unresolved-link="" t="t">String</span>)(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: (<span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>, <span t="t">E</span>)<span t="k"> =&gt; </span>(<span t="t">E</span>, <span t="t">E</span>))(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="../lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span t="t">E</span>, <a href="../rewriting/patterns/Pattern$$Var.html" t="t">Var</a>]): <span data-unresolved-link="" t="t">Rule</span>[<a href="Language.html#Op-0" t="t">Op</a>, <a href="../rewriting/patterns/PatternMatch.html" t="t">PatternMatch</a>[<a href="Language.html#Op-0" t="t">Op</a>], <span data-unresolved-link="" t="t">EGraphT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Create a rewrite rule by supplying a lambda that receives five fresh pattern variables.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Create a rewrite rule by supplying a lambda that receives five fresh pattern variables.</p>
+              <p>This highest-arity overload avoids manual variable pluming in complex rules. If you need more than five variables, consider building helper tuples or switching to the explicit <code>(name, lhs, rhs)</code> overload.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>An e-graph type that supports this language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder from <code>Pattern.Var</code> atoms back to surface <code>E</code>.</p>
+              </dd>
+              <dt class="body-small">
+               enc
+              </dt>
+              <dd class="body-medium">
+               <p>Encoder for <code>Pattern.Var</code> leaves.</p>
+              </dd>
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>A function of five fresh variables that returns <code>(lhs, rhs)</code>.</p>
+              </dd>
+              <dt class="body-small">
+               name
+              </dt>
+              <dd class="body-medium">
+               <p>Human-readable rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val fancy =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> Lang.rule("five-var-demo") { (a, b, c, d, e) =&gt;
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   (F(a, b, c, d, e), F(e, d, c, b, a))
+</span><span line-number="4" class=""><span class="tooltip-container"></span> }
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
         <div class="documentableElement" id="toApplier-fffff772">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
