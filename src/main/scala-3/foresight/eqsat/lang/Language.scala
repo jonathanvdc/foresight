@@ -8,33 +8,160 @@ import foresight.util.ordering.SeqOrdering
 import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 
+/**
+ * Type class describing how a *surface* AST `E` maps to the *core* e-graph language.
+ *
+ * A `Language[E]` provides:
+ *  - a node type alias [[Op]] (backed by `LanguageOp[E]`) that the e-graph stores,
+ *  - encoding/decoding between `E` and a core tree [[MTree]],
+ *  - an ordering over nodes (for deterministic e-graph behavior),
+ *  - convenience bridges from `E` values to matchers/appliers/rules,
+ *  - and a helper to reconstruct `E` from an analysis-view of a node.
+ *
+ * Typical pattern:
+ * {{{
+ * sealed trait ArithExpr derives Language
+ * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+ * // ...
+ *
+ * val Lang = summon[Language[ArithExpr]]
+ * val e: ArithExpr = Add( /* ... */ )
+ *
+ * // Encode to a core tree
+ * val t: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](e)
+ *
+ * // Build a rewrite rule directly from surface syntax
+ * val r = Lang.rule("comm-add", Add(x, y), Add(y, x))
+ * }}}
+ */
 trait Language[E]:
+
+  /** The node type stored in the e-graph for this surface language. */
   type Op = LanguageOp[E]
+
+  /**
+   * The *core* tree shape for this language.
+   *
+   * `MTree[A]` is a mixed tree whose internal nodes are [[Op]] and whose leaves are atoms of type `A`.
+   * Different choices of `A` let the same surface syntax serve distinct purposes (e.g., patterns vs. concrete calls).
+   */
   type MTree[A] = MixedTree[Op, A]
 
+  /**
+   * Total ordering on [[Op]].
+   *
+   * Used for deterministic hashing/canonicalization, stable printing, and for any data structures
+   * that rely on an `Ordering` (e.g., priority queues). Implementations should be consistent with
+   * structural equality of `Op`.
+   */
   def opOrdering: Ordering[Op]
 
-  /** Encode surface AST into the core tree. */
+  /**
+   * Encode a surface AST node `e: E` into the core tree representation [[MTree]].
+   *
+   * @tparam A    the atom payload type at the leaves (e.g., [[Pattern.Var]], [[EClassCall]], etc.)
+   * @param e     a surface AST node
+   * @param enc   a given [[AtomEncoder]] that knows how to encode the leaf atoms for `A`
+   * @return      a mixed core tree equivalent to `e`
+   *
+   * Example (to a pattern tree):
+   * {{{
+   * val patTree: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](surfaceExpr)
+   * }}}
+   */
   def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A]
 
-  /** Decode core tree back to the surface AST. */
+  /**
+   * Decode a core tree back into a surface AST `E`.
+   *
+   * @tparam A    the atom payload type present at the leaves
+   * @param n     a mixed tree with [[Op]] internal nodes and `A` atoms
+   * @param dec   a given [[AtomDecoder]] that knows how to turn `A` atoms back into `E` fragments
+   * @return      the reconstructed surface expression
+   *
+   * Note: decoding is typically partial in the presence of analysis-only atoms; see [[fromAnalysisNode]].
+   */
   def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
 
-  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
+  /**
+   * Build a reversible searcher from a surface expression, by first encoding to a pattern tree.
+   *
+   * Requires an encoder for [[Pattern.Var]] leaves, i.e., a way to turn surface leaves into pattern variables.
+   *
+   * @param e       surface-side pattern
+   * @tparam EGraphT an e-graph type that supports this language
+   */
+  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
+                                                                    (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
 
-  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
+  /**
+   * Build a pattern applier from a surface expression, by first encoding to a pattern tree.
+   *
+   * This is commonly used for rule RHS construction.
+   *
+   * @param e       surface-side template for rewriting
+   * @tparam EGraphT an e-graph type that supports this language
+   */
+  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
+                                                                   (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
 
+  /**
+   * Construct a rewrite rule directly from surface syntax.
+   *
+   * @param name    human-readable rule name (used in logs/diagnostics)
+   * @param lhs     surface pattern to match
+   * @param rhs     surface template to build
+   * @param enc     encoder for [[Pattern.Var]] leaves
+   * @tparam EGraphT an e-graph type that supports this language
+   *
+   * Example:
+   * {{{
+   * val r =
+   *   Lang.rule("comm-add", Add(x, y), Add(y, x))
+   * }}}
+   */
   def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
   : Rule[Op, PatternMatch[Op], EGraphT] =
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
 
-  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E =
-    fromTree[AnalysisFact[A]](MixedTree.Node(node, defs, uses, args.map(AnalysisFact(_)).map(MixedTree.Atom(_))))(using dec)
-
+  /**
+   * Reconstruct a surface expression `E` from an *analysis-view* of a single node.
+   *
+   * This helper wraps argument analysis results `args: Seq[A]` in [[AnalysisFact]] atoms and
+   * builds a one-level [[MixedTree.Node]] with the given `node`, `defs`, and `uses`.
+   * It then decodes the mixed tree using a decoder for `AnalysisFact[A]` atoms.
+   *
+   * This is useful when implementing analyses that want to "peek" back into the surface
+   * language at a particular node boundary, while still operating within the core representation.
+   *
+   * @param node  the core node payload ([[Op]])
+   * @param defs  slots defined by this node (binders)
+   * @param uses  slots used by this node (reads)
+   * @param args  analysis results for the node’s children, in order
+   * @param dec   a decoder from [[AnalysisFact]] atoms back to surface `E`
+   * @tparam A    the analysis result type
+   * @return      the surface expression reconstructed from this node’s analysis view
+   *
+   * Example:
+   * {{{
+   * val surf: E =
+   *   Lang.fromAnalysisNode(resultNode, defs, uses, childFacts)(using analysisFactDecoder)
+   * }}}
+   */
+  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])
+                         (using dec: AtomDecoder[E, AnalysisFact[A]]): E =
+    fromTree[AnalysisFact[A]](
+      MixedTree.Node(
+        node,
+        defs,
+        uses,
+        args.map(AnalysisFact(_)).map(MixedTree.Atom(_))
+      )
+    )
 
 object Language:
   inline given derived[E](using m: Mirror.SumOf[E]): Language[E] =
@@ -184,6 +311,6 @@ object Language:
       case _: (c *: cs) =>
         compsForCase[c](using summonInline[Mirror.ProductOf[c]]) :: compsForCasesList[cs]
 
-  inline def payloadComparatorsFor[E](using s: Mirror.SumOf[E]): Array[Array[(Any, Any) => Int]] =
+  private inline def payloadComparatorsFor[E](using s: Mirror.SumOf[E]): Array[Array[(Any, Any) => Int]] =
     type Cases = s.MirroredElemTypes
     compsForCasesList[Cases].toArray
