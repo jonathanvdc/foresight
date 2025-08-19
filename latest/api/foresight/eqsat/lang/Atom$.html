@@ -111,11 +111,11 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Type alias that pins the associated <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> of <code>A</code> to <code>B</code>.</p>
+             <p>Type alias that pins the associated <code>Payload</code> of <code>A</code> to <code>B</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Type alias that pins the associated <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> of <code>A</code> to <code>B</code>.</p>
+              <p>Type alias that pins the associated <code>Payload</code> of <code>A</code> to <code>B</code>.</p>
               <p>Useful for APIs that need to mention the payload type explicitly:</p>
               <div class="snippet mono-small-block">
                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def needsEClass(using Atom.Aux[Ref, EClassCall]) = ...
@@ -167,8 +167,8 @@ node3 -> node2;
               <p>Derive an <code>Atom[A]</code> instance for single-field case classes.</p>
               <p>The derived instance:</p>
               <ul>
-               <li>sets <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> to the single field's type,</li>
-               <li>implements <span data-unresolved-link="" title="Problem linking asAtom: No DRI found for query">asAtom</span> by projecting/injecting that field.</li>
+               <li>sets <code>Payload</code> to the single field's type,</li>
+               <li>implements <code>asAtom</code> by projecting/injecting that field.</li>
               </ul>
               <p>Fails to compile if <code>A</code> is not a product with exactly one element.</p>
               <p>Example:</p>
