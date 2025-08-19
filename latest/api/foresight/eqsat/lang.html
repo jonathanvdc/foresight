@@ -75,11 +75,11 @@
   <h2><a href="#slots-binders-and-uses" id="slots-binders-and-uses">Slots, binders, and uses</a></h2>
   <p>Use <code>Def[Slot]</code> to represent binders and <code>Use[Slot]</code> for read sites. Implicit conversions from <code>Slot</code> keep code concise:</p>
   <div class="snippet mono-small-block">
-   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def let(param: Def[Slot], body: Expr): Expr = ...
-</span><span line-number="2" class=""><span class="tooltip-container"></span>
-</span><span line-number="3" class=""><span class="tooltip-container"></span>val s: Slot = ...
-</span><span line-number="4" class=""><span class="tooltip-container"></span>let(s, body)        // Slot =&gt; Def[Slot]
-</span><span line-number="5" class=""><span class="tooltip-container"></span>read(Use(s))        // explicit
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Lambda(param: Def[Slot], body: Expr) extends Expr
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Var(param: Use[Slot]) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val s = Slot.fresh()
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Lambda(s, Var(s)) // creates Lambda(Def(s), Use(s))
 </span></code></pre>
    <div class="buttons"></div>
   </div>
