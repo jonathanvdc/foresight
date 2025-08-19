@@ -108,11 +108,11 @@ package foresight.eqsat
  * conversions from `Slot` keep code concise:
  *
  * {{{
- * def let(param: Def[Slot], body: Expr): Expr = ...
+ * final case class Lambda(param: Def[Slot], body: Expr) extends Expr
+ * final case class Var(param: Use[Slot]) extends Expr
  *
- * val s: Slot = ...
- * let(s, body)        // Slot => Def[Slot]
- * read(Use(s))        // explicit
+ * val s = Slot.fresh()
+ * Lambda(s, Var(s)) // creates Lambda(Def(s), Use(s))
  * }}}
  *
  * ## Checklist
