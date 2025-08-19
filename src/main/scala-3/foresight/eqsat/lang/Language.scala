@@ -29,13 +29,11 @@ trait Language[E]:
   def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
-  : Rule[Op, PatternMatch[Op], EGraphT] = {
+  : Rule[Op, PatternMatch[Op], EGraphT] =
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
-  }
 
-  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E = {
+  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E =
     fromTree[AnalysisFact[A]](MixedTree.Node(node, defs, uses, args.map(AnalysisFact(_)).map(MixedTree.Atom(_))))(using dec)
-  }
 
 
 object Language:
