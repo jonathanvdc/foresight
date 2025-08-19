@@ -39,13 +39,11 @@
      <div>
       <p>Typical usage (single-field wrapper as an atom)</p>
       <div class="snippet mono-small-block">
-       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
-</span><span line-number="2" class=""><span class="tooltip-container"></span>// Payload is EClassCall:
-</span><span line-number="3" class=""><span class="tooltip-container"></span>summon[Atom.Aux[Ref, EClassCall]]
-</span><span line-number="4" class=""><span class="tooltip-container"></span>val inst  = summon[Atom[Ref]]
-</span><span line-number="5" class=""><span class="tooltip-container"></span>val ref   = Ref(id)
-</span><span line-number="6" class=""><span class="tooltip-container"></span>val id2   = inst.asAtom.toAtom(ref)     // Ref -&gt; EClassCall
-</span><span line-number="7" class=""><span class="tooltip-container"></span>val ref2  = inst.asAtom.fromAtom(id2)   // EClassCall -&gt; Ref
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val L = summon[Language[Expr]]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref = Ref(id)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val tree = L.toTree[EClassCall](ref) // yields MixedTree.Atom(id)
 </span></code></pre>
        <div class="buttons"></div>
       </div>

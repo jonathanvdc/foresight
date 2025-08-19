@@ -438,13 +438,11 @@
                 <div>
                  <p>Typical usage (single-field wrapper as an atom)</p>
                  <div class="snippet mono-small-block">
-                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
-</span><span line-number="2" class=""><span class="tooltip-container"></span>// Payload is EClassCall:
-</span><span line-number="3" class=""><span class="tooltip-container"></span>summon[Atom.Aux[Ref, EClassCall]]
-</span><span line-number="4" class=""><span class="tooltip-container"></span>val inst  = summon[Atom[Ref]]
-</span><span line-number="5" class=""><span class="tooltip-container"></span>val ref   = Ref(id)
-</span><span line-number="6" class=""><span class="tooltip-container"></span>val id2   = inst.asAtom.toAtom(ref)     // Ref -&gt; EClassCall
-</span><span line-number="7" class=""><span class="tooltip-container"></span>val ref2  = inst.asAtom.fromAtom(id2)   // EClassCall -&gt; Ref
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val L = summon[Language[Expr]]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref = Ref(id)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val tree = L.toTree[EClassCall](ref) // yields MixedTree.Atom(id)
 </span></code></pre>
                   <div class="buttons"></div>
                  </div>
@@ -1123,8 +1121,15 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Low-priority derivation for sum types <code>E</code>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Low-priority derivation for sum types <code>E</code>.</p>
+              <p>If <code>E</code> is a sealed trait/enum and some of its cases have an <code>AsAtom[Case, A]</code>, the derived decoder tries each such case in order until one succeeds.</p>
+              <p>Priority: these derived instances are lower priority than the specific bridges above, so explicit instances or <code>AnalysisBox</code>/<code>AsAtom</code> bridges win when present.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
@@ -1281,18 +1286,149 @@
         </div>
         <div class="documentableElement" id="AtomDecoder-0" data-f-keywords="opaque">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">opaque </span></span><span class="kind"><span t="k">type </span></span><a href="lang.html#AtomDecoder-0" t="n" class="documentableName ">AtomDecoder</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A decoder from leaf payloads <code>A</code> back to the surface language <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A decoder from leaf payloads <code>A</code> back to the surface language <code>E</code>.</p>
+              <p>Conceptually, <code>AtomDecoder[E, A]</code> tries to interpret an atom (leaf) of type <code>A</code> as an <code>E</code> term. It is <em>partial</em>—decoding may fail—and therefore returns <code>Option[E]</code>.</p>
+              <p>Typical sources of decoders:</p>
+              <ul>
+               <li>From an <code>Atom</code>/<code>AsAtom</code> bridge for a constructor <code>C &lt;: E</code> whose payload type is <code>A</code>.</li>
+               <li>From an <code>AnalysisBox[E]</code> when the payload is <code>AnalysisFact[A]</code> (embed analysis results).</li>
+               <li>Via automatic derivation for sum types <code>E</code> (tries each case that has an <code>AsAtom</code> bridge).</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Single-field wrappers as atoms</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Bridge exists:
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val dec: AtomDecoder[Expr, EClassCall] = summon[AtomDecoder[Expr, EClassCall]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>dec(id)            // Some(Ref(id))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+                <div>
+                 <p>Boxing analysis results</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>given AnalysisBox[Expr] with
+</span><span line-number="4" class=""><span class="tooltip-container"></span> type Box[X] = Fact[X]
+</span><span line-number="5" class=""><span class="tooltip-container"></span> def box[X](x: X) = Fact(x)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val decF: AtomDecoder[Expr, AnalysisFact[Int]] =
+</span><span line-number="7" class=""><span class="tooltip-container"></span> summon[AtomDecoder[Expr, AnalysisFact[Int]]]
+</span><span line-number="8" class=""><span class="tooltip-container"></span>decF(AnalysisFact(42)) // Some(Fact(42))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+                <div>
+                 <p>Fallback/derivation for sums</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lit(i: Int) extends Expr derives Atom
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val dInt: AtomDecoder[Expr, Int]        = summon
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val dRef: AtomDecoder[Expr, EClassCall] = summon
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="AtomEncoder-0" data-f-keywords="opaque">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">opaque </span></span><span class="kind"><span t="k">type </span></span><a href="lang.html#AtomEncoder-0" t="n" class="documentableName ">AtomEncoder</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Encoder from a surface value <code>E</code> to a leaf payload <code>A</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Encoder from a surface value <code>E</code> to a leaf payload <code>A</code>.</p>
+              <p>Conceptually, <code>AtomEncoder[E, A]</code> answers: “If <code>E</code> is a case whose atom payload is <code>A</code>, extract that payload; otherwise, say <code>None</code>.”</p>
+              <p>Its function shape is <code>(E, caseOrdinal) =&gt; Option[A]</code>, where <code>caseOrdinal</code> is the ordinal of the constructor for <code>E</code> (as defined by <code>Mirror.SumOf[E]</code>). When the ordinal matches a case that has an <code>AsAtom[Case, A]</code>, encoding succeeds with <code>Some(payload)</code>; otherwise it returns <code>None</code>.</p>
+              <p>You usually don’t pass ordinals yourself. Higher-level code (e.g., language encoders) supplies the correct ordinal for the current constructor.</p>
+              <p>Typical sources:</p>
+              <ul>
+               <li><strong>Derived</strong> for sealed sum types <code>E</code>: if a case <code>C &lt;: E</code> has <code>AsAtom[C, A]</code> (e.g., via <code>derives Atom</code> on a single-field case class), the derived encoder can extract the leaf payload <code>A</code> from values of that case.</li>
+               <li><strong>Manual</strong> instances are rarely needed; prefer adding <code>derives Atom</code> to the case and letting <code>AsAtom</code> + derivation do the work.</li>
+              </ul>
+              <h3><a href="#laws" id="laws">Laws</a></h3>
+              <p>For any value <code>e: E</code> of case <code>C</code> with ordinal <code>ordC</code>:</p>
+              <ul>
+               <li>If there is <code>AsAtom[C, A]</code>, then <code>encode(enc, e, ordC)</code> must be <code>Some(a)</code> for the exact payload <code>a</code>, and <code>encode(enc, e, ord)</code> must be <code>None</code> for <code>ord != ordC</code>.</li>
+               <li>If no <code>AsAtom[C, A]</code> exists, encoding returns <code>None</code> for all ordinals.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lit(i: Int) extends Expr derives Atom
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Atom
+</span><span line-number="4" class=""><span class="tooltip-container"></span>// Encoders exist for each payload type that a case exposes:
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val encInt: AtomEncoder[Expr, Int] = summon
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val encEClassCall: AtomEncoder[Expr, EClassCall] = summon
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val L = summon[Language[Expr]]
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val lit = Lit(42)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val ref = Ref(eclass)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val litTree = L.toTree[Int](lit)(using encInt)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val refTree = L.toTree[EClassCall](ref)(using encEClassCall)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
            </div>
           </div>
          </div>

@@ -11,7 +11,11 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Low-priority derivation for sum types <code>E</code>.</p>
+  <p>If <code>E</code> is a sealed trait/enum and some of its cases have an <code>AsAtom[Case, A]</code>, the derived decoder tries each such case in order until one succeeds.</p>
+  <p>Priority: these derived instances are lower priority than the specific bridges above, so explicit instances or <code>AnalysisBox</code>/<code>AsAtom</code> bridges win when present.</p>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
@@ -90,9 +94,29 @@ node4 -> node0;
         </div>
         <div class="documentableElement" id="derived-8df" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">given </span></span><a href="LowPriorityAtomDecoder.html#derived-8df" t="n" class="documentableName ">derived</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">s</span>: <span data-unresolved-link="" t="t">SumOf</span>[<span t="t">E</span>]): <a href="../lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span data-unresolved-link="" t="t">E</span>, <span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Derive a decoder for sum type <code>E</code>, attempting each case that provides an <code>AsAtom</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Derive a decoder for sum type <code>E</code>, attempting each case that provides an <code>AsAtom</code>.</p>
+              <p>Summoning <code>AtomDecoder[E, A]</code> will succeed if <strong>any</strong> case of <code>E</code> can decode from <code>A</code>. If no cases match, decoding returns <code>None</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>

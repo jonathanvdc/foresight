@@ -95,18 +95,124 @@ node4 -> node1;
         </div>
         <div class="documentableElement" id="apply-892">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AtomDecoder$.html#apply-892" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">f</span>: <span t="t">A</span><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Option</span>[<span t="t">E</span>]): <span data-unresolved-link="" t="t">E</span><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">A</span>
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Build a decoder from a function <code>A =&gt; Option[E]</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Build a decoder from a function <code>A =&gt; Option[E]</code>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>Source atom payload type.</p>
+              </dd>
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>Target surface type.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               f
+              </dt>
+              <dd class="body-medium">
+               <p>Function implementing the decoding logic.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>An <code>AtomDecoder[E, A]</code> wrapping <code>f</code>.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="decode-fffff0ef">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AtomDecoder$.html#decode-fffff0ef" t="n" class="documentableName ">decode</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">decoder</span>: <span t="t">E</span><span t="k"> =&gt; </span><span t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="n">call</span>: <span t="t">A</span>): <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">E</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Run a decoder on a value.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Run a decoder on a value.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>Source atom payload type.</p>
+              </dd>
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>Target surface type.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               call
+              </dt>
+              <dd class="body-medium">
+               <p>The atom payload to decode.</p>
+              </dd>
+              <dt class="body-small">
+               decoder
+              </dt>
+              <dd class="body-medium">
+               <p>The decoder to run.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p><code>Some(e)</code> if decoding succeeded, <code>None</code> if it failed.</p>
+              </dd>
+             </dl>
+            </div>
            </div>
           </div>
          </div>
@@ -128,18 +234,58 @@ node4 -> node1;
         </div>
         <div class="documentableElement" id="analysisDecoder-fffff50f">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">given </span></span><a href="AtomDecoder$.html#analysisDecoder-fffff50f" t="n" class="documentableName ">analysisDecoder</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">bx</span>: <a href="AnalysisBox.html" t="t">AnalysisBox</a>[<span t="t">E</span>]): <span data-unresolved-link="" t="t">E</span><span t="k"> =&gt; </span><a href="AnalysisFact.html" t="t">AnalysisFact</a>[<span data-unresolved-link="" t="t">A</span>]
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>High-priority decoder for analysis facts: if an <code>AnalysisBox[E]</code> is available, any <code>AnalysisFact[A]</code> can be embedded back into <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>High-priority decoder for analysis facts: if an <code>AnalysisBox[E]</code> is available, any <code>AnalysisFact[A]</code> can be embedded back into <code>E</code>.</p>
+              <p>This lets generic code reconstruct surface terms from analysis views.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="atomDecoderFromAsAtom-ffffff52">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">given </span></span><a href="AtomDecoder$.html#atomDecoderFromAsAtom-ffffff52" t="n" class="documentableName ">atomDecoderFromAsAtom</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">C</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">ev</span>: <span t="t">C</span> <span data-unresolved-link="" t="t">&lt;:&lt;</span> <span t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="n">aa</span>: <a href="AsAtom.html" t="t">AsAtom</a>[<span t="t">C</span>, <span t="t">A</span>]): <span data-unresolved-link="" t="t">E</span><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">A</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>High-priority universal bridge: if there is an <code>AsAtom[C, A]</code> and <code>C &lt;: E</code>, we can decode <code>A</code> into the constructor <code>C</code>, and thus into <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>High-priority universal bridge: if there is an <code>AsAtom[C, A]</code> and <code>C &lt;: E</code>, we can decode <code>A</code> into the constructor <code>C</code>, and thus into <code>E</code>.</p>
+              <p>This is the usual path for single-field case classes declared with <code>derives Atom</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -166,8 +312,14 @@ node4 -> node1;
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Derive a decoder for sum type <code>E</code>, attempting each case that provides an <code>AsAtom</code>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Derive a decoder for sum type <code>E</code>, attempting each case that provides an <code>AsAtom</code>.</p>
+              <p>Summoning <code>AtomDecoder[E, A]</code> will succeed if <strong>any</strong> case of <code>E</code> can decode from <code>A</code>. If no cases match, decoding returns <code>None</code>.</p>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">

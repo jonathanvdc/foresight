@@ -89,9 +89,29 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="encode-d11">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AtomEncoder$.html#encode-d11" t="n" class="documentableName ">encode</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">encoder</span>: <span t="t">E</span><span t="k"> =&gt; </span><span t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="n">value</span>: <span t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Int</span>): <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Run an encoder on a value and a case ordinal.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Run an encoder on a value and a case ordinal.</p>
+              <p>Shorthand to keep call sites uniform.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -113,9 +133,30 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="derived-8e0" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">given </span></span><a href="AtomEncoder$.html#derived-8e0" t="n" class="documentableName ">derived</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">s</span>: <span data-unresolved-link="" t="t">SumOf</span>[<span t="t">E</span>]): <span data-unresolved-link="" t="t">E</span><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">A</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Derived encoder for a sum type <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Derived encoder for a sum type <code>E</code>.</p>
+              <p>The derived instance captures, at summon time, the <code>AsAtom</code> bridges for each case of <code>E</code>. At runtime it dispatches by the provided <code>caseOrdinal</code> and attempts to encode only the matching case; if that case has no <code>AsAtom</code> for <code>A</code>, it returns <code>None</code>.</p>
+              <p>Priority: since this is a <code>given</code> in the companion, it is the default way to obtain an <code>AtomEncoder[E, A]</code>. Provide an explicit instance if you need custom behavior.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
