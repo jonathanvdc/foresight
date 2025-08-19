@@ -4,7 +4,7 @@ import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 
 /**
- * An e-graph*is a data structure for representing and maintaining equivalence classes of expressions.
+ * An e-graph is a data structure for representing and maintaining equivalence classes of expressions.
  * E-graphs support equality saturation, a powerful technique for exploring all equivalent forms of a term
  * by exhaustively applying rewrite rules while avoiding redundant work by compacting equivalent subterms
  * into shared e-classes.
