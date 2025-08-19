@@ -362,7 +362,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * The returned instance preserves immutability: operations that would change metadata yield a new
    * e-graph-with-metadata instance.
    *
-   * @return An [[EGraphWithMetadata]] that wraps this e-graph.
+   * @return A [[foresight.eqsat.metadata.EGraphWithMetadata]] that wraps this e-graph.
    */
   final def withMetadata: EGraphWithMetadata[NodeT, This] = EGraphWithMetadata(this.asInstanceOf[This])
 }

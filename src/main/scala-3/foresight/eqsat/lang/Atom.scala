@@ -36,7 +36,7 @@ trait Atom[A]:
 object Atom:
 
   /**
-   * Type alias that pins the associated [[Payload]] of `A` to `B`.
+   * Type alias that pins the associated `Payload` of `A` to `B`.
    *
    * Useful for APIs that need to mention the payload type explicitly:
    * {{{
@@ -49,8 +49,8 @@ object Atom:
    * Derive an `Atom[A]` instance for single-field case classes.
    *
    * The derived instance:
-   *  - sets [[Payload]] to the single field's type,
-   *  - implements [[asAtom]] by projecting/injecting that field.
+   *  - sets `Payload` to the single field's type,
+   *  - implements `asAtom` by projecting/injecting that field.
    *
    * Fails to compile if `A` is not a product with exactly one element.
    *
