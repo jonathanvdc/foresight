@@ -9,30 +9,31 @@ import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 
 trait Language[E]:
-  type MTree[A] = MixedTree[LanguageOp[E], A]
+  type Op = LanguageOp[E]
+  type MTree[A] = MixedTree[Op, A]
 
-  def opOrdering: Ordering[LanguageOp[E]]
+  def opOrdering: Ordering[Op]
 
   /** Encode surface AST into the core tree. */
   def toTree[A](e: E)(using enc: AtomEncoder[E, A]): MTree[A]
 
   /** Decode core tree back to the surface AST. */
-  def fromTree[A](n: MixedTree[LanguageOp[E], A])(using dec: AtomDecoder[E, A]): E
+  def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
 
-  def toSearcher[EGraphT <: EGraphLike[LanguageOp[E], EGraphT] with EGraph[LanguageOp[E]]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[LanguageOp[E], PatternMatch[LanguageOp[E]], EGraphT] =
+  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
 
-  def toApplier[EGraphT <: EGraphLike[LanguageOp[E], EGraphT] with EGraph[LanguageOp[E]]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[LanguageOp[E], EGraphT] =
+  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)(using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
 
-  def rule[EGraphT <: EGraphLike[LanguageOp[E], EGraphT] with EGraph[LanguageOp[E]]]
+  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
-  : Rule[LanguageOp[E], PatternMatch[LanguageOp[E]], EGraphT] = {
+  : Rule[Op, PatternMatch[Op], EGraphT] = {
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
   }
 
-  def fromAnalysisNode[A](node: LanguageOp[E], defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E = {
+  def fromAnalysisNode[A](node: Op, defs: Seq[Slot], uses: Seq[Slot], args: Seq[A])(using dec: AtomDecoder[E, AnalysisFact[A]]): E = {
     fromTree[AnalysisFact[A]](MixedTree.Node(node, defs, uses, args.map(AnalysisFact(_)).map(MixedTree.Atom(_))))(using dec)
   }
 
@@ -43,8 +44,8 @@ object Language:
       private val payComps: Array[Array[(Any, Any) => Int]] =
         payloadComparatorsFor[E](using m)
 
-      def opOrdering: Ordering[LanguageOp[E]] = new Ordering[LanguageOp[E]]:
-        def compare(a: LanguageOp[E], b: LanguageOp[E]): Int =
+      def opOrdering: Ordering[Op] = new Ordering[Op]:
+        def compare(a: Op, b: Op): Int =
           // 1) ord
           val c1 = java.lang.Integer.compare(a.ord, b.ord)
           if c1 != 0 then return c1
@@ -106,7 +107,7 @@ object Language:
           case Some(payload) => MixedTree.Atom(payload)
           case None => encodeCase[A](m.ordinal(e), e)(using enc)
 
-      def fromTree[A](n: MixedTree[LanguageOp[E], A])(using dec: AtomDecoder[E, A]): E =
+      def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E =
         n match
           case MixedTree.Atom(b) =>
             // Rebuild a concrete case C <: E from the call payload, if possible
@@ -117,7 +118,7 @@ object Language:
             }
 
           case MixedTree.Node(op, binders, slots, kids) =>
-            val op2: LanguageOp[E] = op
+            val op2: Op = op
             val schema = op2.schema
             val eb = binders.iterator
             val es = slots.iterator
