@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.arithWithLang
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot, Tree}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot}
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.lang.Language
