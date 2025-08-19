@@ -2,6 +2,9 @@ package foresight.eqsat.lang
 
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
 
+/**
+ * Provides extension methods for `EGraphLike` to add surface expressions as `EClassCall`.
+ */
 extension [E, This <: EGraphLike[LanguageOp[E], This] & EGraph[LanguageOp[E]]](g: EGraphLike[LanguageOp[E], This])
   /**
    * Adds an expression to the EGraph, converting it to an `EClassCall` using the provided language and encoder.

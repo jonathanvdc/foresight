@@ -51,6 +51,11 @@ import scala.deriving.Mirror
  */
 opaque type AtomDecoder[E, A] = A => Option[E]
 
+/**
+ * Companion object for [[AtomDecoder]].
+ *
+ * Provides constructors, decoders, and instances.
+ */
 object AtomDecoder extends LowPriorityAtomDecoder:
 
   /**

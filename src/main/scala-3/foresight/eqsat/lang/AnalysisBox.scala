@@ -43,6 +43,9 @@ trait AnalysisBox[E]:
   /** Wrap an analysis result `a` into the surface AST as a `Box[A]`. */
   def box[A](a: A): Box[A]
 
+/**
+ * Companion object for [[AnalysisBox]].
+ */
 object AnalysisBox:
 
   /**

@@ -25,6 +25,9 @@ import scala.language.implicitConversions
  */
 final case class Use[A](value: A) extends AnyVal
 
+/**
+ * Companion object for [[Use]].
+ */
 object Use:
 
   /**

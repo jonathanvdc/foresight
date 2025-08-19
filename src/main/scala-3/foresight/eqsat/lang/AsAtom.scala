@@ -36,6 +36,9 @@ trait AsAtom[T, B]:
   /** Inject an atom payload `B` back into the surface value `T`. */
   def fromAtom(b: B): T
 
+/**
+ * Companion object for [[AsAtom]].
+ */
 object AsAtom:
 
   /**

@@ -33,6 +33,9 @@ trait Atom[A]:
    */
   def asAtom: AsAtom[A, Payload]
 
+/**
+ * Companion object for [[Atom]].
+ */
 object Atom:
 
   /**

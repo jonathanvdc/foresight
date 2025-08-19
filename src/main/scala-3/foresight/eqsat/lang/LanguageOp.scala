@@ -33,6 +33,11 @@ final case class LanguageOp[E] private[lang](private[lang] ord: Int,
                                              private[lang] schema: Seq[Byte],
                                              private[lang] payload: Seq[Any])
 
+/**
+ * Companion object for [[LanguageOp]].
+ *
+ * Provides utilities and implicits related to `LanguageOp`.
+ */
 object LanguageOp {
   /**
    * Provides an ordering over nodes whenever a [[Language]] is in scope.

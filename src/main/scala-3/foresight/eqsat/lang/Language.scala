@@ -165,6 +165,9 @@ trait Language[E]:
       )
     )
 
+/**
+ * Companion object for [[Language]].
+ */
 object Language:
   inline given derived[E](using m: Mirror.SumOf[E]): Language[E] =
     new Language[E]:

@@ -26,6 +26,9 @@ import scala.language.implicitConversions
  */
 final case class Def[A](value: A) extends AnyVal
 
+/**
+ * Companion object for [[Def]].
+ */
 object Def:
 
   /**

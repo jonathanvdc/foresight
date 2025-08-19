@@ -49,6 +49,11 @@ import scala.deriving.Mirror
  */
 opaque type AtomEncoder[E, A] = (E, Int) => Option[A]
 
+/**
+ * Companion for `AtomEncoder[E, A]`.
+ *
+ * Provides a derived instance for sum types, and a shorthand to run an encoder.
+ */
 object AtomEncoder:
 
   /**
