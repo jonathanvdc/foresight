@@ -98,9 +98,34 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="Aux-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="Atom$.html#Aux-0" t="n" class="documentableName ">Aux</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>] = <a href="Atom.html" t="t">Atom</a>[<span data-unresolved-link="" t="t">A</span>] { <span t="k">type </span>Atom<span t="k"> = </span><span data-unresolved-link="" t="t">B</span>; }
+            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="Atom$.html#Aux-0" t="n" class="documentableName ">Aux</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>] = <a href="Atom.html" t="t">Atom</a>[<span data-unresolved-link="" t="t">A</span>] { <span t="k">type </span>Payload<span t="k"> = </span><span data-unresolved-link="" t="t">B</span>; }
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Type alias that pins the associated <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> of <code>A</code> to <code>B</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Type alias that pins the associated <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> of <code>A</code> to <code>B</code>.</p>
+              <p>Useful for APIs that need to mention the payload type explicitly:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def needsEClass(using Atom.Aux[Ref, EClassCall]) = ...
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -122,9 +147,41 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="derived-92d" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Atom$.html#derived-92d" t="n" class="documentableName ">derived</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">m</span>: <span data-unresolved-link="" t="t">ProductOf</span>[<span t="t">A</span>], <span t="k"></span><span data-unresolved-link="" t="n">ev</span>: <span data-unresolved-link="" t="t">Size</span>[<span t="t">m</span>.<span t="t">MirroredElemTypes</span>] <span data-unresolved-link="" t="t">=:=</span> 1): <a href="Atom.html" t="t">Atom</a>[<span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Derive an <code>Atom[A]</code> instance for single-field case classes.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Derive an <code>Atom[A]</code> instance for single-field case classes.</p>
+              <p>The derived instance:</p>
+              <ul>
+               <li>sets <span data-unresolved-link="" title="Problem linking Payload: No DRI found for query">Payload</span> to the single field's type,</li>
+               <li>implements <span data-unresolved-link="" title="Problem linking asAtom: No DRI found for query">asAtom</span> by projecting/injecting that field.</li>
+              </ul>
+              <p>Fails to compile if <code>A</code> is not a product with exactly one element.</p>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>summon[Atom.Aux[Ref, EClassCall]] // OK
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -146,9 +203,33 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="aux-fffff7ba" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">given </span></span><a href="Atom$.html#aux-fffff7ba" t="n" class="documentableName ">aux</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">d</span>: <a href="Atom.html" t="t">Atom</a>[<span t="t">A</span>], <span t="k"></span><span data-unresolved-link="" t="n">m</span>: <span data-unresolved-link="" t="t">ProductOf</span>[<span t="t">A</span>], <span t="k"></span><span data-unresolved-link="" t="n">eq</span>: <span t="t">m</span>.<span t="t">MirroredElemTypes</span> <span data-unresolved-link="" t="t">=:=</span> (<span t="t">B</span> <span data-unresolved-link="" t="t">*:</span> <span data-unresolved-link="" t="t">EmptyTuple</span>)): <a href="Atom$.html#Aux-0" t="t">Aux</a>[<span data-unresolved-link="" t="t">A</span>, <span data-unresolved-link="" t="t">B</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Helper <code>given</code> that reveals the concrete payload type <code>B</code> when:</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Helper <code>given</code> that reveals the concrete payload type <code>B</code> when:</p>
+              <ul>
+               <li>an explicit/derived <code>Atom[A]</code> is already in scope (opt-in gate), and</li>
+               <li><code>A</code> is a single-field product whose field type is <code>B</code>.</li>
+              </ul>
+              <p>Lets you summon <code>Atom.Aux[A, B]</code> in contexts that need the refined type.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>

@@ -14,10 +14,56 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Witness describing how a language <code>E</code> boxes analysis results into its AST.</p>
+  <p>In equality saturation, analyses compute values <code>A</code> (constants, types, costs, …) associated with nodes. To expose these results uniformly at the surface language level, the language provides a wrapper type <code>Box[A]</code> (a case class or ADT constructor) that embeds an <code>A</code> back into the AST.</p>
+  <p><code>AnalysisBox[E]</code> is the evidence that such a wrapper exists. It tells the system:</p>
+  <ul>
+   <li>given a result type <code>A</code>,</li>
+   <li>how to construct a node <code>Box[A]</code> that is itself an <code>E</code>.</li>
+  </ul>
+  <h3><a href="#members" id="members">Members</a></h3>
+  <ul>
+   <li><a href="AnalysisBox.html#Box-0">Box</a> — a type constructor describing the wrapper (e.g. <code>AnalysisFact[A]</code>).</li>
+   <li><a href="AnalysisBox.html#box-957">box</a> — the function that actually wraps a value into <code>E</code>.</li>
+  </ul>
+ </div>
  <section id="attributes">
+  <h2 class="h500">Type parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    E
+   </dt>
+   <dd class="body-medium">
+    <p>Surface language whose AST can embed analysis facts.</p>
+   </dd>
+  </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p>Suppose your surface language <code>ArithExpr</code> has a case class to hold analysis results:</p>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Const(value: BigInt) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A) extends ArithExpr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>given AnalysisBox[ArithExpr] with
+</span><span line-number="5" class=""><span class="tooltip-container"></span> type Box[A] = Fact[A]
+</span><span line-number="6" class=""><span class="tooltip-container"></span> def box[A](x: A): Fact[X] = Fact(x)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Now any analysis result can be boxed back into the AST:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val L = summon[Language[ArithExpr]]
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val expr: ArithExpr = ab.fromAnalysisNode(...)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+      <p>This makes it possible to reconstruct surface <code>E</code> terms from analysis nodes in a generic way (see <a href="Language.html#fromAnalysisNode-bfc">Language.fromAnalysisNode</a>).</p>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -87,9 +133,28 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="Box-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="AnalysisBox.html#Box-0" t="n" class="documentableName ">Box</a>[<span t="k"></span><span data-unresolved-link="" t="t">_</span>]<span t="k"> &lt;: </span><span t="t">E</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A type constructor that, for any result type <code>A</code>, yields an <code>E</code> node wrapping <code>A</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A type constructor that, for any result type <code>A</code>, yields an <code>E</code> node wrapping <code>A</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -111,9 +176,28 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="box-957">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AnalysisBox.html#box-957" t="n" class="documentableName ">box</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">a</span>: <span t="t">A</span>): <a href="AnalysisBox.html#Box-0" t="t">Box</a>[<span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Wrap an analysis result <code>a</code> into the surface AST as a <code>Box[A]</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Wrap an analysis result <code>a</code> into the surface AST as a <code>Box[A]</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -125,4 +209,4 @@ node3 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

@@ -43,10 +43,59 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Witness describing how a language <code>E</code> boxes analysis results into its AST.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Witness describing how a language <code>E</code> boxes analysis results into its AST.</p>
+              <p>In equality saturation, analyses compute values <code>A</code> (constants, types, costs, …) associated with nodes. To expose these results uniformly at the surface language level, the language provides a wrapper type <code>Box[A]</code> (a case class or ADT constructor) that embeds an <code>A</code> back into the AST.</p>
+              <p><code>AnalysisBox[E]</code> is the evidence that such a wrapper exists. It tells the system:</p>
+              <ul>
+               <li>given a result type <code>A</code>,</li>
+               <li>how to construct a node <code>Box[A]</code> that is itself an <code>E</code>.</li>
+              </ul>
+              <h3><a href="#members" id="members">Members</a></h3>
+              <ul>
+               <li><a href="lang/AnalysisBox.html#Box-0">Box</a> — a type constructor describing the wrapper (e.g. <code>AnalysisFact[A]</code>).</li>
+               <li><a href="lang/AnalysisBox.html#box-957">box</a> — the function that actually wraps a value into <code>E</code>.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>Surface language whose AST can embed analysis facts.</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Suppose your surface language <code>ArithExpr</code> has a case class to hold analysis results:</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Const(value: BigInt) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A) extends ArithExpr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>given AnalysisBox[ArithExpr] with
+</span><span line-number="5" class=""><span class="tooltip-container"></span> type Box[A] = Fact[A]
+</span><span line-number="6" class=""><span class="tooltip-container"></span> def box[A](x: A): Fact[X] = Fact(x)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Now any analysis result can be boxed back into the AST:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val L = summon[Language[ArithExpr]]
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val expr: ArithExpr = ab.fromAnalysisNode(...)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                 <p>This makes it possible to reconstruct surface <code>E</code> terms from analysis nodes in a generic way (see <a href="lang/Language.html#fromAnalysisNode-bfc">Language.fromAnalysisNode</a>).</p>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -147,11 +196,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>AnalysisFact is a wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
+             <p>A wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>AnalysisFact is a wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
+              <p>A wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
              </div>
              <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
@@ -218,10 +267,50 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Bidirectional bridge between a surface type <code>T</code> and its atom payload <code>B</code>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Bidirectional bridge between a surface type <code>T</code> and its atom payload <code>B</code>.</p>
+              <p>An <code>AsAtom[T, B]</code> acts like a tiny isomorphism:</p>
+              <ul>
+               <li><a href="lang/AsAtom.html#toAtom-d26">toAtom</a> : <code>T =&gt; B</code> (strip the wrapper to the leaf payload)</li>
+               <li><a href="lang/AsAtom.html#fromAtom-d26">fromAtom</a> : <code>B =&gt; T</code> (rebuild the surface value from the payload)</li>
+              </ul>
+              <p>You will most often not write this by hand. If <code>T</code> has an <code>Atom[T]</code> instance, an <code>AsAtom[T, B]</code> (with <code>B = Atom[T]#Payload</code>) can be derived automatically.</p>
+              <h3><a href="#laws" id="laws">Laws</a></h3>
+              <p>Implementations are expected to satisfy:</p>
+              <ul>
+               <li><code>fromAtom(toAtom(t)) == t</code> (left inverse)</li>
+               <li><code>toAtom(fromAtom(b)) == b</code> (right inverse)</li>
+              </ul>
+              <p>Violating these laws can lead to incorrect decoding or non-idempotent rewrites.</p>
+              <h3><a href="#typical-usage" id="typical-usage">Typical usage</a></h3>
+              <ul>
+               <li>Inside encoders/decoders where you need to project/inject atom payloads.</li>
+               <li>In utilities that operate generically over “atom-like” wrappers.</li>
+              </ul>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val bridge: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]]
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val id: EClassCall = bridge.toAtom(Ref(id))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref: Ref       = bridge.fromAtom(id)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -321,10 +410,47 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Type class declaring that a surface type <code>A</code> should appear as a leaf atom in a <code>MixedTree</code>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Type class declaring that a surface type <code>A</code> should appear as a leaf atom in a <code>MixedTree</code>.</p>
+              <p><code>Atom[A]</code> is an opt-in witness: by defining or deriving an instance, you state that values of <code>A</code> are stored as leaf payloads rather than core language nodes. The associated type <a href="lang/Atom.html#Payload-0">Payload</a> names the concrete type actually stored at the leaves, and <a href="lang/Atom.html#asAtom-0">asAtom</a> provides a bidirectional bridge between <code>A</code> and <code>Payload</code>.</p>
+              <p>When to use: Mark single-field wrappers (e.g., handles, slots, small value wrappers) as <code>derives Atom</code>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>surface type to be treated as an atom (leaf).</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Typical usage (single-field wrapper as an atom)</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>// Payload is EClassCall:
+</span><span line-number="3" class=""><span class="tooltip-container"></span>summon[Atom.Aux[Ref, EClassCall]]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val inst  = summon[Atom[Ref]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val ref   = Ref(id)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val id2   = inst.asAtom.toAtom(ref)     // Ref -&gt; EClassCall
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val ref2  = inst.asAtom.fromAtom(id2)   // EClassCall -&gt; Ref
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -641,10 +767,46 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Type class describing how a surface AST <code>E</code> maps to the core e-graph language.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Type class describing how a surface AST <code>E</code> maps to the core e-graph language.</p>
+              <p>A <code>Language[E]</code> provides:</p>
+              <ul>
+               <li>a node type alias <a href="lang/Language.html#Op-0">Op</a> (backed by <code>LanguageOp[E]</code>) that the e-graph stores,</li>
+               <li>encoding/decoding between <code>E</code> and a core tree <a href="lang/Language.html#MTree-0">MTree</a>,</li>
+               <li>an ordering over nodes (for deterministic e-graph behavior),</li>
+               <li>convenience bridges from <code>E</code> values to matchers/appliers/rules,</li>
+               <li>and a helper to reconstruct <code>E</code> from an analysis-view of a node.</li>
+              </ul>
+             </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Typical pattern</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val Lang = summon[Language[ArithExpr]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val e: ArithExpr = Add( /* ... */ )
+</span><span line-number="6" class=""><span class="tooltip-container"></span>// Encode to a core tree
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val t: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](e)
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a rewrite rule directly from surface syntax
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val r = Lang.rule("comm-add", Add(x, y), Add(y, x))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
               <dt class="body-small">
                Companion
               </dt>
@@ -809,8 +971,42 @@
           <div>
            <div class="originInfo"></div>
            <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Canonical node representation for a surface language <code>E</code>.</p>
+            </div>
             <div class="cover">
-             <div class="doc"></div>
+             <div class="doc">
+              <p>Canonical node representation for a surface language <code>E</code>.</p>
+              <p><code>LanguageOp[E]</code> is the internal node type used by e-graphs. It is not constructed directly; instead, use the encoders and tree-conversion methods provided by <a href="lang/Language.html">Language</a>. This ensures that nodes are created consistently and can be compared, ordered, and rewritten reliably.</p>
+              <p>Key points:</p>
+              <ul>
+               <li>Each surface language <code>E</code> has an associated <code>LanguageOp[E]</code> type.</li>
+               <li>You typically encounter it inside <a href="MixedTree.html">MixedTree</a> or when working with an <a href="EGraph.html">EGraph</a> that has been parameterized by your language.</li>
+               <li>You do not construct or pattern match on it yourself. Go through the <code>Language[E]</code> instance instead.</li>
+              </ul>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val Lang = summon[Language[ArithExpr]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val expr: ArithExpr = Add(x, y)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Core representation: tree of LanguageOp[ArithExpr] + atoms
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val tree: Lang.MTree[Pattern.Var] = Lang.toTree(expr)
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>the surface language this node belongs to.</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">

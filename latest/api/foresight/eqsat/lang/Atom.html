@@ -14,10 +14,44 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Type class declaring that a surface type <code>A</code> should appear as a leaf atom in a <code>MixedTree</code>.</p>
+  <p><code>Atom[A]</code> is an opt-in witness: by defining or deriving an instance, you state that values of <code>A</code> are stored as leaf payloads rather than core language nodes. The associated type <a href="Atom.html#Payload-0">Payload</a> names the concrete type actually stored at the leaves, and <a href="Atom.html#asAtom-0">asAtom</a> provides a bidirectional bridge between <code>A</code> and <code>Payload</code>.</p>
+  <p>When to use: Mark single-field wrappers (e.g., handles, slots, small value wrappers) as <code>derives Atom</code>.</p>
+ </div>
  <section id="attributes">
+  <h2 class="h500">Type parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    A
+   </dt>
+   <dd class="body-medium">
+    <p>surface type to be treated as an atom (leaf).</p>
+   </dd>
+  </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <p>Typical usage (single-field wrapper as an atom)</p>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>// Payload is EClassCall:
+</span><span line-number="3" class=""><span class="tooltip-container"></span>summon[Atom.Aux[Ref, EClassCall]]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val inst  = summon[Atom[Ref]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val ref   = Ref(id)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val id2   = inst.asAtom.toAtom(ref)     // Ref -&gt; EClassCall
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val ref2  = inst.asAtom.fromAtom(id2)   // EClassCall -&gt; Ref
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -85,11 +119,30 @@ node3 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Types</h4>
         </div>
-        <div class="documentableElement" id="Atom-0">
+        <div class="documentableElement" id="Payload-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="Atom.html#Atom-0" t="n" class="documentableName ">Atom</a>
+            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="Atom.html#Payload-0" t="n" class="documentableName ">Payload</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Concrete payload type stored at leaves for atoms originating from <code>A</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Concrete payload type stored at leaves for atoms originating from <code>A</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -111,9 +164,28 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="asAtom-0">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Atom.html#asAtom-0" t="n" class="documentableName ">asAtom</a>: <a href="AsAtom.html" t="t">AsAtom</a>[<span t="t">A</span>, <a href="Atom.html#Atom-0" t="t">Atom</a>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Atom.html#asAtom-0" t="n" class="documentableName ">asAtom</a>: <a href="AsAtom.html" t="t">AsAtom</a>[<span t="t">A</span>, <a href="Atom.html#Payload-0" t="t">Payload</a>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Bridge converting between the surface wrapper <code>A</code> and its stored <a href="Atom.html#Payload-0">Payload</a>. See <code>AsAtom</code> for details.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Bridge converting between the surface wrapper <code>A</code> and its stored <a href="Atom.html#Payload-0">Payload</a>. See <code>AsAtom</code> for details.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -125,4 +197,4 @@ node3 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

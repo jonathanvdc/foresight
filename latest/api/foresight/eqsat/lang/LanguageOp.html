@@ -14,8 +14,39 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Canonical node representation for a surface language <code>E</code>.</p>
+  <p><code>LanguageOp[E]</code> is the internal node type used by e-graphs. It is not constructed directly; instead, use the encoders and tree-conversion methods provided by <a href="Language.html">Language</a>. This ensures that nodes are created consistently and can be compared, ordered, and rewritten reliably.</p>
+  <p>Key points:</p>
+  <ul>
+   <li>Each surface language <code>E</code> has an associated <code>LanguageOp[E]</code> type.</li>
+   <li>You typically encounter it inside <a href="../MixedTree.html">MixedTree</a> or when working with an <a href="../EGraph.html">EGraph</a> that has been parameterized by your language.</li>
+   <li>You do not construct or pattern match on it yourself. Go through the <code>Language[E]</code> instance instead.</li>
+  </ul>
+  <p>Example:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val Lang = summon[Language[ArithExpr]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val expr: ArithExpr = Add(x, y)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Core representation: tree of LanguageOp[ArithExpr] + atoms
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val tree: Lang.MTree[Pattern.Var] = Lang.toTree(expr)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+ </div>
  <section id="attributes">
+  <h2 class="h500">Type parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    E
+   </dt>
+   <dd class="body-medium">
+    <p>the surface language this node belongs to.</p>
+   </dd>
+  </dl>
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
    <dt class="body-small">
@@ -170,4 +201,4 @@ node6 -> node2;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

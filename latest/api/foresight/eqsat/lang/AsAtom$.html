@@ -98,9 +98,29 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="apply-d72" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="AsAtom$.html#apply-d72" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">ev</span>: <a href="AsAtom.html" t="t">AsAtom</a>[<span t="t">T</span>, <span t="t">B</span>]): <a href="AsAtom.html" t="t">AsAtom</a>[<span data-unresolved-link="" t="t">T</span>, <span data-unresolved-link="" t="t">B</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Summon an implicit <code>AsAtom[T, B]</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Summon an implicit <code>AsAtom[T, B]</code>.</p>
+              <p>Shorthand for <code>summon[AsAtom[T, B]]</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
@@ -120,11 +140,21 @@ node3 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Helper to build a two-way codec.</p>
+             <p>Build a two-way codec from plain functions.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Helper to build a two-way codec.</p>
+              <p>Build a two-way codec from plain functions.</p>
+              <p>Prefer this helper when you have a bespoke type that isn’t a single-field case class, or when you want an explicit instance instead of derivation.</p>
+              <p>Make sure the functions form an isomorphism (see Laws in the trait).</p>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>enum Lit: case I(i: Int)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>given AsAtom[Lit, Int] =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> AsAtom.codec[Lit, Int](_.asInstanceOf[Lit.I].i, Lit.I.apply)
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -150,9 +180,36 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="derivedAsAtom-fffff8c4" data-f-keywords="inline">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">given </span></span><a href="AsAtom$.html#derivedAsAtom-fffff8c4" t="n" class="documentableName ">derivedAsAtom</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">d</span>: <a href="Atom$.html#Aux-0" t="t">Aux</a>[<span t="t">A</span>, <span t="t">B</span>]): <a href="AsAtom.html" t="t">AsAtom</a>[<span data-unresolved-link="" t="t">A</span>, <span data-unresolved-link="" t="t">B</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Automatically derive <code>AsAtom[A, B]</code> from an in-scope <code>Atom.Aux[A, B]</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Automatically derive <code>AsAtom[A, B]</code> from an in-scope <code>Atom.Aux[A, B]</code>.</p>
+              <p>This is the usual path for single-field wrappers declared with <code>derives Atom</code>.</p>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val aa: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]] // derived here
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>

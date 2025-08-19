@@ -208,11 +208,21 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>If a Language[E] is in scope, its Op ordering is summonable.</p>
+             <p>Provides an ordering over nodes whenever a <a href="Language.html">Language</a> is in scope.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>If a Language[E] is in scope, its Op ordering is summonable.</p>
+              <p>Provides an ordering over nodes whenever a <a href="Language.html">Language</a> is in scope.</p>
+              <p>This ordering comes from the language definition itself, ensuring that comparison and canonicalization of nodes is deterministic.</p>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>given Language[ArithExpr] = summon[Language[ArithExpr]]
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val ord: Ordering[LanguageOp[ArithExpr]] =
+</span><span line-number="4" class=""><span class="tooltip-container"></span> summon[Ordering[LanguageOp[ArithExpr]]]
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>

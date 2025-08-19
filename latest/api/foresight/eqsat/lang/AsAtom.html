@@ -14,10 +14,47 @@
  </div>
 </div>
 <div class="cover">
- <div class="doc"></div>
+ <div class="doc">
+  <p>Bidirectional bridge between a surface type <code>T</code> and its atom payload <code>B</code>.</p>
+  <p>An <code>AsAtom[T, B]</code> acts like a tiny isomorphism:</p>
+  <ul>
+   <li><a href="AsAtom.html#toAtom-d26">toAtom</a> : <code>T =&gt; B</code> (strip the wrapper to the leaf payload)</li>
+   <li><a href="AsAtom.html#fromAtom-d26">fromAtom</a> : <code>B =&gt; T</code> (rebuild the surface value from the payload)</li>
+  </ul>
+  <p>You will most often not write this by hand. If <code>T</code> has an <code>Atom[T]</code> instance, an <code>AsAtom[T, B]</code> (with <code>B = Atom[T]#Payload</code>) can be derived automatically.</p>
+  <h3><a href="#laws" id="laws">Laws</a></h3>
+  <p>Implementations are expected to satisfy:</p>
+  <ul>
+   <li><code>fromAtom(toAtom(t)) == t</code> (left inverse)</li>
+   <li><code>toAtom(fromAtom(b)) == b</code> (right inverse)</li>
+  </ul>
+  <p>Violating these laws can lead to incorrect decoding or non-idempotent rewrites.</p>
+  <h3><a href="#typical-usage" id="typical-usage">Typical usage</a></h3>
+  <ul>
+   <li>Inside encoders/decoders where you need to project/inject atom payloads.</li>
+   <li>In utilities that operate generically over “atom-like” wrappers.</li>
+  </ul>
+ </div>
  <section id="attributes">
   <h2 class="h500">Attributes</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    Example
+   </dt>
+   <dd class="body-medium">
+    <div>
+     <div>
+      <div class="snippet mono-small-block">
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Atom
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val bridge: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]]
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val id: EClassCall = bridge.toAtom(Ref(id))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref: Ref       = bridge.fromAtom(id)
+</span></code></pre>
+       <div class="buttons"></div>
+      </div>
+     </div>
+    </div>
+   </dd>
    <dt class="body-small">
     Companion
    </dt>
@@ -87,18 +124,56 @@ node3 -> node2;
         </div>
         <div class="documentableElement" id="fromAtom-d26">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AsAtom.html#fromAtom-d26" t="n" class="documentableName ">fromAtom</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">b</span>: <span t="t">B</span>): <span t="t">T</span>
            </div>
           </div>
          </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Inject an atom payload <code>B</code> back into the surface value <code>T</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Inject an atom payload <code>B</code> back into the surface value <code>T</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
         <div class="documentableElement" id="toAtom-d26">
          <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="AsAtom.html#toAtom-d26" t="n" class="documentableName ">toAtom</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">t</span>: <span t="t">T</span>): <span t="t">B</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Project a surface value <code>T</code> to its atom payload <code>B</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Project a surface value <code>T</code> to its atom payload <code>B</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
            </div>
           </div>
          </div>
