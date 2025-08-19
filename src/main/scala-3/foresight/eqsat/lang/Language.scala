@@ -40,7 +40,7 @@ trait Language[E]:
   type Op = LanguageOp[E]
 
   /**
-   * The *core* tree shape for this language.
+   * The core tree shape for this language.
    *
    * `MTree[A]` is a mixed tree whose internal nodes are [[Op]] and whose leaves are atoms of type `A`.
    * Different choices of `A` let the same surface syntax serve distinct purposes (e.g., patterns vs. concrete calls).
@@ -59,12 +59,13 @@ trait Language[E]:
   /**
    * Encode a surface AST node `e: E` into the core tree representation [[MTree]].
    *
-   * @tparam A    the atom payload type at the leaves (e.g., [[Pattern.Var]], [[EClassCall]], etc.)
-   * @param e     a surface AST node
-   * @param enc   a given [[AtomEncoder]] that knows how to encode the leaf atoms for `A`
-   * @return      a mixed core tree equivalent to `e`
+   * @tparam A    The atom payload type at the leaves (e.g., [[foresight.eqsat.rewriting.patterns.Pattern.Var]],
+   *              [[EClassCall]], etc.).
+   * @param e     A surface AST node.
+   * @param enc   A given [[AtomEncoder]] that knows how to encode the leaf atoms for `A`.
+   * @return      A mixed core tree equivalent to `e`.
    *
-   * Example (to a pattern tree):
+   * @example
    * {{{
    * val patTree: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](surfaceExpr)
    * }}}
@@ -74,10 +75,10 @@ trait Language[E]:
   /**
    * Decode a core tree back into a surface AST `E`.
    *
-   * @tparam A    the atom payload type present at the leaves
-   * @param n     a mixed tree with [[Op]] internal nodes and `A` atoms
-   * @param dec   a given [[AtomDecoder]] that knows how to turn `A` atoms back into `E` fragments
-   * @return      the reconstructed surface expression
+   * @tparam A    The atom payload type present at the leaves.
+   * @param n     A mixed tree with [[Op]] internal nodes and `A` atoms.
+   * @param dec   A given [[AtomDecoder]] that knows how to turn `A` atoms back into `E` fragments.
+   * @return      The reconstructed surface expression.
    *
    * Note: decoding is typically partial in the presence of analysis-only atoms; see [[fromAnalysisNode]].
    */
@@ -86,10 +87,11 @@ trait Language[E]:
   /**
    * Build a reversible searcher from a surface expression, by first encoding to a pattern tree.
    *
-   * Requires an encoder for [[Pattern.Var]] leaves, i.e., a way to turn surface leaves into pattern variables.
+   * Requires an encoder for [[foresight.eqsat.rewriting.patterns.Pattern.Var]] leaves, i.e., a way to turn surface
+   * leaves into pattern variables.
    *
-   * @param e       surface-side pattern
-   * @tparam EGraphT an e-graph type that supports this language
+   * @param e        Surface-side pattern.
+   * @tparam EGraphT An e-graph type that supports this language.
    */
   def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
                                                                     (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
@@ -100,8 +102,8 @@ trait Language[E]:
    *
    * This is commonly used for rule RHS construction.
    *
-   * @param e       surface-side template for rewriting
-   * @tparam EGraphT an e-graph type that supports this language
+   * @param e        Surface-side template for rewriting.
+   * @tparam EGraphT An e-graph type that supports this language.
    */
   def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
                                                                    (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
@@ -110,13 +112,13 @@ trait Language[E]:
   /**
    * Construct a rewrite rule directly from surface syntax.
    *
-   * @param name    human-readable rule name (used in logs/diagnostics)
-   * @param lhs     surface pattern to match
-   * @param rhs     surface template to build
-   * @param enc     encoder for [[Pattern.Var]] leaves
-   * @tparam EGraphT an e-graph type that supports this language
+   * @param name    Human-readable rule name (used in logs/diagnostics).
+   * @param lhs     Surface pattern to match.
+   * @param rhs     Surface template to build.
+   * @param enc     Encoder for [[foresight.eqsat.rewriting.patterns.Pattern.Var]] leaves.
+   * @tparam EGraphT An e-graph type that supports this language.
    *
-   * Example:
+   * @example
    * {{{
    * val r =
    *   Lang.rule("comm-add", Add(x, y), Add(y, x))
@@ -138,15 +140,15 @@ trait Language[E]:
    * This is useful when implementing analyses that want to "peek" back into the surface
    * language at a particular node boundary, while still operating within the core representation.
    *
-   * @param node  the core node payload ([[Op]])
-   * @param defs  slots defined by this node (binders)
-   * @param uses  slots used by this node (reads)
-   * @param args  analysis results for the node’s children, in order
-   * @param dec   a decoder from [[AnalysisFact]] atoms back to surface `E`
-   * @tparam A    the analysis result type
-   * @return      the surface expression reconstructed from this node’s analysis view
+   * @param node  The core node payload ([[Op]]).
+   * @param defs  Slots defined by this node (binders).
+   * @param uses  Slots used by this node (reads).
+   * @param args  Analysis results for the node’s children, in order.
+   * @param dec   A decoder from [[AnalysisFact]] atoms back to surface `E`.
+   * @tparam A    The analysis result type.
+   * @return      The surface expression reconstructed from this node’s analysis view.
    *
-   * Example:
+   * @example
    * {{{
    * val surf: E =
    *   Lang.fromAnalysisNode(resultNode, defs, uses, childFacts)(using analysisFactDecoder)
