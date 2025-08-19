@@ -57,8 +57,8 @@ class PatternTest {
     val y = Var(Slot.fresh())
 
     val egraph = EGraph.empty[ArithIR]
-    val (c1, egraph2) = egraph.add(Lang.toTree(x + y))
-    val (c2, egraph3) = egraph2.add(Lang.toTree(y + x))
+    val (c1, egraph2) = egraph.add(x + y)
+    val (c2, egraph3) = egraph2.add(y + x)
 
     assert(!egraph3.areSame(c1, c2))
 
