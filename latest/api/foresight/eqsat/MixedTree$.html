@@ -721,6 +721,77 @@ node5 -> node1;
           </div>
          </div>
         </div>
+        <div class="documentableElement" id="orderingWithSlots-fffff2b2" data-f-keywords="implicit">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">implicit </span></span><span class="kind"><span t="k">def </span></span><a href="MixedTree$.html#orderingWithSlots-fffff2b2" t="n" class="documentableName ">orderingWithSlots</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">AtomT</span>](<span t="k">implicit </span><span t="k"></span><span data-unresolved-link="" t="n">oNode</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="n">oAtom</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">AtomT</span>], <span t="k"></span><span data-unresolved-link="" t="n">oSlot</span>: <span data-unresolved-link="" t="t">Ordering</span>[<a href="Slot.html" t="t">Slot</a>]): <span data-unresolved-link="" t="t">Ordering</span>[<a href="MixedTree.html" t="t">MixedTree</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">AtomT</span>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Compares Nodes by (nodeType, defs, uses, children), toms by atom payload. Atoms come before Nodes. This ordering is useful for sorting mixed trees in a way that respects both the structure of nodes and the payloads of atoms.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Compares Nodes by (nodeType, defs, uses, children), toms by atom payload. Atoms come before Nodes. This ordering is useful for sorting mixed trees in a way that respects both the structure of nodes and the payloads of atoms.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               AtomT
+              </dt>
+              <dd class="body-medium">
+               <p>The type used to represent leaf payloads.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type used to represent interior nodes.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               oAtom
+              </dt>
+              <dd class="body-medium">
+               <p>The ordering for atom payloads.</p>
+              </dd>
+              <dt class="body-small">
+               oNode
+              </dt>
+              <dd class="body-medium">
+               <p>The ordering for node types.</p>
+              </dd>
+              <dt class="body-small">
+               oSlot
+              </dt>
+              <dd class="body-medium">
+               <p>The ordering for slots.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>An <code>Ordering</code> that compares mixed trees by their node types, slot definitions, slot uses, and children. Atoms are ordered before Nodes.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
        </div>
       </section>
      </div>
