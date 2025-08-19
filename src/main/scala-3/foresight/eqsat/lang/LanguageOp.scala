@@ -1,11 +1,53 @@
 package foresight.eqsat.lang
 
+/**
+ * Canonical node representation for a surface language `E`.
+ *
+ * `LanguageOp[E]` is the internal node type used by e-graphs. It is not constructed
+ * directly; instead, use the encoders and tree-conversion methods provided by
+ * [[Language]]. This ensures that nodes are created consistently and can be
+ * compared, ordered, and rewritten reliably.
+ *
+ * Key points:
+ *  - Each surface language `E` has an associated `LanguageOp[E]` type.
+ *  - You typically encounter it inside [[MixedTree]] or when working with an
+ *    [[EGraph]] that has been parameterized by your language.
+ *  - You do not construct or pattern match on it yourself. Go through the
+ *    `Language[E]` instance instead.
+ *
+ * Example:
+ * {{{
+ * sealed trait ArithExpr derives Language
+ * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+ *
+ * val Lang = summon[Language[ArithExpr]]
+ * val expr: ArithExpr = Add(x, y)
+ *
+ * // Core representation: tree of LanguageOp[ArithExpr] + atoms
+ * val tree: Lang.MTree[Pattern.Var] = Lang.toTree(expr)
+ * }}}
+ *
+ * @tparam E the surface language this node belongs to.
+ */
 final case class LanguageOp[E] private[lang](private[lang] ord: Int,
                                              private[lang] schema: Seq[Byte],
                                              private[lang] payload: Seq[Any])
 
 object LanguageOp {
-  /** If a Language[E] is in scope, its Op ordering is summonable. */
+  /**
+   * Provides an ordering over nodes whenever a [[Language]] is in scope.
+   *
+   * This ordering comes from the language definition itself, ensuring that
+   * comparison and canonicalization of nodes is deterministic.
+   *
+   * Example:
+   * {{{
+   * given Language[ArithExpr] = summon[Language[ArithExpr]]
+   *
+   * val ord: Ordering[LanguageOp[ArithExpr]] =
+   *   summon[Ordering[LanguageOp[ArithExpr]]]
+   * }}}
+   */
   given opOrderingFor[E](using L: Language[E]): Ordering[LanguageOp[E]] =
     L.opOrdering
 }

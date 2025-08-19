@@ -9,7 +9,7 @@ import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
 
 /**
- * Type class describing how a *surface* AST `E` maps to the *core* e-graph language.
+ * Type class describing how a surface AST `E` maps to the core e-graph language.
  *
  * A `Language[E]` provides:
  *  - a node type alias [[Op]] (backed by `LanguageOp[E]`) that the e-graph stores,
@@ -18,7 +18,7 @@ import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
  *  - convenience bridges from `E` values to matchers/appliers/rules,
  *  - and a helper to reconstruct `E` from an analysis-view of a node.
  *
- * Typical pattern:
+ * @example Typical pattern
  * {{{
  * sealed trait ArithExpr derives Language
  * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
