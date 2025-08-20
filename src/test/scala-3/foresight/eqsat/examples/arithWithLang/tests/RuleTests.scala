@@ -2,14 +2,16 @@ package foresight.eqsat.examples.arithWithLang.tests
 
 import scala.language.implicitConversions
 import foresight.eqsat.{EClassCall, EGraph, Slot}
-import foresight.eqsat.examples.arithWithLang.{Add, ArithExpr, ArithIR, ConstantAnalysis, Mul, Rules, Var}
+import foresight.eqsat.examples.arithWithLang.*
+import foresight.eqsat.examples.arithWithLang.given
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.lang.*
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import org.junit.Test
 
 class RuleTests {
-  val R: Rules = Rules()
+  val L: Language[ArithExpr] = summon[Language[ArithExpr]]
+  val R: Rules = Rules()(using L)
   type ArithRule = R.ArithRule
 
   private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
@@ -159,5 +161,31 @@ class RuleTests {
       val Some(egraph4) = strategy(egraph3)
       assert(egraph4.areSame(c1, c2))
     }
+  }
+
+  @Test
+  def strengthReduceAndExtract(): Unit = {
+    val x = Var(Slot.fresh())
+
+    // Desired identity: 1 * 3 * x + 3 * x = 6 * x.
+    val expr = 1 * (3 * x) + 3 * x
+    val expected = Seq(6 * x, x * 6)
+
+    // Construct an e-graph from the expression and saturate it.
+    val (root, egraph) = EGraph.from(L.toTree(expr))
+    val egraph2 = strategies.head(egraph).get
+
+    val cost = new LanguageCostFunction[ArithExpr, Int] {
+      override def apply(expr: ArithExpr): Int = expr match {
+        case Number(_) => 1
+        case Var(_) => 1
+        case Add(Fact(l: Int), Fact(r: Int)) => 2 + l + r
+        case Mul(Fact(l: Int), Fact(r: Int)) => 4 + l + r
+        case _ => throw new IllegalArgumentException(s"Unexpected node in expression: $expr")
+      }
+    }
+
+    val extracted = egraph2.extract(root, cost)
+    assert(expected.contains(extracted), s"Expected one of: $expected, but got: $extracted")
   }
 }
