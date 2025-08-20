@@ -1,4 +1,4 @@
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.13.14", "3.4.1")
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.20", "2.13.14", "3.4.1")
 ThisBuild / scalaVersion := "3.4.1"
 
 ThisBuild / organization := "com.github.jonathanvdc"
@@ -42,7 +42,7 @@ lazy val foresight = (project in file("."))
 
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) =>
+        case Some((2, 11)) | Some((2, 12)) =>
           Seq("-unchecked", "-deprecation", "-feature", "-Xmax-classfile-name", "100")
         case Some((2, _)) =>
           Seq("-unchecked", "-deprecation", "-feature")
@@ -79,10 +79,10 @@ lazy val foresight = (project in file("."))
     Compile / unmanagedSourceDirectories ++= {
       val base = (Compile / sourceDirectory).value
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) => Seq(base / "scala-2.11")
-        case Some((2, 13)) => Seq(base / "scala-2.13+")
-        case Some((3, _))  => Seq(base / "scala-2.13+", base / "scala-3")
-        case _             => Nil
+        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
+        case Some((2, 13))                 => Seq(base / "scala-2.13+")
+        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
+        case _                             => Nil
       }
     },
 
