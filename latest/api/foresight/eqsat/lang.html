@@ -955,16 +955,6 @@
                   <div class="buttons"></div>
                  </div>
                 </div>
-                <div>
-                 <p>Typical end-to-end flow</p>
-                 <div class="snippet mono-small-block">
-                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
-</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
-</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Number(value: BigInt) extends ArithExpr
-</span></code></pre>
-                  <div class="buttons"></div>
-                 </div>
-                </div>
                </div>
               </dd>
               <dt class="body-small">
@@ -1840,13 +1830,13 @@
          <h4 class="groupHeader h200">Extensions</h4>
         </div>
         <div>
-         <span class="groupHeader"><span t="k">extension </span>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">This</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>]]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">g</span>: <a href="EGraphLike.html" t="t">EGraphLike</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">This</span>])</span>
-         <div class="documentableElement" id="add-253">
+         <span class="groupHeader"><span t="k">extension </span>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">This</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>]]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">g</span>: <span t="t">This</span>)</span>
+         <div class="documentableElement" id="add-b9c">
           <div class="documentableElement-expander">
            <button class="icon-button ar show-content"></button>
            <div class="header monospace mono-medium">
             <div class="signature">
-             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#add-253" t="n" class="documentableName ">add</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">expr</span>: <span t="t">E</span>)(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="EClassCall.html" t="t">EClassCall</a>]): (<a href="EClassCall.html" t="t">EClassCall</a>, <span data-unresolved-link="" t="t">This</span>)
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#add-b9c" t="n" class="documentableName ">add</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">expr</span>: <span t="t">E</span>)(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="EClassCall.html" t="t">EClassCall</a>]): (<a href="EClassCall.html" t="t">EClassCall</a>, <span data-unresolved-link="" t="t">This</span>)
             </div>
            </div>
           </div>
@@ -1890,6 +1880,191 @@
                </dt>
                <dd class="body-medium">
                 <p>A tuple containing the <code>EClassCall</code> created from the expression and the updated EGraph.</p>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="extract-fffff483">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#extract-fffff483" t="n" class="documentableName ">extract</a>[<span t="k"></span><span data-unresolved-link="" t="t">C</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">call</span>: <a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">costFunction</span>: <a href="lang/LanguageCostFunction.html" t="t">LanguageCostFunction</a>[<span t="t">E</span>, <span t="t">C</span>])(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">C</span>]): <span data-unresolved-link="" t="t">E</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Extract a surface expression from this e-graph starting at a given root e-class.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Extract a surface expression from this e-graph starting at a given root e-class.</p>
+               <p>This is a thin convenience wrapper around <a href="lang/Language.html#extract-d93">Language.extract</a>, using the current e-graph <code>g</code>. It:</p>
+               <ul>
+                <li>Builds an extraction analysis from the provided cost function,</li>
+                <li>Enriches <code>g</code> with that analysis (without mutating <code>g</code>),</li>
+                <li>Reconstructs the minimal-cost surface expression rooted at <code>call</code>.</li>
+               </ul>
+              </div>
+              <h2 class="h200">Type parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                C
+               </dt>
+               <dd class="body-medium">
+                <p>The cost type used to rank candidate extractions.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                L
+               </dt>
+               <dd class="body-medium">
+                <p>(using) The <code>Language[E]</code> instance describing how to encode/decode <code>E</code>.</p>
+               </dd>
+               <dt class="body-small">
+                call
+               </dt>
+               <dd class="body-medium">
+                <p>The root e-class to extract from.</p>
+               </dd>
+               <dt class="body-small">
+                costFunction
+               </dt>
+               <dd class="body-medium">
+                <p>Function assigning costs to surface ASTs.</p>
+               </dd>
+               <dt class="body-small">
+                ord
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Ordering on costs of type <code>C</code>.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                Returns
+               </dt>
+               <dd class="body-medium">
+                <p>The extracted surface AST <code>E</code> of minimal cost according to <code>costFunction</code>.</p>
+               </dd>
+               <dt class="body-small">
+                Example
+               </dt>
+               <dd class="body-medium">
+                <div>
+                 <div>
+                  <div class="snippet mono-small-block">
+                   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val cf: LanguageCostFunction[Expr, Int] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val program: Expr = g.extract(rootCall, cf)
+</span></code></pre>
+                   <div class="buttons"></div>
+                  </div>
+                 </div>
+                </div>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="extract-cf6">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#extract-cf6" t="n" class="documentableName ">extract</a>[<span t="k"></span><span data-unresolved-link="" t="t">C</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">exprWithCalls</span>: <span t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="n">costFunction</span>: <a href="lang/LanguageCostFunction.html" t="t">LanguageCostFunction</a>[<span t="t">E</span>, <span t="t">C</span>])(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="EClassCall.html" t="t">EClassCall</a>], <span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">C</span>]): <span data-unresolved-link="" t="t">E</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Insert a surface expression into this e-graph and immediately extract its minimal-cost equivalent.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Insert a surface expression into this e-graph and immediately extract its minimal-cost equivalent.</p>
+               <p>This is a thin convenience wrapper around <a href="lang/Language.html#extract-d93">Language.extract</a>, using the current e-graph <code>g</code>.</p>
+              </div>
+              <h2 class="h200">Type parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                C
+               </dt>
+               <dd class="body-medium">
+                <p>The cost type used to rank candidate exactions.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                L
+               </dt>
+               <dd class="body-medium">
+                <p>(using) The <code>Language[E]</code> instance describing how to encode/decode <code>E</code>.</p>
+               </dd>
+               <dt class="body-small">
+                costFunction
+               </dt>
+               <dd class="body-medium">
+                <p>Function assigning costs to surface ASTs.</p>
+               </dd>
+               <dt class="body-small">
+                enc
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Encoder from surface AST atoms to <code>EClassCall</code> for insertion.</p>
+               </dd>
+               <dt class="body-small">
+                exprWithCalls
+               </dt>
+               <dd class="body-medium">
+                <p>Surface expression to add and then extract from.</p>
+               </dd>
+               <dt class="body-small">
+                ord
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Ordering on costs of type <code>C</code>.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                Returns
+               </dt>
+               <dd class="body-medium">
+                <p>The minimal-cost expression equivalent to <code>exprWithCalls</code> under <code>costFunction</code>.</p>
+               </dd>
+               <dt class="body-small">
+                Example
+               </dt>
+               <dd class="body-medium">
+                <div>
+                 <div>
+                  <div class="snippet mono-small-block">
+                   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val cf: LanguageCostFunction[Expr, BigDecimal] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val best: Expr = g.extract(myExpr, cf)
+</span></code></pre>
+                   <div class="buttons"></div>
+                  </div>
+                 </div>
+                </div>
                </dd>
               </dl>
              </div>
