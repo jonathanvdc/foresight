@@ -285,6 +285,84 @@ node5 -> node1;
           </div>
          </div>
         </div>
+        <div class="documentableElement" id="apply-fffffea9">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="BackoffRuleApplication$.html#apply-fffffea9" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rules</span>: <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="t">EGraphT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">ruleApplicationLimit</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">ruleBanLength</span>: <span data-unresolved-link="" t="t">Int</span>): <a href="BackoffRuleApplication.html" t="t">BackoffRuleApplication</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">Rule</span>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">MatchT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Convenience factory method for constructing a <a href="BackoffRuleApplication.html">BackoffRuleApplication</a> with uniform scheduling parameters and the default non-caching search-and-apply strategy.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Convenience factory method for constructing a <a href="BackoffRuleApplication.html">BackoffRuleApplication</a> with uniform scheduling parameters and the default non-caching search-and-apply strategy.</p>
+              <p>This overload is a further simplification of the other <code>apply</code>: all rules are wrapped in <a href="BackoffRule.html">BackoffRule</a>s with the same initial match limit and ban length, and <a href="SearchAndApply$.html#withoutCaching-bc7">SearchAndApply.withoutCaching</a> is used for rule application.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of rule match.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The node type in the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               ruleApplicationLimit
+              </dt>
+              <dd class="body-medium">
+               <p>The initial number of matches each rule may apply before being banned.</p>
+              </dd>
+              <dt class="body-small">
+               ruleBanLength
+              </dt>
+              <dd class="body-medium">
+               <p>The number of iterations each rule is banned after hitting its match limit.</p>
+              </dd>
+              <dt class="body-small">
+               rules
+              </dt>
+              <dd class="body-medium">
+               <p>The sequence of rewrite rules to schedule with backoff.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A new <a href="BackoffRuleApplication.html">BackoffRuleApplication</a> instance configured with the given rules and parameters.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
        </div>
       </section>
      </div>
