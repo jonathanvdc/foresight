@@ -180,4 +180,29 @@ object BackoffRuleApplication {
           rule, ruleApplicationLimit, ruleBanLength)),
       searchAndApply)
   }
+  /**
+   * Convenience factory method for constructing a [[BackoffRuleApplication]] with
+   * uniform scheduling parameters and the default non-caching search-and-apply strategy.
+   *
+   * This overload is a further simplification of the other `apply`: all rules are
+   * wrapped in [[BackoffRule]]s with the same initial match limit and ban length,
+   * and [[SearchAndApply.withoutCaching]] is used for rule application.
+   *
+   * @param rules The sequence of rewrite rules to schedule with backoff.
+   * @param ruleApplicationLimit The initial number of matches each rule may apply before being banned.
+   * @param ruleBanLength The number of iterations each rule is banned after hitting its match limit.
+   * @tparam NodeT The node type in the e-graph.
+   * @tparam EGraphT The type of the e-graph.
+   * @tparam MatchT The type of rule match.
+   * @return A new [[BackoffRuleApplication]] instance configured with the given rules and parameters.
+   */
+  def apply[NodeT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT](
+             rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+             ruleApplicationLimit: Int,
+             ruleBanLength: Int
+           ): BackoffRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+    apply(rules, ruleApplicationLimit, ruleBanLength, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT])
+  }
 }
