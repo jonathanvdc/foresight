@@ -135,9 +135,9 @@ object Strategies {
     val ruleBanLength = 5
 
     val baseStrategy = BackoffRuleApplication(
-      rules.map(rule =>
-        BackoffRule[ArrayIR, Rule[ArrayIR, Match, MetadataEGraph], Match](
-          rule, ruleApplicationLimit, ruleBanLength)),
+      rules,
+      ruleApplicationLimit,
+      ruleBanLength,
       SearchAndApply.withCaching[ArrayIR, MetadataEGraph, Match])
 
     baseStrategy
