@@ -35,13 +35,6 @@ import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
  * // Build a rewrite rule directly from surface syntax
  * val r = Lang.rule("comm-add", Add(x, y), Add(y, x))
  * }}}
- *
- * @example Typical end-to-end flow
- * {{{
- * sealed trait ArithExpr derives Language
- * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
- * final case class Number(value: BigInt) extends ArithExpr
- * }}}
  */
 trait Language[E]:
 
