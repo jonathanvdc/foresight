@@ -65,6 +65,11 @@ object AtomEncoder:
     encoder(value, ord)
 
   /**
+   * A no-op encoder that always returns `None`.
+   */
+  def noEncoding[E, A]: AtomEncoder[E, A] = (_: E, _: Int) => None
+
+  /**
    * Derived encoder for a sum type `E`.
    *
    * The derived instance captures, at summon time, the `AsAtom` bridges for each case of `E`.

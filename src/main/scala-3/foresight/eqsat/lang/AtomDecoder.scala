@@ -81,6 +81,14 @@ object AtomDecoder extends LowPriorityAtomDecoder:
     decoder(call)
 
   /**
+   * A no-op decoder that always returns `None`.
+   * @tparam E Target surface type.
+   * @tparam A Source atom payload type.
+   * @return An `AtomDecoder[E, A]` that does not decode anything.
+   */
+  def noDecoding[E, A]: AtomDecoder[E, A] = (_: A) => None
+
+  /**
    * High-priority decoder for analysis facts:
    * if an `AnalysisBox[E]` is available, any `AnalysisFact[A]` can be embedded back into `E`.
    *
