@@ -2,6 +2,8 @@ package foresight.eqsat.lang
 
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
 
+import scala.util.NotGiven
+
 /**
  * Provides extension methods for `EGraphLike` to operate on surface expressions.
  */
@@ -74,5 +76,6 @@ extension [E, This <: EGraphLike[LanguageOp[E], This] with EGraph[LanguageOp[E]]
    */
   def extract[C](exprWithCalls: E, costFunction: LanguageCostFunction[E, C])(using L: Language[E],
                                                                              enc: AtomEncoder[E, EClassCall],
-                                                                             ord: Ordering[C]): E =
+                                                                             ord: Ordering[C],
+                                                                             ev: NotGiven[E =:= EClassCall]): E =
     L.extract[C](exprWithCalls, g, costFunction)(using enc, ord)
