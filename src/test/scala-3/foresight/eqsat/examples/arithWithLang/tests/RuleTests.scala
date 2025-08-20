@@ -172,7 +172,7 @@ class RuleTests {
     val expected = Seq(6 * x, x * 6)
 
     // Construct an e-graph from the expression and saturate it.
-    val (root, egraph) = EGraph.from(L.toTree(expr))
+    val (root, egraph) = L.toEGraph(expr)
     val egraph2 = strategies.head(egraph).get
 
     val cost = new LanguageCostFunction[ArithExpr, Int] {
