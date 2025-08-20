@@ -144,3 +144,40 @@ final case class BackoffRuleApplication[NodeT,
     (newEGraph, newData)
   }
 }
+
+/**
+ * A companion object for [[BackoffRuleApplication]] providing factory methods and utilities.
+ */
+object BackoffRuleApplication {
+  /**
+   * Convenience factory method for constructing a [[BackoffRuleApplication]] from plain rewrite rules.
+   *
+   * Instead of requiring each rule to be wrapped in a [[BackoffRule]] with explicit scheduling
+   * parameters, this method assigns all rules the same initial match limit and ban length.
+   *
+   * @param rules The sequence of rewrite rules to schedule with backoff.
+   * @param ruleApplicationLimit The initial number of matches each rule may apply before being banned.
+   * @param ruleBanLength The number of iterations each rule is banned after hitting its match limit.
+   * @param searchAndApply Strategy for finding and applying rule matches to the e-graph.
+   * @tparam NodeT The node type in the e-graph.
+   * @tparam RuleT The rewrite rule type.
+   * @tparam EGraphT The type of the e-graph.
+   * @tparam MatchT The type of rule match.
+   * @return A new [[BackoffRuleApplication]] instance configured with the given rules and parameters.
+   */
+  def apply[NodeT,
+    RuleT <: Rule[NodeT, MatchT, _],
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT](
+             rules: Seq[RuleT],
+             ruleApplicationLimit: Int,
+             ruleBanLength: Int,
+             searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
+           ): BackoffRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
+    BackoffRuleApplication(
+      rules.map(rule =>
+        BackoffRule[NodeT, RuleT, MatchT](
+          rule, ruleApplicationLimit, ruleBanLength)),
+      searchAndApply)
+  }
+}
