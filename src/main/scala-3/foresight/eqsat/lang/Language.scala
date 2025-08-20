@@ -18,9 +18,9 @@ import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
  *  - encoding/decoding between `E` and a core tree [[MTree]],
  *  - an ordering over nodes (for deterministic e-graph behavior),
  *  - convenience bridges from `E` values to matchers/appliers/rules,
- *  - and a helper to reconstruct `E` from an analysis-view of a node.
+ *  - helpers to reconstruct `E` from analysis or extraction results.
  *
- * @example Typical pattern
+ * @example Encoding and rules at a glance
  * {{{
  * sealed trait ArithExpr derives Language
  * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
@@ -34,6 +34,13 @@ import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
  *
  * // Build a rewrite rule directly from surface syntax
  * val r = Lang.rule("comm-add", Add(x, y), Add(y, x))
+ * }}}
+ *
+ * @example Typical end-to-end flow
+ * {{{
+ * sealed trait ArithExpr derives Language
+ * final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+ * final case class Number(value: BigInt) extends ArithExpr
  * }}}
  */
 trait Language[E]:
@@ -114,12 +121,6 @@ trait Language[E]:
    *   also an `EGraph[Op]`.
    * @param analysis
    *   The extraction analysis defined over `LanguageOp[E]` and cost type `C`.
-   * @param enc
-   *   (using) Encoder that maps surface AST atoms in `E` to `EClassCall`
-   *   when building/encoding trees.
-   * @param dec
-   *   (using) Decoder that maps atoms from `EClassCall` back into `E`
-   *   when reconstructing the surface AST via [[fromTree]].
    * @return
    *   A `LanguageExtractor[E, EGraphWithMetadata[Op, Repr]]` whose `apply`
    *   method takes an `EClassCall` and an `EGraphWithMetadata[Op, Repr]`
@@ -136,13 +137,13 @@ trait Language[E]:
    * val program: E = extr(root, g)   // decodes to surface AST E
    * }}}
    */
-  def extractor[C, Repr <: EGraphLike[Op, Repr] with EGraph[Op]](analysis: ExtractionAnalysis[LanguageOp[E], C])
-                                                                (using enc: AtomEncoder[E, EClassCall],
-                                                                 dec: AtomDecoder[E, EClassCall]): LanguageExtractor[E, EGraphWithMetadata[Op, Repr]] = {
+  def extractor[C, Repr <: EGraphLike[Op, Repr] with EGraph[Op]](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, EGraphWithMetadata[Op, Repr]] = {
     val innerExtractor = analysis.extractor[Repr]
-    new LanguageExtractor[E, EGraphWithMetadata[Op, Repr]](using this, enc) {
+    def absurd[A](n: Nothing): A = n
+    val dec: AtomDecoder[E, Nothing] = AtomDecoder[E, Nothing] { absurd }
+    new LanguageExtractor[E, EGraphWithMetadata[Op, Repr]](using this) {
       def apply(call: EClassCall, egraph: EGraphWithMetadata[Op, Repr]): E =
-        fromTree(innerExtractor(call, egraph))
+        fromTree[Nothing](innerExtractor(call, egraph))(using dec)
     }
   }
 
@@ -204,10 +205,6 @@ trait Language[E]:
    *   The e-graph containing equivalences and metadata.
    * @param costFunction
    *   Function assigning costs to surface ASTs.
-   * @param enc
-   *   (using) Encoder from surface AST atoms to `EClassCall`.
-   * @param dec
-   *   (using) Decoder from `EClassCall` atoms back to surface AST `E`.
    * @param ord
    *   (using) Ordering on costs.
    * @return
@@ -220,9 +217,7 @@ trait Language[E]:
    * }}}
    */
   def extract[C](call: EClassCall, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
-                (using enc: AtomEncoder[E, EClassCall],
-                 dec: AtomDecoder[E, EClassCall],
-                 ord: Ordering[C]): E = {
+                (using ord: Ordering[C]): E = {
     val analysis = extractionAnalysis("extraction", costFunction)
     val withMetadata = egraph.withMetadata.addAnalysis(analysis)
     extractor(analysis)(call, withMetadata)
@@ -250,8 +245,6 @@ trait Language[E]:
    *
    * @param enc
    *   (using) Encoder from surface AST atoms to `EClassCall`.
-   * @param dec
-   *   (using) Decoder from `EClassCall` atoms back to surface AST `E`.
    * @param ord
    *   (using) Ordering on costs.
    *
@@ -267,10 +260,9 @@ trait Language[E]:
    */
   def extract[C](exprWithCalls: E, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
                 (using enc: AtomEncoder[E, EClassCall],
-                 dec: AtomDecoder[E, EClassCall],
                  ord: Ordering[C]): E = {
-    val (call, newGraph) = egraph.add(exprWithCalls)(using this)
-    extract(call, newGraph, costFunction)(using enc, dec, ord)
+    val (call, newGraph) = egraph.add(exprWithCalls)(using this, enc)
+    extract(call, newGraph, costFunction)(using ord)
   }
 
   /**
