@@ -9,6 +9,7 @@ import foresight.util.ordering.SeqOrdering
 
 import scala.deriving.*
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
+import scala.util.NotGiven
 
 /**
  * Type class describing how a surface AST `E` maps to the core e-graph language.
@@ -209,7 +210,7 @@ trait Language[E]:
    *   val program: Expr = lang.extract(rootCall, g, cf)
    * }}}
    */
-  def extract[C](call: EClassCall, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
+  def extract[C](call: EClassCall, egraph: EGraph[LanguageOp[E]], costFunction: LanguageCostFunction[E, C])
                 (using ord: Ordering[C]): E = {
     val analysis = extractionAnalysis("extraction", costFunction)
     val withMetadata = egraph.withMetadata.addAnalysis(analysis)
@@ -253,7 +254,8 @@ trait Language[E]:
    */
   def extract[C](exprWithCalls: E, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
                 (using enc: AtomEncoder[E, EClassCall],
-                 ord: Ordering[C]): E = {
+                 ord: Ordering[C],
+                 ev: NotGiven[E =:= EClassCall]): E = {
     val (call, newGraph) = egraph.add(exprWithCalls)(using this, enc)
     extract(call, newGraph, costFunction)(using ord)
   }
