@@ -5,25 +5,25 @@ import scala.deriving.*
 /**
  * Type class declaring that a surface type `A` should appear as a leaf atom in a `MixedTree`.
  *
- * `Atom[A]` is an opt-in witness: by defining or deriving an instance, you state that values
+ * `Box[A]` is an opt-in witness: by defining or deriving an instance, you state that values
  * of `A` are stored as leaf payloads rather than core language nodes. The associated type
  * [[Payload]] names the concrete type actually stored at the leaves, and [[asAtom]] provides a
  * bidirectional bridge between `A` and `Payload`.
  *
- * When to use: Mark single-field wrappers (e.g., handles, slots, small value wrappers) as `derives Atom`.
+ * When to use: Mark single-field wrappers (e.g., handles, slots, small value wrappers) as `derives Box`.
  *
  * @tparam A surface type to be treated as an atom (leaf).
  * @example Typical usage (single-field wrapper as an atom)
  * {{{
  * sealed trait Expr derives Language
- * final case class Ref(id: EClassCall) extends Expr derives Atom
+ * final case class Ref(id: EClassCall) extends Expr derives Box
  *
  * val L = summon[Language[Expr]]
  * val ref = Ref(id)
  * val tree = L.toTree[EClassCall](ref) // yields MixedTree.Atom(id)
  * }}}
  */
-trait Atom[A]:
+trait Box[A]:
   /** Concrete payload type stored at leaves for atoms originating from `A`. */
   type Payload
 
@@ -34,22 +34,22 @@ trait Atom[A]:
   def asAtom: AsAtom[A, Payload]
 
 /**
- * Companion object for [[Atom]].
+ * Companion object for [[Box]].
  */
-object Atom:
+object Box:
 
   /**
    * Type alias that pins the associated `Payload` of `A` to `B`.
    *
    * Useful for APIs that need to mention the payload type explicitly:
    * {{{
-   * def needsEClass(using Atom.Aux[Ref, EClassCall]) = ...
+   * def needsEClass(using Box.Aux[Ref, EClassCall]) = ...
    * }}}
    */
-  type Aux[A, B] = Atom[A] { type Payload = B }
+  type Aux[A, B] = Box[A] { type Payload = B }
 
   /**
-   * Derive an `Atom[A]` instance for single-field case classes.
+   * Derive a `Box[A]` instance for single-field case classes.
    *
    * The derived instance:
    *  - sets `Payload` to the single field's type,
@@ -59,15 +59,15 @@ object Atom:
    *
    * Example:
    * {{{
-   * final case class Ref(id: EClassCall) derives Atom
-   * summon[Atom.Aux[Ref, EClassCall]] // OK
+   * final case class Ref(id: EClassCall) derives Box
+   * summon[Box.Aux[Ref, EClassCall]] // OK
    * }}}
    */
   inline def derived[A](using
                         m: Mirror.ProductOf[A],
                         ev: Tuple.Size[m.MirroredElemTypes] =:= 1
-                       ): Atom[A] =
-    new Atom[A]:
+                       ): Box[A] =
+    new Box[A]:
       type Payload = Head[m.MirroredElemTypes]
       val asAtom: AsAtom[A, Payload] = new AsAtom[A, Payload]:
         def toAtom(a: A): Payload =
@@ -77,17 +77,17 @@ object Atom:
 
   /**
    * Helper `given` that reveals the concrete payload type `B` when:
-   *  - an explicit/derived `Atom[A]` is already in scope (opt-in gate), and
+   *  - an explicit/derived `Box[A]` is already in scope (opt-in gate), and
    *  - `A` is a single-field product whose field type is `B`.
    *
-   * Lets you summon `Atom.Aux[A, B]` in contexts that need the refined type.
+   * Lets you summon `Box.Aux[A, B]` in contexts that need the refined type.
    */
   inline given aux[A, B](using
-                         d: Atom[A],                                   // opt-in gate (prevents silent auto instances)
+                         d: Box[A], // opt-in gate (prevents silent auto instances)
                          m: Mirror.ProductOf[A],
                          eq: m.MirroredElemTypes =:= (B *: EmptyTuple) // enforce single field of type B
-                        ): Atom.Aux[A, B] =
-    d.asInstanceOf[Atom.Aux[A, B]]
+                        ): Box.Aux[A, B] =
+    d.asInstanceOf[Box.Aux[A, B]]
 
   // Extract the first (only) field type of product
   private type Head[T <: Tuple] = T match

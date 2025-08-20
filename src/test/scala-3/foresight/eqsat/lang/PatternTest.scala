@@ -16,7 +16,7 @@ class PatternTest {
   final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
   final case class Number(value: BigInt) extends ArithExpr
 
-  final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Atom
+  final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Box
   object PatternVar {
     def fresh(): PatternVar = PatternVar(Pattern.Var.fresh())
   }

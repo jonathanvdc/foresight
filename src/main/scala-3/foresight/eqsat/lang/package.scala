@@ -8,7 +8,7 @@ package foresight.eqsat
  * syntax, and embed analysis results back into the surface language.
  *
  * The API is intentionally minimal and strongly typed. In practice most users only
- * derive [[foresight.eqsat.lang.Language]] and add `derives Atom` to a few case
+ * derive [[foresight.eqsat.lang.Language]] and add `derives Box` to a few case
  * classes.
  *
  * ## Core abstractions
@@ -27,9 +27,9 @@ package foresight.eqsat
  * through a `Language[E]`. An `Ordering[LanguageOp[E]]` is summonable whenever a
  * `Language[E]` is in scope.
  *
- * [[foresight.eqsat.lang.Atom]] and [[foresight.eqsat.lang.AsAtom]] mark a wrapper
+ * [[foresight.eqsat.lang.Box]] and [[foresight.eqsat.lang.AsAtom]] mark a wrapper
  * type `A` as a leaf atom, whose stored payload type is `Payload`. You can write
- * `derives Atom` on single-field case classes to derive this automatically, and the
+ * `derives Box` on single-field case classes to derive this automatically, and the
  * corresponding `AsAtom[A, Payload]` bridge will be provided.
  *
  * [[foresight.eqsat.lang.AtomEncoder]] and [[foresight.eqsat.lang.AtomDecoder]]
@@ -52,9 +52,9 @@ package foresight.eqsat
  * import foresight.eqsat.rewriting.patterns.Pattern
  *
  * sealed trait Expr derives Language
- * final case class Lit(i: Int)           extends Expr derives Atom
+ * final case class Lit(i: Int)           extends Expr derives Box
  * final case class Add(x: Expr, y: Expr) extends Expr
- * final case class Ref(id: EClassCall)   extends Expr derives Atom
+ * final case class Ref(id: EClassCall)   extends Expr derives Box
  *
  * val Lang = summon[Language[Expr]]
  *
@@ -71,7 +71,7 @@ package foresight.eqsat
  * atoms by deriving `Atom`.
  *
  * {{{
- * final case class Ref(id: EClassCall) extends Expr derives Atom
+ * final case class Ref(id: EClassCall) extends Expr derives Box
  * }}}
  *
  * If a case is not a single-field product, provide a manual `Atom` and `AsAtom`
@@ -84,7 +84,7 @@ package foresight.eqsat
  *   - `AtomEncoder[Expr, Int]` succeeds on `Lit(i)` and yields `i`.
  *   - `AtomDecoder[Expr, EClassCall]` succeeds on `Ref(id)` and yields `Ref(id)`.
  *
- * You rarely need to implement these by hand. Add `derives Atom` to your
+ * You rarely need to implement these by hand. Add `derives Box` to your
  * single-field wrappers and let the compiler summon the right instances.
  *
  * ## Analysis integration
@@ -117,7 +117,7 @@ package foresight.eqsat
  *
  * ## Checklist
  *
- *   - Add `derives Atom` to single-field wrappers.
+ *   - Add `derives Box` to single-field wrappers.
  *   - Implement or derive a single `Language[E]` for your AST.
  *   - Build rules and patterns with surface terms through `Language`.
  *   - Provide an `AnalysisBox[E]` if analyses should appear as surface nodes.

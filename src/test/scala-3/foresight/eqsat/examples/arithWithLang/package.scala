@@ -27,7 +27,7 @@ package foresight.eqsat.examples
  * To make the e-graph interplay smoother, two classes of helpers are introduced:
  *
  *   - `Ref(eClass: EClassCall)` and `PatternVar(variable: Pattern.Var)` derive
- *     [[foresight.eqsat.lang.Atom Atom]]. This marks them as atoms that can be embedded in
+ *     [[foresight.eqsat.lang.Box Atom]]. This marks them as atoms that can be embedded in
  *     mixed trees. `PatternVar.fresh()` creates uniquely
  *     identifiable pattern variables.
  *   - A `given` conversion `Int => ArithExpr` maps literals to `Number`, and extension methods define

@@ -7,7 +7,7 @@ package foresight.eqsat.lang
  *  - [[toAtom]]   : `T => B`   (strip the wrapper to the leaf payload)
  *  - [[fromAtom]] : `B => T`   (rebuild the surface value from the payload)
  *
- * You will most often not write this by hand. If `T` has an `Atom[T]` instance,
+ * You will most often not write this by hand. If `T` has a `Box[T]` instance,
  * an `AsAtom[T, B]` (with `B = Atom[T]#Payload`) can be derived automatically.
  *
  * ### Laws
@@ -23,7 +23,7 @@ package foresight.eqsat.lang
  *
  * @example
  * {{{
- * final case class Ref(id: EClassCall) derives Atom
+ * final case class Ref(id: EClassCall) derives Box
  *
  * val bridge: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]]
  * val id: EClassCall = bridge.toAtom(Ref(id))
@@ -71,13 +71,13 @@ object AsAtom:
   /**
    * Automatically derive `AsAtom[A, B]` from an in-scope `Atom.Aux[A, B]`.
    *
-   * This is the usual path for single-field wrappers declared with `derives Atom`.
+   * This is the usual path for single-field wrappers declared with `derives Box`.
    *
    * Example:
    * {{{
-   * final case class Ref(id: EClassCall) derives Atom
+   * final case class Ref(id: EClassCall) derives Box
    * val aa: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]] // derived here
    * }}}
    */
-  inline given derivedAsAtom[A, B](using d: Atom.Aux[A, B]): AsAtom[A, B] =
+  inline given derivedAsAtom[A, B](using d: Box.Aux[A, B]): AsAtom[A, B] =
     d.asAtom

@@ -17,7 +17,7 @@ import scala.deriving.Mirror
  * @example Single-field wrappers as atoms
  * {{{
  * sealed trait Expr derives Language
- * final case class Ref(id: EClassCall) extends Expr derives Atom
+ * final case class Ref(id: EClassCall) extends Expr derives Box
  *
  * // Bridge exists:
  * val dec: AtomDecoder[Expr, EClassCall] = summon[AtomDecoder[Expr, EClassCall]]
@@ -42,8 +42,8 @@ import scala.deriving.Mirror
  * @example Fallback/derivation for sums
  * {{{
  * sealed trait Expr derives Language
- * final case class Lit(i: Int) extends Expr derives Atom
- * final case class Ref(id: EClassCall) extends Expr derives Atom
+ * final case class Lit(i: Int) extends Expr derives Box
+ * final case class Ref(id: EClassCall) extends Expr derives Box
  *
  * val dInt: AtomDecoder[Expr, Int]        = summon
  * val dRef: AtomDecoder[Expr, EClassCall] = summon
@@ -94,7 +94,7 @@ object AtomDecoder extends LowPriorityAtomDecoder:
    * if there is an `AsAtom[C, A]` and `C <: E`, we can decode `A` into the constructor `C`,
    * and thus into `E`.
    *
-   * This is the usual path for single-field case classes declared with `derives Atom`.
+   * This is the usual path for single-field case classes declared with `derives Box`.
    */
   given atomDecoderFromAsAtom[E, C, A](using ev: C <:< E, aa: AsAtom[C, A]): AtomDecoder[E, A] =
   (a: A) => Some(ev(aa.fromAtom(a)))

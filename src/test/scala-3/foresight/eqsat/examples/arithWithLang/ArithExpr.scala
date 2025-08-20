@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.arithWithLang
 
 import foresight.eqsat.{EClassCall, Slot}
-import foresight.eqsat.lang.{AnalysisBox, Atom, Def, Language, LanguageOp, Use}
+import foresight.eqsat.lang.{AnalysisBox, Box, Def, Language, LanguageOp, Use}
 import foresight.eqsat.rewriting.patterns.Pattern
 
 /**
@@ -59,19 +59,19 @@ final case class Number(value: BigInt) extends ArithExpr
  * An explicit reference to an existing e-class in the e-graph.
  *
  * This is useful in examples/rules where we want to splice a matched subtree back
- * into another expression. Deriving [[Atom]] ensures that matcher/applier treat `Ref`
+ * into another expression. Deriving [[Box]] ensures that matcher/applier treat `Ref`
  * as a leaf (no recursive matching into the referenced class).
  */
-final case class Ref(eClass: EClassCall) extends ArithExpr derives Atom
+final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
 
 /**
  * A pattern variable exposed at the surface AST level.
  *
  * `PatternVar` lets us write example rules in ordinary Scala by plugging these
- * placeholders into expressions. Because it derives [[Atom]], it is also treated as
+ * placeholders into expressions. Because it derives [[Box]], it is also treated as
  * a leaf during matching. Use [[fresh]] to create a uniquely-named variable.
  */
-final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Atom
+final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Box
 object PatternVar {
   /**
    * Fresh pattern variable for building matchers in examples.

@@ -19,9 +19,9 @@ import scala.deriving.Mirror
  *
  * Typical sources:
  *   - **Derived** for sealed sum types `E`: if a case `C <: E` has `AsAtom[C, A]`
- *     (e.g., via `derives Atom` on a single-field case class), the derived encoder
+ *     (e.g., via `derives Box` on a single-field case class), the derived encoder
  *     can extract the leaf payload `A` from values of that case.
- *   - **Manual** instances are rarely needed; prefer adding `derives Atom` to the case
+ *   - **Manual** instances are rarely needed; prefer adding `derives Box` to the case
  *     and letting `AsAtom` + derivation do the work.
  *
  * ### Laws
@@ -33,8 +33,8 @@ import scala.deriving.Mirror
  * @example
  * {{{
  * sealed trait Expr derives Language
- * final case class Lit(i: Int) extends Expr derives Atom
- * final case class Ref(id: EClassCall) extends Expr derives Atom
+ * final case class Lit(i: Int) extends Expr derives Box
+ * final case class Ref(id: EClassCall) extends Expr derives Box
  *
  * // Encoders exist for each payload type that a case exposes:
  * val encInt: AtomEncoder[Expr, Int] = summon
