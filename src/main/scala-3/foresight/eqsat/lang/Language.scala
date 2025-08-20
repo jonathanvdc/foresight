@@ -88,6 +88,18 @@ trait Language[E]:
   def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
 
   /**
+   * Encode a surface AST `e: E` into an e-graph, returning the root e-class call
+   * and the new e-graph containing `e`.
+   * @param e The surface AST expression to encode.
+   * @return A tuple containing:
+   *         - The `EClassCall` representing the root of the encoded expression.
+   *         - The new e-graph with `e` added.
+   */
+  def toEGraph(e: E): (EClassCall, EGraph[Op]) = {
+    EGraph.from(toTree(e)(using AtomEncoder.noEncoding))
+  }
+
+  /**
    * Build a language-level extractor from a core [[ExtractionAnalysis]].
    *
    * This adapter takes a core extractor produced by the given `analysis`
@@ -133,11 +145,9 @@ trait Language[E]:
    */
   def extractor[C, Repr <: EGraphLike[Op, Repr] with EGraph[Op]](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, EGraphWithMetadata[Op, Repr]] = {
     val innerExtractor = analysis.extractor[Repr]
-    def absurd[A](n: Nothing): A = n
-    val dec: AtomDecoder[E, Nothing] = AtomDecoder[E, Nothing] { absurd }
     new LanguageExtractor[E, EGraphWithMetadata[Op, Repr]](using this) {
       def apply(call: EClassCall, egraph: EGraphWithMetadata[Op, Repr]): E =
-        fromTree[Nothing](innerExtractor(call, egraph))(using dec)
+        fromTree[Nothing](innerExtractor(call, egraph))(using AtomDecoder.noDecoding)
     }
   }
 
