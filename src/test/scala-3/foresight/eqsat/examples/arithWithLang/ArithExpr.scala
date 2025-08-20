@@ -19,7 +19,7 @@ import foresight.eqsat.rewriting.patterns.Pattern
  * - **Binders vs uses:** parameter positions carry `Def[Slot]` (a binder), while variable
  *   references carry `Use[Slot]`. This makes binding structure explicit to the language
  *   derivation, so the e-graph can treat lambdas/apps hygienically.
- * - **Atoms when we really want leaves:** `Ref` and `PatternVar` "derive Atom" to tell the
+ * - **Boxes when we really want leaves:** `Ref` and `PatternVar` "derive Atom" to tell the
  *   language that these become MixedTree atoms.
  * - **Fact as an analysis box:** `AnalysisBox` lets analyses temporarily embed results back
  *   into the surface AST (e.g., a discovered constant), which can be convenient for rules.
