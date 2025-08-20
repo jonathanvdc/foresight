@@ -1,8 +1,10 @@
 package foresight.eqsat.lang
 
+import foresight.eqsat.extraction.ExtractionAnalysis
+import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot}
 import foresight.util.ordering.SeqOrdering
 
 import scala.deriving.*
@@ -83,6 +85,193 @@ trait Language[E]:
    * Note: decoding is typically partial in the presence of analysis-only atoms; see [[fromAnalysisNode]].
    */
   def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
+
+  /**
+   * Build a language-level extractor from a core [[ExtractionAnalysis]].
+   *
+   * This adapter takes a core extractor produced by the given `analysis`
+   * (which works over the e-graph's internal node type `LanguageOp[E]`)
+   * and wraps it so that it returns surface AST values `E`.
+   *
+   * Internally it:
+   *    - obtains the core extractor via `analysis.extractor[Repr]`, which
+   *      returns a function `(EClassCall, Repr) => MixedTree[Op, EClassCall]`
+   *    - invokes that extractor and then decodes the resulting core tree back
+   *      to the surface AST using [[fromTree]]
+   *
+   * Use this when you want to perform extractor-based reconstruction
+   * (e.g., cost-based extraction, witness construction) but interact with
+   * your language `E` rather than the e-graph’s internal representation.
+   *
+   * This method does not alter the semantics or cost model of `analysis`;
+   * it delegates extraction to the inner (core) extractor and then decodes
+   * the resulting core tree to `E`.
+   *
+   * @tparam C
+   *   The analysis result / cost type managed by `ExtractionAnalysis`.
+   * @tparam Repr
+   *   The concrete e-graph type. Must be an `EGraphLike[Op, Repr]` that is
+   *   also an `EGraph[Op]`.
+   * @param analysis
+   *   The extraction analysis defined over `LanguageOp[E]` and cost type `C`.
+   * @param enc
+   *   (using) Encoder that maps surface AST atoms in `E` to `EClassCall`
+   *   when building/encoding trees.
+   * @param dec
+   *   (using) Decoder that maps atoms from `EClassCall` back into `E`
+   *   when reconstructing the surface AST via [[fromTree]].
+   * @return
+   *   A `LanguageExtractor[E, EGraphWithMetadata[Op, Repr]]` whose `apply`
+   *   method takes an `EClassCall` and an `EGraphWithMetadata[Op, Repr]`
+   *   and returns a surface AST value `E`.
+   * @example
+   * {{{
+   * val lang: Language[E] = summon[Language[E]]
+   * val analysis: ExtractionAnalysis[lang.Op, Cost] = ...
+   *
+   * val g: EGraphWithMetadata[lang.Op, Repr] = ...
+   * val root: EClassCall = ...
+   *
+   * val extr = lang.extractor[Cost, Repr](analysis)
+   * val program: E = extr(root, g)   // decodes to surface AST E
+   * }}}
+   */
+  def extractor[C, Repr <: EGraphLike[Op, Repr] with EGraph[Op]](analysis: ExtractionAnalysis[LanguageOp[E], C])
+                                                                (using enc: AtomEncoder[E, EClassCall],
+                                                                 dec: AtomDecoder[E, EClassCall]): LanguageExtractor[E, EGraphWithMetadata[Op, Repr]] = {
+    val innerExtractor = analysis.extractor[Repr]
+    new LanguageExtractor[E, EGraphWithMetadata[Op, Repr]](using this, enc) {
+      def apply(call: EClassCall, egraph: EGraphWithMetadata[Op, Repr]): E =
+        fromTree(innerExtractor(call, egraph))
+    }
+  }
+
+  /**
+   * Create a core [[ExtractionAnalysis]] from a cost function.
+   *
+   * This helper lifts a [[LanguageCostFunction]] over surface ASTs `E`
+   * into an [[ExtractionAnalysis]] that operates over the e-graph's
+   * internal node type `LanguageOp[E]`.
+   *
+   * Internally, it binds the provided cost function with the
+   * ordering on costs and the ordering on language operators.
+   *
+   * @tparam C
+   *   The cost type returned by the cost function.
+   * @param name
+   *   A human-readable name for the analysis (for logging/debugging).
+   * @param costFunction
+   *   A function assigning a cost to each surface AST `E`.
+   * @param ord
+   *   (using) Ordering on costs, required for extraction.
+   * @return
+   *   An [[ExtractionAnalysis]] defined over `LanguageOp[E]` and cost type `C`.
+   * @example
+   * {{{
+   * val cf: LanguageCostFunction[Expr, Int] = ...
+   * val analysis = lang.extractionAnalysis("my-cost", cf)
+   * }}}
+   */
+  def extractionAnalysis[C](name: String, costFunction: LanguageCostFunction[E, C])
+                           (using ord: Ordering[C]): ExtractionAnalysis[LanguageOp[E], C] = {
+    ExtractionAnalysis(name, costFunction)(ord, opOrdering)
+  }
+
+  /**
+   * Extract a surface expression from an e-graph given a cost function.
+   *
+   * This method performs a one-off version of the standard cost-based extraction process:
+   *
+   *   - Wrap the provided cost function in an [[ExtractionAnalysis]]
+   *   - Enrich the input e-graph with that analysis
+   *   - Run [[extractor]] to reconstruct the minimal-cost expression
+   *     of type `E` rooted at the given [[EClassCall]]
+   *
+   * This does not mutate the input e-graph; instead it builds a
+   * metadata-enriched wrapper and extracts from that.
+   *
+   * If multiple extraction rounds are needed, consider building a
+   * [[foresight.eqsat.metadata.EGraphWithMetadata]]
+   * configured with an extraction analysis obtained through [[extractionAnalysis]].
+   * Concrete expressions can be extracted from that enriched e-graph
+   * using the [[extractor]] method.
+   *
+   * @tparam C
+   *   The cost type used to rank candidate extractions.
+   * @param call
+   *   The root e-class to extract from.
+   * @param egraph
+   *   The e-graph containing equivalences and metadata.
+   * @param costFunction
+   *   Function assigning costs to surface ASTs.
+   * @param enc
+   *   (using) Encoder from surface AST atoms to `EClassCall`.
+   * @param dec
+   *   (using) Decoder from `EClassCall` atoms back to surface AST `E`.
+   * @param ord
+   *   (using) Ordering on costs.
+   * @return
+   *   The extracted surface AST `E` of minimal cost according to the
+   *   supplied cost function.
+   * @example
+   * {{{
+   *   val cf: LanguageCostFunction[Expr, Int] = ...
+   *   val program: Expr = lang.extract(rootCall, g, cf)
+   * }}}
+   */
+  def extract[C](call: EClassCall, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
+                (using enc: AtomEncoder[E, EClassCall],
+                 dec: AtomDecoder[E, EClassCall],
+                 ord: Ordering[C]): E = {
+    val analysis = extractionAnalysis("extraction", costFunction)
+    val withMetadata = egraph.withMetadata.addAnalysis(analysis)
+    extractor(analysis)(call, withMetadata)
+  }
+
+  /**
+   * Add an expression with e-class calls to the e-graph and immediately
+   * extract its minimal-cost equivalent according to the given cost function.
+   *
+   * This is a convenience overload that:
+   *
+   *   - Inserts `exprWithCalls` into the e-graph
+   *   - Delegates to [[extract(EClassCall,EGraph,LanguageCostFunction)]]
+   *     on the resulting e-class
+   *
+   * @tparam C
+   *   The cost type used to rank candidate extractions.
+   *
+   * @param exprWithCalls
+   *   Surface expression to add and extract from.
+   * @param egraph
+   *   The e-graph to insert into.
+   * @param costFunction
+   *   Function assigning costs to surface ASTs.
+   *
+   * @param enc
+   *   (using) Encoder from surface AST atoms to `EClassCall`.
+   * @param dec
+   *   (using) Decoder from `EClassCall` atoms back to surface AST `E`.
+   * @param ord
+   *   (using) Ordering on costs.
+   *
+   * @return
+   *   The extracted minimal-cost expression equivalent to
+   *   `exprWithCalls`.
+   *
+   * @example
+   *   {{{
+   *   val cf: LanguageCostFunction[Expr, Int] = ...
+   *   val program: Expr = lang.extract(myExpr, g, cf)
+   *   }}}
+   */
+  def extract[C](exprWithCalls: E, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
+                (using enc: AtomEncoder[E, EClassCall],
+                 dec: AtomDecoder[E, EClassCall],
+                 ord: Ordering[C]): E = {
+    val (call, newGraph) = egraph.add(exprWithCalls)(using this)
+    extract(call, newGraph, costFunction)(using enc, dec, ord)
+  }
 
   /**
    * Build a reversible searcher from a surface expression, by first encoding to a pattern tree.
