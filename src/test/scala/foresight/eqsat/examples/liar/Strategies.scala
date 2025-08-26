@@ -103,7 +103,7 @@ object Strategies {
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
       .repeatUntilStable
-      .thenApply(MaximalRuleApplicationWithCaching(idiomRules).withChangeLogger(onChange))
+      .thenApply(phase(idiomRules).repeatUntilStable)
       .closeRecording
       .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
