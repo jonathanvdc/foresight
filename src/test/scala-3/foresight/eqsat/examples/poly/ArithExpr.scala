@@ -1,7 +1,8 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.lang.{AnalysisBox, Box, Language, LanguageOp}
+import foresight.eqsat.lang.*
 import foresight.eqsat.rewriting.patterns.Pattern
+import foresight.eqsat.{EClassCall, MixedTree}
 
 sealed trait ArithExpr derives Language
 
@@ -27,6 +28,15 @@ final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
 final case class Pow(base: ArithExpr, exponent: ArithExpr) extends ArithExpr
 
 /**
+ * An explicit reference to an existing e-class in the e-graph.
+ *
+ * This is useful in examples/rules where we want to splice a matched subtree back
+ * into another expression. Deriving [[Box]] ensures that matcher/applier treat `Ref`
+ * as a leaf (no recursive matching into the referenced class).
+ */
+final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
+
+/**
  * A pattern variable exposed at the surface AST level.
  *
  * `PatternVar` lets us write example rules in ordinary Scala by plugging these
@@ -45,6 +55,28 @@ object PatternVar {
    * }}}
    */
   def fresh(): PatternVar = PatternVar(Pattern.Var.fresh())
+}
+
+/**
+ * Simple wrapper used by the analysis box.
+ *
+ * Analyses can produce `Fact[A]` nodes when convenient. For instance, constant-propagation
+ * might compute an `Option[BigInt]` and rules can consult/box that information.
+ */
+final case class Fact[A](value: A) extends ArithExpr
+
+/**
+ * Companion configures analysis boxing for this surface language.
+ *
+ * By implementing [[AnalysisBox]] we tell Foresight that analyses may embed results
+ * as `Fact[A]` nodes inside this AST. This is optional but makes certain examples
+ * and rules terser.
+ */
+object ArithExpr {
+  given AnalysisBox[ArithExpr] with
+    type Box[A] = Fact[A]
+
+    def box[A](a: A): Fact[A] = Fact(a)
 }
 
 /** Infix operators for building trees concisely in rules/tests. */
