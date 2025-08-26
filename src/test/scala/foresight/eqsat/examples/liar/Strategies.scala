@@ -73,7 +73,8 @@ object Strategies {
    * Based on the algorithm in Figure 3 of Thomas, Samuel, and James Bornholt. "Automatic generation of vectorizing
    * compilers for customizable digital signal processors." Proceedings of the 29th ACM International Conference on
    * Architectural Support for Programming Languages and Operating Systems, Volume 1. 2024.
-   * @param timeout An optional timeout for the strategy.
+   * @param expansionAndSimplificationTimeout An optional timeout for the strategy's expansion and simplification
+   *                                          phases.
    * @param phaseTimeout An optional timeout for each phase of the strategy.
    * @param expansionRules A sequence of rules to apply for expanding the e-graph, defaults to introducing constant
    *                       arrays and arithmetic introduction rules.
@@ -84,7 +85,7 @@ object Strategies {
    *                 e-graphs. This can be used for logging or debugging purposes.
    * @return A strategy that applies the Isaria approach to e-graph rewriting.
    */
-  def isaria(timeout: Option[Duration] = None,
+  def isaria(expansionAndSimplificationTimeout: Option[Duration] = None,
              phaseTimeout: Option[Duration] = None,
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
@@ -101,7 +102,7 @@ object Strategies {
     phase(expansionRules)
       .thenApply(phase(simplificationRules))
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
-      .withTimeout(timeout)
+      .withTimeout(expansionAndSimplificationTimeout)
       .repeatUntilStable
       .thenApply(phase(idiomRules))
       .closeRecording
