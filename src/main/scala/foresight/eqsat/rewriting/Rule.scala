@@ -2,7 +2,7 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.{EGraph, EGraphLike}
-import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
 import foresight.eqsat.saturation.EGraphWithRoot
 
 /**
@@ -151,6 +151,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
         matches, applier.apply(_, egraph).simplify(egraph)).toSeq
       CommandQueue(commands).optimized
     } catch {
+      case e: OperationCanceledException => throw e
       case e: Exception =>
         throw Rule.ApplicationException(this, egraph, e)
     }
