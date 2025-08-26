@@ -516,4 +516,6 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"root","t":"root","d":"","k":"s
 {"l":"foresight/util/random/Random$.html#apply-73","e":false,"i":"","n":"apply","t":"apply(seed: Long): Random","d":"foresight.util.random.Random","k":"def","x":""},
 {"l":"foresight/util/random/Sample$.html#","e":false,"i":"","n":"Sample","t":"Sample","d":"foresight.util.random","k":"object","x":""},
 {"l":"foresight/util/random/Sample$.html#withoutReplacement-1ec","e":false,"i":"","n":"withoutReplacement","t":"withoutReplacement[A](elements: Seq[(A, Double)], n: Int, rng: Random): (Seq[A], Random)","d":"foresight.util.random.Sample","k":"def","x":""},
-{"l":"foresight/util/random/ShiftedGeometricDistribution.html#","e":false,"i":"","n":"ShiftedGeometricDistribution","t":"ShiftedGeometricDistribution(p: Double) extends DiscreteDistribution","d":"foresight.util.random","k":"class","x":""}];
+{"l":"foresight/util/random/ShiftedGeometricDistribution.html#","e":false,"i":"","n":"ShiftedGeometricDistribution","t":"ShiftedGeometricDistribution(p: Double) extends DiscreteDistribution","d":"foresight.util.random","k":"class","x":""},
+{"l":"foresight/util/DotPrinter.html#","e":false,"i":"","n":"DotPrinter","t":"DotPrinter[E]()(using L: Language[E])","d":"foresight.util","k":"class","x":""},
+{"l":"foresight/util/DotPrinter.html#apply-fffff5ee","e":false,"i":"","n":"apply","t":"apply(egraph: EGraph[LanguageOp[E]], filename: String)(using dec: AtomDecoder[E, EClassCall]): Unit","d":"foresight.util.DotPrinter","k":"def","x":""}];
