@@ -95,15 +95,15 @@ object Strategies {
       MaximalRuleApplicationWithCaching(rules)
         .withChangeLogger(onChange)
         .withTimeout(phaseTimeout)
+        .repeatUntilStable
     }
 
     phase(expansionRules)
       .thenApply(phase(simplificationRules))
-      .repeatUntilStable
       .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(timeout)
       .repeatUntilStable
-      .thenApply(phase(idiomRules).repeatUntilStable)
+      .thenApply(phase(idiomRules))
       .closeRecording
       .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
       .closeMetadata
