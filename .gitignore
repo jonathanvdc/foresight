@@ -16,3 +16,4 @@ target-generatedFiles/
 lib/
 .vscode/
 .bsp/
+.DS_Store
