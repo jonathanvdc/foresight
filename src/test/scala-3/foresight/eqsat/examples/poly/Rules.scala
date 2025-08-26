@@ -1,10 +1,9 @@
 package foresight.eqsat.examples.poly
 
+import foresight.eqsat.EGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.{EGraph, MixedTree}
 
 import scala.language.implicitConversions
 
@@ -43,24 +42,24 @@ final case class Rules()(using L: Language[ArithExpr]) {
       (x * (y * z)) -> ((x * y) * z)
     }
   val distributivity1: ArithRule =
-    rule("distributivity1") { (x, y, z) =>
-      (x * (y + z)) -> ((x * y) + (x * z))
+    rule("distributivity1") { (x, a, b) =>
+      (x * (a + b)) -> ((x * a) + (x * b))
     }
   val distributivity2: ArithRule =
-    rule("distributivity2") { (a, b, c) =>
-      ((a * b) + (a * c)) -> (a * (b + c))
+    rule("distributivity2") { (x, a, b) =>
+      ((x * a) + (x * b)) -> (x * (a + b))
     }
   val multiplicativeIdentity: ArithRule = {
-    rule("multiplicative-identity") { (x) =>
+    rule("multiplicative-identity") { x =>
       (x * Succ(Zero)) -> x
     }
   }
-  val powerNull: ArithRule = {
-    rule("power-null") { (x) =>
+  val zeroExponent: ArithRule = {
+    rule("power-null") { x =>
       (x ** Zero) -> Succ(Zero)
     }
   }
-  val powerReduction: ArithRule = {
+  val defOfExponentiation: ArithRule = {
     rule("power-reduction") { (x, n) =>
       (x ** Succ(n)) -> (x * (x ** n))
     }
@@ -79,7 +78,7 @@ final case class Rules()(using L: Language[ArithExpr]) {
     distributivity1,
     distributivity2,
     multiplicativeIdentity,
-    powerNull,
-    powerReduction
+    zeroExponent,
+    defOfExponentiation
   )
 }

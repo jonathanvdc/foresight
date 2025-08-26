@@ -1,0 +1,49 @@
+(with-dynamic-cost
+  (datatype Expr
+      (Mat i64 i64)
+      (Mul Expr Expr)
+))
+
+(let X (Mat 200 175))
+(let Y (Mat 175 250))
+(let Z (Mat 250 150))
+(let W (Mat 150 10))
+
+(let XY (Mul X Y))
+(let XY_Z (Mul XY Z))
+(let XY_Z__W (Mul XY_Z W))
+
+(function nrows (Expr) i64 :no-merge)
+(function ncols (Expr) i64 :no-merge)
+
+(rule (
+	(= M (Mat ?nr ?nc))
+) (
+	(set (nrows M) ?nr)
+	(set (ncols M) ?nc)
+))
+
+(rule (
+	(= AB (Mul ?A ?B))
+	(= rA (nrows ?A))
+	(= (ncols ?A) (nrows ?B))
+    (= cB (ncols ?B))
+) (
+	(set (nrows AB) rA)
+    (set (ncols AB) cB)
+))
+
+(rule (
+    (Mul ?A ?B)
+    (= rA (nrows ?A))
+    (= cA (ncols ?A))
+    (= cB (ncols ?B))
+) (
+    (set-cost (Mul ?A ?B) (* rA (* cA cB)))
+))
+
+(birewrite (Mul ?A (Mul ?B ?C)) (Mul (Mul ?A ?B) ?C))
+
+(run-schedule (saturate (run)))
+
+(extract XY_Z__W)

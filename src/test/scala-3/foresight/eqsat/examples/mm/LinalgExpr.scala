@@ -1,31 +1,16 @@
-package foresight.eqsat.examples.poly
+package foresight.eqsat.examples.mm
 
-import foresight.eqsat.lang.*
-import foresight.eqsat.rewriting.patterns.Pattern
 import foresight.eqsat.{EClassCall, MixedTree}
+import foresight.eqsat.lang.{AnalysisBox, AtomDecoder, AtomEncoder, Box, Language, LanguageOp}
+import foresight.eqsat.rewriting.patterns.Pattern
 
-sealed trait ArithExpr derives Language
+sealed trait LinalgExpr derives Language
 
-/** Integer literal. */
-//final case class Num(value: Int) extends ArithExpr
+/** Matrix */
+final case class Mat(rows: Int, cols: Int) extends LinalgExpr
 
-/** Peano numeral for zero. */
-case object Zero extends ArithExpr
-
-/** Peano numeral for successor. */
-final case class Succ(pred: ArithExpr) extends ArithExpr
-
-/** A variable. */
-final case class Var(sym: String) extends ArithExpr
-
-/** Addition node. */
-final case class Add(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
-
-/** Multiplication node. */
-final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
-
-/** Power node. */
-final case class Pow(base: ArithExpr, exponent: ArithExpr) extends ArithExpr
+/** Matrix multiplication */
+final case class Mul(lhs: LinalgExpr, rhs: LinalgExpr) extends LinalgExpr
 
 /**
  * An explicit reference to an existing e-class in the e-graph.
@@ -34,7 +19,7 @@ final case class Pow(base: ArithExpr, exponent: ArithExpr) extends ArithExpr
  * into another expression. Deriving [[Box]] ensures that matcher/applier treat `Ref`
  * as a leaf (no recursive matching into the referenced class).
  */
-final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
+final case class Ref(eClass: EClassCall) extends LinalgExpr derives Box
 
 /**
  * A pattern variable exposed at the surface AST level.
@@ -43,7 +28,7 @@ final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
  * placeholders into expressions. Because it derives [[Box]], it is also treated as
  * a leaf during matching. Use [[fresh]] to create a uniquely-named variable.
  */
-final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Box
+final case class PatternVar(variable: Pattern.Var) extends LinalgExpr derives Box
 
 object PatternVar {
   /**
@@ -63,7 +48,7 @@ object PatternVar {
  * Analyses can produce `Fact[A]` nodes when convenient. For instance, constant-propagation
  * might compute an `Option[BigInt]` and rules can consult/box that information.
  */
-final case class Fact[A](value: A) extends ArithExpr
+final case class Fact[A](value: A) extends LinalgExpr
 
 /**
  * Companion configures analysis boxing for this surface language.
@@ -72,20 +57,16 @@ final case class Fact[A](value: A) extends ArithExpr
  * as `Fact[A]` nodes inside this AST. This is optional but makes certain examples
  * and rules terser.
  */
-object ArithExpr {
-  given AnalysisBox[ArithExpr] with
+object LinalgExpr {
+  given AnalysisBox[LinalgExpr] with
     type Box[A] = Fact[A]
 
     def box[A](a: A): Fact[A] = Fact(a)
 }
 
 /** Infix operators for building trees concisely in rules/tests. */
-extension (lhs: ArithExpr)
-  /** {{{ x + y }}} builds an [[Add]] node. */
-  infix def +(rhs: ArithExpr): ArithExpr = Add(lhs, rhs)
+extension (lhs: LinalgExpr)
   /** {{{ x * y }}} builds a [[Mul]] node. */
-  infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
-  /** {{{ x ** y }}} builds a [[Pow]] node. */
-  infix def **(rhs: ArithExpr): ArithExpr = Pow(lhs, rhs)
+  infix def *(rhs: LinalgExpr): LinalgExpr = Mul(lhs, rhs)
 
-type ArithIR = LanguageOp[ArithExpr]
+type LinalgIR = LanguageOp[LinalgExpr]
