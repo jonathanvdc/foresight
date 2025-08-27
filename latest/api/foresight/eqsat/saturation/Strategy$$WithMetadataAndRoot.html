@@ -108,6 +108,58 @@ node3 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
+        <div class="documentableElement" id="rebaseBetweenIterations-fffffa24">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Strategy$$WithMetadataAndRoot.html#rebaseBetweenIterations-fffffa24" t="n" class="documentableName ">rebaseBetweenIterations</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="../extraction/Extractor.html" t="t">Extractor</a>[<span t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphWithMetadata</span>[<span t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]]], <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>], <a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>): <a href="RepeatUntilStableBuilder.html" t="t">RepeatUntilStableBuilder</a>[<span t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphWithMetadata</span>[<span t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]], <span t="t">Data</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Creates a builder for a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached, with a rebasing operation executed between each successful iteration.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Creates a builder for a strategy that repeatedly applies iterations of this strategy until a fixpoint is reached, with a rebasing operation executed between each successful iteration.</p>
+              <p>This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree after each iteration, but only when a change occurs <strong>and</strong> the extracted tree differs from the previous one.</p>
+              <p>Rewriting strategies often accumulate redundant or irrelevant information in the e-graph; rebasing helps keep the search focused by collapsing the current best result into a fresh starting point.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               areEquivalent
+              </dt>
+              <dd class="body-medium">
+               <p>An optional function to compare trees for equivalence. Defaults to structural equality (<code>==</code>).</p>
+              </dd>
+              <dt class="body-small">
+               extractor
+              </dt>
+              <dd class="body-medium">
+               <p>Extracts a tree from the e-graph starting at a root node.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A builder for creating a strategy that applies this strategy until a fixpoint is reached, with rebasing executed between each iteration.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
         <div class="documentableElement" id="thenRebase-fffff57a">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>

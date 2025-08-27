@@ -1066,7 +1066,7 @@
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/Rebase.html" t="n" class="documentableName ">Rebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>)<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]</span><span class="signature-long"></span>
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/Rebase.html" t="n" class="documentableName ">Rebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>], <a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>)<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]</span><span class="signature-long"></span>
            </div>
           </div>
          </div>
@@ -1099,6 +1099,12 @@
              </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               areEquivalent
+              </dt>
+              <dd class="body-medium">
+               <p>A function to determine if two trees are equivalent. If a newly extracted tree is equivalent to the previously extracted tree, no rebasing is performed.</p>
+              </dd>
               <dt class="body-small">
                extractor
               </dt>
@@ -1141,7 +1147,7 @@
                  trait <span data-unresolved-link="" t="n">Equals</span>
                 </div>
                 <div>
-                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
                 </div>
                 <div>
                  class <span data-unresolved-link="" t="n">Object</span>

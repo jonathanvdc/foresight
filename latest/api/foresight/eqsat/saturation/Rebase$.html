@@ -195,12 +195,12 @@ node5 -> node1;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="apply-fffff82f">
+        <div class="documentableElement" id="apply-fffffe7d">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Rebase$.html#apply-fffff82f" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="../extraction/Extractor.html" t="t">Extractor</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]): <a href="Rebase.html" t="t">Rebase</a>[<span data-unresolved-link="" t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>]]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Rebase$.html#apply-fffffe7d" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="../extraction/Extractor.html" t="t">Extractor</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>], <a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>): <a href="Rebase.html" t="t">Rebase</a>[<span data-unresolved-link="" t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>]]
            </div>
           </div>
          </div>
@@ -233,6 +233,12 @@ node5 -> node1;
              </dl>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
+              <dt class="body-small">
+               areEquivalent
+              </dt>
+              <dd class="body-medium">
+               <p>A function to determine if two trees are equivalent. If a newly extracted tree is equivalent to the previously extracted tree, no rebasing is performed. Defaults to always returning false.</p>
+              </dd>
               <dt class="body-small">
                extractor
               </dt>

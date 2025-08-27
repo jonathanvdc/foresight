@@ -10,7 +10,7 @@
 </div>
 <div class="main-signature mono-small-block">
  <div class="signature">
-  <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="Rebase.html" t="n" class="documentableName ">Rebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="../extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="../EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="../EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>)<span t="k"> extends </span><a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]</span><span class="signature-long"></span>
+  <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="Rebase.html" t="n" class="documentableName ">Rebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="../extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="../EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="../EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="../Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>], <a href="../Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>)<span t="k"> extends </span><a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]</span><span class="signature-long"></span>
  </div>
 </div>
 <div class="cover">
@@ -35,6 +35,12 @@
   </dl>
   <h2 class="h500">Value parameters</h2>
   <dl class="attributes">
+   <dt class="body-small">
+    areEquivalent
+   </dt>
+   <dd class="body-medium">
+    <p>A function to determine if two trees are equivalent. If a newly extracted tree is equivalent to the previously extracted tree, no rebasing is performed.</p>
+   </dd>
    <dt class="body-small">
     extractor
    </dt>
@@ -74,7 +80,7 @@
 node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
-node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"Strategy.html\" t=\"n\">Strategy</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">EGraphT</span>, <span data-unresolved-link=\"\" t=\"t\">Unit</span>]</span>", class="trait vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"Strategy.html\" t=\"n\">Strategy</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">EGraphT</span>, <span data-unresolved-link=\"\" t=\"t\">Option</span>[<a href=\"../Tree.html\" t=\"t\">Tree</a>[<span t=\"t\">NodeT</span>]]]</span>", class="trait vertex"];
 node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Product</span></span>", class="trait vertex"];
 node6 [id=node6, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Equals</span></span>", class="trait vertex"];
 node7 [id=node7, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Serializable</span></span>", class="class vertex"];
@@ -112,7 +118,7 @@ node7 -> node2;
       trait <span data-unresolved-link="" t="n">Equals</span>
      </div>
      <div>
-      trait <a href="Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]
+      trait <a href="Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
      </div>
      <div>
       class <span data-unresolved-link="" t="n">Object</span>
@@ -147,12 +153,12 @@ node7 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="apply-fffffae7" data-f-keywords="override">
+        <div class="documentableElement" id="apply-ac8" data-f-keywords="override">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#apply-fffffae7" t="n" class="documentableName ">apply</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">data</span>: <span data-unresolved-link="" t="t">Unit</span>, <span t="k"></span><span data-unresolved-link="" t="n">parallelize</span>: <a href="../parallel/ParallelMap.html" t="t">ParallelMap</a>): (<span data-unresolved-link="" t="t">Option</span>[<span t="t">EGraphT</span>], <span data-unresolved-link="" t="t">Unit</span>)
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#apply-ac8" t="n" class="documentableName ">apply</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">data</span>: <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">parallelize</span>: <a href="../parallel/ParallelMap.html" t="t">ParallelMap</a>): (<span data-unresolved-link="" t="t">Option</span>[<span t="t">EGraphT</span>], <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]])
            </div>
           </div>
          </div>
@@ -216,7 +222,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#initialData-0" t="n" class="documentableName ">initialData</a>: <span data-unresolved-link="" t="t">Unit</span>
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#initialData-0" t="n" class="documentableName ">initialData</a>: <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]
            </div>
           </div>
          </div>
@@ -317,7 +323,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#betweenIterations-fffff75b" t="n" class="documentableName ">betweenIterations</a>[<span t="k"></span><span data-unresolved-link="" t="t">BetweenItersDataT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">betweenIterations</span>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span t="t">BetweenItersDataT</span>]): <a href="RepeatUntilStableBuilder.html" t="t">RepeatUntilStableBuilder</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">BetweenItersDataT</span>]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#betweenIterations-fffff75b" t="n" class="documentableName ">betweenIterations</a>[<span t="k"></span><span data-unresolved-link="" t="t">BetweenItersDataT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">betweenIterations</span>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span t="t">BetweenItersDataT</span>]): <a href="RepeatUntilStableBuilder.html" t="t">RepeatUntilStableBuilder</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">BetweenItersDataT</span>]
            </div>
           </div>
          </div>
@@ -518,7 +524,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#repeatUntilStableWithState-0" t="n" class="documentableName ">repeatUntilStableWithState</a>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#repeatUntilStableWithState-0" t="n" class="documentableName ">repeatUntilStableWithState</a>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
            </div>
           </div>
          </div>
@@ -559,7 +565,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#thenApply-b1" t="n" class="documentableName ">thenApply</a>[<span t="k"></span><span data-unresolved-link="" t="t">Data2</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">other</span>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span t="t">Data2</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">Data2</span>)]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#thenApply-b1" t="n" class="documentableName ">thenApply</a>[<span t="k"></span><span data-unresolved-link="" t="t">Data2</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">other</span>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span t="t">Data2</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">Data2</span>)]
            </div>
           </div>
          </div>
@@ -618,7 +624,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withChangeLogger-adc" t="n" class="documentableName ">withChangeLogger</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">logChange</span>: (<span t="t">EGraphT</span>, <span t="t">EGraphT</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withChangeLogger-adc" t="n" class="documentableName ">withChangeLogger</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">logChange</span>: (<span t="t">EGraphT</span>, <span t="t">EGraphT</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
            </div>
           </div>
          </div>
@@ -669,7 +675,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withIterationLimit-151" t="n" class="documentableName ">withIterationLimit</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">limit</span>: <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">Int</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">Int</span>)]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withIterationLimit-151" t="n" class="documentableName ">withIterationLimit</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">limit</span>: <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">Int</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">Int</span>)]
            </div>
           </div>
          </div>
@@ -719,7 +725,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withIterationLimit-fffff027" t="n" class="documentableName ">withIterationLimit</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">limit</span>: <span data-unresolved-link="" t="t">Int</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">Int</span>)]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withIterationLimit-fffff027" t="n" class="documentableName ">withIterationLimit</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">limit</span>: <span data-unresolved-link="" t="t">Int</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">Int</span>)]
            </div>
           </div>
          </div>
@@ -769,7 +775,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withRoot-0" t="n" class="documentableName ">withRoot</a>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>], <span data-unresolved-link="" t="t">Unit</span>]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withRoot-0" t="n" class="documentableName ">withRoot</a>: <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <a href="EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>], <span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
            </div>
           </div>
          </div>
@@ -810,7 +816,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withTimeout-151" t="n" class="documentableName ">withTimeout</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">timeout</span>: <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">Duration</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">Duration</span>)]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withTimeout-151" t="n" class="documentableName ">withTimeout</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">timeout</span>: <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">Duration</span>]): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">Duration</span>)]
            </div>
           </div>
          </div>
@@ -860,7 +866,7 @@ node7 -> node2;
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withTimeout-84f" t="n" class="documentableName ">withTimeout</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">timeout</span>: <span data-unresolved-link="" t="t">Duration</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Unit</span>, <span data-unresolved-link="" t="t">Duration</span>)]
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="Rebase.html#withTimeout-84f" t="n" class="documentableName ">withTimeout</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">timeout</span>: <span data-unresolved-link="" t="t">Duration</span>): <a href="Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span data-unresolved-link="" t="t">Option</span>[<a href="../Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">Duration</span>)]
            </div>
           </div>
          </div>
