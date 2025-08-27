@@ -447,6 +447,27 @@ object Strategy {
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase(strategy, extractor, areEquivalent)
     }
+
+    /**
+     * Creates a builder for a strategy that repeatedly applies iterations of this strategy until a fixpoint is
+     * reached, with a rebasing operation executed between each successful iteration.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree after each iteration,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A builder for creating a strategy that applies this strategy until a fixpoint is reached, with rebasing
+     *         executed between each iteration.
+     */
+    def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphT],
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithRoot[NodeT, EGraphT], Data, Option[Tree[NodeT]]] = {
+      strategy.betweenIterations(Rebase(extractor, areEquivalent))
+    }
   }
 
   /**
@@ -485,6 +506,27 @@ object Strategy {
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase.withMetadata(strategy, extractor, areEquivalent)
+    }
+
+    /**
+     * Creates a builder for a strategy that repeatedly applies iterations of this strategy until a fixpoint is
+     * reached, with a rebasing operation executed between each successful iteration.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree after each iteration,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A builder for creating a strategy that applies this strategy until a fixpoint is reached, with rebasing
+     *         executed between each iteration.
+     */
+    def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data, Option[Tree[NodeT]]] = {
+      strategy.betweenIterations(Rebase.withMetadata(extractor, areEquivalent))
     }
   }
 
@@ -526,6 +568,27 @@ object Strategy {
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase.withRecording(strategy, extractor, areEquivalent)
+    }
+
+    /**
+     * Creates a builder for a strategy that repeatedly applies iterations of this strategy until a fixpoint is
+     * reached, with a rebasing operation executed between each successful iteration.
+     *
+     * This allows the strategy to restart from a clean e-graph rooted at a newly extracted tree after each iteration,
+     * but only when a change occurs **and** the extracted tree differs from the previous one.
+     *
+     * Rewriting strategies often accumulate redundant or irrelevant information in the e-graph;
+     * rebasing helps keep the search focused by collapsing the current best result into a fresh
+     * starting point.
+     *
+     * @param extractor Extracts a tree from the e-graph starting at a root node.
+     * @param areEquivalent An optional function to compare trees for equivalence. Defaults to structural equality (`==`).
+     * @return A builder for creating a strategy that applies this strategy until a fixpoint is reached, with rebasing
+     *         executed between each iteration.
+     */
+    def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data, Option[Tree[NodeT]]] = {
+      strategy.betweenIterations(Rebase.withRecording(extractor, areEquivalent))
     }
   }
 }
