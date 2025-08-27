@@ -21,7 +21,8 @@ final case class RepeatUntilStableBuilder[
   NodeT,
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   DataT,
-  BetweenItersDataT]
+  BetweenItersDataT
+]
   (
     body: Strategy[NodeT, EGraphT, DataT],
     betweenIterations: Strategy[NodeT, EGraphT, BetweenItersDataT]
