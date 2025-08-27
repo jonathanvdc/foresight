@@ -46,7 +46,7 @@ final case class RepeatUntilStableBuilder[
    *
    * The `body` strategy is applied at least once. After each application of `body`, the `betweenIterations`
    * strategy is executed. If `body` makes no changes to the e-graph (i.e., it returns `None`), the
-   * repetition stops, and the final e-graph and combined data from all iterations are returned.
+   * repetition stops, and the final e-graph is returned.
    *
    * @return A strategy that applies `body` repeatedly until stable.
    */
