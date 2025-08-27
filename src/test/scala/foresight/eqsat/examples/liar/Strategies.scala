@@ -5,7 +5,7 @@ import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRecordedApplications, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, SearchAndApply, Strategy}
+import foresight.eqsat.saturation.{BackoffRule, BackoffRuleApplication, EGraphWithRecordedApplications, EGraphWithRoot, MaximalRuleApplication, MaximalRuleApplicationWithCaching, Rebase, SearchAndApply, Strategy}
 
 import scala.concurrent.duration.Duration
 
@@ -101,8 +101,53 @@ object Strategies {
 
     phase(expansionRules)
       .thenApply(phase(simplificationRules))
-      .thenRebase(extractionAnalysis.extractor, areEquivalent)
       .withTimeout(expansionAndSimplificationTimeout)
+      .thenRebase(extractionAnalysis.extractor, areEquivalent)
+      .repeatUntilStable
+      .thenApply(phase(idiomRules))
+      .closeRecording
+      .addAnalyses(ExtractionAnalysis.smallest[ArrayIR], extractionAnalysis, TypeInferenceAnalysis)
+      .closeMetadata
+      .dropData
+  }
+
+  /**
+   * An improved version of the Isaria strategy that elides the last rebase after the expansion/simplification phase,
+   * providing the idiom rules with a more fully expanded e-graph to work with.
+   *
+   * Based on the algorithm in Figure 3 of Thomas, Samuel, and James Bornholt. "Automatic generation of vectorizing
+   * compilers for customizable digital signal processors." Proceedings of the 29th ACM International Conference on
+   * Architectural Support for Programming Languages and Operating Systems, Volume 1. 2024.
+   * @param expansionAndSimplificationTimeout An optional timeout for the strategy's expansion and simplification
+   *                                          phases.
+   * @param phaseTimeout An optional timeout for each phase of the strategy.
+   * @param expansionRules A sequence of rules to apply for expanding the e-graph, defaults to introducing constant
+   *                       arrays and arithmetic introduction rules.
+   * @param simplificationRules A sequence of rules to apply for simplifying the e-graph, defaults to core elimination rules
+   *                            and arithmetic simplification rules.
+   * @param idiomRules A sequence of rules to apply for recognizing idioms, defaults to all BLAS idiom rules.
+   * @param onChange A callback that is invoked whenever a change is made to the e-graph, providing the old and new
+   *                 e-graphs. This can be used for logging or debugging purposes.
+   * @return A strategy that applies the improved Isaria approach to e-graph rewriting.
+   */
+  def isariaImproved(expansionAndSimplificationTimeout: Option[Duration] = None,
+                     phaseTimeout: Option[Duration] = None,
+                     expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
+                     simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
+                     idiomRules: Seq[LiarRule] = blasIdiomRules.all,
+                     onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
+
+    def phase(rules: Seq[LiarRule]) = {
+      MaximalRuleApplicationWithCaching(rules)
+        .withChangeLogger(onChange)
+        .withTimeout(phaseTimeout)
+        .repeatUntilStable
+    }
+
+    phase(expansionRules)
+      .thenApply(phase(simplificationRules))
+      .withTimeout(expansionAndSimplificationTimeout)
+      .rebaseBetweenIterations(extractionAnalysis.extractor, areEquivalent)
       .repeatUntilStable
       .thenApply(phase(idiomRules))
       .closeRecording
