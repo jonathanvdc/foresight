@@ -132,6 +132,17 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
   final def repeatUntilStable: Strategy[NodeT, EGraphT, Unit] = repeatUntilStableWithState.dropData
 
   /**
+   * Registers a strategy to be executed between each iteration of this strategy when using
+   * `repeatUntilStableWithState` or `repeatUntilStable`.
+   * @param betweenIterations The strategy to execute between each iteration of this strategy.
+   * @tparam BetweenItersDataT The type of the data carried by the `betweenIterations` strategy.
+   * @return A builder for creating a strategy that applies this strategy until a fixpoint is reached, with the
+   *         `betweenIterations` strategy executed between each iteration.
+   */
+  final def betweenIterations[BetweenItersDataT](betweenIterations: Strategy[NodeT, EGraphT, BetweenItersDataT]): RepeatUntilStableBuilder[NodeT, EGraphT, Data, BetweenItersDataT] =
+    RepeatUntilStableBuilder(this, betweenIterations)
+
+  /**
    * Creates a strategy that places a limit on the number of iterations. The limit is the maximum number of iterations
    * that the strategy will run. Once the limit is reached, additional applications of the strategy will make no further
    * changes to the e-graph.
