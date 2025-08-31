@@ -1,0 +1,47 @@
+(datatype Expr
+    (Zero :cost 1)
+    (Succ Expr :cost 1)
+	(Var String :cost 1)
+	(Add Expr Expr :cost 10)
+	(Mul Expr Expr :cost 100)
+	(Pow Expr Expr :cost 1000)
+)
+
+
+(let c0 (Zero))
+(let c1 (Succ c0))
+(let c2 (Succ c1))
+(let c3 (Succ c2))
+(let c4 (Succ c3))
+(let c5 (Succ c4))
+(let vx (Var "x"))
+(let va (Var "a"))
+(let vb (Var "b"))
+(let vc (Var "c"))
+(let vd (Var "d"))
+(let ve (Var "e"))
+(let vf (Var "f"))
+
+(let poly5 (Add (Mul va (Pow vx c5)) (Add (Mul vb (Pow vx c4)) (Add (Mul vc (Pow vx c3)) (Add (Mul vd (Pow vx c2)) (Add (Mul ve vx) vf)))))) ; f + ex + dx^2 + cx^3 + bx^4 + ax^5
+
+(ruleset rules)
+
+; commute
+(rewrite (Add ?x ?y) (Add ?y ?x) :ruleset rules) ; x + y = y + x
+(rewrite (Mul ?x ?y) (Mul ?y ?x) :ruleset rules) ; x * y = y * x
+
+; associative
+(birewrite (Add ?x (Add ?y ?z)) (Add (Add ?x ?y) ?z) :ruleset rules) ; (x + y) + z = x + (y + z)
+(birewrite (Mul ?x (Mul ?y ?z)) (Mul (Mul ?x ?y) ?z) :ruleset rules) ; (x * y) * z = x * (y * z)
+
+; identity
+(rewrite (Mul ?x c1) ?x :ruleset rules) ; x * 1 = x
+(rewrite (Pow ?x c0) c1 :ruleset rules) ; x^0 = 1
+
+(rewrite (Pow ?x (Succ ?n)) (Mul ?x (Pow ?x ?n)) :ruleset rules) ; x^(n+1) = x * x^n
+
+(birewrite (Add (Mul ?x ?a) (Mul ?x ?b)) (Mul ?x (Add ?a ?b)) :ruleset rules) ; xa + xb = x(a+b)
+
+(run-schedule (saturate rules))
+
+(extract poly5)

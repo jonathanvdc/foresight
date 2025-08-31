@@ -1,0 +1,52 @@
+(with-dynamic-cost
+  (datatype Expr
+      (Mat i64 i64)
+      (Mul Expr Expr)
+))
+
+(let m0 (Mat 100 100))
+(let m1 (Mat 100 100))
+(let m2 (Mat 100 100))
+(let m3 (Mat 100 100))
+(let m4 (Mat 100 100))
+(let m5 (Mat 100 100))
+(let mm0 (Mul m0 m1))
+(let mm1 (Mul mm0 m2))
+(let mm2 (Mul mm1 m3))
+(let mm3 (Mul mm2 m4))
+(let mm4 (Mul mm3 m5))
+
+(function nrows (Expr) i64 :no-merge)
+(function ncols (Expr) i64 :no-merge)
+
+(rule (
+	(= M (Mat ?nr ?nc))
+) (
+	(set (nrows M) ?nr)
+	(set (ncols M) ?nc)
+))
+
+(rule (
+	(= AB (Mul ?A ?B))
+	(= rA (nrows ?A))
+	(= (ncols ?A) (nrows ?B))
+    (= cB (ncols ?B))
+) (
+	(set (nrows AB) rA)
+    (set (ncols AB) cB)
+))
+
+(rule (
+    (Mul ?A ?B)
+    (= rA (nrows ?A))
+    (= cA (ncols ?A))
+    (= cB (ncols ?B))
+) (
+    (set-cost (Mul ?A ?B) (* rA (* cA cB)))
+))
+
+(birewrite (Mul ?A (Mul ?B ?C)) (Mul (Mul ?A ?B) ?C))
+
+(run-schedule (saturate (run)))
+
+(extract mm4)
