@@ -165,4 +165,73 @@ class MMTest {
     val extracted = egraph2.extract(root, costFunction)
     assert(extracted == expr4, s"Expected $expr4 but got $extracted")
   }
+
+  def nmm(n: Int): LinalgExpr = {
+    if (n == 0) {
+      Mat(10, 10)
+    } else {
+      Mul(nmm(n - 1), Mat(10, 10))
+    }
+  }
+
+  def testNmmBench(n: Int): Unit = {
+    type LinalgRule = R.LinalgRule
+    val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
+    val R: Rules = Rules()(using L)
+
+    val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+
+    val costFunction: LanguageCostFunction[LinalgExpr, DimAndCost] = new LanguageCostFunction[LinalgExpr, DimAndCost]() {
+      override def apply(expr: LinalgExpr): DimAndCost = {
+        expr match {
+          case Mat(rows, cols) => DimAndCost(rows, cols, 0)
+          case Fact(dimAndCost: DimAndCost) => dimAndCost
+          case Mul(lhs, rhs) =>
+            val DimAndCost(lrows, lcols, lcost) = apply(lhs)
+            val DimAndCost(rrows, rcols, rcost) = apply(rhs)
+            if (lcols != rrows) {
+              throw new RuntimeException(s"Dimension mismatch: $lcols != $rrows")
+            } else {
+              DimAndCost(lrows, rcols, lrows * lcols * rcols + lcost + rcost)
+            }
+          case _ => DimAndCost(-1, -1, 0)
+        }
+      }
+    }
+
+    val expr = nmm(n)
+
+    val (root, egraph) = L.toEGraph(expr)
+    val egraph2 = simpleStrategy(egraph).get
+
+    val extracted = egraph2.extract(root, costFunction)
+  }
+
+  def benchNmm(n: Int): Unit = {
+    val time = 60_000_000_000L
+    val start = System.nanoTime()
+    var times: List[Long] = List()
+    var iterations = 0
+    while (System.nanoTime() - start < time) {
+      val testStart = System.nanoTime()
+      testNmmBench(n)
+      val testEnd = System.nanoTime()
+      val duration = testEnd - testStart
+      //      println(s"Iteration $iterations took $duration ms")
+      times = duration :: times
+      iterations += 1
+    }
+    println(s"Completed $iterations iterations in 60 seconds")
+    val avgTime = if (times.nonEmpty) times.sum / times.length else 0
+    println(s"Average time per iteration: ${avgTime/1e6} ms")
+  }
+
+  @Test
+  def benchMM(): Unit = {
+    val n = List(3, 5, 10, 20, 40, 80)
+    for (i <- n) {
+      println(s"Benchmarking n=$i")
+      benchNmm(i)
+    }
+  }
 }
