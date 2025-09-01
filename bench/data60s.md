@@ -22,32 +22,64 @@ Running benchmark on 80mm.egg
 Time elapsed is: 77.976667ms
 -----------------------------------
 
-# Foresight
+# Foresight (with ParellelMap.default)
 ## Poly
-Completed 296 iterations in 60 seconds
-Average time per iteration: 203.207348 ms
+Completed 313 iterations in 60 seconds
+Average time per iteration: 192.14006 ms
+
 ## NMM
 -----------------------------------
 Benchmarking n=3
-Completed 55591 iterations in 60 seconds
-Average time per iteration: 1.078479 ms
+Completed 129674 iterations in 60 seconds
+Average time per iteration: 0.462369 ms
 -----------------------------------
 Benchmarking n=5
-Completed 41223 iterations in 60 seconds
-Average time per iteration: 1.454969 ms
+Completed 58048 iterations in 60 seconds
+Average time per iteration: 1.033141 ms
 -----------------------------------
 Benchmarking n=10
-Completed 10995 iterations in 60 seconds
-Average time per iteration: 5.456236 ms
+Completed 18422 iterations in 60 seconds
+Average time per iteration: 3.25688 ms
 -----------------------------------
 Benchmarking n=20
-Completed 3256 iterations in 60 seconds
-Average time per iteration: 18.428634 ms
+Completed 4388 iterations in 60 seconds
+Average time per iteration: 13.679113 ms
 -----------------------------------
 Benchmarking n=40
-Completed 546 iterations in 60 seconds
-Average time per iteration: 109.905446 ms
+Completed 712 iterations in 60 seconds
+Average time per iteration: 84.328903 ms
 -----------------------------------
 Benchmarking n=80
-Completed 70 iterations in 60 seconds
-Average time per iteration: 865.846394 ms
+Completed 84 iterations in 60 seconds
+Average time per iteration: 719.013971 ms
+
+# Foresight (with ParallelMap.sequential)
+## Poly
+Completed 96 iterations in 60 seconds
+Average time per iteration: 629.822986 ms
+## NMM
+-----------------------------------
+Benchmarking n=3
+Completed 409662 iterations in 60 seconds
+Average time per iteration: 0.146409 ms
+-----------------------------------
+Benchmarking n=5
+Completed 83574 iterations in 60 seconds
+Average time per iteration: 0.717813 ms
+-----------------------------------
+Benchmarking n=10
+Completed 10980 iterations in 60 seconds
+Average time per iteration: 5.464747 ms
+-----------------------------------
+Benchmarking n=20
+Completed 1334 iterations in 60 seconds
+Average time per iteration: 44.989084 ms
+-----------------------------------
+Benchmarking n=40
+Completed 159 iterations in 60 seconds
+Average time per iteration: 378.214739 ms
+-----------------------------------
+Benchmarking n=80
+Completed 18 iterations in 60 seconds
+Average time per iteration: 3443.261118 ms
+-----------------------------------
