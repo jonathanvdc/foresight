@@ -1,0 +1,5 @@
+Iteration,Time(ns),NumEClasses,NumENodes
+0,0,6,6
+1,210168,6,10
+2,353300,6,15
+3,522017,6,16
