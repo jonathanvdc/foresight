@@ -119,7 +119,7 @@ trait SearcherPhase[
    * @param parallelize  Parallelization strategy and task labeling.
    * @return             The aggregated output for this phase.
    */
-  final def search(egraph: EGraphT, input: InputT, parallelize: ParallelMap = ParallelMap.default): OutputT = {
+  final def search(egraph: EGraphT, input: InputT, parallelize: ParallelMap): OutputT = {
     val classes = egraph.classes
     val searchClass = (c: EClassRef) => c -> search(egraph.canonicalize(c), egraph, input)
     val matches = parallelize(classes, searchClass).toMap
