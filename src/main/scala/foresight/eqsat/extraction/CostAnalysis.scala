@@ -34,7 +34,7 @@ final case class CostAnalysis[NodeT, C](name: String, cost: CostFunction[NodeT, 
   }
 
   override def join(left: C, right: C): C = {
-    left min right
+    costOrdering.min(left, right)
   }
 }
 
