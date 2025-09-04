@@ -86,7 +86,7 @@ trait LanguageCostFunction[E, C](using
                    nodeType: LanguageOp[E],
                    definitions: Seq[Slot],
                    uses: Seq[Slot],
-                   args: Seq[ExtractionTreeCall[LanguageOp[E], C]]
+                   args: Seq[C]
                  ): C =
-    apply(L.fromAnalysisNode(nodeType, definitions, uses, args.map(_.cost)))
+    apply(L.fromAnalysisNode(nodeType, definitions, uses, args))
 }
