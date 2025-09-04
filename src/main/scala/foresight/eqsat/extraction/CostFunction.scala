@@ -48,8 +48,7 @@ trait CostFunction[NodeT, C] {
    * @param nodeType    The operator/type of the current node.
    * @param definitions Slots defined by this node itself (e.g., outputs or bindings introduced here).
    * @param uses        Slots used by this node but defined elsewhere (its external dependencies).
-   * @param args        Children as costed calls. Each child’s cost is available via
-   *                    `args(i).tree.cost`. If your cost is additive, you typically sum these.
+   * @param args        Already-costed children, in evaluation order.
    * @return The total cost for the subtree rooted at this node (including children).
    *
    * @note Implementations are expected to be pure and total. Avoid relying on global state.
@@ -57,7 +56,7 @@ trait CostFunction[NodeT, C] {
   def apply(nodeType: NodeT,
             definitions: Seq[Slot],
             uses: Seq[Slot],
-            args: Seq[ExtractionTreeCall[NodeT, C]]): C
+            args: Seq[C]): C
 
   /**
    * Computes the cost of a whole [[Tree]] by recursively converting it to an
@@ -87,11 +86,58 @@ trait CostFunction[NodeT, C] {
   private final def toExtractionTree(tree: Tree[NodeT]): ExtractionTree[NodeT, C] = {
     val args = tree.args.map(toExtractionTreeCall)
     ExtractionTree(
-      apply(tree.nodeType, tree.definitions, tree.uses, args),
+      apply(tree.nodeType, tree.definitions, tree.uses, args.map(_.cost)),
       tree.nodeType,
       tree.definitions,
       tree.uses,
       args
     )
+  }
+}
+
+/**
+ * Common preset cost functions for typical extraction strategies.
+ */
+object CostFunction {
+  /**
+   * A cost function that counts the total number of nodes in a tree,
+   * defined as `1 + sum(child sizes)`.
+   *
+   * @tparam NodeT The node/operator type (unused).
+   * @return A cost function that counts nodes.
+   *
+   * @example {{{
+   * val countNodes: CostFunction[Op, Int] = CostFunction.size[Op]
+   * val numNodes: Int = countNodes(someTree) // total node count
+   * }}}
+   */
+  def size[NodeT]: CostFunction[NodeT, Int] = new CostFunction[NodeT, Int] {
+    override def apply(nodeType: NodeT,
+                       definitions: Seq[Slot],
+                       uses: Seq[Slot],
+                       args: Seq[Int]): Int = {
+      args.sum + 1
+    }
+  }
+
+  /**
+   * A cost function that computes the depth (height) of a tree, defined as
+   * `1 + max(child depths)`, with leaf nodes having depth `1`.
+   *
+   * @tparam NodeT The node/operator type (unused).
+   * @return A cost function that computes tree depth.
+   *
+   * @example {{{
+   * val computeDepth: CostFunction[Op, Int] = CostFunction.depth[Op]
+   * val treeDepth: Int = computeDepth(someTree) // maximum depth
+   * }}}
+   */
+  def depth[NodeT]: CostFunction[NodeT, Int] = new CostFunction[NodeT, Int] {
+    override def apply(nodeType: NodeT,
+                       definitions: Seq[Slot],
+                       uses: Seq[Slot],
+                       args: Seq[Int]): Int = {
+      (args :+ 0).max + 1
+    }
   }
 }

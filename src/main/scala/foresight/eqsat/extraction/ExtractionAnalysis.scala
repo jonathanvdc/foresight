@@ -127,16 +127,7 @@ object ExtractionAnalysis {
    * }}}
    */
   def smallest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
-    ExtractionAnalysis(
-      "SmallestExtractionAnalysis",
-      new CostFunction[NodeT, Int] {
-        override def apply(nodeType: NodeT,
-                           definitions: Seq[Slot],
-                           uses: Seq[Slot],
-                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
-          args.map(_.cost).sum + 1
-        }
-      })
+    ExtractionAnalysis("SmallestExtractionAnalysis", CostFunction.size)
   }
 
   /**
@@ -154,15 +145,6 @@ object ExtractionAnalysis {
    * }}}
    */
   def shallowest[NodeT](implicit nodeOrdering: Ordering[NodeT]): ExtractionAnalysis[NodeT, Int] = {
-    ExtractionAnalysis(
-      "ShallowestExtractionAnalysis",
-      new CostFunction[NodeT, Int] {
-        override def apply(nodeType: NodeT,
-                           definitions: Seq[Slot],
-                           uses: Seq[Slot],
-                           args: Seq[ExtractionTreeCall[NodeT, Int]]): Int = {
-          args.map(_.cost).max + 1
-        }
-      })
+    ExtractionAnalysis("ShallowestExtractionAnalysis", CostFunction.depth)
   }
 }
