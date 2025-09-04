@@ -52,6 +52,33 @@ trait ReversibleSearcher[
  * Factory and utilities for [[ReversibleSearcher]]
  */
 object ReversibleSearcher {
+  /**
+   * A simple reversible searcher built from a single [[ReversibleSearcherPhase]].
+   *
+   * This is a convenience for the common case where the searcher is built from
+   * exactly one reversible phase whose input type is `Unit` (i.e., it does not
+   * depend on prior phase results).
+   *
+   * @param phase The reversible searcher phase to wrap.
+   * @tparam NodeT   Node payload type.
+   * @tparam MatchT  Match type produced by the phase.
+   * @tparam EGraphT Concrete e-graph type (must mix in [[EGraphLike]] and [[EGraph]]).
+   */
+  final case class SinglePhaseReversibleSearcher[
+    NodeT,
+    MatchT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](phase: ReversibleSearcherPhase[NodeT, Unit, _, MatchT, EGraphT])
+    extends ReversibleSearcher[NodeT, MatchT, EGraphT] {
+
+    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
+      phase.search(egraph, (), parallelize)
+    }
+
+    override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = {
+      phase.tryReverse(Applier.ignore)
+    }
+  }
 
   /**
    * Create a single-phase reversible searcher from a [[ReversibleSearcherPhase]].
@@ -77,14 +104,7 @@ object ReversibleSearcher {
     NodeT,
     MatchT,
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](phase: ReversibleSearcherPhase[NodeT, Unit, _, MatchT, EGraphT]): ReversibleSearcher[NodeT, MatchT, EGraphT] = {
-
-    new ReversibleSearcher[NodeT, MatchT, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] =
-        phase.search(egraph, (), parallelize)
-
-      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] =
-        phase.tryReverse(Applier.ignore)
-    }
+  ](phase: ReversibleSearcherPhase[NodeT, Unit, _, MatchT, EGraphT]): SinglePhaseReversibleSearcher[NodeT, MatchT, EGraphT] = {
+    SinglePhaseReversibleSearcher(phase)
   }
 }
