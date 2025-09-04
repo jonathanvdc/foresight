@@ -7,7 +7,7 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
  *
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-sealed trait MachineError[NodeT]
+trait MachineError[NodeT]
 
 /**
  * A companion object for the `MachineError` trait.
