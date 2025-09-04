@@ -8,7 +8,7 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, Slot}
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph.
  */
-sealed trait Instruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Instruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
   /**
    * Executes the instruction on the given machine state.
    * @param graph The e-graph to execute the instruction on.
