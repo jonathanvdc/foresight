@@ -90,3 +90,7 @@ final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRe
     }
   }
 }
+
+object VersionMetadata {
+  def empty[NodeT]: VersionMetadata[NodeT] = VersionMetadata(0, Map.empty)
+}
