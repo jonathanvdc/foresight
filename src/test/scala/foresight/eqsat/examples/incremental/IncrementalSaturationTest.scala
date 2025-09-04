@@ -32,7 +32,7 @@ class IncrementalSaturationTest {
       .repeatUntilStable
 
     // Initialize an e-graph with version metadata and a cost analysis
-    var egraph = EGraphWithMetadata(EGraph.empty[ArithIR])
+    var egraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]](EGraph.empty)
       .addMetadata(metadataName, VersionMetadata.empty)
       .addAnalysis(costAnalysis)
       .addAnalysis(extractionAnalysis)
