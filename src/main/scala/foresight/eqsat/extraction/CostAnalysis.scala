@@ -22,7 +22,7 @@ import foresight.eqsat._
  * @tparam C            Cost type produced by the cost function.
  */
 final case class CostAnalysis[NodeT, C](name: String, cost: CostFunction[NodeT, C])
-                                       (implicit costOrdering: Ordering[C])
+                                       (implicit val costOrdering: Ordering[C])
   extends Analysis[NodeT, C] {
 
   override def rename(result: C, renaming: SlotMap): C = {
