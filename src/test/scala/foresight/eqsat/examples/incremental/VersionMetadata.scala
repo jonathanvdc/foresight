@@ -2,7 +2,7 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.metadata.Metadata
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * Metadata that tracks a global version number for the e-graph and a version number for each e-class.
@@ -80,9 +80,9 @@ final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRe
 
   private def findEClassesInTerm(term: MixedTree[NodeT, EClassCall], egraph: EGraph[NodeT]): (EClassCall, Set[EClassRef]) = {
     term match {
-      case MixedTree.Atom(call) =>
+      case MixedTree.Atom[NodeT, EClassCall](call) =>
         call -> Set(egraph.canonicalize(call).ref)
-      case MixedTree.Node(n, defs, uses, args) =>
+      case MixedTree.Node[NodeT, EClassCall](n, defs, uses, args) =>
         val (argCalls, argEClasses) = args.map(arg => findEClassesInTerm(arg, egraph)).unzip
         val eNode = ENode(n, defs, uses, argCalls)
         val eClassCall = egraph.find(eNode).getOrElse(throw new IllegalStateException("Node in term not found in e-graph"))
