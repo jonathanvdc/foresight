@@ -112,8 +112,8 @@ object Main {
     val (nEclasses, nEnodes, dts) = testNmmBench(n, map)
 
     println(s"Completed $iterations iterations in 60 seconds")
-    val avgTime = if (times.nonEmpty) times.sum / times.length else 0
-    println(s"Average time per iteration: ${avgTime / 1e6} ms")
+    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
+    println(s"Median time per iteration: ${medianTime / 1e6} ms");
 
     // save nEclasses, nEnodes, dts to csv
     val csvLines = new StringBuilder
@@ -206,8 +206,8 @@ object Main {
       iterations += 1
     }
     println(s"Completed $iterations iterations in 60 seconds")
-    val avgTime = if (times.nonEmpty) times.sum / times.length else 0
-    println(s"Average time per iteration: ${avgTime / 1e6} ms")
+    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
+    println(s"Median time per iteration: ${medianTime / 1e6} ms");
 
     val (nEclasses, nEnodes, dts) = testPoly5Bench(map)
 
