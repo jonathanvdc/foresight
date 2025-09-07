@@ -54,31 +54,14 @@ object Main {
     }
   }
 
-  def testNmmBench(n: Int, map: ParallelMap): (ArrayBuffer[Int], ArrayBuffer[Int], ArrayBuffer[Long]) = {
+  def testNmmBench(n: Int, map: ParallelMap): Unit = {
     benchStartTime = System.nanoTime()
     val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
     val R: mm.Rules = mm.Rules()(using L)
     type LinalgRule = R.LinalgRule
 
-    val nEclasses: ArrayBuffer[Int] = ArrayBuffer.empty
-    val nEnodes: ArrayBuffer[Int] = ArrayBuffer.empty
-    val times: ArrayBuffer[Long] = ArrayBuffer.empty
 
     val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
-      .withChangeLogger((oldEGraph, newEGraph) => {
-//        println(s"\t\tEGraph changed: ${oldEGraph.classCount} -> ${newEGraph.classCount} eclasses, ${oldEGraph.nodeCount} -> ${newEGraph.nodeCount} enodes, Time since start of this benchmark: ${(System.nanoTime() - benchStartTime) / 1e6} ms")
-        val dt = System.nanoTime() - benchStartTime
-
-        if (nEclasses.isEmpty) {
-          nEclasses += oldEGraph.classCount
-          nEnodes += oldEGraph.nodeCount
-          times += 0L
-        }
-
-        nEclasses += newEGraph.classCount
-        nEnodes += newEGraph.nodeCount
-        times += dt
-      })
       .repeatUntilStable
 
     val expr = nmm(n)
@@ -87,8 +70,6 @@ object Main {
     val egraph2 = simpleStrategy(egraph, map).get
 
     val extracted = egraph2.extract(root, linalgCostFunction)
-
-    return (nEclasses, nEnodes, times)
   }
 
   def benchNmm(n: Int, map: ParallelMap, str: String): Unit = {
@@ -99,33 +80,17 @@ object Main {
     var iterations = 0
 
     while (System.nanoTime() - start < time) {
-//      println("\tStarting iteration " + (iterations + 1))
       val testStart = System.nanoTime()
       testNmmBench(n, map)
       val testEnd = System.nanoTime()
       val duration = testEnd - testStart
-      //      println(s"Iteration $iterations took $duration ms")
       times = duration :: times
       iterations += 1
     }
 
-    val (nEclasses, nEnodes, dts) = testNmmBench(n, map)
-
     println(s"Completed $iterations iterations in 60 seconds")
     val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
     println(s"Median time per iteration: ${medianTime / 1e6} ms");
-
-    // save nEclasses, nEnodes, dts to csv
-    val csvLines = new StringBuilder
-    csvLines.append("Iteration,Time(ns),NumEClasses,NumENodes\n")
-    for (i <- dts.indices) {
-      csvLines.append(s"${i},${dts(i)},${nEclasses(i)},${nEnodes(i)}\n")
-    }
-    val filename = s"bench/${n}mm$str.csv"
-    import java.io._
-    val pw = new PrintWriter(new File(filename))
-    pw.write(csvLines.toString())
-    pw.close()
   }
 
   def benchMM(map: ParallelMap, str: String): Unit = {
@@ -135,31 +100,13 @@ object Main {
     }
   }
 
-  def testPoly5Bench(map: ParallelMap) : (ArrayBuffer[Int], ArrayBuffer[Int], ArrayBuffer[Long]) = {
+  def testPoly5Bench(map: ParallelMap) : Unit = {
     benchStartTime = System.nanoTime()
     val L: Language[ArithExpr] = summon[Language[ArithExpr]]
     val R: poly.Rules = poly.Rules()(using L)
     type ArithRule = R.ArithRule
 
-    val nEclasses: ArrayBuffer[Int] = ArrayBuffer.empty
-    val nEnodes: ArrayBuffer[Int] = ArrayBuffer.empty
-    val times: ArrayBuffer[Long] = ArrayBuffer.empty
-
     val simpleStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all)
-      .withChangeLogger((oldEGraph, newEGraph) => {
-//        println(s"\t\tEGraph changed: ${oldEGraph.classCount} -> ${newEGraph.classCount} eclasses, ${oldEGraph.nodeCount} -> ${newEGraph.nodeCount} enodes, Time since start of this benchmark: ${(System.nanoTime() - benchStartTime) / 1e6} ms")
-        val dt = System.nanoTime() - benchStartTime
-
-        if (nEclasses.isEmpty) {
-          nEclasses += oldEGraph.classCount
-          nEnodes += oldEGraph.nodeCount
-          times += 0L
-        }
-
-        nEclasses += newEGraph.classCount
-        nEnodes += newEGraph.nodeCount
-        times += dt
-      })
       .repeatUntilStable
 
     // polynomial of degree 5: ax^5 + bx^4 + cx^3 + dx^2 + ex + f
@@ -185,8 +132,6 @@ object Main {
     val egraph2 = simpleStrategy(egraph, map).get
 
     val extracted = egraph2.extract(root, arithCostFunction)
-
-    return (nEclasses, nEnodes, times)
   }
 
   def benchPoly5(map: ParallelMap, str: String): Unit = {
@@ -196,60 +141,32 @@ object Main {
     var times: List[Long] = List()
     var iterations = 0
     while (System.nanoTime() - start < time) {
-//      println("\tStarting iteration " + (iterations + 1))
       val testStart = System.nanoTime()
       testPoly5Bench(map)
       val testEnd = System.nanoTime()
       val duration = testEnd - testStart
-      //      println(s"Iteration $iterations took $duration ms")
       times = duration :: times
       iterations += 1
     }
+
     println(s"Completed $iterations iterations in 60 seconds")
     val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
     println(s"Median time per iteration: ${medianTime / 1e6} ms");
-
-    val (nEclasses, nEnodes, dts) = testPoly5Bench(map)
-
-    // save nEclasses, nEnodes, dts to csv
-    val csvLines = new StringBuilder
-    csvLines.append("Iteration,Time(ns),NumEClasses,NumENodes\n")
-    for (i <- dts.indices) {
-      csvLines.append(s"${i},${dts(i)},${nEclasses(i)},${nEnodes(i)}\n")
-    }
-    val filename = s"bench/poly_$str.csv"
-    import java.io._
-    val pw = new PrintWriter(new File(filename))
-    pw.write(csvLines.toString())
-    pw.close()
   }
 
   def main(args: Array[String]): Unit = {
     {
-      val map = ParallelMap.default.timed
+      val map = ParallelMap.default
       println("# ================Using default parallel map================")
       benchPoly5(map, "default")
-      println(map.report)
       benchMM(map, "default")
-      println(map.report)
-    }
-
-    {
-      val map = ParallelMap.sequential.timed
-      println("# ================Using sequential map================")
-      benchPoly5(map, "sequential")
-      println(map.report)
-      benchMM(map, "sequential")
-      println(map.report)
     }
 
     for (i <- 1 to 10) {
-      val map = ParallelMap.fixedThreadParallel(i).timed
+      val map = ParallelMap.fixedThreadParallel(i)
       println(s"# ================Using fixed parallel map with $i threads================")
       benchPoly5(map, "fixedThreadParallel" + i)
-      println(map.report)
       benchMM(map, "fixedThreadParallel" + i)
-      println(map.report)
     }
   }
 
