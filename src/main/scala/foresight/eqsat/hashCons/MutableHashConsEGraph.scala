@@ -59,25 +59,32 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def find(node: ENode[NodeT]): Option[EClassCall] = {
-    findUnsafe(canonicalize(node))
+    Option(findUnsafe(canonicalize(node)))
   }
 
   /**
    * Finds the e-class of a given e-node. The e-node must be canonical.
    * @param renamedShape The canonicalized e-node to find the e-class of.
-   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.
+   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, null.
    */
-  private def findUnsafe(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
+  private def findUnsafe(renamedShape: ShapeCall[NodeT]): EClassCall = {
     if (MutableHashConsEGraph.debug) {
       assert(renamedShape.shape.isShape)
     }
 
-    hashCons.get(renamedShape.shape).map { ref =>
-      val data = classData(ref)
-      val classToNode = data.nodes(renamedShape.shape)
-      val out = classToNode.inverse.compose(renamedShape.renaming)
-      EClassCall(ref, out)
+    if (!hashCons.contains(renamedShape.shape)) {
+      return null
     }
+
+    val ref = hashCons(renamedShape.shape)
+    if (!renamedShape.shape.hasSlots) {
+      return EClassCall(ref, SlotMap.empty)
+    }
+
+    val data = classData(ref)
+    val classToNode = data.nodes(renamedShape.shape)
+    val out = classToNode.inverse.compose(renamedShape.renaming)
+    EClassCall(ref, out)
   }
 
   /**
@@ -168,11 +175,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @return The e-class reference of the e-node in the e-graph.
    */
   def tryAddUnsafe(canonicalNode: ShapeCall[NodeT]): AddNodeResult = {
-    findUnsafe(canonicalNode) match {
-      case Some(ref) => AddNodeResult.AlreadyThere(ref)
-      case None =>
-        val ref = addNewUnsafe(canonicalNode)
-        AddNodeResult.Added(ref)
+    val resultOrNull = findUnsafe(canonicalNode)
+    if (resultOrNull == null) {
+      val ref = addNewUnsafe(canonicalNode)
+      AddNodeResult.Added(ref)
+    } else {
+      AddNodeResult.AlreadyThere(resultOrNull)
     }
   }
 
