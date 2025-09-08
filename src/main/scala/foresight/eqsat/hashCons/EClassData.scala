@@ -25,7 +25,7 @@ private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
     nodes.map { case (node, renaming) => ShapeCall(node, renaming) }.toSet
   }
 
-  def hasNoSlots: Boolean = {
-    nodes.values.forall(_.isEmpty)
+  def hasSlots: Boolean = {
+    nodes.values.exists(!_.isEmpty)
   }
 }
