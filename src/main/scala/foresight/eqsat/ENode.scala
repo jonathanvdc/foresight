@@ -38,6 +38,13 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    */
   def slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.args.valueSet)
 
+  /**
+   * Whether this node contains any slots at all: definitions, uses, or children’s argument slots.
+   *
+   * @return True if this node has any slots; false if it is completely ground.
+   */
+  def hasSlots: Boolean = definitions.nonEmpty || uses.nonEmpty || args.exists(!_.args.isEmpty)
+
   private def containsSlot(slot: Slot): Boolean = {
     definitions.contains(slot) || uses.contains(slot) || args.exists(_.args.valueSet.contains(slot))
   }
