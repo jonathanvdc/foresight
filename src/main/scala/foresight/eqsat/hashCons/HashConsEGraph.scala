@@ -43,7 +43,12 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
-    classData(canonicalApp.ref).appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
+    val data = classData(canonicalApp.ref)
+    if (data.hasNoSlots) {
+      data.nodes.keySet
+    } else {
+      data.appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
+    }
   }
 
   override def users(ref: EClassRef): Set[ENode[NodeT]] = {
