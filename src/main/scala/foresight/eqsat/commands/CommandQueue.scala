@@ -197,7 +197,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
                          egraph: EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    var newQueue = Seq.newBuilder[Command[NodeT]]
+    val newQueue = Seq.newBuilder[Command[NodeT]]
     var newReification = partialReification
     for (command <- flatCommands) {
       val (simplified, newReificationPart) = command.simplify(egraph, newReification)

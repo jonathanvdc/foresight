@@ -97,19 +97,36 @@ final case class AddManyCommand[NodeT](
     val resolvedBuilder = Map.newBuilder[EClassSymbol.Virtual, EClassCall]
     val unresolvedBuilder = Seq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
 
+    def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+      val resolvedArgs = Seq.newBuilder[EClassCall]
+      for (arg <- args) {
+        arg match {
+          case EClassSymbol.Real(call) =>
+            resolvedArgs += call
+          case v: EClassSymbol.Virtual if partialReification.contains(v) =>
+            resolvedArgs += partialReification(v)
+          case _ =>
+            // Argument is virtual and not in the partial reification.
+            // Cannot fully resolve this node.
+            return null
+        }
+      }
+      resolvedArgs.result()
+    }
+
     for ((result, node) <- nodes) {
-      val newArgs = node.args.map(_.refine(partialReification))
-      if (newArgs.forall(_.isReal)) {
-        val reifiedNode = ENode(node.nodeType, node.definitions, node.uses, newArgs.map(_.reify(partialReification)))
+      val resolvedArgs = resolveAllOrNull(node.args)
+      if (resolvedArgs != null) {
+        val reifiedNode = ENode(node.nodeType, node.definitions, node.uses, resolvedArgs)
         egraph.find(reifiedNode) match {
           case Some(call) =>
             resolvedBuilder += (result -> call)
           case None =>
-            val refined = node.copy(args = newArgs)
+            val refined = node.copy(args = resolvedArgs.map(EClassSymbol.Real(_)))
             unresolvedBuilder += (result -> refined)
         }
       } else {
-        val refined = node.copy(args = newArgs)
+        val refined = node.copy(args = node.args.map(_.refine(partialReification)))
         unresolvedBuilder += (result -> refined)
       }
     }
