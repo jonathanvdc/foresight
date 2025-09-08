@@ -24,6 +24,16 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
   }
 
   /**
+   * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.
+   * @param ref The e-class to check.
+   * @return True if the e-class is the canonical representative of its set, false otherwise.
+   */
+  def isCanonical(ref: EClassRef): Boolean = {
+    // require(parents.contains(ref), s"EClassRef $ref is not in the union-find.")
+    parents(ref).ref == ref
+  }
+
+  /**
    * Finds the representative of the given key and compresses the path. If the key is not in the union-find, None is
    * returned; otherwise, the representative of the key, the renaming of the path, and the new union-find are
    * returned.
@@ -51,7 +61,14 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key and the new union-find.
    */
   def findAndCompress(ref: EClassRef): (EClassCall, SlottedUnionFind) = {
-    tryFindAndCompress(ref).get
+    val parent = parents(ref)
+    if (parent.ref == ref) {
+      (parent, this)
+    } else {
+      val (grandparent, newDisjointSet) = findAndCompress(parent)
+      val newMap = newDisjointSet.parents + (ref -> grandparent)
+      (grandparent, SlottedUnionFind(newMap))
+    }
   }
 
   /**

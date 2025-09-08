@@ -26,14 +26,22 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     canonicalize(app.ref).rename(app.args)
   }
 
+  def isCanonical(ref: EClassRef): Boolean = {
+    unionFind.isCanonical(ref)
+  }
+
+  def isCanonical(call: EClassCall): Boolean = {
+    isCanonical(call.ref)
+  }
+
   def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import foresight.util.ordering.SeqOrdering
-
-    val canonicalArgs = node.args.map(canonicalize)
-    if (canonicalArgs == node.args && !node.hasSlots) {
+    
+    if (node.args.forall(isCanonical) && !node.hasSlots) {
       return ShapeCall(node, SlotMap.empty)
     }
 
+    val canonicalArgs = node.args.map(canonicalize)
     val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
     groupCompatibleVariants(nodeWithCanonicalizedArgs).toSeq
       .map(_.asShapeCall)
