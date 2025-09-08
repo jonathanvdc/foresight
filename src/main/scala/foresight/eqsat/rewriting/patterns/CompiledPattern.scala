@@ -23,7 +23,7 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wi
     Machine.run(egraph, state, instructions).map { state =>
       val newVars = state.boundVars.mapValuesStrict(MixedTree.Atom[NodeT, EClassCall])
       PatternMatch(call, newVars, state.boundSlots)
-    }.toSeq
+    }.distinct
   }
 
   /**
