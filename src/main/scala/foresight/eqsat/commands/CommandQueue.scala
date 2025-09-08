@@ -204,7 +204,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
       newQueue += simplified
       newReification ++= newReificationPart
     }
-    (CommandQueue(newQueue.result()).optimized, newReification)
+    (CommandQueue(newQueue.result()), newReification)
   }
 }
 
