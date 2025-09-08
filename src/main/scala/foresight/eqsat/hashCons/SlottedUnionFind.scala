@@ -68,6 +68,17 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
   }
 
   /**
+   * Finds the representative of the given key. If the key is not in the union-find, None is returned; otherwise, the
+   * representative of the key and the new union-find are returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key and the new union-find, if the key is in the union-find. None otherwise.
+   */
+  def tryFind(ref: EClassCall): Option[EClassCall] = {
+    tryFind(ref.ref).map(_.rename(ref.args))
+  }
+
+  /**
    * Finds the representative of the given key. If the key is not in the union-find, an exception is thrown; otherwise,
    * the representative of the key is returned.
    *
@@ -79,6 +90,17 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
   }
 
   /**
+   * Finds the representative of the given key. If the key is not in the union-find, an exception is thrown; otherwise,
+   * the representative of the key is returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key.
+   */
+  def find(ref: EClassCall): EClassCall = {
+    tryFind(ref).get
+  }
+
+  /**
    * Finds the representative of the given key. If the key is not in the union-find, None is returned; otherwise, the
    * representative of the key is returned.
    *
@@ -86,7 +108,16 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key, if the key is in the union-find. None otherwise.
    */
   def tryFind(key: EClassRef): Option[EClassCall] = {
-    tryFindAndCompress(key).map { _._1 }
+    if (parents.contains(key)) {
+      val parent = parents(key)
+      if (parent.ref == key) {
+        Some(parent)
+      } else {
+        tryFind(parent)
+      }
+    } else {
+      None
+    }
   }
 }
 
