@@ -21,7 +21,11 @@ private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
    * Gets the applied nodes.
    * @return The applied nodes.
    */
-  def appliedNodes: Set[ShapeCall[NodeT]] = {
+  lazy val appliedNodes: Set[ShapeCall[NodeT]] = {
     nodes.map { case (node, renaming) => ShapeCall(node, renaming) }.toSet
+  }
+
+  def hasNoSlots: Boolean = {
+    nodes.values.forall(_.isEmpty)
   }
 }
