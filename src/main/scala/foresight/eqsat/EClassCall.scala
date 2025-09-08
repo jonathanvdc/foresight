@@ -59,6 +59,8 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return A new application with arguments renamed (possibly dropping some).
    */
   def renamePartial(renaming: SlotMap): EClassCall = {
+    if (args.isEmpty || renaming.isEmpty) return this
+
     EClassCall(ref, args.composePartial(renaming))
   }
 
