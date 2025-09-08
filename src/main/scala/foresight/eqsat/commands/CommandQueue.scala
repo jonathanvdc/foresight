@@ -100,8 +100,9 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
     val builder = Seq.newBuilder[Command[NodeT]]
+    builder ++= commands
     val result = addImpl(tree, builder)
-    (result, CommandQueue(commands ++ builder.result()))
+    (result, CommandQueue(builder.result()))
   }
 
   private def addImpl(tree: MixedTree[NodeT, EClassSymbol],
