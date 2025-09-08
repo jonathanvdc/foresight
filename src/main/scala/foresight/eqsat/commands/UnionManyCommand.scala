@@ -87,14 +87,19 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
                          egraph: EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    pairs.map {
-      case (left, right) => (left.refine(partialReification), right.refine(partialReification))
-    }.filter {
-      case (EClassSymbol.Real(left), EClassSymbol.Real(right)) => !egraph.areSame(left, right)
-      case _ => true
-    } match {
-      case Seq() => (CommandQueue.empty, Map.empty)
-      case simplifiedPairs => (UnionManyCommand(simplifiedPairs), Map.empty)
+    val builder = Seq.newBuilder[(EClassSymbol, EClassSymbol)]
+    for ((left, right) <- pairs) {
+      val lRefined = left.refine(partialReification)
+      val rRefined = right.refine(partialReification)
+      (lRefined, rRefined) match {
+        case (EClassSymbol.Real(l), EClassSymbol.Real(r)) =>
+          if (!egraph.areSame(l, r)) builder += ((lRefined, rRefined))
+        case _ =>
+          builder += ((lRefined, rRefined))
+      }
     }
+    val simplifiedPairs = builder.result()
+    if (simplifiedPairs.isEmpty) (CommandQueue.empty, Map.empty)
+    else (UnionManyCommand(simplifiedPairs), Map.empty)
   }
 }
