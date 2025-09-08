@@ -44,6 +44,8 @@ object Machine {
       case Nil => Set(MachineResult.Success(machine))
       case firstInstruction :: remainingInstructions =>
         firstInstruction.execute(graph, machine) match {
+          case Left(newMachines) if newMachines.size == 1 =>
+            tryRun(graph, newMachines.head, remainingInstructions)
           case Left(newMachines) =>
             newMachines.flatMap(newMachine => tryRun(graph, newMachine, remainingInstructions))
           case Right(error) => Set(MachineResult.Failure(machine, error, instructions))
