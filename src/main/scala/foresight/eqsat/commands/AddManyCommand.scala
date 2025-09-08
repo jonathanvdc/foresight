@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{AddNodeResult, EClassCall, EGraph, EGraphLike}
+import foresight.eqsat.{AddNodeResult, EClassCall, EGraph, EGraphLike, ENode}
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
@@ -93,32 +93,33 @@ final case class AddManyCommand[NodeT](
                          egraph: EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val refinedNodes = nodes.map {
-      case (result, node) =>
-        val newArgs = node.args.map(_.refine(partialReification))
-        val refined = node.copy(args = newArgs)
-        if (newArgs.forall(_.isReal)) {
-          val reifiedNode = refined.reify(partialReification)
-          egraph.find(reifiedNode) match {
-            case Some(call) => (refined, result, Some(call))
-            case None => (refined, result, None)
-          }
-        } else {
-          (refined, result, None)
+
+    val resolvedBuilder = Map.newBuilder[EClassSymbol.Virtual, EClassCall]
+    val unresolvedBuilder = Seq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+
+    for ((result, node) <- nodes) {
+      val newArgs = node.args.map(_.refine(partialReification))
+      if (newArgs.forall(_.isReal)) {
+        val reifiedNode = ENode(node.nodeType, node.definitions, node.uses, newArgs.map(_.reify(partialReification)))
+        egraph.find(reifiedNode) match {
+          case Some(call) =>
+            resolvedBuilder += (result -> call)
+          case None =>
+            val refined = node.copy(args = newArgs)
+            unresolvedBuilder += (result -> refined)
         }
+      } else {
+        val refined = node.copy(args = newArgs)
+        unresolvedBuilder += (result -> refined)
+      }
     }
 
-    val resolved = refinedNodes.collect {
-      case (_, result, Some(call)) => result -> call
-    }
-
-    val unresolved = refinedNodes.collect {
-      case (node, result, None) => result -> node
-    }
+    val resolved = resolvedBuilder.result()
+    val unresolved = unresolvedBuilder.result()
 
     (
       if (unresolved.isEmpty) CommandQueue.empty else AddManyCommand(unresolved),
-      resolved.toMap
+      resolved
     )
   }
 }
