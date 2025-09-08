@@ -73,24 +73,24 @@ object Main {
   }
 
   def benchNmm(n: Int, map: ParallelMap, str: String): Unit = {
-    println(s"## Benchmarking nmm with n=$n for 60 seconds.")
-    val time = 60_000_000_000L
-    val start = System.nanoTime()
-    var times: List[Long] = List()
+//    println(s"## Benchmarking nmm with n=$n for 60 seconds.")
+//    val time = 60_000_000_000L
+//    val start = System.nanoTime()
+//    var times: List[Long] = List()
     var iterations = 0
 
-    while (System.nanoTime() - start < time) {
-      val testStart = System.nanoTime()
+    while (iterations < 5) {
+//      val testStart = System.nanoTime()
       testNmmBench(n, map)
-      val testEnd = System.nanoTime()
-      val duration = testEnd - testStart
-      times = duration :: times
+//      val testEnd = System.nanoTime()
+//      val duration = testEnd - testStart
+//      times = duration :: times
       iterations += 1
     }
 
-    println(s"Completed $iterations iterations in 60 seconds")
-    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
-    println(s"Median time per iteration: ${medianTime / 1e6} ms");
+//    println(s"Completed $iterations iterations in 60 seconds")
+//    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
+//    println(s"Median time per iteration: ${medianTime / 1e6} ms");
   }
 
   def benchMM(map: ParallelMap, str: String): Unit = {
@@ -135,30 +135,32 @@ object Main {
   }
 
   def benchPoly5(map: ParallelMap, str: String): Unit = {
-//    println("## Benchmarking poly5 for 60 seconds.")
-//    val start = System.nanoTime()
-//    var times: List[Long] = List()
+    println("## Benchmarking poly5 for 60 seconds.")
+    val start = System.nanoTime()
+    var times: List[Long] = List()
     var iterations = 0
-    while (iterations < 12) {
-//      val testStart = System.nanoTime()
+    while (System.nanoTime() - start < 60_000_000_000L) {
+      val testStart = System.nanoTime()
       testPoly5Bench(map)
-//      val testEnd = System.nanoTime()
-//      val duration = testEnd - testStart
-//      times = duration :: times
+      val testEnd = System.nanoTime()
+//      println("Completed iteration " + (iterations + 1) + " in " + ((testEnd - testStart) / 1e6) + " ms")
+      val duration = testEnd - testStart
+      times = duration :: times
       iterations += 1
     }
 
-//    println(s"Completed $iterations iterations in 60 seconds")
-//    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
-//    println(s"Median time per iteration: ${medianTime / 1e6} ms");
+    println(s"Completed $iterations iterations in 60 seconds")
+    val medianTime = if (times.nonEmpty) times.sorted.apply(times.length / 2) else 0
+    println(s"Median time per iteration: ${medianTime / 1e6} ms")
   }
 
   def main(args: Array[String]): Unit = {
     {
       val map = ParallelMap.sequential
 //      println("# ================Using default parallel map================")
-      benchPoly5(map, "default")
+//      benchPoly5(map, "default")
 //      benchMM(map, "default")
+      benchNmm(80, map, "default")
     }
 
 //    for (i <- 1 to 10) {

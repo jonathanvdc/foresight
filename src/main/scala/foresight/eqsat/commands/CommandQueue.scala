@@ -101,12 +101,14 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val (addedArgs, newQueue) = args.foldLeft((Seq.empty[EClassSymbol], this)) {
-          case ((added, queue), arg: MixedTree[NodeT, EClassSymbol]) =>
-            val (result, newQueue) = queue.add(arg)
-            (added :+ result, newQueue)
+        val addedArgsBuilder = Seq.newBuilder[EClassSymbol]
+        var newQueue = this
+        for (arg <- args) {
+          val (result, updatedQueue) = newQueue.add(arg)
+          addedArgsBuilder += result
+          newQueue = updatedQueue
         }
-        newQueue.add(ENodeSymbol(t, defs, uses, addedArgs))
+        newQueue.add(ENodeSymbol(t, defs, uses, addedArgsBuilder.result()))
 
       case MixedTree.Atom(call) =>
         (call, this)
