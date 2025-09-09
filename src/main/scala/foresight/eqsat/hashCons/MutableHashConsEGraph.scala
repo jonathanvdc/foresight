@@ -89,11 +89,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       assert(renamedShape.shape.isShape)
     }
 
-    if (!hashCons.contains(renamedShape.shape)) {
+    val ref = hashCons.getOrElse(renamedShape.shape, null)
+    if (ref == null) {
       return null
     }
 
-    val ref = hashCons(renamedShape.shape)
     if (!renamedShape.shape.hasSlots) {
       return EClassCall(ref, SlotMap.empty)
     }
@@ -109,10 +109,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       assert(!node.hasSlots)
     }
 
-    if (hashCons.contains(node)) {
-      EClassCall(hashCons(node), SlotMap.empty)
-    } else {
+    val result = hashCons.getOrElse(node, null)
+    if (result == null) {
       null
+    } else {
+      EClassCall(result, SlotMap.empty)
     }
   }
 
