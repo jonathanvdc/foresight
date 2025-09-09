@@ -1,0 +1,7 @@
+[package]
+name = "slotted"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+slotted-egraphs = "0.0.35"

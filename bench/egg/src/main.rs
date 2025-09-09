@@ -226,42 +226,48 @@ fn mm(n: usize) -> (DimAndCost, RecExpr<Linalg>){
     extractor.find_best(root)
 }
 
-fn main() {
-    let mut times = vec![];
-    for _ in 0..15 {
-        let time_start = std::time::Instant::now();
-        let (_, best_expr) = poly();
-        let time_end = std::time::Instant::now();
-        println!("Simplified expression: {}", best_expr);
-        let duration = time_end.duration_since(time_start);
-        times.push(duration.as_micros());
+fn median(v: &mut Vec<u128>) -> u128 {
+    v.sort();
+    let mid = v.len() / 2;
+    if v.len() % 2 == 0 {
+        (v[mid - 1] + v[mid]) / 2
+    } else {
+        v[mid]
     }
+}
 
-    let median_time = {
-        let mut sorted_times = times.clone();
-        sorted_times.sort();
-        sorted_times[sorted_times.len() / 2]
-    };
-    println!("[Poly] All times over 10 runs: {:?}", times);
-    println!("[Poly] Median time over 10 runs: {} ms", median_time as f64 / 1000.0);
-
-    for n in [3, 5, 10, 20, 40, 80] {
-        times.clear();
-        for _ in 0..10 {
+fn main() {
+    let total_time = 60; // seconds
+    {
+        println!("## Benchmarking poly5 for 60 seconds.");
+        let start = std::time::Instant::now();
+        let mut times = vec![];
+        let end = start + std::time::Duration::from_secs(total_time);
+        while std::time::Instant::now() < end {
             let time_start = std::time::Instant::now();
-            let (best_cost, _) = mm(n);
+            let (best_cost, best_expr) = poly();
+            println!("Best expression: {}, cost: {}", best_expr, best_cost);
             let time_end = std::time::Instant::now();
-            println!("Best cost for multiplying {} 10x10 matrices: {}", n, best_cost.cost);
             let duration = time_end.duration_since(time_start);
             times.push(duration.as_micros());
         }
+        println!("Completed {} runs.", times.len());
+        println!("Median time per iteration: {}ms", median(&mut times) as f64 / 1000.0);
+    }
 
-        let median_time = {
-            let mut sorted_times = times.clone();
-            sorted_times.sort();
-            sorted_times[sorted_times.len() / 2]
-        };
-        println!("[MM {}] All times over 10 runs: {:?}", n, times);
-        println!("[MM {}] Median time over 10 runs: {} ms", n, median_time as f64 / 1000.0);
+    for n in [3, 5, 10, 20, 40, 80] {
+        println!("## Benchmarking {}mm for 60 seconds.", n);
+        let mut times = vec![];
+        let start = std::time::Instant::now();
+        let end = start + std::time::Duration::from_secs(total_time);
+        while std::time::Instant::now() < end {
+            let time_start = std::time::Instant::now();
+            let (_, best_expr) = mm(n);
+            let time_end = std::time::Instant::now();
+            let duration = time_end.duration_since(time_start);
+            times.push(duration.as_micros());
+        }
+        println!("Completed {} runs.", times.len());
+        println!("Median time per iteration: {}ms", median(&mut times) as f64 / 1000.0);
     }
 }
