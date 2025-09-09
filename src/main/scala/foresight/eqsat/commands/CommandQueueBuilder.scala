@@ -184,16 +184,13 @@ final class CommandQueueBuilder[NodeT] {
 
 private object CommandQueueBuilder {
   def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
-    val resolvedArgs = Seq.newBuilder[EClassCall]
-    for (arg <- args) {
-      arg match {
-        case EClassSymbol.Real(call) =>
-          resolvedArgs += call
-        case _ =>
-          // Argument is virtual. Cannot fully resolve all arguments.
-          return null
+    if (args.forall(_.isReal)) {
+      args.map {
+        case EClassSymbol.Real(call) => call
+        case _ => throw new IllegalStateException("Unreachable")
       }
+    } else {
+      null
     }
-    resolvedArgs.result()
   }
 }
