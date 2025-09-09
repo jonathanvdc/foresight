@@ -34,6 +34,19 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     isCanonical(call.ref)
   }
 
+  private def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
+    if (MutableHashConsEGraph.debug && node.hasSlots) {
+      throw new IllegalArgumentException("Node has slots.")
+    }
+
+    if (node.args.forall(isCanonical)) {
+      node
+    } else {
+      val canonicalArgs = node.args.map(canonicalize)
+      node.copy(args = canonicalArgs)
+    }
+  }
+
   def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import foresight.util.ordering.SeqOrdering
     
@@ -59,7 +72,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def find(node: ENode[NodeT]): Option[EClassCall] = {
-    Option(findUnsafe(canonicalize(node)))
+    if (node.hasSlots) {
+      Option(findUnsafe(canonicalize(node)))
+    } else {
+      Option(findUnsafeWithoutSlots(canonicalizeWithoutSlots(node)))
+    }
   }
 
   /**
@@ -85,6 +102,18 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     val classToNode = data.nodes(renamedShape.shape)
     val out = classToNode.inverse.compose(renamedShape.renaming)
     EClassCall(ref, out)
+  }
+
+  private def findUnsafeWithoutSlots(node: ENode[NodeT]): EClassCall = {
+    if (MutableHashConsEGraph.debug) {
+      assert(!node.hasSlots)
+    }
+
+    if (hashCons.contains(node)) {
+      EClassCall(hashCons(node), SlotMap.empty)
+    } else {
+      null
+    }
   }
 
   /**
