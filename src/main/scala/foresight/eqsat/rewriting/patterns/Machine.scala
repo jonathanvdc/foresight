@@ -28,7 +28,7 @@ object Machine {
 
     val results = Seq.newBuilder[MachineState[NodeT]]
     tryRunCPSWithoutFailure(graph, machine, instructions,
-      onSuccess = finalMachine => results += finalMachine
+      onSuccess = (finalMachine: MachineState[NodeT]) => results += finalMachine
     )
     results.result()
   }
@@ -50,8 +50,9 @@ object Machine {
                                                                             instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
     val results = Seq.newBuilder[MachineResult[NodeT, GraphT]]
     tryRunCPS(graph, machine, instructions,
-      onSuccess = finalMachine => results += MachineResult.Success(finalMachine),
-      onFailure = (failedMachine, error, remainingInstructions) => results += MachineResult.Failure(failedMachine, error, remainingInstructions)
+      onSuccess = (finalMachine: MachineState[NodeT]) => results += MachineResult.Success(finalMachine),
+      onFailure = (failedMachine: MachineState[NodeT], error: MachineError[NodeT], remainingInstructions: List[Instruction[NodeT, GraphT]]) =>
+        results += MachineResult.Failure(failedMachine, error, remainingInstructions)
     )
     results.result()
   }
