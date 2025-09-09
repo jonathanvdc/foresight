@@ -40,7 +40,7 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    * @return The new machine state.
    */
   def bindVar(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): MachineState[NodeT] = {
-    val newBoundVars = boundVars + (variable -> value)
+    val newBoundVars = boundVars.updated(variable, value)
     MachineState(registers, newBoundVars, boundSlots, boundNodes)
   }
 }

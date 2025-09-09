@@ -15,7 +15,7 @@ trait Instruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT
    * @param machine The machine state to execute the instruction on.
    * @return Either a nonempty set of new machine states or a machine error.
    */
-  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]]
+  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]]
 }
 
 /**
@@ -54,8 +54,8 @@ object Instruction {
       true
     }
 
-    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Set[ENode[NodeT]] = {
-      graph.nodes(call).filter { node =>
+    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Seq[ENode[NodeT]] = {
+      graph.nodes(call).toSeq.filter { node =>
         node.nodeType == nodeType &&
           node.args.size == argCount &&
           allSlotsMatch(machine, definitions, node.definitions) &&
@@ -63,7 +63,7 @@ object Instruction {
       }
     }
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       val call = machine.registers(register)
       findInEClass(graph, call, machine) match {
         case nodes if nodes.isEmpty => Right(MachineError.NoMatchingNode(this, call))
@@ -83,8 +83,8 @@ object Instruction {
                                                                                             variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
-      Left(Set(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
+      Left(Seq(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
     }
   }
 
@@ -97,9 +97,9 @@ object Instruction {
    */
   final case class Compare[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
-        Left(Set(machine))
+        Left(Seq(machine))
       } else {
         Right(MachineError.InconsistentVars(this, machine.registers(register1), machine.registers(register2)))
       }
