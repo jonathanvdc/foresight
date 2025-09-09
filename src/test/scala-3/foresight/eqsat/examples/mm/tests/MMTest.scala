@@ -226,12 +226,12 @@ class MMTest {
     println(s"Average time per iteration: ${avgTime/1e6} ms")
   }
 
-  @Test
-  def benchMM(): Unit = {
-    val n = List(3, 5, 10, 20, 40, 80)
-    for (i <- n) {
-      println(s"Benchmarking n=$i")
-      benchNmm(i)
-    }
-  }
+//  @Test
+//  def benchMM(): Unit = {
+//    val n = List(3, 5, 10, 20, 40, 80)
+//    for (i <- n) {
+//      println(s"Benchmarking n=$i")
+//      benchNmm(i)
+//    }
+//  }
 }
