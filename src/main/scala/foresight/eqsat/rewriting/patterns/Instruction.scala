@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, Slot}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, MixedTree, Slot}
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -74,7 +74,7 @@ object Instruction {
     extends Instruction[NodeT, EGraphT] {
 
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
-      Left(Set(machine.bindVar(variable, machine.registers(register))))
+      Left(Set(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
     }
   }
 
