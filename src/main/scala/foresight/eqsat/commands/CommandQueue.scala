@@ -99,23 +99,10 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }}}
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
-    val builder = Seq.newBuilder[Command[NodeT]]
-    builder ++= commands
-    val result = addImpl(tree, builder)
-    (result, CommandQueue(builder.result()))
-  }
-
-  private def addImpl(tree: MixedTree[NodeT, EClassSymbol],
-                      builder: mutable.Builder[Command[NodeT], Seq[Command[NodeT]]]): EClassSymbol = {
-    tree match {
-      case MixedTree.Node(t, defs, uses, args) =>
-        val result = EClassSymbol.virtual()
-        builder += AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(addImpl(_, builder)))))
-        result
-
-      case MixedTree.Atom(call) =>
-        call
-    }
+    val builder = new CommandQueueBuilder[NodeT]()
+    builder.appendAll(commands)
+    val result = builder.add(tree)
+    (result, builder.result())
   }
 
   /**
