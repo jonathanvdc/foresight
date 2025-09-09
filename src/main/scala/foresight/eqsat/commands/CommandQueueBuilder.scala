@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.MixedTree
+import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree}
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
@@ -88,6 +88,49 @@ final class CommandQueueBuilder[NodeT] {
   }
 
   /**
+   * Appends an insertion of a [[MixedTree]], using the provided e-graph
+   * to simplify the insertion.
+   *
+   * Child subtrees are inserted first, then a final node referencing their
+   * symbols is added. If the tree is a [[MixedTree.Atom]], no new command
+   * is added and the existing [[EClassSymbol.Real]] is returned.
+   *
+   * @param tree Tree to insert.
+   * @return The [[EClassSymbol]] for the tree’s root e-class.
+   */
+  def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: EGraph[NodeT]): EClassSymbol = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        // First, add all the children
+        val argSymbols = args.map(addSimplified(_, egraph))
+
+        // Check if all children are already in the graph
+        val argCalls = CommandQueueBuilder.resolveAllOrNull(argSymbols)
+
+        // If the children are already present, we might not need to add a new node
+        if (argCalls != null) {
+          val candidateNode = ENode(t, defs, uses, argCalls)
+          egraph.find(candidateNode) match {
+            case Some(existingCall) =>
+              // Node already exists in the graph; reuse its class
+              return EClassSymbol.real(existingCall)
+
+            case None =>
+              // Node does not exist; we will add it below
+          }
+        }
+
+        val result = EClassSymbol.virtual()
+        val candidateNode = ENodeSymbol[NodeT](t, defs, uses, argSymbols)
+        commands += AddManyCommand(Seq(result -> candidateNode))
+        result
+
+      case MixedTree.Atom(call) =>
+        call
+    }
+  }
+
+  /**
    * Appends a [[UnionManyCommand]] request to merge two e-classes.
    *
    * @param a First class symbol.
@@ -95,5 +138,46 @@ final class CommandQueueBuilder[NodeT] {
    */
   def union(a: EClassSymbol, b: EClassSymbol): Unit = {
     commands += UnionManyCommand(Seq((a, b)))
+  }
+
+  /**
+   * Appends a [[UnionManyCommand]] request to merge two e-classes,
+   * but only if they are not already known to be equivalent in the
+   * provided e-graph.
+   *
+   * If both `a` and `b` are [[EClassSymbol.Real]], their canonical
+   * representatives in the e-graph are compared; if they differ, a
+   * union command is added. If either is virtual, a union command is
+   * always added.
+   *
+   * @param a First class symbol.
+   * @param b Second class symbol.
+   * @param egraph E-graph used to check existing equivalences.
+   */
+  def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: EGraph[NodeT]): Unit = {
+    (a, b) match {
+      case (EClassSymbol.Real(callA), EClassSymbol.Real(callB)) =>
+        if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {
+          commands += UnionManyCommand(Seq((a, b)))
+        }
+      case _ =>
+        commands += UnionManyCommand(Seq((a, b)))
+    }
+  }
+}
+
+private object CommandQueueBuilder {
+  def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+    val resolvedArgs = Seq.newBuilder[EClassCall]
+    for (arg <- args) {
+      arg match {
+        case EClassSymbol.Real(call) =>
+          resolvedArgs += call
+        case _ =>
+          // Argument is virtual. Cannot fully resolve all arguments.
+          return null
+      }
+    }
+    resolvedArgs.result()
   }
 }
