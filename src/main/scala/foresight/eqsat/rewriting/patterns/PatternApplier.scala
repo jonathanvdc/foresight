@@ -47,6 +47,10 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
         case v: Pattern.Var => m(v).mapAtoms(EClassSymbol.real)
       }
 
+      case MixedTree.Node(t, Seq(), uses, args) =>
+        // No definitions, so we can reuse the PatternMatch and its original slot mapping
+        MixedTree.Node[NodeT, EClassSymbol](t, Seq(), uses.map(m(_)), args.map(instantiate(_, m)))
+
       case MixedTree.Node(t, defs, uses, args) =>
         val defSlots = defs.map { s =>
           m.slotMapping.get(s) match {
@@ -66,6 +70,12 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
 
     pattern match {
       case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
+      case MixedTree.Node(t, Seq(), uses, args) =>
+        // No definitions, so we can reuse the PatternMatch and its original slot mapping
+        val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, m, egraph, builder))
+        val useSymbols = uses.map(m(_))
+        builder.addSimplifiedNode(t, Seq(), useSymbols, argSymbols, egraph)
+
       case MixedTree.Node(t, defs, uses, args) =>
         val defSlots = defs.map { s =>
           m.slotMapping.get(s) match {
