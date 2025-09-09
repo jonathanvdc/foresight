@@ -1,0 +1,29 @@
+lib,benchmark,median_time(ms)
+egglog,poly,11.734645
+egglog,3mm,1.804500
+egglog,5mm,2.294292
+egglog,10mm,3.669084
+egglog,20mm,7.639459
+egglog,40mm,22.113333
+egglog,80mm,106.567042
+egg,poly,10.519
+egg,3mm,0.017
+egg,5mm,0.031
+egg,10mm,0.108
+egg,20mm,0.64
+egg,40mm,4.833
+egg,80mm,37.155
+slotted,poly,239.018
+slotted,3mm,0.131
+slotted,5mm,0.511
+slotted,10mm,3.3
+slotted,20mm,23.733
+slotted,40mm,188.032
+slotted,80mm,1557.796
+hegg,poly,340.0 ms
+hegg,3mm,0.04093
+hegg,5mm,0.1724
+hegg,10mm,1.328
+hegg,20mm,12.82
+hegg,40mm,115.4
+hegg,80mm,1.054 s

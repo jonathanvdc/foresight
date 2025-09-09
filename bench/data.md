@@ -107,23 +107,23 @@ variance introduced by outliers: 19% (moderately inflated)
 
 # Foresight
 ## Benchmarking poly5 for 60 seconds.
-Completed 478 iterations in 60 seconds
-Median time per iteration: 119.005333 ms
+Completed 591 iterations in 60 seconds
+Median time per iteration: 95.405791 ms
 ## Benchmarking nmm with n=3 for 60 seconds.
-Completed 153818 iterations in 60 seconds
-Median time per iteration: 0.378334 ms
+Completed 168419 iterations in 60 seconds
+Median time per iteration: 0.34175 ms
 ## Benchmarking nmm with n=5 for 60 seconds.
-Completed 72741 iterations in 60 seconds
-Median time per iteration: 0.813709 ms
+Completed 85474 iterations in 60 seconds
+Median time per iteration: 0.686334 ms
 ## Benchmarking nmm with n=10 for 60 seconds.
-Completed 25746 iterations in 60 seconds
-Median time per iteration: 2.277209 ms
+Completed 32064 iterations in 60 seconds
+Median time per iteration: 1.834333 ms
 ## Benchmarking nmm with n=20 for 60 seconds.
-Completed 6685 iterations in 60 seconds
-Median time per iteration: 8.74725 ms
+Completed 9796 iterations in 60 seconds
+Median time per iteration: 6.035417 ms
 ## Benchmarking nmm with n=40 for 60 seconds.
-Completed 1028 iterations in 60 seconds
-Median time per iteration: 57.752583 ms
+Completed 2025 iterations in 60 seconds
+Median time per iteration: 29.403583 ms
 ## Benchmarking nmm with n=80 for 60 seconds.
-Completed 122 iterations in 60 seconds
-Median time per iteration: 485.799833 ms
+Completed 283 iterations in 60 seconds
+Median time per iteration: 212.20075 ms
