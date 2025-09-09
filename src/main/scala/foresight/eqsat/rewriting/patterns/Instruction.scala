@@ -44,12 +44,22 @@ object Instruction {
       machine.boundSlots.get(expected).forall(_ == actual)
     }
 
+    private def allSlotsMatch(machine: MachineState[NodeT], expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
+      if (expected.length != actual.length) return false
+      var i = 0
+      while (i < expected.length) {
+        if (!matchesSlot(machine, (expected(i), actual(i)))) return false
+        i += 1
+      }
+      true
+    }
+
     private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Set[ENode[NodeT]] = {
       graph.nodes(call).filter { node =>
-        node.nodeType == nodeType && node.definitions.size == definitions.size &&
-          node.uses.size == uses.size && node.args.size == argCount &&
-          definitions.zip(node.definitions).forall(matchesSlot(machine, _)) &&
-          uses.zip(node.uses).forall(matchesSlot(machine, _))
+        node.nodeType == nodeType &&
+          node.args.size == argCount &&
+          allSlotsMatch(machine, definitions, node.definitions) &&
+          allSlotsMatch(machine, uses, node.uses)
       }
     }
 
