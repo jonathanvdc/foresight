@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree}
+import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
@@ -101,32 +101,48 @@ final class CommandQueueBuilder[NodeT] {
   def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: EGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        // First, add all the children
         val argSymbols = args.map(addSimplified(_, egraph))
+        addSimplifiedNode(t, defs, uses, argSymbols, egraph)
 
-        // Check if all children are already in the graph
-        val argCalls = CommandQueueBuilder.resolveAllOrNull(argSymbols)
+      case MixedTree.Atom(call) => call
+    }
+  }
 
-        // If the children are already present, we might not need to add a new node
-        if (argCalls != null) {
-          val candidateNode = ENode(t, defs, uses, argCalls)
-          egraph.find(candidateNode) match {
-            case Some(existingCall) =>
-              // Node already exists in the graph; reuse its class
-              return EClassSymbol.real(existingCall)
+  private[eqsat] def addSimplifiedNode(nodeType: NodeT,
+                                       definitions: Seq[Slot],
+                                       uses: Seq[Slot],
+                                       args: Seq[EClassSymbol],
+                                       egraph: EGraph[NodeT]): EClassSymbol = {
 
-            case None =>
-              // Node does not exist; we will add it below
-          }
-        }
+    // Check if all children are already in the graph
+    val argCalls = CommandQueueBuilder.resolveAllOrNull(args)
 
-        val result = EClassSymbol.virtual()
-        val candidateNode = ENodeSymbol[NodeT](t, defs, uses, argSymbols)
-        commands += AddManyCommand(Seq(result -> candidateNode))
-        result
+    // If the children are already present, we might not need to add a new node
+    if (argCalls != null) {
+      val candidateNode = ENode(nodeType, definitions, uses, argCalls)
+      egraph.find(candidateNode) match {
+        case Some(existingCall) =>
+          // Node already exists in the graph; reuse its class
+          return EClassSymbol.real(existingCall)
 
-      case MixedTree.Atom(call) =>
-        call
+        case None =>
+          // Node does not exist; we will add it below
+      }
+    }
+
+    val result = EClassSymbol.virtual()
+    val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, args)
+    commands += AddManyCommand(Seq(result -> candidateNode))
+    result
+  }
+
+  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: EGraph[NodeT]): EClassSymbol = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val argSymbols = args.map(addSimplifiedReal(_, egraph))
+        addSimplifiedNode(t, defs, uses, argSymbols, egraph)
+
+      case MixedTree.Atom(call) => EClassSymbol.real(call)
     }
   }
 

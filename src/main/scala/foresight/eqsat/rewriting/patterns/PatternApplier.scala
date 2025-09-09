@@ -15,7 +15,10 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
-    Command.equivalenceSimplified(EClassSymbol.real(m.root), instantiate(m), egraph)
+    val builder = new CommandQueueBuilder[NodeT]()
+    val symbol = instantiateAsSimplifiedAddCommand(pattern, m, egraph, builder)
+    builder.unionSimplified(EClassSymbol.real(m.root), symbol, egraph)
+    builder.result()
   }
 
   override def tryReverse: Option[Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]] = {
@@ -53,6 +56,26 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
         }
         val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
         MixedTree.Node[NodeT, EClassSymbol](t, defSlots, uses.map(newMatch(_)), args.map(instantiate(_, newMatch)))
+    }
+  }
+
+  private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
+                                                m: PatternMatch[NodeT],
+                                                egraph: EGraphT,
+                                                builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
+
+    pattern match {
+      case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
+      case MixedTree.Node(t, defs, uses, args) =>
+        val defSlots = defs.map { s =>
+          m.slotMapping.get(s) match {
+            case Some(v) => v
+            case None => Slot.fresh()
+          }
+        }
+        val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
+        val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, newMatch, egraph, builder))
+        builder.addSimplifiedNode(t, defSlots, uses.map(newMatch(_)), argSymbols, egraph)
     }
   }
 }
