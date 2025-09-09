@@ -15,7 +15,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
-    Command.addEquivalentTree(EClassSymbol.real(m.root), instantiate(m))
+    Command.equivalence(EClassSymbol.real(m.root), instantiate(m))
   }
 
   override def tryReverse: Option[Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]] = {
