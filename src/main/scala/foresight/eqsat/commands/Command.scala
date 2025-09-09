@@ -117,7 +117,7 @@ object Command {
    * import foresight.eqsat.commands.Command
    *
    * val cmd: Command[MyNode] =
-   *   Command.addEquivalentTree(existingSym, myTree)
+   *   Command.equivalence(existingSym, myTree)
    *
    * val (optGraph, out) =
    *   cmd.simplify(egraph).apply(egraph, Map.empty, parallel)
@@ -130,6 +130,46 @@ object Command {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.add(tree)
     builder.union(symbol, c)
+    builder.result()
+  }
+
+  /**
+   * Creates a [[Command]] that asserts an existing [[EClassSymbol]] is equivalent to a given
+   * expression tree, simplifying the command with respect to the given e-graph.
+   *
+   * Internally, this:
+   *   1. Inserts the tree (creating a fresh virtual symbol for its root if needed)
+   *   2. Unions that root with `symbol`
+   *   3. Simplifies the resulting command with respect to `egraph`
+   *
+   * This is the canonical “add-and-unify” operation when you want to grow the e-graph with a
+   * concrete term and immediately equate it with an existing class, while avoiding redundant work.
+   *
+   * @param symbol E-class symbol to unify with the tree’s root.
+   * @param tree   Expression to insert/reuse and equate.
+   * @param egraph E-graph used as context for simplification.
+   * @tparam NodeT Node type for the expression.
+   * @return A compound command performing the insert and the union, simplified with respect to `egraph`.
+   *
+   * @example
+   * {{{
+   * import foresight.eqsat.commands.Command
+   *
+   * val cmd: Command[MyNode] =
+   *   Command.equivalenceSimplified(existingSym, myTree, egraph)
+   *
+   * val (optGraph, out) =
+   *   cmd.apply(egraph, Map.empty, parallel)
+   * }}}
+   */
+  def equivalenceSimplified[NodeT](
+                                    symbol: EClassSymbol,
+                                    tree: MixedTree[NodeT, EClassSymbol],
+                                    egraph: EGraph[NodeT]
+                                  ): Command[NodeT] = {
+    val builder = new CommandQueueBuilder[NodeT]
+    val c = builder.addSimplified(tree, egraph)
+    builder.unionSimplified(symbol, c, egraph)
     builder.result()
   }
 }
