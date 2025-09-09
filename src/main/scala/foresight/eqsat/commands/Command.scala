@@ -130,6 +130,6 @@ object Command {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.add(tree)
     builder.union(symbol, c)
-    builder.queue
+    builder.result()
   }
 }

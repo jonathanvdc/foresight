@@ -26,15 +26,30 @@ import foresight.eqsat.MixedTree
  * }}}
  */
 final class CommandQueueBuilder[NodeT] {
-  private var queueUnderConstruction: CommandQueue[NodeT] = CommandQueue.empty
+  private val commands = Seq.newBuilder[Command[NodeT]]
 
   /**
    * The [[CommandQueue]] accumulated so far.
-   *
-   * This value is updated after each call to [[add(ENodeSymbol) add(node)]],
-   * [[add(MixedTree) add(tree)]], or [[union]].
    */
-  def queue: CommandQueue[NodeT] = queueUnderConstruction
+  def result(): CommandQueue[NodeT] = CommandQueue(commands.result())
+
+  /**
+   * Appends a [[Command]] to the queue.
+   *
+   * @param cmd Command to append.
+   */
+  def append(cmd: Command[NodeT]): Unit = {
+    commands += cmd
+  }
+
+  /**
+   * Appends multiple [[Command]]s to the queue.
+   *
+   * @param cmds Commands to append.
+   */
+  def appendAll(cmds: Iterable[Command[NodeT]]): Unit = {
+    commands ++= cmds
+  }
 
   /**
    * Appends an insertion of an [[ENodeSymbol]].
@@ -45,9 +60,9 @@ final class CommandQueueBuilder[NodeT] {
    * @return The fresh [[EClassSymbol.Virtual]] assigned to the inserted node’s e-class.
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
-    val (symbol, newQueue) = queueUnderConstruction.add(node)
-    queueUnderConstruction = newQueue
-    symbol
+    val result = EClassSymbol.virtual()
+    commands += AddManyCommand(Seq(result -> node))
+    result
   }
 
   /**
@@ -61,9 +76,15 @@ final class CommandQueueBuilder[NodeT] {
    * @return The [[EClassSymbol]] for the tree’s root e-class.
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): EClassSymbol = {
-    val (symbol, newQueue) = queueUnderConstruction.add(tree)
-    queueUnderConstruction = newQueue
-    symbol
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val result = EClassSymbol.virtual()
+        commands += AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add))))
+        result
+
+      case MixedTree.Atom(call) =>
+        call
+    }
   }
 
   /**
@@ -73,6 +94,6 @@ final class CommandQueueBuilder[NodeT] {
    * @param b Second class symbol.
    */
   def union(a: EClassSymbol, b: EClassSymbol): Unit = {
-    queueUnderConstruction = queueUnderConstruction.union(a, b)
+    commands += UnionManyCommand(Seq((a, b)))
   }
 }
