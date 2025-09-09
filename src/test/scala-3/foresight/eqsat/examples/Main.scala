@@ -7,8 +7,6 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.eqsat.{EClassCall, EGraph}
 
-import scala.collection.mutable.ArrayBuffer
-
 object Main {
 
   final case class DimAndCost(nrows: Int, ncols: Int, cost: Int)
