@@ -25,7 +25,11 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    */
   def bindNode(node: ENode[NodeT], definitions: Seq[Slot], uses: Seq[Slot]): MachineState[NodeT] = {
     val newRegisters = registers ++ node.args
-    val newBoundSlots = boundSlots ++ (definitions zip node.definitions) ++ (uses zip node.uses)
+    val newBoundSlots = if (definitions.isEmpty && uses.isEmpty) {
+      boundSlots
+    } else {
+      boundSlots ++ (definitions zip node.definitions) ++ (uses zip node.uses)
+    }
     MachineState(newRegisters, boundVars, newBoundSlots, boundNodes :+ node)
   }
 
