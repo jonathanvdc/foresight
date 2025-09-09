@@ -193,23 +193,23 @@ class PolyTest {
     val extracted = egraph2.extract(root, costFunction)
   }
 
-  @Test
-  def benchPoly5(): Unit = {
-    val time = 60_000_000_000L
-    val start = System.nanoTime()
-    var times: List[Long] = List()
-    var iterations = 0
-    while (System.nanoTime() - start < time) {
-      val testStart = System.nanoTime()
-      testPoly5Bench()
-      val testEnd = System.nanoTime()
-      val duration = testEnd - testStart
-//      println(s"Iteration $iterations took $duration ms")
-      times = duration :: times
-      iterations += 1
-    }
-    println(s"Completed $iterations iterations in 60 seconds")
-    val avgTime = if (times.nonEmpty) times.sum / times.length else 0
-    println(s"Average time per iteration: ${avgTime/1e6} ms")
-  }
+//  @Test
+//  def benchPoly5(): Unit = {
+//    val time = 60_000_000_000L
+//    val start = System.nanoTime()
+//    var times: List[Long] = List()
+//    var iterations = 0
+//    while (System.nanoTime() - start < time) {
+//      val testStart = System.nanoTime()
+//      testPoly5Bench()
+//      val testEnd = System.nanoTime()
+//      val duration = testEnd - testStart
+////      println(s"Iteration $iterations took $duration ms")
+//      times = duration :: times
+//      iterations += 1
+//    }
+//    println(s"Completed $iterations iterations in 60 seconds")
+//    val avgTime = if (times.nonEmpty) times.sum / times.length else 0
+//    println(s"Average time per iteration: ${avgTime/1e6} ms")
+//  }
 }
