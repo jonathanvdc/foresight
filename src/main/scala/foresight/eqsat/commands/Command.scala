@@ -123,10 +123,10 @@ object Command {
    *   cmd.simplify(egraph).apply(egraph, Map.empty, parallel)
    * }}}
    */
-  def addEquivalentTree[NodeT](
-                                symbol: EClassSymbol,
-                                tree: MixedTree[NodeT, EClassSymbol]
-                              ): Command[NodeT] = {
+  def equivalence[NodeT](
+                          symbol: EClassSymbol,
+                          tree: MixedTree[NodeT, EClassSymbol]
+                        ): Command[NodeT] = {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.add(tree)
     builder.union(symbol, c)
