@@ -14,12 +14,8 @@ object Dependencies {
 
     def libraryDependencies(scalaVersion: String): Seq[ModuleID] = {
         val scalaXmlVersion = if (isScala211(scalaVersion)) "1.0.4" else "2.1.0"
-        val scalaCheckVersion = if (isScala211(scalaVersion)) "1.14.3" else "1.17.0"
 
         val baseDeps = Seq(
-            "junit" % "junit" % "4.11",
-            "com.novocode" % "junit-interface" % "0.11" % Test,
-            "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test,
             "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
         )
 
@@ -37,5 +33,15 @@ object Dependencies {
             else Nil
 
         baseDeps ++ reflectDeps ++ parallelCollections
+    }
+
+    def testDependencies(scalaVersion: String): Seq[ModuleID] = {
+        val scalaCheckVersion = if (isScala211(scalaVersion)) "1.14.3" else "1.17.0"
+
+        Seq(
+            "junit" % "junit" % "4.11",
+            "com.novocode" % "junit-interface" % "0.11" % Test,
+            "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+        )
     }
 }
