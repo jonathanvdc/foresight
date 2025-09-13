@@ -126,13 +126,13 @@ lazy val examples = (project in file("examples"))
     fork := true
   )
 
-lazy val bench = (project in file("benchmarks"))
+lazy val benchmarks = (project in file("benchmarks"))
   .enablePlugins(JmhPlugin)
   .dependsOn(foresight, examples)
   .settings(
     name := "foresight-benchmarks",
     publish / skip := true,
-    Test / skip := true,
+//    Test / skip := true,
     Jmh / fork := true,
     Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G"),
 
