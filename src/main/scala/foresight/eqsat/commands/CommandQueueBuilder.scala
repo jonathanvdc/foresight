@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.MixedTree
+import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
@@ -26,15 +26,30 @@ import foresight.eqsat.MixedTree
  * }}}
  */
 final class CommandQueueBuilder[NodeT] {
-  private var queueUnderConstruction: CommandQueue[NodeT] = CommandQueue.empty
+  private val commands = Seq.newBuilder[Command[NodeT]]
 
   /**
    * The [[CommandQueue]] accumulated so far.
-   *
-   * This value is updated after each call to [[add(ENodeSymbol) add(node)]],
-   * [[add(MixedTree) add(tree)]], or [[union]].
    */
-  def queue: CommandQueue[NodeT] = queueUnderConstruction
+  def result(): CommandQueue[NodeT] = CommandQueue(commands.result())
+
+  /**
+   * Appends a [[Command]] to the queue.
+   *
+   * @param cmd Command to append.
+   */
+  def append(cmd: Command[NodeT]): Unit = {
+    commands += cmd
+  }
+
+  /**
+   * Appends multiple [[Command]]s to the queue.
+   *
+   * @param cmds Commands to append.
+   */
+  def appendAll(cmds: Iterable[Command[NodeT]]): Unit = {
+    commands ++= cmds
+  }
 
   /**
    * Appends an insertion of an [[ENodeSymbol]].
@@ -45,9 +60,9 @@ final class CommandQueueBuilder[NodeT] {
    * @return The fresh [[EClassSymbol.Virtual]] assigned to the inserted node’s e-class.
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
-    val (symbol, newQueue) = queueUnderConstruction.add(node)
-    queueUnderConstruction = newQueue
-    symbol
+    val result = EClassSymbol.virtual()
+    commands += AddManyCommand(Seq(result -> node))
+    result
   }
 
   /**
@@ -61,9 +76,74 @@ final class CommandQueueBuilder[NodeT] {
    * @return The [[EClassSymbol]] for the tree’s root e-class.
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): EClassSymbol = {
-    val (symbol, newQueue) = queueUnderConstruction.add(tree)
-    queueUnderConstruction = newQueue
-    symbol
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val result = EClassSymbol.virtual()
+        commands += AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add))))
+        result
+
+      case MixedTree.Atom(call) =>
+        call
+    }
+  }
+
+  /**
+   * Appends an insertion of a [[MixedTree]], using the provided e-graph
+   * to simplify the insertion.
+   *
+   * Child subtrees are inserted first, then a final node referencing their
+   * symbols is added. If the tree is a [[MixedTree.Atom]], no new command
+   * is added and the existing [[EClassSymbol.Real]] is returned.
+   *
+   * @param tree Tree to insert.
+   * @return The [[EClassSymbol]] for the tree’s root e-class.
+   */
+  def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: EGraph[NodeT]): EClassSymbol = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val argSymbols = args.map(addSimplified(_, egraph))
+        addSimplifiedNode(t, defs, uses, argSymbols, egraph)
+
+      case MixedTree.Atom(call) => call
+    }
+  }
+
+  private[eqsat] def addSimplifiedNode(nodeType: NodeT,
+                                       definitions: Seq[Slot],
+                                       uses: Seq[Slot],
+                                       args: Seq[EClassSymbol],
+                                       egraph: EGraph[NodeT]): EClassSymbol = {
+
+    // Check if all children are already in the graph
+    val argCalls = CommandQueueBuilder.resolveAllOrNull(args)
+
+    // If the children are already present, we might not need to add a new node
+    if (argCalls != null) {
+      val candidateNode = ENode(nodeType, definitions, uses, argCalls)
+      egraph.find(candidateNode) match {
+        case Some(existingCall) =>
+          // Node already exists in the graph; reuse its class
+          return EClassSymbol.real(existingCall)
+
+        case None =>
+          // Node does not exist; we will add it below
+      }
+    }
+
+    val result = EClassSymbol.virtual()
+    val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, args)
+    commands += AddManyCommand(Seq(result -> candidateNode))
+    result
+  }
+
+  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: EGraph[NodeT]): EClassSymbol = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val argSymbols = args.map(addSimplifiedReal(_, egraph))
+        addSimplifiedNode(t, defs, uses, argSymbols, egraph)
+
+      case MixedTree.Atom(call) => EClassSymbol.real(call)
+    }
   }
 
   /**
@@ -73,6 +153,44 @@ final class CommandQueueBuilder[NodeT] {
    * @param b Second class symbol.
    */
   def union(a: EClassSymbol, b: EClassSymbol): Unit = {
-    queueUnderConstruction = queueUnderConstruction.union(a, b)
+    commands += UnionManyCommand(Seq((a, b)))
+  }
+
+  /**
+   * Appends a [[UnionManyCommand]] request to merge two e-classes,
+   * but only if they are not already known to be equivalent in the
+   * provided e-graph.
+   *
+   * If both `a` and `b` are [[EClassSymbol.Real]], their canonical
+   * representatives in the e-graph are compared; if they differ, a
+   * union command is added. If either is virtual, a union command is
+   * always added.
+   *
+   * @param a First class symbol.
+   * @param b Second class symbol.
+   * @param egraph E-graph used to check existing equivalences.
+   */
+  def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: EGraph[NodeT]): Unit = {
+    (a, b) match {
+      case (EClassSymbol.Real(callA), EClassSymbol.Real(callB)) =>
+        if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {
+          commands += UnionManyCommand(Seq((a, b)))
+        }
+      case _ =>
+        commands += UnionManyCommand(Seq((a, b)))
+    }
+  }
+}
+
+private object CommandQueueBuilder {
+  def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+    if (args.forall(_.isReal)) {
+      args.map {
+        case EClassSymbol.Real(call) => call
+        case _ => throw new IllegalStateException("Unreachable")
+      }
+    } else {
+      null
+    }
   }
 }

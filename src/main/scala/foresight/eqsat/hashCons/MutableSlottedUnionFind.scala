@@ -10,6 +10,10 @@ private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
   def update(key: EClassRef, value: EClassCall): Unit = {
     set = set.update(key, value)
   }
+  
+  def isCanonical(ref: EClassRef): Boolean = {
+    set.isCanonical(ref)
+  }
 
   def tryFindAndCompress(key: EClassRef): Option[EClassCall] = {
     foldUpdateIntoSet(set.tryFindAndCompress(key))

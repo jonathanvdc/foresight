@@ -2,7 +2,6 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.{EGraph, EGraphLike}
 import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.saturation.EGraphWithRoot
 
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
@@ -59,6 +58,24 @@ object Applier {
 
       override def tryReverse: Option[Searcher[NodeT, Seq[MatchT], EGraphT]] = Some(Searcher.empty)
     }
+
+  /**
+   * An applier that simplifies the commands produced by another applier.
+   * @param applier  Inner applier whose commands will be simplified.
+   * @tparam NodeT   Node payload type stored in the e-graph.
+   * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
+   * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
+   */
+  final case class Simplify[
+    NodeT,
+    MatchT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+  ](applier: Applier[NodeT, MatchT, EGraphT]) extends Applier[NodeT, MatchT, EGraphT] {
+    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = {
+      val command = applier.apply(m, egraph)
+      command.simplify(egraph)
+    }
+  }
 
   /**
    * Conditionally apply: run `applier` only when `filter(match, egraph)` is true; otherwise emit no-op.
@@ -154,6 +171,13 @@ object Applier {
     NodeT, MatchT,
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
   ](private val applier: Applier[NodeT, MatchT, EGraphT]) extends AnyVal {
+
+    /**
+     * Simplify the commands produced by this applier before returning them.
+     *
+     * @return An applier that simplifies its commands.
+     */
+    def simplify: Applier[NodeT, MatchT, EGraphT] = Simplify(applier)
 
     /**
      * Conditionally apply this applier; otherwise emit an empty command.

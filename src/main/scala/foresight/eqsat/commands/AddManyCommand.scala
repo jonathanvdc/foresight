@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{AddNodeResult, EClassCall, EGraph, EGraphLike}
+import foresight.eqsat.{AddNodeResult, EClassCall, EGraph, EGraphLike, ENode}
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
@@ -93,32 +93,50 @@ final case class AddManyCommand[NodeT](
                          egraph: EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val refinedNodes = nodes.map {
-      case (result, node) =>
-        val newArgs = node.args.map(_.refine(partialReification))
-        val refined = node.copy(args = newArgs)
-        if (newArgs.forall(_.isReal)) {
-          val reifiedNode = refined.reify(partialReification)
-          egraph.find(reifiedNode) match {
-            case Some(call) => (refined, result, Some(call))
-            case None => (refined, result, None)
-          }
-        } else {
-          (refined, result, None)
+
+    val resolvedBuilder = Map.newBuilder[EClassSymbol.Virtual, EClassCall]
+    val unresolvedBuilder = Seq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+
+    def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+      val resolvedArgs = Seq.newBuilder[EClassCall]
+      for (arg <- args) {
+        arg match {
+          case EClassSymbol.Real(call) =>
+            resolvedArgs += call
+          case v: EClassSymbol.Virtual if partialReification.contains(v) =>
+            resolvedArgs += partialReification(v)
+          case _ =>
+            // Argument is virtual and not in the partial reification.
+            // Cannot fully resolve this node.
+            return null
         }
+      }
+      resolvedArgs.result()
     }
 
-    val resolved = refinedNodes.collect {
-      case (_, result, Some(call)) => result -> call
+    for ((result, node) <- nodes) {
+      val resolvedArgs = resolveAllOrNull(node.args)
+      if (resolvedArgs != null) {
+        val reifiedNode = ENode(node.nodeType, node.definitions, node.uses, resolvedArgs)
+        egraph.find(reifiedNode) match {
+          case Some(call) =>
+            resolvedBuilder += (result -> call)
+          case None =>
+            val refined = node.copy(args = resolvedArgs.map(EClassSymbol.Real(_)))
+            unresolvedBuilder += (result -> refined)
+        }
+      } else {
+        val refined = node.copy(args = node.args.map(_.refine(partialReification)))
+        unresolvedBuilder += (result -> refined)
+      }
     }
 
-    val unresolved = refinedNodes.collect {
-      case (node, result, None) => result -> node
-    }
+    val resolved = resolvedBuilder.result()
+    val unresolved = unresolvedBuilder.result()
 
     (
       if (unresolved.isEmpty) CommandQueue.empty else AddManyCommand(unresolved),
-      resolved.toMap
+      resolved
     )
   }
 }

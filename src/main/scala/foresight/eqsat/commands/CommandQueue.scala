@@ -99,18 +99,10 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }}}
    */
   def add(tree: MixedTree[NodeT, EClassSymbol]): (EClassSymbol, CommandQueue[NodeT]) = {
-    tree match {
-      case MixedTree.Node(t, defs, uses, args) =>
-        val (addedArgs, newQueue) = args.foldLeft((Seq.empty[EClassSymbol], this)) {
-          case ((added, queue), arg: MixedTree[NodeT, EClassSymbol]) =>
-            val (result, newQueue) = queue.add(arg)
-            (added :+ result, newQueue)
-        }
-        newQueue.add(ENodeSymbol(t, defs, uses, addedArgs))
-
-      case MixedTree.Atom(call) =>
-        (call, this)
-    }
+    val builder = new CommandQueueBuilder[NodeT]()
+    builder.appendAll(commands)
+    val result = builder.add(tree)
+    (result, builder.result())
   }
 
   /**
@@ -195,14 +187,14 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
                          egraph: EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val (newQueue, newReification) =
-      flatCommands.foldLeft((CommandQueue.empty[NodeT], partialReification)) {
-        case ((newQueue, reification), command) =>
-          val (simplified, newReificationPart) = command.simplify(egraph, reification)
-          (newQueue.chain(simplified), reification ++ newReificationPart)
-      }
-
-    (newQueue.optimized, newReification)
+    val newQueue = Seq.newBuilder[Command[NodeT]]
+    var newReification = partialReification
+    for (command <- flatCommands) {
+      val (simplified, newReificationPart) = command.simplify(egraph, newReification)
+      newQueue += simplified
+      newReification ++= newReificationPart
+    }
+    (CommandQueue(newQueue.result()), newReification)
   }
 }
 

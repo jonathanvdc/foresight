@@ -15,7 +15,10 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
-    Command.addEquivalentTree(EClassSymbol.real(m.root), instantiate(m))
+    val builder = new CommandQueueBuilder[NodeT]()
+    val symbol = instantiateAsSimplifiedAddCommand(pattern, m, egraph, builder)
+    builder.unionSimplified(EClassSymbol.real(m.root), symbol, egraph)
+    builder.result()
   }
 
   override def tryReverse: Option[Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]] = {
@@ -44,6 +47,10 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
         case v: Pattern.Var => m(v).mapAtoms(EClassSymbol.real)
       }
 
+      case MixedTree.Node(t, Seq(), uses, args) =>
+        // No definitions, so we can reuse the PatternMatch and its original slot mapping
+        MixedTree.Node[NodeT, EClassSymbol](t, Seq(), uses.map(m(_)), args.map(instantiate(_, m)))
+
       case MixedTree.Node(t, defs, uses, args) =>
         val defSlots = defs.map { s =>
           m.slotMapping.get(s) match {
@@ -53,6 +60,32 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
         }
         val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
         MixedTree.Node[NodeT, EClassSymbol](t, defSlots, uses.map(newMatch(_)), args.map(instantiate(_, newMatch)))
+    }
+  }
+
+  private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
+                                                m: PatternMatch[NodeT],
+                                                egraph: EGraphT,
+                                                builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
+
+    pattern match {
+      case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
+      case MixedTree.Node(t, Seq(), uses, args) =>
+        // No definitions, so we can reuse the PatternMatch and its original slot mapping
+        val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, m, egraph, builder))
+        val useSymbols = uses.map(m(_))
+        builder.addSimplifiedNode(t, Seq(), useSymbols, argSymbols, egraph)
+
+      case MixedTree.Node(t, defs, uses, args) =>
+        val defSlots = defs.map { s =>
+          m.slotMapping.get(s) match {
+            case Some(v) => v
+            case None => Slot.fresh()
+          }
+        }
+        val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
+        val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, newMatch, egraph, builder))
+        builder.addSimplifiedNode(t, defSlots, uses.map(newMatch(_)), argSymbols, egraph)
     }
   }
 }

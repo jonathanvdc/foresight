@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, Slot}
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode, MixedTree, Slot}
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -15,7 +15,7 @@ trait Instruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT
    * @param machine The machine state to execute the instruction on.
    * @return Either a nonempty set of new machine states or a machine error.
    */
-  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]]
+  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]]
 }
 
 /**
@@ -44,16 +44,26 @@ object Instruction {
       machine.boundSlots.get(expected).forall(_ == actual)
     }
 
-    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Set[ENode[NodeT]] = {
-      graph.nodes(call).filter { node =>
-        node.nodeType == nodeType && node.definitions.size == definitions.size &&
-          node.uses.size == uses.size && node.args.size == argCount &&
-          definitions.zip(node.definitions).forall(matchesSlot(machine, _)) &&
-          uses.zip(node.uses).forall(matchesSlot(machine, _))
+    private def allSlotsMatch(machine: MachineState[NodeT], expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
+      if (expected.length != actual.length) return false
+      var i = 0
+      while (i < expected.length) {
+        if (!matchesSlot(machine, (expected(i), actual(i)))) return false
+        i += 1
+      }
+      true
+    }
+
+    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Seq[ENode[NodeT]] = {
+      graph.nodes(call).toSeq.filter { node =>
+        node.nodeType == nodeType &&
+          node.args.size == argCount &&
+          allSlotsMatch(machine, definitions, node.definitions) &&
+          allSlotsMatch(machine, uses, node.uses)
       }
     }
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       val call = machine.registers(register)
       findInEClass(graph, call, machine) match {
         case nodes if nodes.isEmpty => Right(MachineError.NoMatchingNode(this, call))
@@ -73,8 +83,8 @@ object Instruction {
                                                                                             variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
-      Left(Set(machine.bindVar(variable, machine.registers(register))))
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
+      Left(Seq(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
     }
   }
 
@@ -87,9 +97,9 @@ object Instruction {
    */
   final case class Compare[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Set[MachineState[NodeT]], MachineError[NodeT]] = {
+    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
-        Left(Set(machine))
+        Left(Seq(machine))
       } else {
         Right(MachineError.InconsistentVars(this, machine.registers(register1), machine.registers(register2)))
       }

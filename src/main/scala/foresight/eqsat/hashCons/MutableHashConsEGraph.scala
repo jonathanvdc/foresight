@@ -26,11 +26,37 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     canonicalize(app.ref).rename(app.args)
   }
 
+  def isCanonical(ref: EClassRef): Boolean = {
+    unionFind.isCanonical(ref)
+  }
+
+  def isCanonical(call: EClassCall): Boolean = {
+    isCanonical(call.ref)
+  }
+
+  private def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
+    if (MutableHashConsEGraph.debug && node.hasSlots) {
+      throw new IllegalArgumentException("Node has slots.")
+    }
+
+    if (node.args.forall(isCanonical)) {
+      node
+    } else {
+      val canonicalArgs = node.args.map(canonicalize)
+      node.copy(args = canonicalArgs)
+    }
+  }
+
   def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import foresight.util.ordering.SeqOrdering
+    
+    if (node.args.forall(isCanonical) && !node.hasSlots) {
+      return ShapeCall(node, SlotMap.empty)
+    }
 
-    val canonicalizedArgs = node.copy(args = node.args.map(canonicalize))
-    groupCompatibleVariants(canonicalizedArgs).toSeq
+    val canonicalArgs = node.args.map(canonicalize)
+    val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
+    groupCompatibleVariants(nodeWithCanonicalizedArgs).toSeq
       .map(_.asShapeCall)
       .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
@@ -46,24 +72,48 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   def find(node: ENode[NodeT]): Option[EClassCall] = {
-    findUnsafe(canonicalize(node))
+    if (node.hasSlots) {
+      Option(findUnsafe(canonicalize(node)))
+    } else {
+      Option(findUnsafeWithoutSlots(canonicalizeWithoutSlots(node)))
+    }
   }
 
   /**
    * Finds the e-class of a given e-node. The e-node must be canonical.
    * @param renamedShape The canonicalized e-node to find the e-class of.
-   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, None.
+   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, null.
    */
-  private def findUnsafe(renamedShape: ShapeCall[NodeT]): Option[EClassCall] = {
+  private def findUnsafe(renamedShape: ShapeCall[NodeT]): EClassCall = {
     if (MutableHashConsEGraph.debug) {
       assert(renamedShape.shape.isShape)
     }
 
-    hashCons.get(renamedShape.shape).map { ref =>
-      val data = classData(ref)
-      val classToNode = data.nodes(renamedShape.shape)
-      val out = classToNode.inverse.compose(renamedShape.renaming)
-      EClassCall(ref, out)
+    val ref = hashCons.getOrElse(renamedShape.shape, null)
+    if (ref == null) {
+      return null
+    }
+
+    if (!renamedShape.shape.hasSlots) {
+      return EClassCall(ref, SlotMap.empty)
+    }
+
+    val data = classData(ref)
+    val classToNode = data.nodes(renamedShape.shape)
+    val out = classToNode.inverse.compose(renamedShape.renaming)
+    EClassCall(ref, out)
+  }
+
+  private def findUnsafeWithoutSlots(node: ENode[NodeT]): EClassCall = {
+    if (MutableHashConsEGraph.debug) {
+      assert(!node.hasSlots)
+    }
+
+    val result = hashCons.getOrElse(node, null)
+    if (result == null) {
+      null
+    } else {
+      EClassCall(result, SlotMap.empty)
     }
   }
 
@@ -155,11 +205,12 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @return The e-class reference of the e-node in the e-graph.
    */
   def tryAddUnsafe(canonicalNode: ShapeCall[NodeT]): AddNodeResult = {
-    findUnsafe(canonicalNode) match {
-      case Some(ref) => AddNodeResult.AlreadyThere(ref)
-      case None =>
-        val ref = addNewUnsafe(canonicalNode)
-        AddNodeResult.Added(ref)
+    val resultOrNull = findUnsafe(canonicalNode)
+    if (resultOrNull == null) {
+      val ref = addNewUnsafe(canonicalNode)
+      AddNodeResult.Added(ref)
+    } else {
+      AddNodeResult.AlreadyThere(resultOrNull)
     }
   }
 

@@ -148,8 +148,8 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
     try {
       val commands = parallelize.child(s"apply $name")[MatchT, Command[NodeT]](
-        matches, applier.apply(_, egraph).simplify(egraph)).toSeq
-      CommandQueue(commands).optimized
+        matches, applier.apply(_, egraph)).toSeq
+      CommandQueue(commands)
     } catch {
       case e: OperationCanceledException => throw e
       case e: Exception =>

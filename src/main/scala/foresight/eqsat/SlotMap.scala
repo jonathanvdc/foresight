@@ -209,7 +209,7 @@ object SlotMap {
   /**
    * The empty mapping.
    */
-  def empty: SlotMap = SlotMap(Map.empty)
+  val empty: SlotMap = SlotMap(Map.empty)
 
   /**
    * Builds a map from `(key, value)` pairs. Later pairs overwrite earlier ones with the same key.

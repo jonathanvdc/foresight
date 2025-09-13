@@ -21,9 +21,8 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wi
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
     val state = MachineState[NodeT](call)
     Machine.run(egraph, state, instructions).map { state =>
-      val newVars = state.boundVars.mapValuesStrict(MixedTree.Atom[NodeT, EClassCall])
-      PatternMatch(call, newVars, state.boundSlots)
-    }.toSeq
+      PatternMatch(call, state.boundVars, state.boundSlots)
+    }.distinct
   }
 
   /**

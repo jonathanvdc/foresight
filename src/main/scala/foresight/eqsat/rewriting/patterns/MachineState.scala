@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, Slot}
+import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 
 /**
  * The state of a pattern machine.
@@ -12,7 +12,7 @@ import foresight.eqsat.{EClassCall, ENode, Slot}
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class MachineState[NodeT](registers: Seq[EClassCall],
-                                     boundVars: Map[Pattern.Var, EClassCall],
+                                     boundVars: Map[Pattern.Var, MixedTree[NodeT, EClassCall]],
                                      boundSlots: Map[Slot, Slot],
                                      boundNodes: Seq[ENode[NodeT]]) {
 
@@ -25,7 +25,11 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    */
   def bindNode(node: ENode[NodeT], definitions: Seq[Slot], uses: Seq[Slot]): MachineState[NodeT] = {
     val newRegisters = registers ++ node.args
-    val newBoundSlots = boundSlots ++ (definitions zip node.definitions) ++ (uses zip node.uses)
+    val newBoundSlots = if (definitions.isEmpty && uses.isEmpty) {
+      boundSlots
+    } else {
+      boundSlots ++ (definitions zip node.definitions) ++ (uses zip node.uses)
+    }
     MachineState(newRegisters, boundVars, newBoundSlots, boundNodes :+ node)
   }
 
@@ -35,8 +39,8 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
    * @param value The value to bind the variable to.
    * @return The new machine state.
    */
-  def bindVar(variable: Pattern.Var, value: EClassCall): MachineState[NodeT] = {
-    val newBoundVars = boundVars + (variable -> value)
+  def bindVar(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): MachineState[NodeT] = {
+    val newBoundVars = boundVars.updated(variable, value)
     MachineState(registers, newBoundVars, boundSlots, boundNodes)
   }
 }
