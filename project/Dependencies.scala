@@ -40,8 +40,8 @@ object Dependencies {
 
         Seq(
             "junit" % "junit" % "4.11",
-            "com.novocode" % "junit-interface" % "0.11" % Test,
-            "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+            "com.novocode" % "junit-interface" % "0.11",
+            "org.scalacheck" %% "scalacheck" % scalaCheckVersion
         )
     }
 }

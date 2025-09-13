@@ -90,7 +90,7 @@ lazy val foresight = (project in file("."))
     libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
 
     // Testing
-    Test / libraryDependencies ++= Dependencies.testDependencies(scalaVersion.value),
+    libraryDependencies ++= Dependencies.testDependencies(scalaVersion.value).map(_ % Test),
     Test / logBuffered := false,
     Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "5"),
