@@ -13,7 +13,7 @@
 <div class="cover">
  <div class="doc">
   <p>Incrementally constructs a <a href="CommandQueue.html">CommandQueue</a> for later execution.</p>
-  <p>This builder is a mutable convenience wrapper around <a href="CommandQueue.html">CommandQueue</a>’s immutable API. It allows code to append commands without repeatedly reassigning the queue, and to retrieve the finished queue via <a href="CommandQueueBuilder.html#queue-0">queue</a>.</p>
+  <p>This builder is a mutable convenience wrapper around <a href="CommandQueue.html">CommandQueue</a>’s immutable API. It allows code to append commands without repeatedly reassigning the queue, and to retrieve the finished queue via <span data-unresolved-link="" title="Problem linking queue: No DRI found for query">queue</span>.</p>
   <p>Typical usage is to:</p>
   <ol>
    <li>Create a <code>CommandQueueBuilder</code></li>
@@ -202,12 +202,131 @@ node3 -> node2;
           </div>
          </div>
         </div>
-        <div class="documentableElement" id="queue-0">
+        <div class="documentableElement" id="addSimplified-cce">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#queue-0" t="n" class="documentableName ">queue</a>: <a href="CommandQueue.html" t="t">CommandQueue</a>[<span t="t">NodeT</span>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#addSimplified-cce" t="n" class="documentableName ">addSimplified</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">tree</span>: <a href="../MixedTree.html" t="t">MixedTree</a>[<span t="t">NodeT</span>, <a href="EClassSymbol.html" t="t">EClassSymbol</a>], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]): <a href="EClassSymbol.html" t="t">EClassSymbol</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Appends an insertion of a <a href="../MixedTree.html">MixedTree</a>, using the provided e-graph to simplify the insertion.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Appends an insertion of a <a href="../MixedTree.html">MixedTree</a>, using the provided e-graph to simplify the insertion.</p>
+              <p>Child subtrees are inserted first, then a final node referencing their symbols is added. If the tree is a <a href="../MixedTree$$Atom.html">MixedTree.Atom</a>, no new command is added and the existing <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a> is returned.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               tree
+              </dt>
+              <dd class="body-medium">
+               <p>Tree to insert.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>The <a href="EClassSymbol.html">EClassSymbol</a> for the tree’s root e-class.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="append-572">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#append-572" t="n" class="documentableName ">append</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">cmd</span>: <a href="Command.html" t="t">Command</a>[<span t="t">NodeT</span>]): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Appends a <a href="Command.html">Command</a> to the queue.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Appends a <a href="Command.html">Command</a> to the queue.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               cmd
+              </dt>
+              <dd class="body-medium">
+               <p>Command to append.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="appendAll-fffff606">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#appendAll-fffff606" t="n" class="documentableName ">appendAll</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">cmds</span>: <span data-unresolved-link="" t="t">Iterable</span>[<a href="Command.html" t="t">Command</a>[<span t="t">NodeT</span>]]): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Appends multiple <a href="Command.html">Command</a>s to the queue.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Appends multiple <a href="Command.html">Command</a>s to the queue.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               cmds
+              </dt>
+              <dd class="body-medium">
+               <p>Commands to append.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="result-d0b">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#result-d0b" t="n" class="documentableName ">result</a>(<span t="k"></span>): <a href="CommandQueue.html" t="t">CommandQueue</a>[<span t="t">NodeT</span>]
            </div>
           </div>
          </div>
@@ -222,7 +341,6 @@ node3 -> node2;
             <div class="cover">
              <div class="doc">
               <p>The <a href="CommandQueue.html">CommandQueue</a> accumulated so far.</p>
-              <p>This value is updated after each call to <a href="CommandQueueBuilder.html#add-fffffbb8">add(node)</a>, <a href="CommandQueueBuilder.html#add-fffffbb8">add(tree)</a>, or <a href="CommandQueueBuilder.html#union-34c">union</a>.</p>
              </div>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small"></dl>
@@ -265,6 +383,56 @@ node3 -> node2;
               </dt>
               <dd class="body-medium">
                <p>Second class symbol.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="unionSimplified-9f6">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CommandQueueBuilder.html#unionSimplified-9f6" t="n" class="documentableName ">unionSimplified</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">a</span>: <a href="EClassSymbol.html" t="t">EClassSymbol</a>, <span t="k"></span><span data-unresolved-link="" t="n">b</span>: <a href="EClassSymbol.html" t="t">EClassSymbol</a>, <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Appends a <a href="UnionManyCommand.html">UnionManyCommand</a> request to merge two e-classes, but only if they are not already known to be equivalent in the provided e-graph.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Appends a <a href="UnionManyCommand.html">UnionManyCommand</a> request to merge two e-classes, but only if they are not already known to be equivalent in the provided e-graph.</p>
+              <p>If both <code>a</code> and <code>b</code> are <a href="EClassSymbol$$Real.html">EClassSymbol.Real</a>, their canonical representatives in the e-graph are compared; if they differ, a union command is added. If either is virtual, a union command is always added.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               a
+              </dt>
+              <dd class="body-medium">
+               <p>First class symbol.</p>
+              </dd>
+              <dt class="body-small">
+               b
+              </dt>
+              <dd class="body-medium">
+               <p>Second class symbol.</p>
+              </dd>
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>E-graph used to check existing equivalences.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>

@@ -98,12 +98,12 @@ node3 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="addEquivalentTree-d5f">
+        <div class="documentableElement" id="equivalence-d5f">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Command$.html#addEquivalentTree-d5f" t="n" class="documentableName ">addEquivalentTree</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">symbol</span>: <a href="EClassSymbol.html" t="t">EClassSymbol</a>, <span t="k"></span><span data-unresolved-link="" t="n">tree</span>: <a href="../MixedTree.html" t="t">MixedTree</a>[<span t="t">NodeT</span>, <a href="EClassSymbol.html" t="t">EClassSymbol</a>]): <a href="Command.html" t="t">Command</a>[<span data-unresolved-link="" t="t">NodeT</span>]
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Command$.html#equivalence-d5f" t="n" class="documentableName ">equivalence</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">symbol</span>: <a href="EClassSymbol.html" t="t">EClassSymbol</a>, <span t="k"></span><span data-unresolved-link="" t="n">tree</span>: <a href="../MixedTree.html" t="t">MixedTree</a>[<span t="t">NodeT</span>, <a href="EClassSymbol.html" t="t">EClassSymbol</a>]): <a href="Command.html" t="t">Command</a>[<span data-unresolved-link="" t="t">NodeT</span>]
            </div>
           </div>
          </div>
@@ -166,9 +166,99 @@ node3 -> node2;
                  <div class="snippet mono-small-block">
                   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.Command
 </span><span line-number="2" class=""><span class="tooltip-container"></span>val cmd: Command[MyNode] =
-</span><span line-number="3" class=""><span class="tooltip-container"></span> Command.addEquivalentTree(existingSym, myTree)
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Command.equivalence(existingSym, myTree)
 </span><span line-number="4" class=""><span class="tooltip-container"></span>val (optGraph, out) =
 </span><span line-number="5" class=""><span class="tooltip-container"></span> cmd.simplify(egraph).apply(egraph, Map.empty, parallel)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="equivalenceSimplified-7c9">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="Command$.html#equivalenceSimplified-7c9" t="n" class="documentableName ">equivalenceSimplified</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">symbol</span>: <a href="EClassSymbol.html" t="t">EClassSymbol</a>, <span t="k"></span><span data-unresolved-link="" t="n">tree</span>: <a href="../MixedTree.html" t="t">MixedTree</a>[<span t="t">NodeT</span>, <a href="EClassSymbol.html" t="t">EClassSymbol</a>], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <a href="../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]): <a href="Command.html" t="t">Command</a>[<span data-unresolved-link="" t="t">NodeT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Creates a <a href="Command.html">Command</a> that asserts an existing <a href="EClassSymbol.html">EClassSymbol</a> is equivalent to a given expression tree, simplifying the command with respect to the given e-graph.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Creates a <a href="Command.html">Command</a> that asserts an existing <a href="EClassSymbol.html">EClassSymbol</a> is equivalent to a given expression tree, simplifying the command with respect to the given e-graph.</p>
+              <p>Internally, this:</p>
+              <ol>
+               <li>Inserts the tree (creating a fresh virtual symbol for its root if needed)</li>
+               <li>Unions that root with <code>symbol</code></li>
+               <li>Simplifies the resulting command with respect to <code>egraph</code></li>
+              </ol>
+              <p>This is the canonical “add-and-unify” operation when you want to grow the e-graph with a concrete term and immediately equate it with an existing class, while avoiding redundant work.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>Node type for the expression.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>E-graph used as context for simplification.</p>
+              </dd>
+              <dt class="body-small">
+               symbol
+              </dt>
+              <dd class="body-medium">
+               <p>E-class symbol to unify with the tree’s root.</p>
+              </dd>
+              <dt class="body-small">
+               tree
+              </dt>
+              <dd class="body-medium">
+               <p>Expression to insert/reuse and equate.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A compound command performing the insert and the union, simplified with respect to <code>egraph</code>.</p>
+              </dd>
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.Command
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val cmd: Command[MyNode] =
+</span><span line-number="3" class=""><span class="tooltip-container"></span> Command.equivalenceSimplified(existingSym, myTree, egraph)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val (optGraph, out) =
+</span><span line-number="5" class=""><span class="tooltip-container"></span> cmd.apply(egraph, Map.empty, parallel)
 </span></code></pre>
                   <div class="buttons"></div>
                  </div>
