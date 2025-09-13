@@ -1,4 +1,4 @@
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.20", "2.13.14", "3.4.1")
+ThisBuild / crossScalaVersions := Seq("3.4.1")
 ThisBuild / scalaVersion := "3.4.1"
 
 ThisBuild / organization := "com.github.jonathanvdc"
@@ -126,11 +126,11 @@ lazy val examples = (project in file("examples"))
     fork := true
   )
 
-lazy val bench = (project in file("bench"))
+lazy val bench = (project in file("benchmarks"))
   .enablePlugins(JmhPlugin)
   .dependsOn(foresight, examples)
   .settings(
-    name := "foresight-bench",
+    name := "foresight-benchmarks",
     publish / skip := true,
     Test / skip := true,
     Jmh / fork := true,
