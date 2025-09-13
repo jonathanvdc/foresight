@@ -1,6 +1,5 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.examples.poly.{Add, ArithExpr, ArithIR, Fact, Mul, Pow, Rules, Succ, Var, Zero, *}
 import foresight.eqsat.lang.*
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EClassCall, EGraph}
