@@ -101,6 +101,27 @@ lazy val foresight = (project in file("."))
     fork := true
   )
 
+lazy val bench = (project in file("bench"))
+  .enablePlugins(JmhPlugin)
+  .dependsOn(foresight)
+  .settings(
+    name := "foresight-bench",
+    publish / skip := true,
+    Test / skip := true,
+    Jmh / fork := true,
+    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G"),
+
+    Compile / unmanagedSourceDirectories ++= {
+      val base = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
+        case Some((2, 13))                 => Seq(base / "scala-2.13+")
+        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
+        case _                             => Nil
+      }
+    },
+  )
+
 // Publish to GitHub Pages
 enablePlugins(GhpagesPlugin, SitePlugin, SiteScaladocPlugin)
 git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
