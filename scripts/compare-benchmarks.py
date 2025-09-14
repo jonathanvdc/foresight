@@ -124,7 +124,6 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
         pstr = ", ".join(f"{k}={v}" for k, v in params) if params else EM_DASH
         lines.append(f"| `{short_name(bench)}` | {pstr} | {bscore_s} | {cscore_s} | {delta_s} | {unit} |")
 
-    lines.append("")
     # Append geometric mean rows per threadCount (computed over ratios PR/Base)
     if geomean_logs:
         # Sort threadCount keys numerically when possible
@@ -142,6 +141,7 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
             lines.append(f"| **Geomean** | threadCount={tkey} | {EM_DASH} | {EM_DASH} | {gm_s} |  |")
         lines.append("")
 
+    lines.append("")
     if note:
         lines.append(note)
         lines.append("")
