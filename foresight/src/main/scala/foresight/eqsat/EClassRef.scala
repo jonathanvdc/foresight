@@ -33,4 +33,11 @@ package foresight.eqsat
  * used as keys in maps or sets, but note that their equivalence meaning may change
  * as the e-graph evolves.
  */
-final class EClassRef
+final class EClassRef {
+  /**
+   * A pre-instantiated EClassCall representing this e-class with no argument slots.
+   * This is a common case for non-parameterized e-classes, allowing efficient reuse
+   * without needing to repeatedly construct new `EClassCall` instances.
+   */
+  private[eqsat] val callWithoutSlots: EClassCall = EClassCall(this, SlotMap.empty)
+}

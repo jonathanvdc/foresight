@@ -85,13 +85,10 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       assert(renamedShape.shape.isShape)
     }
 
-    val ref = hashCons.getOrElse(renamedShape.shape, null)
-    if (ref == null) {
-      return null
-    }
+    val ref = hashCons.getOrElse(renamedShape.shape, return null)
 
     if (!renamedShape.shape.hasSlots) {
-      return EClassCall(ref, SlotMap.empty)
+      return ref.callWithoutSlots
     }
 
     val data = classData(ref)
@@ -105,12 +102,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       assert(!node.hasSlots)
     }
 
-    val result = hashCons.getOrElse(node, null)
-    if (result == null) {
-      null
-    } else {
-      EClassCall(result, SlotMap.empty)
-    }
+    hashCons.getOrElse(node, return null).callWithoutSlots
   }
 
   /**
@@ -178,7 +170,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     if (!shape.hasSlots) {
       val newRef = createEmptyClass(Set.empty)
       addNodeToClass(newRef, canonicalNode)
-      return EClassCall(newRef, SlotMap.empty)
+      return newRef.callWithoutSlots
     }
 
     // Generate slots for the e-class.
