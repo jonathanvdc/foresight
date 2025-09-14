@@ -10,14 +10,16 @@ import org.openjdk.jmh.annotations.*
 
 import java.util.concurrent.TimeUnit
 
-// State and scope tell JMH how to manage instances
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class PolyBenchmarks extends BenchmarksWithParallelMap {
+  @Param(Array("5", "6"))
+  var size: Int = _
+
   @Benchmark
-  def poly5(): ArithExpr = {
-    poly5Bench(parallelMap)
+  def polynomial(): ArithExpr = {
+    polyBench(size, parallelMap)
   }
 
   val arithCostFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
@@ -32,7 +34,29 @@ class PolyBenchmarks extends BenchmarksWithParallelMap {
     }
   }
 
-  def poly5Bench(map: ParallelMap): ArithExpr = {
+  /**
+    * Constructs a polynomial expression of degree `n` in variable `x` with symbolic coefficients.
+    * Coefficients are named 'a', 'b', ..., corresponding to each term.
+    * The polynomial is built as: a_n * x^n + a_{n-1} * x^{n-1} + ... + a_0
+    *
+    * @param n Degree of the polynomial
+    * @return The constructed polynomial as an `ArithExpr`
+    */
+  def polynomialExpr(n: Int): ArithExpr = {
+    val x = Var("x")
+    val coeffs = (0 to n).map(i => Var(('a' + i).toChar.toString))
+    coeffs.zipWithIndex.reverse.map { case (c, i) =>
+      if (i == 0) c
+      else c * (x ** const(i))
+    }.reduce(_ + _)
+  }
+
+  def const(n: Int): ArithExpr = {
+    if (n == 0) Zero
+    else Succ(const(n - 1))
+  }
+
+  def polyBench(n: Int, map: ParallelMap): ArithExpr = {
     val L: Language[ArithExpr] = summon[Language[ArithExpr]]
     val R: Rules = poly.Rules()(using L)
     type ArithRule = R.ArithRule
@@ -40,26 +64,7 @@ class PolyBenchmarks extends BenchmarksWithParallelMap {
     val simpleStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
-    // polynomial of degree 5: ax^5 + bx^4 + cx^3 + dx^2 + ex + f
-    val c0 = Zero // 0
-    val c1 = Succ(c0) // 1
-    val c2 = Succ(c1) // 2
-    val c3 = Succ(c2) // 3
-    val c4 = Succ(c3) // 4
-    val c5 = Succ(c4) // 5
-
-    val x = Var("x")
-    val a = Var("a")
-    val b = Var("b")
-    val c = Var("c")
-    val d = Var("d")
-    val e = Var("e")
-    val f = Var("f")
-
-    val poly5 = a * (x ** c5) + b * (x ** c4) + c * (x ** c3) + d * (x ** c2) + e * x + f
-    val poly5Simplified = f + x * (e + x * (d + x * (c + x * (b + a * x))))
-
-    val (root, egraph) = L.toEGraph(poly5)
+    val (root, egraph) = L.toEGraph(polynomialExpr(n))
     val egraph2 = simpleStrategy(egraph, map).get
 
     egraph2.extract(root, arithCostFunction)
