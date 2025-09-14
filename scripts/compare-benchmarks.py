@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import math
 import sys
 from typing import Dict, Iterable, List, Tuple, Any
 
@@ -83,6 +84,7 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
         return bench.split(".")[-2] + "." + bench.split(".")[-1] if "." in bench else bench
 
     lines: List[str] = []
+    geomean_logs: Dict[str, List[float]] = {}
     lines.append(f"### {title}")
     lines.append("")
     lines.append("| Benchmark | Params | Baseline | PR | Δ (PR/Base) | Unit |")
@@ -109,10 +111,38 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
             delta_s = "n/a"
             unit = cunit or bunit or ""
 
+        # Accumulate ratios for geometric mean per threadCount
+        if bscore is not None and cscore is not None and bscore != 0:
+            ratio = cscore / bscore
+            # Extract threadCount param value (as string) if present
+            params_dict = dict(params)
+            tval = params_dict.get("threadCount")
+            if tval is not None:
+                tkey = str(tval)
+                geomean_logs.setdefault(tkey, []).append(math.log(ratio))
+
         pstr = ", ".join(f"{k}={v}" for k, v in params) if params else EM_DASH
         lines.append(f"| `{short_name(bench)}` | {pstr} | {bscore_s} | {cscore_s} | {delta_s} | {unit} |")
 
     lines.append("")
+    # Append geometric mean rows per threadCount (computed over ratios PR/Base)
+    if geomean_logs:
+        lines.append("|  |  |  |  |  |  |")  # keep table format alignment
+        # Sort threadCount keys numerically when possible
+        def _thread_sort_key(s: str) -> Tuple[int, str]:
+            try:
+                return (0, f"{float(s):g}")
+            except Exception:
+                return (1, s)
+        for tkey in sorted(geomean_logs.keys(), key=_thread_sort_key):
+            logs = geomean_logs[tkey]
+            if not logs:
+                continue
+            gm = math.exp(sum(logs) / len(logs))
+            gm_s = f"{gm:.3f}× ({(gm - 1.0) * 100:+.1f}%)"
+            lines.append(f"| **Geomean** | threadCount={tkey} | {EM_DASH} | {EM_DASH} | {gm_s} |  |")
+        lines.append("")
+
     if note:
         lines.append(note)
         lines.append("")
