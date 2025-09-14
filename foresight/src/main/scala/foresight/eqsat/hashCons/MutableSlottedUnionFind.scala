@@ -59,23 +59,6 @@ private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCa
   }
 
   /**
-   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
-   * representative of the key is returned.
-   *
-   * @param ref The key to find.
-   * @return The representative of the key, if the key is in the union-find.
-   *         Null otherwise.
-   */
-  def findAndCompressOrNull(ref: EClassCall): EClassCall = {
-    val parent = findAndCompressOrNull(ref.ref)
-    if (parent == null) {
-      null
-    } else {
-      parent.rename(ref.args)
-    }
-  }
-
-  /**
    * Finds the representative of the given key. If the key is not in the union-find, an exception is thrown; otherwise,
    * the representative of the key is returned.
    *
