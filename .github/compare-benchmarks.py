@@ -117,27 +117,6 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
     return "\n".join(lines)
 
 
-def write_github_output(block: str) -> bool:
-    """Append a multi-line output named `comment` to $GITHUB_OUTPUT.
-
-    Returns True if written, False if the env var is not set.
-    """
-    gha_out = os.environ.get("GITHUB_OUTPUT")
-    if not gha_out:
-        return False
-    try:
-        with open(gha_out, "a", encoding="utf-8") as out:
-            out.write("comment<<EOF\n")
-            out.write(block)
-            if not block.endswith("\n"):
-                out.write("\n")
-            out.write("EOF\n")
-        return True
-    except OSError as e:
-        print(f"warning: failed to write GITHUB_OUTPUT: {e}", file=sys.stderr)
-        return False
-
-
 def parse_args(argv: List[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Compare two JMH JSON files and emit Markdown.")
     p.add_argument("baseline", help="Path to baseline JMH JSON (e.g., from main)")
@@ -163,9 +142,7 @@ def main(argv: List[str]) -> int:
 
     md = compare_to_markdown(base, cur, title=args.title, note=args.note)
 
-    # Prefer GitHub Actions output if available; otherwise print to stdout.
-    if not write_github_output(md):
-        print(md)
+    print(md)
     return 0
 
 
