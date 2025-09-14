@@ -36,7 +36,7 @@ ThisBuild / credentials += Credentials(
   sys.env.getOrElse("GITHUB_TOKEN", "")
 )
 
-lazy val foresight = (project in file("."))
+lazy val foresight = (project in file("foresight"))
   .settings(
     name := "foresight",
 
@@ -69,11 +69,36 @@ lazy val foresight = (project in file("."))
 
     scalacOptions in(Compile, doc) := Seq("-implicits"),
 
-    // Source locations
-//    scalaSource in Compile := baseDirectory(_ / "src/main").value,
-//    scalaSource in Test := baseDirectory(_ / "src/test").value,
-//    javaSource in Compile := baseDirectory(_ / "src/main").value,
-//    javaSource in Test := baseDirectory(_ / "src/test").value,
+    // Version-specific support directories
+    Compile / unmanagedSourceDirectories ++= {
+      val base = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
+        case Some((2, 13))                 => Seq(base / "scala-2.13+")
+        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
+        case _                             => Nil
+      }
+    },
+
+    // Dependencies
+    libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
+
+    // Testing
+    libraryDependencies ++= Dependencies.testDependencies(scalaVersion.value).map(_ % Test),
+    Test / logBuffered := false,
+    Test / testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "5"),
+
+    // Code coverage
+    scoverage.ScoverageKeys.coverageExcludedPackages := "<empty>;.*Test.*;.*testing.*",
+
+    fork := true
+  )
+
+lazy val examples = (project in file("examples"))
+  .dependsOn(foresight)
+  .settings(
+    name := "foresight-examples",
 
     // Version-specific support directories
     Compile / unmanagedSourceDirectories ++= {
@@ -99,6 +124,27 @@ lazy val foresight = (project in file("."))
     scoverage.ScoverageKeys.coverageExcludedPackages := "<empty>;.*Test.*;.*testing.*",
 
     fork := true
+  )
+
+lazy val benchmarks = (project in file("benchmarks"))
+  .enablePlugins(JmhPlugin)
+  .dependsOn(foresight, examples)
+  .settings(
+    name := "foresight-benchmarks",
+    publish / skip := true,
+//    Test / skip := true,
+    Jmh / fork := true,
+    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G"),
+
+    Compile / unmanagedSourceDirectories ++= {
+      val base = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
+        case Some((2, 13))                 => Seq(base / "scala-2.13+")
+        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
+        case _                             => Nil
+      }
+    },
   )
 
 // Publish to GitHub Pages
