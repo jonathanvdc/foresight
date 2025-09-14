@@ -1,0 +1,98 @@
+name: PR Benchmarks (compare to base)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}-bench
+  cancel-in-progress: true
+
+jobs:
+  jmh-compare:
+    runs-on: ubuntu-latest
+    env:
+      JMH_ARGS: "-wi 1 -i 1 -f 1 -r 10s -p threadCount=1,2"
+
+    steps:
+      - name: Checkout PR (head)
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+
+      - name: Run JMH on PR (head)
+        run: >
+          sbt
+          "benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff $GITHUB_WORKSPACE/jmh-current.json"
+
+      - name: Checkout base revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          fetch-depth: 0
+
+      - name: Run JMH on base
+        working-directory: base
+        run: >
+          sbt
+          "benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff $GITHUB_WORKSPACE/jmh-baseline.json"
+
+      - name: Verify JMH result files
+        if: always()
+        run: |
+          set -euxo pipefail
+          echo "Workspace is: $GITHUB_WORKSPACE"
+          ls -lah "$GITHUB_WORKSPACE"
+          echo "File details:"
+          for f in "$GITHUB_WORKSPACE/jmh-current.json" "$GITHUB_WORKSPACE/jmh-baseline.json"; do
+            if [[ -f "$f" ]]; then
+              echo "✅ Found $f"
+              wc -c "$f"
+              head -c 200 "$f" || true
+              echo
+            else
+              echo "❌ Missing $f"
+            fi
+          done
+
+      - name: Upload JMH artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmh-results-${{ github.run_id }}
+          path: |
+            $GITHUB_WORKSPACE/jmh-current.json
+            $GITHUB_WORKSPACE/jmh-baseline.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Compare JMH results
+        id: compare
+        shell: bash
+        run: |
+          set -euxo pipefail
+          base_json="$GITHUB_WORKSPACE/jmh-baseline.json"
+          head_json="$GITHUB_WORKSPACE/jmh-current.json"
+          [[ -s "$base_json" ]] || { echo "Missing or empty $base_json"; exit 1; }
+          [[ -s "$head_json" ]] || { echo "Missing or empty $head_json"; exit 1; }
+          python3 scripts/compare-benchmarks.py "$base_json" "$head_json" > comment.md
+          echo "comment<<EOF" >> $GITHUB_OUTPUT
+          cat comment.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post sticky comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: jmh-results
+          message: ${{ steps.compare.outputs.comment }}
