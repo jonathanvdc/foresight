@@ -79,6 +79,9 @@ def _numeric_score(e: Entry | None) -> float | None:
 def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title: str, note: str | None) -> str:
     keys = sorted(set(base.keys()) | set(cur.keys()))
 
+    def short_name(bench: str) -> str:
+        return bench.split(".")[-2] + "." + bench.split(".")[-1] if "." in bench else bench
+
     lines: List[str] = []
     lines.append(f"### {title}")
     lines.append("")
@@ -107,7 +110,7 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
             unit = cunit or bunit or ""
 
         pstr = ", ".join(f"{k}={v}" for k, v in params) if params else EM_DASH
-        lines.append(f"| `{bench}` | {pstr} | {bscore_s} | {cscore_s} | {delta_s} | {unit} |")
+        lines.append(f"| `{short_name(bench)}` | {pstr} | {bscore_s} | {cscore_s} | {delta_s} | {unit} |")
 
     lines.append("")
     if note:
