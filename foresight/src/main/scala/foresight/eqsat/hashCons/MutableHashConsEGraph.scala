@@ -267,7 +267,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   private def isWellFormed(call: EClassCall): Boolean = {
-    val slots = unionFind.set.findAndCompress(call.ref)._1.args.valueSet
+    val slots = unionFind.set.find(call.ref).args.valueSet
     slots.subsetOf(call.args.keySet)
   }
 

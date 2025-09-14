@@ -27,7 +27,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   //      classData(ref) such that parent is in the e-node's arguments.
 
   private def toMutable: MutableHashConsEGraph[NodeT] = {
-    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind), hashCons, classData)
+    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind.parents), hashCons, classData)
   }
 
   override def classes: Iterable[EClassRef] = classData.keys

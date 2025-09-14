@@ -1,47 +1,92 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{EClassCall, EClassRef, Slot}
+import foresight.eqsat.{EClassCall, EClassRef, Slot, SlotMap}
 
-private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
+private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCall]) {
+  def set: SlottedUnionFind = SlottedUnionFind(parents)
+
+  /**
+   * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.
+   * @param ref The e-class to check.
+   * @return True if the e-class is the canonical representative of its set, false otherwise.
+   */
+  def isCanonical(ref: EClassRef): Boolean = {
+    // require(parents.contains(ref), s"EClassRef $ref is not in the union-find.")
+    parents(ref).ref == ref
+  }
+
   def add(key: EClassRef, slots: Set[Slot]): Unit = {
-    set = set.add(key, slots)
+    update(key, EClassCall(key, SlotMap.identity(slots)))
   }
 
   def update(key: EClassRef, value: EClassCall): Unit = {
-    set = set.update(key, value)
-  }
-  
-  def isCanonical(ref: EClassRef): Boolean = {
-    set.isCanonical(ref)
+    parents = parents + (key -> value)
   }
 
-  def findAndCompressOrNull(key: EClassRef): EClassCall = {
-    foldUpdateIntoSet(set.findAndCompressOrNull(key))
-  }
-
-  def findAndCompress(ref: EClassRef): EClassCall = {
-    val (result, newSet) = set.findAndCompress(ref)
-    set = newSet
-    result
-  }
-
-  def findAndCompressOrNull(ref: EClassCall): EClassCall = {
-    foldUpdateIntoSet(set.findAndCompressOrNull(ref))
-  }
-
-  def findAndCompress(ref: EClassCall): EClassCall = {
-    val (result, newSet) = set.findAndCompress(ref)
-    set = newSet
-    result
-  }
-
-  private def foldUpdateIntoSet[A](pair: (A, SlottedUnionFind)): A = {
-    val (result , newSet) = pair
-    if (result == null) {
-      null.asInstanceOf[A]
+  /**
+   * Finds the representative of the given key and compresses the path. If the key is not in the union-find, null is
+   * returned; otherwise, the representative of the key is returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key, if the key is in the union-find.
+   *         Null otherwise.
+   */
+  def findAndCompressOrNull(ref: EClassRef): EClassCall = {
+    val parent = parents.getOrElse(ref, return null)
+    if (parent.ref == ref) {
+      parent
     } else {
-      set = newSet
+      val grandparent = findAndCompress(parent)
+      update(ref, grandparent)
+      grandparent
+    }
+  }
+
+  /**
+   * Finds the representative of the given key and compresses the path. If the key is not in the union-find, an
+   * exception is thrown; otherwise, the representative of the key and the new union-find are returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key and the new union-find.
+   */
+  def findAndCompress(ref: EClassRef): EClassCall = {
+    val result = findAndCompressOrNull(ref)
+    if (result == null) {
+      throw new NoSuchElementException(s"EClassRef $ref is not in the union-find.")
+    } else {
       result
     }
+  }
+
+  /**
+   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
+   * representative of the key is returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key, if the key is in the union-find.
+   *         Null otherwise.
+   */
+  def findAndCompressOrNull(ref: EClassCall): EClassCall = {
+    val parent = findAndCompressOrNull(ref.ref)
+    if (parent == null) {
+      null
+    } else {
+      parent.rename(ref.args)
+    }
+  }
+
+  /**
+   * Finds the representative of the given key. If the key is not in the union-find, an exception is thrown; otherwise,
+   * the representative of the key is returned.
+   *
+   * @param ref The key to find.
+   * @return The representative of the key.
+   */
+  def findAndCompress(ref: EClassCall): EClassCall = {
+    val parent = findAndCompress(ref.ref)
+    if (parent == null) {
+      throw new NoSuchElementException(s"EClassRef ${ref.ref} is not in the union-find.")
+    }
+    parent.rename(ref.args)
   }
 }
