@@ -310,7 +310,6 @@ class BlasIdiomRuleTest {
   /**
    * Tests that we can find gemm in a matrix-matrix multiplication. This is a slow test, so it is ignored by default.
    */
-  @Ignore("Finding gemm in a matrix-matrix multiplication is slow.")
   @Test
   def findGemmInMm(): Unit = {
     val M = ConstIntType(100).toTree
@@ -343,7 +342,7 @@ class BlasIdiomRuleTest {
 
     val (c1, egraph2) = EGraphWithRoot.from(build)
 
-    val egraph4 = strategy(6)(egraph2).get
+    val egraph4 = strategy(4)(egraph2).get
 
     assert(egraph4.contains(gemm))
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))
