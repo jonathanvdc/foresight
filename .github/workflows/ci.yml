@@ -4,12 +4,11 @@ name: Continuous integration
 # It also publishes Scaladoc to GitHub Pages when changes are pushed to the main branch
 # or when a new tag is created.
 
-# This workflow is triggered on pushes to the main branch and on pull requests.
+# This workflow is triggered on pushes.
 on:
   push:
     branches-ignore:
       - gh-pages
-  pull_request:
 
 jobs:
   ci:
