@@ -41,7 +41,44 @@ jobs:
         # Benchmarking with JMH can be time-consuming, so we run it with one fork,
         # one warmup iteration, one measurement iteration, and a 10-second measurement time
         # per iteration to keep the CI time reasonable.
-        run: sbt 'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1'
+        run: sbt 'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1 -rf json -rff jmh-current.json'
+
+      - name: Checkout base revision (for PR baseline)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          fetch-depth: 0
+
+      - name: Run benchmarks on base revision
+        if: ${{ github.event_name == 'pull_request' }}
+        working-directory: base
+        run: sbt 'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1 -rf json -rff ../jmh-baseline.json'
+
+      - name: Upload JMH artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jmh-results-${{ github.run_id }}
+          path: |
+            jmh-current.json
+            jmh-baseline.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Compare JMH results (baseline vs PR)
+        id: compare
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        run: python3 jmh-baseline.json jmh-current.json
+
+      - name: Post comparison as sticky PR comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: jmh-results
+          message: ${{ steps.compare.outputs.comment }}
 
       - name: Publish to GitHub Packages
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
