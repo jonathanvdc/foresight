@@ -47,6 +47,8 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return A new application with arguments renamed.
    */
   def rename(renaming: SlotMap): EClassCall = {
+    if (args.isEmpty) return this
+
     assert(args.valueSet.subsetOf(renaming.keySet), "Argument slots must be in the renaming.")
     EClassCall(ref, args.composePartial(renaming))
   }
