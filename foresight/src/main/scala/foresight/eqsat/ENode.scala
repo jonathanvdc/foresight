@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.util.Debug
+
 /**
  * A node in a slotted e-graph.
  *
@@ -62,7 +64,9 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return A node with slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
+    if (Debug.isEnabled) {
+      require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
+    }
 
     val newDefinitions = definitions.map(renaming.apply)
     val newUses = uses.map(renaming.apply)
