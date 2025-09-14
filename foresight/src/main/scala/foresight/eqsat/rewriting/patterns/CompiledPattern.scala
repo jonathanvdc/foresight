@@ -20,9 +20,16 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wi
    */
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
     val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions).map { state =>
+    val matches = Machine.run(egraph, state, instructions).map { state =>
       PatternMatch(call, state.boundVars, state.boundSlots)
-    }.distinct
+    }
+
+    if (matches.size == 1) {
+      // If there's only one match, skip the distinct call for performance
+      matches
+    } else {
+      matches.distinct
+    }
   }
 
   /**
