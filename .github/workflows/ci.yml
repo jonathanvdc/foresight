@@ -41,7 +41,7 @@ jobs:
         # Benchmarking with JMH can be time-consuming, so we run it with one fork,
         # one warmup iteration, one measurement iteration, and a 10-second measurement time
         # per iteration to keep the CI time reasonable.
-        run: sbt 'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s'
+        run: sbt 'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1'
 
       - name: Publish to GitHub Packages
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
