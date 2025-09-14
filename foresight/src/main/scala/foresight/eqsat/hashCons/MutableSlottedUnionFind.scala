@@ -3,7 +3,7 @@ package foresight.eqsat.hashCons
 import foresight.eqsat.{EClassCall, EClassRef, Slot, SlotMap}
 
 private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCall]) {
-  def set: SlottedUnionFind = SlottedUnionFind(parents)
+  def toImmutable: SlottedUnionFind = SlottedUnionFind(parents)
 
   /**
    * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.
