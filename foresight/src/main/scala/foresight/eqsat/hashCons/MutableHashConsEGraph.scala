@@ -1,6 +1,6 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.*
+import foresight.eqsat._
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],

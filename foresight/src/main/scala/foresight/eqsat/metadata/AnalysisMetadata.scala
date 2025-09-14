@@ -1,7 +1,7 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * Incremental, queryable results of running an [[Analysis]] over an e-graph.

@@ -1,6 +1,6 @@
 package foresight.util.random
 
-import org.junit.Assert.*
+import org.junit.Assert._
 import org.junit.Test
 
 class RandomTest {

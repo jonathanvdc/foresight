@@ -2,7 +2,7 @@ package foresight.eqsat.examples.arithWithLang
 
 import foresight.eqsat.examples.arithWithLang.{*, given}
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EClassCall, EGraph, Slot}
 import org.junit.Test

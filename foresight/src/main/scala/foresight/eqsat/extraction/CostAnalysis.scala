@@ -1,6 +1,6 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.*
+import foresight.eqsat._
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
 
 /**

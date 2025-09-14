@@ -1,7 +1,7 @@
 package foresight.eqsat.parallel
 
 import java.util.concurrent.ForkJoinPool
-import scala.collection.parallel.CollectionConverters.*
+import scala.collection.parallel.CollectionConverters._
 
 /**
  * An implementation of the [[ParallelMap]] trait that provides parallel processing capabilities. This implementation

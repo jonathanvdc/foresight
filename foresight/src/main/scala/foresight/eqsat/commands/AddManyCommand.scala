@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.

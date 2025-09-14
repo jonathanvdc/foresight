@@ -1,8 +1,8 @@
 package foresight.eqsat.examples
 
-import foresight.eqsat.examples.mm.*
-import foresight.eqsat.examples.poly.*
-import foresight.eqsat.lang.*
+import foresight.eqsat.examples.mm._
+import foresight.eqsat.examples.poly._
+import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.eqsat.{EClassCall, EGraph}

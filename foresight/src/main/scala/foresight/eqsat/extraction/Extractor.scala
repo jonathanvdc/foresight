@@ -1,6 +1,6 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * An extractor that converts e-graph references (e-class calls) into concrete expression trees.

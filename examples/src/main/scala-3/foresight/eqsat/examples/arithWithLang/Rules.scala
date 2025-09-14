@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.arithWithLang
 
 import scala.language.implicitConversions
-import ApplierOps.*
+import ApplierOps._
 import foresight.eqsat.lang.{Language, LanguageOp}
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule

@@ -1,7 +1,7 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.*
+import foresight.eqsat._
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**

@@ -47,7 +47,7 @@ package foresight.eqsat
  * ## Getting started
  *
  * {{{
- * import foresight.eqsat.lang.*
+ * import foresight.eqsat.lang._
  * import foresight.eqsat.rewriting.{Rule, ReversibleSearcher}
  * import foresight.eqsat.rewriting.patterns.Pattern
  *

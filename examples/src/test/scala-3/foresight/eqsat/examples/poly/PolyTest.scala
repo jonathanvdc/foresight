@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EClassCall, EGraph}
 import org.junit.Test

@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.examples.liar.*
+import foresight.eqsat.examples.liar._
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch

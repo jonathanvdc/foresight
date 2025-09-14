@@ -2,7 +2,7 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * An e-graph that records the set of matches that have been applied to it.

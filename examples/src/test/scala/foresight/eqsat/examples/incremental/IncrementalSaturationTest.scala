@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat.examples.arith.*
+import foresight.eqsat.examples.arith._
 import foresight.eqsat.extraction.{CostAnalysis, CostFunction, ExtractionAnalysis}
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.saturation.MaximalRuleApplication

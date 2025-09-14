@@ -2,7 +2,7 @@ package foresight.eqsat.examples.poly
 
 import foresight.eqsat.EGraph
 import foresight.eqsat.examples.poly
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import org.openjdk.jmh.annotations._

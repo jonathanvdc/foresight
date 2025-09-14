@@ -1,7 +1,7 @@
 package foresight.eqsat.extraction
 
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * An analysis that derives minimal-cost extraction results for each e-class.

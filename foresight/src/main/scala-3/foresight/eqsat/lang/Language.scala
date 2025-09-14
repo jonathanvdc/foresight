@@ -4,11 +4,11 @@ import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
-import foresight.eqsat.*
+import foresight.eqsat._
 import foresight.util.ordering.SeqOrdering
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
-import scala.deriving.*
+import scala.deriving._
 import scala.util.NotGiven
 
 /**

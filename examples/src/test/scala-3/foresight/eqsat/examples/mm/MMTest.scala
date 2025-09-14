@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.mm
 
 import foresight.eqsat.examples.mm.{Fact, LinalgExpr, LinalgIR, Mat, Mul, Rules, *}
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.{EClassCall, EGraph}
 import org.junit.Test

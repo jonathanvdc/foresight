@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * An e-graph that has a root e-class.

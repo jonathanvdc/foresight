@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.rewriting.patterns.Pattern
 import foresight.eqsat.{EClassCall, MixedTree}
 

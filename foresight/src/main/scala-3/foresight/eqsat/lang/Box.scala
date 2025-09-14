@@ -1,6 +1,6 @@
 package foresight.eqsat.lang
 
-import scala.deriving.*
+import scala.deriving._
 
 /**
  * Type class declaring that a surface type `A` should appear as a leaf atom in a `MixedTree`.

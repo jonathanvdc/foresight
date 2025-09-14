@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * An instruction for the pattern-matching virtual machine.

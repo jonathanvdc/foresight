@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.*
+import foresight.eqsat._
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.

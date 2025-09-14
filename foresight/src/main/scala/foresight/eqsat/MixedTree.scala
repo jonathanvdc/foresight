@@ -1,7 +1,7 @@
 package foresight.eqsat
 
 import foresight.eqsat.rewriting.ReversibleSearcher
-import foresight.eqsat.rewriting.patterns.*
+import foresight.eqsat.rewriting.patterns._
 import foresight.util.ordering.SeqOrdering
 
 /**
