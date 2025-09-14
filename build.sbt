@@ -1,5 +1,15 @@
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.20", "2.13.14", "3.4.1")
-ThisBuild / scalaVersion := "3.4.1"
+// Default scala used for day-to-day dev / IDE
+val devScala = "3.4.1"
+
+// During IntelliJ import (VM option -DIDEA_IMPORT=1), expose only Scala 3 to the IDE.
+// From the CLI (no IDEA_IMPORT prop), keep the full cross set for + / ++.
+ThisBuild / crossScalaVersions := {
+  if (sys.props.get("IDEA_IMPORT").contains("1"))
+    Seq(devScala)
+  else
+    Seq("2.11.12", "2.12.20", "2.13.14", devScala)
+}
+ThisBuild / scalaVersion := devScala
 
 ThisBuild / organization := "com.github.jonathanvdc"
 ThisBuild / version := {
@@ -36,49 +46,56 @@ ThisBuild / credentials += Credentials(
   sys.env.getOrElse("GITHUB_TOKEN", "")
 )
 
+// Common settings for all Scala versions
+lazy val commonScalaSettings = Seq(
+  scalaVersion       := (ThisBuild / scalaVersion).value,
+  crossScalaVersions := (ThisBuild / crossScalaVersions).value,
+
+  // Version-specific support directories
+  Compile / unmanagedSourceDirectories ++= {
+    val base = (Compile / sourceDirectory).value
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
+      case Some((2, 13))                 => Seq(base / "scala-2.13+")
+      case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
+      case _                             => Nil
+    }
+  },
+
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 11)) | Some((2, 12)) =>
+        Seq("-unchecked", "-deprecation", "-feature", "-Xmax-classfile-name", "100")
+      case Some((2, _)) =>
+        Seq("-unchecked", "-deprecation", "-feature")
+      case Some((3, 4)) =>
+        Seq(
+          "-unchecked",
+          "-deprecation",
+          "-feature",
+          // Silence deprecated `with` type operator
+          "-Wconf:msg=with as a type operator has been deprecated:silent",
+          // Silence deprecated wildcard types (`_`)
+          "-Wconf:msg=is deprecated for wildcard arguments:silent",
+          // Silence deprecated vararg splices (`x: _*`)
+          "-Wconf:msg=no longer supported:silent",
+          // Silence warnings about specialization
+          "-Wconf:msg=is more specialized than the right hand side:silent"
+        )
+      case Some((3, _)) =>
+        Seq("-unchecked", "-deprecation", "-feature")
+      case _ =>
+        Seq.empty
+    }
+  },
+
+  // Compile / doc / scalacOptions := Seq("-implicits")
+)
+
 lazy val foresight = (project in file("foresight"))
   .settings(
     name := "foresight",
-
-    scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) | Some((2, 12)) =>
-          Seq("-unchecked", "-deprecation", "-feature", "-Xmax-classfile-name", "100")
-        case Some((2, _)) =>
-          Seq("-unchecked", "-deprecation", "-feature")
-        case Some((3, 4)) =>
-          Seq(
-            "-unchecked",
-            "-deprecation",
-            "-feature",
-            // Silence deprecated `with` type operator
-            "-Wconf:msg=with as a type operator has been deprecated:silent",
-            // Silence deprecated wildcard types (`_`)
-            "-Wconf:msg=is deprecated for wildcard arguments:silent",
-            // Silence deprecated vararg splices (`x: _*`)
-            "-Wconf:msg=no longer supported:silent",
-            // Silence warnings about specialization
-            "-Wconf:msg=is more specialized than the right hand side:silent"
-          )
-        case Some((3, _)) =>
-          Seq("-unchecked", "-deprecation", "-feature")
-        case _ =>
-          Seq.empty
-      }
-    },
-
-    scalacOptions in(Compile, doc) := Seq("-implicits"),
-
-    // Version-specific support directories
-    Compile / unmanagedSourceDirectories ++= {
-      val base = (Compile / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
-        case Some((2, 13))                 => Seq(base / "scala-2.13+")
-        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
-        case _                             => Nil
-      }
-    },
+    commonScalaSettings,
 
     // Dependencies
     libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
@@ -99,17 +116,7 @@ lazy val examples = (project in file("examples"))
   .dependsOn(foresight)
   .settings(
     name := "foresight-examples",
-
-    // Version-specific support directories
-    Compile / unmanagedSourceDirectories ++= {
-      val base = (Compile / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
-        case Some((2, 13))                 => Seq(base / "scala-2.13+")
-        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
-        case _                             => Nil
-      }
-    },
+    commonScalaSettings,
 
     // Dependencies
     libraryDependencies ++= Dependencies.libraryDependencies(scalaVersion.value),
@@ -126,31 +133,50 @@ lazy val examples = (project in file("examples"))
     fork := true
   )
 
+
 lazy val benchmarks = (project in file("benchmarks"))
   .enablePlugins(JmhPlugin)
   .dependsOn(foresight, examples)
   .settings(
     name := "foresight-benchmarks",
+    commonScalaSettings,
     publish / skip := true,
 //    Test / skip := true,
     Jmh / fork := true,
-    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G"),
-
-    Compile / unmanagedSourceDirectories ++= {
-      val base = (Compile / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 11)) | Some((2, 12)) => Seq(base / "scala-2.11")
-        case Some((2, 13))                 => Seq(base / "scala-2.13+")
-        case Some((3, _))                  => Seq(base / "scala-2.13+", base / "scala-3")
-        case _                             => Nil
-      }
-    },
+    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G")
   )
+
+// Aggregated Scaladoc for the root project (copies child docs under one folder)
+lazy val aggregatedDoc = taskKey[File]("Generate aggregated Scaladoc for the root from subprojects")
 
 lazy val root = (project in file("."))
   .aggregate(foresight, examples, benchmarks)
   .settings(
-    name := "foresight-root",          // nicer name in IntelliJ
+    name := "foresight-root",
+    commonScalaSettings,
+    // Make `root / doc` build and collect child docs without publishing any package
+    Compile / doc := aggregatedDoc.value,
+    aggregatedDoc := {
+      val log = streams.value.log
+      val sv   = scalaVersion.value
+      val sbin = scalaBinaryVersion.value
+      val scalaDir = if (sbin.startsWith("3")) s"scala-$sv" else s"scala-$sbin"
+      val out = target.value / scalaDir / "api"
+      sbt.IO.delete(out)
+
+      // Trigger docs for each child explicitly (avoid ScopeFilter + lambda captures)
+      val foresightDocOut  = (foresight  / Compile / doc).value
+      val examplesDocOut   = (examples   / Compile / doc).value
+      val benchmarksDocOut = (benchmarks / Compile / doc).value
+
+      // Copy into per-project subfolders under the aggregate
+      sbt.IO.copyDirectory(foresightDocOut,  out / foresight.id)
+      sbt.IO.copyDirectory(examplesDocOut,   out / examples.id)
+      sbt.IO.copyDirectory(benchmarksDocOut, out / benchmarks.id)
+
+      log.info(s"Aggregated docs written to: $out")
+      out
+    },
     publish / skip := true,            // don't publish the aggregate
     Compile / packageDoc / publishArtifact := false,
     Compile / packageSrc / publishArtifact := false
