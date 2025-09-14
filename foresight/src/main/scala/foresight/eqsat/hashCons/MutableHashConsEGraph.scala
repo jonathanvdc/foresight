@@ -1,6 +1,6 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.*
+import foresight.eqsat._
 import foresight.util.Debug
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
