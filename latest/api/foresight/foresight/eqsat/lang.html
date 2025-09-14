@@ -1,0 +1,2083 @@
+<!DOCTYPE html><html data-pathToRoot="../../" data-rawLocation="foresight/eqsat/lang" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>foresight.eqsat.lang</title><link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico"></link><script type="text/javascript" src="../../scripts/theme.js"></script><script type="text/javascript" src="../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../styles/nord-light.css"></link><link rel="stylesheet" href="../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../styles/code-snippets.css"></link><link rel="stylesheet" href="../../styles/searchbar.css"></link><link rel="stylesheet" href="../../styles/social-links.css"></link><link rel="stylesheet" href="../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../styles/content-contributors.css"></link><link rel="stylesheet" href="../../styles/fontawesome.css"></link><script type="text/javascript" src="../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../scripts/data.js" defer="true"></script><link rel="stylesheet" href="../../styles/apistyles.css"></link><script>var pathToRoot = "../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../" class="logo-container"><span class="project-name h300">foresight</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">foresight</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="api-nav-button" class="switcher h100 selected" href="../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../foresight.html"><span class="micon pa"></span><span>foresight</span></a></span><div class="ni n1 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../eqsat.html"><span class="micon pa"></span><span>eqsat</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="commands.html"><span class="micon pa"></span><span>commands</span></a></span><div class="ni n3 "><span class="nh "><a href="commands/AddManyCommand.html"><span class="micon cl"></span><span>AddManyCommand</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/Command.html"><span class="micon tr"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/Command$.html"><span class="micon ob"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueue.html"><span class="micon cl"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueue$.html"><span class="micon ob"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueueBuilder.html"><span class="micon cl"></span><span>CommandQueueBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/EClassSymbol.html"><span class="micon tr"></span><span>EClassSymbol</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="commands/EClassSymbol$.html"><span class="micon ob"></span><span>EClassSymbol</span></a></span><div class="ni n4 "><span class="nh "><a href="commands/EClassSymbol$$Real.html"><span class="micon cl"></span><span>Real</span></a></span></div><div class="ni n4 "><span class="nh "><a href="commands/EClassSymbol$$Virtual.html"><span class="micon cl"></span><span>Virtual</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="commands/ENodeSymbol.html"><span class="micon cl"></span><span>ENodeSymbol</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/UnionManyCommand.html"><span class="micon cl"></span><span>UnionManyCommand</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="extraction.html"><span class="micon pa"></span><span>extraction</span></a></span><div class="ni n3 "><span class="nh "><a href="extraction/CostAnalysis.html"><span class="micon cl"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostAnalysis$.html"><span class="micon ob"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostFunction.html"><span class="micon tr"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostFunction$.html"><span class="micon ob"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionAnalysis.html"><span class="micon cl"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionAnalysis$.html"><span class="micon ob"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTree.html"><span class="micon cl"></span><span>ExtractionTree</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTreeCall.html"><span class="micon cl"></span><span>ExtractionTreeCall</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTreeOrdering.html"><span class="micon cl"></span><span>ExtractionTreeOrdering</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/Extractor.html"><span class="micon tr"></span><span>Extractor</span></a></span></div></div><div class="ni n2 expanded"><span class="nh h100 selected"><button class="ar icon-button expanded"></button><a href="#"><span class="micon pa"></span><span>lang</span></a></span><div class="ni n3 "><span class="nh "><a href="lang/AnalysisBox.html"><span class="micon tr"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AnalysisBox$.html"><span class="micon ob"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AnalysisFact.html"><span class="micon cl"></span><span>AnalysisFact</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AsAtom.html"><span class="micon tr"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AsAtom$.html"><span class="micon ob"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AtomDecoder$.html"><span class="micon ob"></span><span>AtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AtomEncoder$.html"><span class="micon ob"></span><span>AtomEncoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Box.html"><span class="micon tr"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Box$.html"><span class="micon ob"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Def.html"><span class="micon cl"></span><span>Def</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="lang/Def$.html"><span class="micon ob"></span><span>Def</span></a></span><div class="ni n4 "><span class="nh "><a href="lang/Def$$given_Conversion_Slot_Def$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Def</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="lang/Language.html"><span class="micon tr"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Language$.html"><span class="micon ob"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageAnalysis.html"><span class="micon tr"></span><span>LanguageAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageCostFunction.html"><span class="micon tr"></span><span>LanguageCostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageExtractor.html"><span class="micon tr"></span><span>LanguageExtractor</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageOp.html"><span class="micon cl"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageOp$.html"><span class="micon ob"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LowPriorityAtomDecoder.html"><span class="micon tr"></span><span>LowPriorityAtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Use.html"><span class="micon cl"></span><span>Use</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="lang/Use$.html"><span class="micon ob"></span><span>Use</span></a></span><div class="ni n4 "><span class="nh "><a href="lang/Use$$given_Conversion_Slot_Use$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Use</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="metadata.html"><span class="micon pa"></span><span>metadata</span></a></span><div class="ni n3 "><span class="nh "><a href="metadata/Analysis.html"><span class="micon tr"></span><span>Analysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="metadata/AnalysisMetadata.html"><span class="micon cl"></span><span>AnalysisMetadata</span></a></span></div><div class="ni n3 "><span class="nh "><a href="metadata/Metadata.html"><span class="micon tr"></span><span>Metadata</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="parallel.html"><span class="micon pa"></span><span>parallel</span></a></span><div class="ni n3 "><span class="nh "><a href="parallel/CancellationToken.html"><span class="micon cl"></span><span>CancellationToken</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/OperationCanceledException.html"><span class="micon cl"></span><span>OperationCanceledException</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/ParallelMap.html"><span class="micon tr"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/ParallelMap$.html"><span class="micon ob"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimedParallelMap.html"><span class="micon cl"></span><span>TimedParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimingReport.html"><span class="micon cl"></span><span>TimingReport</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimingReport$.html"><span class="micon ob"></span><span>TimingReport</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="rewriting.html"><span class="micon pa"></span><span>rewriting</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns.html"><span class="micon pa"></span><span>patterns</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/CompiledPattern.html"><span class="micon cl"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/CompiledPattern$.html"><span class="micon ob"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/Instruction.html"><span class="micon tr"></span><span>Instruction</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/Instruction$.html"><span class="micon ob"></span><span>Instruction</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$BindNode.html"><span class="micon cl"></span><span>BindNode</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$BindVar.html"><span class="micon cl"></span><span>BindVar</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$Compare.html"><span class="micon cl"></span><span>Compare</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/Machine$.html"><span class="micon ob"></span><span>Machine</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineError.html"><span class="micon tr"></span><span>MachineError</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/MachineError$.html"><span class="micon ob"></span><span>MachineError</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineError$$InconsistentVars.html"><span class="micon cl"></span><span>InconsistentVars</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineError$$NoMatchingNode.html"><span class="micon cl"></span><span>NoMatchingNode</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineResult.html"><span class="micon tr"></span><span>MachineResult</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/MachineResult$.html"><span class="micon ob"></span><span>MachineResult</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineResult$$Failure.html"><span class="micon cl"></span><span>Failure</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineResult$$Success.html"><span class="micon cl"></span><span>Success</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineSearcherPhase.html"><span class="micon cl"></span><span>MachineSearcherPhase</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineState.html"><span class="micon cl"></span><span>MachineState</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineState$.html"><span class="micon ob"></span><span>MachineState</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/Pattern$.html"><span class="micon ob"></span><span>Pattern</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Pattern$$Var.html"><span class="micon cl"></span><span>Var</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Pattern$$Var$.html"><span class="micon ob"></span><span>Var</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternApplier.html"><span class="micon cl"></span><span>PatternApplier</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternCompiler$.html"><span class="micon ob"></span><span>PatternCompiler</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternMatch.html"><span class="micon cl"></span><span>PatternMatch</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/PortableMatch.html"><span class="micon tr"></span><span>PortableMatch</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleApplier.html"><span class="micon tr"></span><span>ReversibleApplier</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleSearcher.html"><span class="micon tr"></span><span>ReversibleSearcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/ReversibleSearcher$.html"><span class="micon ob"></span><span>ReversibleSearcher</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/ReversibleSearcher$$SinglePhaseReversibleSearcher.html"><span class="micon cl"></span><span>SinglePhaseReversibleSearcher</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleSearcherPhase.html"><span class="micon tr"></span><span>ReversibleSearcherPhase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/Searcher.html"><span class="micon tr"></span><span>Searcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/Searcher$.html"><span class="micon ob"></span><span>Searcher</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Filter.html"><span class="micon cl"></span><span>Filter</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Flatten.html"><span class="micon cl"></span><span>Flatten</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Map.html"><span class="micon cl"></span><span>Map</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfPatternMatch.html"><span class="micon cl"></span><span>SearcherOfPatternMatch</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfPatternMatchProductOps.html"><span class="micon cl"></span><span>SearcherOfPatternMatchProductOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfSeqOfTraversableOps.html"><span class="micon cl"></span><span>SearcherOfSeqOfTraversableOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfSeqOps.html"><span class="micon cl"></span><span>SearcherOfSeqOps</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/SearcherPhase.html"><span class="micon tr"></span><span>SearcherPhase</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="saturation.html"><span class="micon pa"></span><span>saturation</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="saturation/priorities.html"><span class="micon pa"></span><span>priorities</span></a></span><div class="ni n4 "><span class="nh "><a href="saturation/priorities/CurveFittedPriorities.html"><span class="micon cl"></span><span>CurveFittedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/MatchPriorities.html"><span class="micon tr"></span><span>MatchPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/PrioritizedMatch.html"><span class="micon cl"></span><span>PrioritizedMatch</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/ReweightedPriorities.html"><span class="micon tr"></span><span>ReweightedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/UniformPriorities.html"><span class="micon cl"></span><span>UniformPriorities</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRule.html"><span class="micon cl"></span><span>BackoffRule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleApplication.html"><span class="micon cl"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleApplication$.html"><span class="micon ob"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleStats.html"><span class="micon cl"></span><span>BackoffRuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRecordedApplications.html"><span class="micon cl"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRecordedApplications$.html"><span class="micon ob"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRoot.html"><span class="micon cl"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRoot$.html"><span class="micon ob"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplication.html"><span class="micon cl"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplication$.html"><span class="micon ob"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>MaximalRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Rebase.html"><span class="micon cl"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Rebase$.html"><span class="micon ob"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/RepeatUntilStableBuilder.html"><span class="micon cl"></span><span>RepeatUntilStableBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/RuleStats.html"><span class="micon cl"></span><span>RuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/SearchAndApply.html"><span class="micon tr"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/SearchAndApply$.html"><span class="micon ob"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplication.html"><span class="micon cl"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplication$.html"><span class="micon ob"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>StochasticRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Strategy.html"><span class="micon tr"></span><span>Strategy</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="saturation/Strategy$.html"><span class="micon ob"></span><span>Strategy</span></a></span><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithMetadata.html"><span class="micon cl"></span><span>WithMetadata</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithMetadataAndRoot.html"><span class="micon cl"></span><span>WithMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRecordedApplications.html"><span class="micon cl"></span><span>WithRecordedApplications</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRecordingMetadataAndRoot.html"><span class="micon cl"></span><span>WithRecordingMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRoot.html"><span class="micon cl"></span><span>WithRoot</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="saturation/TransformAndRebase.html"><span class="micon cl"></span><span>TransformAndRebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/TransformAndRebase$.html"><span class="micon ob"></span><span>TransformAndRebase</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="AddNodeResult.html"><span class="micon tr"></span><span>AddNodeResult</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="AddNodeResult$.html"><span class="micon ob"></span><span>AddNodeResult</span></a></span><div class="ni n3 "><span class="nh "><a href="AddNodeResult$$Added.html"><span class="micon cl"></span><span>Added</span></a></span></div><div class="ni n3 "><span class="nh "><a href="AddNodeResult$$AlreadyThere.html"><span class="micon cl"></span><span>AlreadyThere</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="EClassCall.html"><span class="micon cl"></span><span>EClassCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EClassRef.html"><span class="micon cl"></span><span>EClassRef</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraph.html"><span class="micon tr"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraph$.html"><span class="micon ob"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphLike.html"><span class="micon tr"></span><span>EGraphLike</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphWithPendingUnions.html"><span class="micon cl"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphWithPendingUnions$.html"><span class="micon ob"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ENode.html"><span class="micon cl"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ENode$.html"><span class="micon ob"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="MixedTree.html"><span class="micon tr"></span><span>MixedTree</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="MixedTree$.html"><span class="micon ob"></span><span>MixedTree</span></a></span><div class="ni n3 "><span class="nh "><a href="MixedTree$$Atom.html"><span class="micon cl"></span><span>Atom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$MixedTreeOfEClassCallOps.html"><span class="micon cl"></span><span>MixedTreeOfEClassCallOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$MixedTreeOfPatternOps.html"><span class="micon cl"></span><span>MixedTreeOfPatternOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$Node.html"><span class="micon cl"></span><span>Node</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="Permutation.html"><span class="micon tr"></span><span>Permutation</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ShapeCall.html"><span class="micon cl"></span><span>ShapeCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Slot.html"><span class="micon tr"></span><span>Slot</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="Slot$.html"><span class="micon ob"></span><span>Slot</span></a></span><div class="ni n3 "><span class="nh "><a href="Slot$$NumberedSlot.html"><span class="micon cl"></span><span>NumberedSlot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="Slot$$UniqueSlot.html"><span class="micon cl"></span><span>UniqueSlot</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="SlotMap.html"><span class="micon cl"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="SlotMap$.html"><span class="micon ob"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Tree.html"><span class="micon cl"></span><span>Tree</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Tree$.html"><span class="micon ob"></span><span>Tree</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../util.html"><span class="micon pa"></span><span>util</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/collections.html"><span class="micon pa"></span><span>collections</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../util/collections/StrictMapOps$.html"><span class="micon ob"></span><span>StrictMapOps</span></a></span><div class="ni n4 "><span class="nh "><a href="../util/collections/StrictMapOps$$Ops.html"><span class="micon cl"></span><span>Ops</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/ordering.html"><span class="micon pa"></span><span>ordering</span></a></span><div class="ni n3 "><span class="nh "><a href="../util/ordering/SeqOrdering$.html"><span class="micon ob"></span><span>SeqOrdering</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/random.html"><span class="micon pa"></span><span>random</span></a></span><div class="ni n3 "><span class="nh "><a href="../util/random/DiscreteDistribution.html"><span class="micon tr"></span><span>DiscreteDistribution</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Random.html"><span class="micon tr"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Random$.html"><span class="micon ob"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Sample$.html"><span class="micon ob"></span><span>Sample</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/ShiftedGeometricDistribution.html"><span class="micon cl"></span><span>ShiftedGeometricDistribution</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../util/DotPrinter.html"><span class="micon cl"></span><span>DotPrinter</span></a></span></div></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../index.html">foresight</a>/<a href="../../foresight.html">foresight</a>/<a href="../eqsat.html">foresight.eqsat</a>/<a href="lang.html">foresight.eqsat.lang</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon pa"></span></span>
+ <h1 class="h600 single">foresight.eqsat.lang</h1>
+</div>
+<div class="fqname body-large">
+ <span></span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="lang.html" t="n" class="documentableName ">foresight.eqsat.lang</a>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc">
+  <p>Defines the type classes and data types that connect a surface AST (your domain language) to Foresight’s core e-graph representation. It lets you describe how your AST maps to e-graph nodes, mark which wrappers are leaf atoms, encode and decode between surface terms and mixed trees, build rules from surface syntax, and embed analysis results back into the surface language.</p>
+  <p>The API is intentionally minimal and strongly typed. In practice most users only derive <a href="lang/Language.html">foresight.eqsat.lang.Language</a> and add <code>derives Box</code> to a few case classes.</p>
+  <h2><a href="#core-abstractions" id="core-abstractions">Core abstractions</a></h2>
+  <p><a href="lang/Language.html">foresight.eqsat.lang.Language</a> defines the bridge for a surface language <code>E</code>. It provides:</p>
+  <ul>
+   <li><code>toTree</code> and <code>fromTree</code>: conversion between surface expressions and core trees.</li>
+   <li><code>toSearcher</code>, <code>toApplier</code>, and <code>rule</code>: ways to build rewrite patterns directly from surface syntax.</li>
+   <li><code>opOrdering</code>: a deterministic ordering over nodes for reproducibility.</li>
+  </ul>
+  <p><a href="lang/LanguageOp.html">foresight.eqsat.lang.LanguageOp</a> is the canonical node representation the e-graph stores for a given language. You never construct it directly; obtain it through a <code>Language[E]</code>. An <code>Ordering[LanguageOp[E]]</code> is summonable whenever a <code>Language[E]</code> is in scope.</p>
+  <p><a href="lang/Box.html">foresight.eqsat.lang.Box</a> and <a href="lang/AsAtom.html">foresight.eqsat.lang.AsAtom</a> mark a wrapper type <code>A</code> as a leaf atom, whose stored payload type is <code>Payload</code>. You can write <code>derives Box</code> on single-field case classes to derive this automatically, and the corresponding <code>AsAtom[A, Payload]</code> bridge will be provided.</p>
+  <p><a href="lang.html#AtomEncoder-0">foresight.eqsat.lang.AtomEncoder</a> and <a href="lang.html#AtomDecoder-0">foresight.eqsat.lang.AtomDecoder</a> handle encoding and decoding between surface values and payloads. These are usually derived automatically from <code>Atom</code> and <code>AsAtom</code> instances.</p>
+  <p><a href="lang/AnalysisBox.html">foresight.eqsat.lang.AnalysisBox</a> is evidence that your language can box an analysis result <code>A</code> into an <code>E</code> node (for example, <code>Fact[A]</code>). This enables reconstruction of surface terms from analysis results.</p>
+  <p><a href="lang/Use.html">foresight.eqsat.lang.Use</a> and <a href="lang/Def.html">foresight.eqsat.lang.Def</a> are lightweight wrappers to distinguish between read sites and binder sites, commonly over <a href="Slot.html">Slot</a>. Implicit conversions from <code>Slot</code> keep call sites clean.</p>
+  <h2><a href="#getting-started" id="getting-started">Getting started</a></h2>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.lang._
+</span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting.{Rule, ReversibleSearcher}
+</span><span line-number="3" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting.patterns.Pattern
+</span><span line-number="4" class=""><span class="tooltip-container"></span>
+</span><span line-number="5" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="6" class=""><span class="tooltip-container"></span>final case class Lit(i: Int)           extends Expr derives Box
+</span><span line-number="7" class=""><span class="tooltip-container"></span>final case class Add(x: Expr, y: Expr) extends Expr
+</span><span line-number="8" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall)   extends Expr derives Box
+</span><span line-number="9" class=""><span class="tooltip-container"></span>
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val Lang = summon[Language[Expr]]
+</span><span line-number="11" class=""><span class="tooltip-container"></span>
+</span><span line-number="12" class=""><span class="tooltip-container"></span>val pat: Lang.MTree[Pattern.Var] =
+</span><span line-number="13" class=""><span class="tooltip-container"></span> Lang.toTree(Add(Ref(ec1), Ref(ec2)))
+</span><span line-number="14" class=""><span class="tooltip-container"></span>
+</span><span line-number="15" class=""><span class="tooltip-container"></span>val r: Rule[Lang.Op, PatternMatch[Lang.Op], ?] =
+</span><span line-number="16" class=""><span class="tooltip-container"></span> Lang.rule("comm-add", Add(x, y), Add(y, x))
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <h2><a href="#atoms" id="atoms">Atoms</a></h2>
+  <p>Single-field wrappers, such as handles or IDs, can be made first-class <a href="MixedTree.html">MixedTree</a> atoms by deriving <code>Atom</code>.</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Box
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>If a case is not a single-field product, provide a manual <code>Atom</code> and <code>AsAtom</code> instance.</p>
+  <h2><a href="#encoding-and-decoding" id="encoding-and-decoding">Encoding and decoding</a></h2>
+  <p>Encoders and decoders are derived when possible. For example:</p>
+  <ul>
+   <li><code>AtomEncoder[Expr, Int]</code> succeeds on <code>Lit(i)</code> and yields <code>i</code>.</li>
+   <li><code>AtomDecoder[Expr, EClassCall]</code> succeeds on <code>Ref(id)</code> and yields <code>Ref(id)</code>.</li>
+  </ul>
+  <p>You rarely need to implement these by hand. Add <code>derives Box</code> to your single-field wrappers and let the compiler summon the right instances.</p>
+  <h2><a href="#analysis-integration" id="analysis-integration">Analysis integration</a></h2>
+  <p>If your language can wrap analysis results, such as <code>Fact[A] &lt;: Expr</code>, provide an <code>AnalysisBox</code>:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>given AnalysisBox[Expr] with
+</span><span line-number="2" class=""><span class="tooltip-container"></span> type Box[X] = Fact[X]
+</span><span line-number="3" class=""><span class="tooltip-container"></span> def box[X](x: X) = Fact(x)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <p>This enables decoders like <code>AtomDecoder[Expr, AnalysisFact[A]]</code> and allows utilities such as <code>Language.fromAnalysisNode</code> to reconstruct surface terms from analysis views.</p>
+  <h2><a href="#slots-binders-and-uses" id="slots-binders-and-uses">Slots, binders, and uses</a></h2>
+  <p>Use <code>Def[Slot]</code> to represent binders and <code>Use[Slot]</code> for read sites. Implicit conversions from <code>Slot</code> keep code concise:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Lambda(param: Def[Slot], body: Expr) extends Expr
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Var(param: Use[Slot]) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val s = Slot.fresh()
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Lambda(s, Var(s)) // creates Lambda(Def(s), Use(s))
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+  <h2><a href="#checklist" id="checklist">Checklist</a></h2>
+  <ul>
+   <li>Add <code>derives Box</code> to single-field wrappers.</li>
+   <li>Implement or derive a single <code>Language[E]</code> for your AST.</li>
+   <li>Build rules and patterns with surface terms through <code>Language</code>.</li>
+   <li>Provide an <code>AnalysisBox[E]</code> if analyses should appear as surface nodes.</li>
+  </ul>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes"></dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Type-members">
+     <div data-togglable="Type members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Type members" class="h400">Type members</h3>
+      </div>
+      <section id="Classlikes">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Classlikes</h4>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/AnalysisBox.html" t="n" class="documentableName ">AnalysisBox</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Witness describing how a language <code>E</code> boxes analysis results into its AST.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Witness describing how a language <code>E</code> boxes analysis results into its AST.</p>
+              <p>In equality saturation, analyses compute values <code>A</code> (constants, types, costs, …) associated with nodes. To expose these results uniformly at the surface language level, the language provides a wrapper type <code>Box[A]</code> (a case class or ADT constructor) that embeds an <code>A</code> back into the AST.</p>
+              <p><code>AnalysisBox[E]</code> is the evidence that such a wrapper exists. It tells the system:</p>
+              <ul>
+               <li>given a result type <code>A</code>,</li>
+               <li>how to construct a node <code>Box[A]</code> that is itself an <code>E</code>.</li>
+              </ul>
+              <h3><a href="#members" id="members">Members</a></h3>
+              <ul>
+               <li><a href="lang/AnalysisBox.html#Box-0">Box</a> — a type constructor describing the wrapper (e.g. <code>AnalysisFact[A]</code>).</li>
+               <li><a href="lang/AnalysisBox.html#box-957">box</a> — the function that actually wraps a value into <code>E</code>.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>Surface language whose AST can embed analysis facts.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Suppose your surface language <code>ArithExpr</code> has a case class to hold analysis results:</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Const(value: BigInt) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A) extends ArithExpr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>given AnalysisBox[ArithExpr] with
+</span><span line-number="5" class=""><span class="tooltip-container"></span> type Box[A] = Fact[A]
+</span><span line-number="6" class=""><span class="tooltip-container"></span> def box[A](x: A): Fact[X] = Fact(x)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Now any analysis result can be boxed back into the AST:
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val L = summon[Language[ArithExpr]]
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val expr: ArithExpr = ab.fromAnalysisNode(...)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                 <p>This makes it possible to reconstruct surface <code>E</code> terms from analysis nodes in a generic way (see <a href="lang/Language.html#fromAnalysisNode-bfc">Language.fromAnalysisNode</a>).</p>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/AnalysisBox$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/AnalysisBox$.html" t="n" class="documentableName ">AnalysisBox</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/AnalysisBox.html">AnalysisBox</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/AnalysisBox.html">AnalysisBox</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/AnalysisBox.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/AnalysisBox$.html" t="n">AnalysisBox</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="lang/AnalysisFact.html" t="n" class="documentableName ">AnalysisFact</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">value</span>: <span data-unresolved-link="" t="t">A</span>)<span t="k"> extends </span><span data-unresolved-link="" t="t">AnyVal</span></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A wrapper for a value of type A that represents a fact in the context of an analysis. It is used to store information that can be used during the analysis phase of an e-graph.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the value stored in the analysis fact.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               value
+              </dt>
+              <dd class="body-medium">
+               <p>The value of the analysis fact.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">AnyVal</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/AsAtom.html" t="n" class="documentableName ">AsAtom</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>, <span t="k"></span><span data-unresolved-link="" t="t">B</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Bidirectional bridge between a surface type <code>T</code> and its atom payload <code>B</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Bidirectional bridge between a surface type <code>T</code> and its atom payload <code>B</code>.</p>
+              <p>An <code>AsAtom[T, B]</code> acts like a tiny isomorphism:</p>
+              <ul>
+               <li><a href="lang/AsAtom.html#toAtom-d26">toAtom</a> : <code>T =&gt; B</code> (strip the wrapper to the leaf payload)</li>
+               <li><a href="lang/AsAtom.html#fromAtom-d26">fromAtom</a> : <code>B =&gt; T</code> (rebuild the surface value from the payload)</li>
+              </ul>
+              <p>You will most often not write this by hand. If <code>T</code> has a <code>Box[T]</code> instance, an <code>AsAtom[T, B]</code> (with <code>B = Atom[T]#Payload</code>) can be derived automatically.</p>
+              <h3><a href="#laws" id="laws">Laws</a></h3>
+              <p>Implementations are expected to satisfy:</p>
+              <ul>
+               <li><code>fromAtom(toAtom(t)) == t</code> (left inverse)</li>
+               <li><code>toAtom(fromAtom(b)) == b</code> (right inverse)</li>
+              </ul>
+              <p>Violating these laws can lead to incorrect decoding or non-idempotent rewrites.</p>
+              <h3><a href="#typical-usage" id="typical-usage">Typical usage</a></h3>
+              <ul>
+               <li>Inside encoders/decoders where you need to project/inject atom payloads.</li>
+               <li>In utilities that operate generically over “atom-like” wrappers.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) derives Box
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val bridge: AsAtom[Ref, EClassCall] = summon[AsAtom[Ref, EClassCall]]
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val id: EClassCall = bridge.toAtom(Ref(id))
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref: Ref       = bridge.fromAtom(id)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/AsAtom$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/AsAtom$.html" t="n" class="documentableName ">AsAtom</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/AsAtom.html">AsAtom</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/AsAtom.html">AsAtom</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/AsAtom.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/AsAtom$.html" t="n">AsAtom</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/AtomDecoder$.html" t="n" class="documentableName ">AtomDecoder</a><span t="k"> extends </span><a href="lang/LowPriorityAtomDecoder.html" t="t">LowPriorityAtomDecoder</a></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang.html#AtomDecoder-0">AtomDecoder</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang.html#AtomDecoder-0">AtomDecoder</a>.</p>
+              <p>Provides constructors, decoders, and instances.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <a href="lang/LowPriorityAtomDecoder.html" t="n">LowPriorityAtomDecoder</a>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/AtomDecoder$.html" t="n">AtomDecoder</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/AtomEncoder$.html" t="n" class="documentableName ">AtomEncoder</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion for <code>AtomEncoder[E, A]</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion for <code>AtomEncoder[E, A]</code>.</p>
+              <p>Provides a derived instance for sum types, and a shorthand to run an encoder.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/AtomEncoder$.html" t="n">AtomEncoder</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/Box.html" t="n" class="documentableName ">Box</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Type class declaring that a surface type <code>A</code> should appear as a leaf atom in a <code>MixedTree</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Type class declaring that a surface type <code>A</code> should appear as a leaf atom in a <code>MixedTree</code>.</p>
+              <p><code>Box[A]</code> is an opt-in witness: by defining or deriving an instance, you state that values of <code>A</code> are stored as leaf payloads rather than core language nodes. The associated type <a href="lang/Box.html#Payload-0">Payload</a> names the concrete type actually stored at the leaves, and <a href="lang/Box.html#asAtom-0">asAtom</a> provides a bidirectional bridge between <code>A</code> and <code>Payload</code>.</p>
+              <p>When to use: Mark single-field wrappers (e.g., handles, slots, small value wrappers) as <code>derives Box</code>.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>surface type to be treated as an atom (leaf).</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Typical usage (single-field wrapper as an atom)</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Box
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val L = summon[Language[Expr]]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val ref = Ref(id)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val tree = L.toTree[EClassCall](ref) // yields MixedTree.Atom(id)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Box$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/Box$.html" t="n" class="documentableName ">Box</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/Box.html">Box</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/Box.html">Box</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Box.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/Box$.html" t="n">Box</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="lang/Def.html" t="n" class="documentableName ">Def</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">value</span>: <span data-unresolved-link="" t="t">A</span>)<span t="k"> extends </span><span data-unresolved-link="" t="t">AnyVal</span></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Labels a value as a binder/definition site in the AST or IR.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Labels a value as a binder/definition site in the AST or IR.</p>
+              <p>In slotted e-graphs, both binders and uses are represented as raw <a href="Slot.html">Slot</a>s. Wrapping them as <code>Def[A]</code> (and its counterpart <code>Use[A]</code>) makes intent explicit in type signatures and constructors, while staying allocation-free at runtime (<code>AnyVal</code>).</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>the underlying payload (commonly <a href="Slot.html">Slot</a>)</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lambda(param: Use[Slot], body: Expr) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Var(slot: Use[Slot]) extends Expr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val x = Slot.fresh()
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Lambda(Def(x), Var(Use(x))) // defines slot x
+</span><span line-number="6" class=""><span class="tooltip-container"></span>Lambda(x, Var(x))           // also defines slot x, but less explicit
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Def$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">AnyVal</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/Def$.html" t="n" class="documentableName ">Def</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/Def.html">Def</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/Def.html">Def</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Def.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/Def$.html" t="n">Def</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/Language.html" t="n" class="documentableName ">Language</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Type class describing how a surface AST <code>E</code> maps to the core e-graph language.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Type class describing how a surface AST <code>E</code> maps to the core e-graph language.</p>
+              <p>A <code>Language[E]</code> provides:</p>
+              <ul>
+               <li>a node type alias <a href="lang/Language.html#Op-0">Op</a> (backed by <code>LanguageOp[E]</code>) that the e-graph stores,</li>
+               <li>encoding/decoding between <code>E</code> and a core tree <a href="lang/Language.html#MTree-0">MTree</a>,</li>
+               <li>an ordering over nodes (for deterministic e-graph behavior),</li>
+               <li>convenience bridges from <code>E</code> values to matchers/appliers/rules,</li>
+               <li>helpers to reconstruct <code>E</code> from analysis or extraction results.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Encoding and rules at a glance</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// ...
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val Lang = summon[Language[ArithExpr]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val e: ArithExpr = Add( /* ... */ )
+</span><span line-number="6" class=""><span class="tooltip-container"></span>// Encode to a core tree
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val t: Lang.MTree[Pattern.Var] = Lang.toTree[Pattern.Var](e)
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a rewrite rule directly from surface syntax
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val r = Lang.rule("comm-add", Add(x, y), Add(y, x))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Language$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/Language$.html" t="n" class="documentableName ">Language</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/Language.html">Language</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/Language.html">Language</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Language.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/Language$.html" t="n">Language</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/LanguageAnalysis.html" t="n" class="documentableName ">LanguageAnalysis</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">x$1</span>: <a href="lang/Language.html" t="t">Language</a>[<span data-unresolved-link="" t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">x$2</span>: <a href="lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span data-unresolved-link="" t="t">E</span>, <a href="lang/AnalysisFact.html" t="t">AnalysisFact</a>[<span data-unresolved-link="" t="t">A</span>]])<span t="k"> extends </span><a href="metadata/Analysis.html" t="t">Analysis</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">A</span>]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A helper trait for defining analyses over a Language with an expression type E.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A helper trait for defining analyses over a Language with an expression type E.</p>
+              <p>This trait leverages the Language's ability to construct an expression E from its analysis nodes, allowing you to write your analysis logic directly in terms of E rather than the raw analysis node structure.</p>
+              <p>To use this trait, implement the <code>make(expr: E): A</code> method with your analysis logic. The <code>make</code> method that takes the analysis node and its arguments is provided for you and will construct the view E before delegating to your implementation.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>The result type of the analysis.</p>
+              </dd>
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>The view type provided by the Language.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <a href="metadata/Analysis.html" t="n">Analysis</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">A</span>]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/LanguageCostFunction.html" t="n" class="documentableName ">LanguageCostFunction</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">C</span>](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span data-unresolved-link="" t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">dec</span>: <a href="lang.html#AtomDecoder-0" t="t">AtomDecoder</a>[<span data-unresolved-link="" t="t">E</span>, <a href="lang/AnalysisFact.html" t="t">AnalysisFact</a>[<span data-unresolved-link="" t="t">C</span>]])<span t="k"> extends </span><a href="extraction/CostFunction.html" t="t">CostFunction</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">C</span>]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Defines extraction cost functions in terms of a surface AST <code>E</code> rather than raw e-graph nodes.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Defines extraction cost functions in terms of a surface AST <code>E</code> rather than raw e-graph nodes.</p>
+              <p>Instead of implementing a low-level <span data-unresolved-link="" title="Problem linking CostFunction: No DRI found for query">CostFunction</span> over <code>LanguageOp[E]</code>, you implement:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>def apply(expr: E): C
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <p>The framework will:</p>
+              <ol>
+               <li>Reconstruct a surface expression <code>E</code> from the e-graph analysis view (operator, binders/uses, and child costs).</li>
+               <li>Instantiate children using your language-specific <code>AnalysisBox[E]</code>. Concretely, if you provide a given <code>AnalysisBox[E] { type Box[A] = X[A] }</code>, then each child is wrapped as <code>X[C]</code> (e.g., for <code>ArithExpr</code>, children appear as <code>Fact[C]</code>).</li>
+               <li>Delegate to your <code>apply(expr: E)</code> to compute the cost.</li>
+              </ol>
+              <p>This lets you write compositional cost functions over your own AST while leveraging the extraction engine’s incremental computation of child costs.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               C
+              </dt>
+              <dd class="body-medium">
+               <p>The cost type, which can be a number, tuple, or any custom structure that represents the cost of the expression.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               L
+              </dt>
+              <dd class="body-medium">
+               <p>Encodes/decodes <code>E</code> to/from the core e-graph language and can rebuild surface nodes from analysis views.</p>
+              </dd>
+              <dt class="body-small">
+               dec
+              </dt>
+              <dd class="body-medium">
+               <p>Decoder for your boxed child costs. If you use a language-specific <code>AnalysisBox[E]</code> with <code>type Box[A] = X[A]</code>, then you need an <code>AtomDecoder[E, X[C]]</code> so the reconstruction can embed child costs in your box type.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>For a language like:</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
+</span><span line-number="4" class=""><span class="tooltip-container"></span>final case class Number(value: BigInt)               extends ArithExpr
+</span><span line-number="5" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A)                   extends ArithExpr
+</span><span line-number="6" class=""><span class="tooltip-container"></span>object ArithExpr:
+</span><span line-number="7" class=""><span class="tooltip-container"></span> given AnalysisBox[ArithExpr] with
+</span><span line-number="8" class=""><span class="tooltip-container"></span>   type Box[A] = Fact[A]
+</span><span line-number="9" class=""><span class="tooltip-container"></span>   def box[A](a: A): Fact[A] = Fact(a)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                 <p>a surface-level cost function can access child costs via the language box (<code>Fact[C]</code>):</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>object SizeCost extends LanguageCostFunction[ArithExpr, Int]:
+</span><span line-number="2" class=""><span class="tooltip-container"></span> def apply(expr: ArithExpr): Int = expr match
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   case Number(_)        =&gt; 1
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   case Add(Fact(l: Int), Fact(r: Int)) =&gt; 1 + l + r // child costs from Fact[Int]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   case Mul(Fact(l: Int), Fact(r: Int)) =&gt; 1 + l + r
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                 <p>The key point is that children are not raw subtrees: they are the same surface constructors, but where child positions encode precomputed costs using your <code>AnalysisBox[E]</code> (e.g., <code>Fact[C]</code>).</p>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <a href="extraction/CostFunction.html" t="n">CostFunction</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">C</span>]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/LanguageExtractor.html" t="n" class="documentableName ">LanguageExtractor</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">Repr</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">Repr</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>]]](<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span data-unresolved-link="" t="t">E</span>])
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>An extractor that converts e-graph references (e-class calls) into surface language expressions. Implementations define the extraction policy (e.g., cost-based or heuristic).</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>An extractor that converts e-graph references (e-class calls) into surface language expressions. Implementations define the extraction policy (e.g., cost-based or heuristic).</p>
+              <p>Determinism depends on the extractor and the e-graph contents. If multiple trees are equally optimal under the policy, the chosen tree may be implementation-defined.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>The surface expression type stored in the e-graph and produced in the resulting expression.</p>
+              </dd>
+              <dt class="body-small">
+               Repr
+              </dt>
+              <dd class="body-medium">
+               <p>The concrete e-graph type, which must implement both <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="lang/LanguageOp.html" t="n" class="documentableName ">LanguageOp</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Canonical node representation for a surface language <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Canonical node representation for a surface language <code>E</code>.</p>
+              <p><code>LanguageOp[E]</code> is the internal node type used by e-graphs. It is not constructed directly; instead, use the encoders and tree-conversion methods provided by <a href="lang/Language.html">Language</a>. This ensures that nodes are created consistently and can be compared, ordered, and rewritten reliably.</p>
+              <p>Key points:</p>
+              <ul>
+               <li>Each surface language <code>E</code> has an associated <code>LanguageOp[E]</code> type.</li>
+               <li>You typically encounter it inside <a href="MixedTree.html">MixedTree</a> or when working with an <a href="EGraph.html">EGraph</a> that has been parameterized by your language.</li>
+               <li>You do not construct or pattern match on it yourself. Go through the <code>Language[E]</code> instance instead.</li>
+              </ul>
+              <p>Example:</p>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait ArithExpr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Add(x: ArithExpr, y: ArithExpr) extends ArithExpr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val Lang = summon[Language[ArithExpr]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val expr: ArithExpr = Add(x, y)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>
+</span><span line-number="7" class=""><span class="tooltip-container"></span>// Core representation: tree of LanguageOp[ArithExpr] + atoms
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val tree: Lang.MTree[Pattern.Var] = Lang.toTree(expr)
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               E
+              </dt>
+              <dd class="body-medium">
+               <p>the surface language this node belongs to.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/LanguageOp$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/LanguageOp$.html" t="n" class="documentableName ">LanguageOp</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/LanguageOp.html">LanguageOp</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/LanguageOp.html">LanguageOp</a>.</p>
+              <p>Provides utilities and implicits related to <code>LanguageOp</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/LanguageOp.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/LanguageOp$.html" t="n">LanguageOp</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="lang/LowPriorityAtomDecoder.html" t="n" class="documentableName ">LowPriorityAtomDecoder</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Low-priority derivation for sum types <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Low-priority derivation for sum types <code>E</code>.</p>
+              <p>If <code>E</code> is a sealed trait/enum and some of its cases have an <code>AsAtom[Case, A]</code>, the derived decoder tries each such case in order until one succeeds.</p>
+              <p>Priority: these derived instances are lower priority than the specific bridges above, so explicit instances or <code>AnalysisBox</code>/<code>AsAtom</code> bridges win when present.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Known subtypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block subtypes">
+                <div>
+                 object <a href="lang/AtomDecoder$.html" t="n">AtomDecoder</a>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="lang/Use.html" t="n" class="documentableName ">Use</a>[<span t="k"></span><span data-unresolved-link="" t="t">A</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">value</span>: <span data-unresolved-link="" t="t">A</span>)<span t="k"> extends </span><span data-unresolved-link="" t="t">AnyVal</span></span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Labels a value as a use/read site in the AST or IR.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Labels a value as a use/read site in the AST or IR.</p>
+              <p>In slotted e-graphs, binders and uses are often both represented as <a href="Slot.html">Slot</a>s. Wrapping them in <code>Use[A]</code> (and its counterpart <code>Def[A]</code>) makes intent explicit in type signatures and constructors while remaining allocation-free at runtime (<code>AnyVal</code>).</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               A
+              </dt>
+              <dd class="body-medium">
+               <p>the underlying payload (often <a href="Slot.html">Slot</a>)</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Var(param: Use[Slot]) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val x = Slot.fresh()
+</span><span line-number="4" class=""><span class="tooltip-container"></span>Var(Use(x)) // a use of slot x
+</span><span line-number="5" class=""><span class="tooltip-container"></span>Var(x)      // also a use of slot x, but less explicit
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Use$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">AnyVal</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="lang/Use$.html" t="n" class="documentableName ">Use</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Companion object for <a href="lang/Use.html">Use</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Companion object for <a href="lang/Use.html">Use</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="lang/Use.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="lang/Use$.html" t="n">Use</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+      <section id="Types">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Types</h4>
+        </div>
+        <div class="documentableElement" id="AtomDecoder-0" data-f-keywords="opaque">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">opaque </span></span><span class="kind"><span t="k">type </span></span><a href="lang.html#AtomDecoder-0" t="n" class="documentableName ">AtomDecoder</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A decoder from leaf payloads <code>A</code> back to the surface language <code>E</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A decoder from leaf payloads <code>A</code> back to the surface language <code>E</code>.</p>
+              <p>Conceptually, <code>AtomDecoder[E, A]</code> tries to interpret an atom (leaf) of type <code>A</code> as an <code>E</code> term. It is <em>partial</em>—decoding may fail—and therefore returns <code>Option[E]</code>.</p>
+              <p>Typical sources of decoders:</p>
+              <ul>
+               <li>From an <code>Atom</code>/<code>AsAtom</code> bridge for a constructor <code>C &lt;: E</code> whose payload type is <code>A</code>.</li>
+               <li>From an <code>AnalysisBox[E]</code> when the payload is <code>AnalysisFact[A]</code> (embed analysis results).</li>
+               <li>Via automatic derivation for sum types <code>E</code> (tries each case that has an <code>AsAtom</code> bridge).</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>Single-field wrappers as atoms</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Box
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Bridge exists:
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val dec: AtomDecoder[Expr, EClassCall] = summon[AtomDecoder[Expr, EClassCall]]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>dec(id)            // Some(Ref(id))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+                <div>
+                 <p>Boxing analysis results</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Fact[A](value: A) extends Expr
+</span><span line-number="3" class=""><span class="tooltip-container"></span>given AnalysisBox[Expr] with
+</span><span line-number="4" class=""><span class="tooltip-container"></span> type Box[X] = Fact[X]
+</span><span line-number="5" class=""><span class="tooltip-container"></span> def box[X](x: X) = Fact(x)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val decF: AtomDecoder[Expr, AnalysisFact[Int]] =
+</span><span line-number="7" class=""><span class="tooltip-container"></span> summon[AtomDecoder[Expr, AnalysisFact[Int]]]
+</span><span line-number="8" class=""><span class="tooltip-container"></span>decF(AnalysisFact(42)) // Some(Fact(42))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+                <div>
+                 <p>Fallback/derivation for sums</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lit(i: Int) extends Expr derives Box
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Box
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val dInt: AtomDecoder[Expr, Int]        = summon
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val dRef: AtomDecoder[Expr, EClassCall] = summon
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="AtomEncoder-0" data-f-keywords="opaque">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">opaque </span></span><span class="kind"><span t="k">type </span></span><a href="lang.html#AtomEncoder-0" t="n" class="documentableName ">AtomEncoder</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">A</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Encoder from a surface value <code>E</code> to a leaf payload <code>A</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Encoder from a surface value <code>E</code> to a leaf payload <code>A</code>.</p>
+              <p>Conceptually, <code>AtomEncoder[E, A]</code> answers: “If <code>E</code> is a case whose atom payload is <code>A</code>, extract that payload; otherwise, say <code>None</code>.”</p>
+              <p>Its function shape is <code>(E, caseOrdinal) =&gt; Option[A]</code>, where <code>caseOrdinal</code> is the ordinal of the constructor for <code>E</code> (as defined by <code>Mirror.SumOf[E]</code>). When the ordinal matches a case that has an <code>AsAtom[Case, A]</code>, encoding succeeds with <code>Some(payload)</code>; otherwise it returns <code>None</code>.</p>
+              <p>You usually don’t pass ordinals yourself. Higher-level code (e.g., language encoders) supplies the correct ordinal for the current constructor.</p>
+              <p>Typical sources:</p>
+              <ul>
+               <li><strong>Derived</strong> for sealed sum types <code>E</code>: if a case <code>C &lt;: E</code> has <code>AsAtom[C, A]</code> (e.g., via <code>derives Box</code> on a single-field case class), the derived encoder can extract the leaf payload <code>A</code> from values of that case.</li>
+               <li><strong>Manual</strong> instances are rarely needed; prefer adding <code>derives Box</code> to the case and letting <code>AsAtom</code> + derivation do the work.</li>
+              </ul>
+              <h3><a href="#laws" id="laws">Laws</a></h3>
+              <p>For any value <code>e: E</code> of case <code>C</code> with ordinal <code>ordC</code>:</p>
+              <ul>
+               <li>If there is <code>AsAtom[C, A]</code>, then <code>encode(enc, e, ordC)</code> must be <code>Some(a)</code> for the exact payload <code>a</code>, and <code>encode(enc, e, ord)</code> must be <code>None</code> for <code>ord != ordC</code>.</li>
+               <li>If no <code>AsAtom[C, A]</code> exists, encoding returns <code>None</code> for all ordinals.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sealed trait Expr derives Language
+</span><span line-number="2" class=""><span class="tooltip-container"></span>final case class Lit(i: Int) extends Expr derives Box
+</span><span line-number="3" class=""><span class="tooltip-container"></span>final case class Ref(id: EClassCall) extends Expr derives Box
+</span><span line-number="4" class=""><span class="tooltip-container"></span>// Encoders exist for each payload type that a case exposes:
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val encInt: AtomEncoder[Expr, Int] = summon
+</span><span line-number="6" class=""><span class="tooltip-container"></span>val encEClassCall: AtomEncoder[Expr, EClassCall] = summon
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val L = summon[Language[Expr]]
+</span><span line-number="8" class=""><span class="tooltip-container"></span>val lit = Lit(42)
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val ref = Ref(eclass)
+</span><span line-number="10" class=""><span class="tooltip-container"></span>val litTree = L.toTree[Int](lit)(using encInt)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val refTree = L.toTree[EClassCall](ref)(using encEClassCall)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+    <section id="Extensions">
+     <div data-togglable="Extensions" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Extensions" class="h400">Extensions</h3>
+      </div>
+      <section id="Extensions">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Extensions</h4>
+        </div>
+        <div>
+         <span class="groupHeader"><span t="k">extension </span>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="t">This</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>], <span t="t">LazyRef(...)</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<a href="lang/LanguageOp.html" t="t">LanguageOp</a>[<span t="t">E</span>]]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">g</span>: <span t="t">This</span>)</span>
+         <div class="documentableElement" id="add-b9c">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#add-b9c" t="n" class="documentableName ">add</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">expr</span>: <span t="t">E</span>)(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="EClassCall.html" t="t">EClassCall</a>]): (<a href="EClassCall.html" t="t">EClassCall</a>, <span data-unresolved-link="" t="t">This</span>)
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Adds an expression to the EGraph, converting it to an <code>EClassCall</code> using the provided language and encoder.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Adds an expression to the EGraph, converting it to an <code>EClassCall</code> using the provided language and encoder.</p>
+              </div>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                L
+               </dt>
+               <dd class="body-medium">
+                <p>Implicit language instance for converting the expression to a tree.</p>
+               </dd>
+               <dt class="body-small">
+                enc
+               </dt>
+               <dd class="body-medium">
+                <p>Implicit encoder for converting the expression to an <code>EClassCall</code>.</p>
+               </dd>
+               <dt class="body-small">
+                expr
+               </dt>
+               <dd class="body-medium">
+                <p>The expression to add.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                Returns
+               </dt>
+               <dd class="body-medium">
+                <p>A tuple containing the <code>EClassCall</code> created from the expression and the updated EGraph.</p>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="extract-fffff483">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#extract-fffff483" t="n" class="documentableName ">extract</a>[<span t="k"></span><span data-unresolved-link="" t="t">C</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">call</span>: <a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">costFunction</span>: <a href="lang/LanguageCostFunction.html" t="t">LanguageCostFunction</a>[<span t="t">E</span>, <span t="t">C</span>])(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">C</span>]): <span data-unresolved-link="" t="t">E</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Extract a surface expression from this e-graph starting at a given root e-class.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Extract a surface expression from this e-graph starting at a given root e-class.</p>
+               <p>This is a thin convenience wrapper around <a href="lang/Language.html#extract-d93">Language.extract</a>, using the current e-graph <code>g</code>. It:</p>
+               <ul>
+                <li>Builds an extraction analysis from the provided cost function,</li>
+                <li>Enriches <code>g</code> with that analysis (without mutating <code>g</code>),</li>
+                <li>Reconstructs the minimal-cost surface expression rooted at <code>call</code>.</li>
+               </ul>
+              </div>
+              <h2 class="h200">Type parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                C
+               </dt>
+               <dd class="body-medium">
+                <p>The cost type used to rank candidate extractions.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                L
+               </dt>
+               <dd class="body-medium">
+                <p>(using) The <code>Language[E]</code> instance describing how to encode/decode <code>E</code>.</p>
+               </dd>
+               <dt class="body-small">
+                call
+               </dt>
+               <dd class="body-medium">
+                <p>The root e-class to extract from.</p>
+               </dd>
+               <dt class="body-small">
+                costFunction
+               </dt>
+               <dd class="body-medium">
+                <p>Function assigning costs to surface ASTs.</p>
+               </dd>
+               <dt class="body-small">
+                ord
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Ordering on costs of type <code>C</code>.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                Returns
+               </dt>
+               <dd class="body-medium">
+                <p>The extracted surface AST <code>E</code> of minimal cost according to <code>costFunction</code>.</p>
+               </dd>
+               <dt class="body-small">
+                Example
+               </dt>
+               <dd class="body-medium">
+                <div>
+                 <div>
+                  <div class="snippet mono-small-block">
+                   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val cf: LanguageCostFunction[Expr, Int] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val program: Expr = g.extract(rootCall, cf)
+</span></code></pre>
+                   <div class="buttons"></div>
+                  </div>
+                 </div>
+                </div>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="extract-39e">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="lang.html#extract-39e" t="n" class="documentableName ">extract</a>[<span t="k"></span><span data-unresolved-link="" t="t">C</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">exprWithCalls</span>: <span t="t">E</span>, <span t="k"></span><span data-unresolved-link="" t="n">costFunction</span>: <a href="lang/LanguageCostFunction.html" t="t">LanguageCostFunction</a>[<span t="t">E</span>, <span t="t">C</span>])(<span t="k">using </span><span t="k"></span><span data-unresolved-link="" t="n">L</span>: <a href="lang/Language.html" t="t">Language</a>[<span t="t">E</span>], <span t="k"></span><span data-unresolved-link="" t="n">enc</span>: <a href="lang.html#AtomEncoder-0" t="t">AtomEncoder</a>[<span t="t">E</span>, <a href="EClassCall.html" t="t">EClassCall</a>], <span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Ordering</span>[<span t="t">C</span>], <span t="k"></span><span data-unresolved-link="" t="n">ev</span>: <span data-unresolved-link="" t="t">NotGiven</span>[<span t="t">E</span> <span data-unresolved-link="" t="t">=:=</span> <a href="EClassCall.html" t="t">EClassCall</a>]): <span data-unresolved-link="" t="t">E</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Insert a surface expression into this e-graph and immediately extract its minimal-cost equivalent.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Insert a surface expression into this e-graph and immediately extract its minimal-cost equivalent.</p>
+               <p>This is a thin convenience wrapper around <a href="lang/Language.html#extract-d93">Language.extract</a>, using the current e-graph <code>g</code>.</p>
+              </div>
+              <h2 class="h200">Type parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                C
+               </dt>
+               <dd class="body-medium">
+                <p>The cost type used to rank candidate exactions.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                L
+               </dt>
+               <dd class="body-medium">
+                <p>(using) The <code>Language[E]</code> instance describing how to encode/decode <code>E</code>.</p>
+               </dd>
+               <dt class="body-small">
+                costFunction
+               </dt>
+               <dd class="body-medium">
+                <p>Function assigning costs to surface ASTs.</p>
+               </dd>
+               <dt class="body-small">
+                enc
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Encoder from surface AST atoms to <code>EClassCall</code> for insertion.</p>
+               </dd>
+               <dt class="body-small">
+                exprWithCalls
+               </dt>
+               <dd class="body-medium">
+                <p>Surface expression to add and then extract from.</p>
+               </dd>
+               <dt class="body-small">
+                ord
+               </dt>
+               <dd class="body-medium">
+                <p>(using) Ordering on costs of type <code>C</code>.</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">
+                Returns
+               </dt>
+               <dd class="body-medium">
+                <p>The minimal-cost expression equivalent to <code>exprWithCalls</code> under <code>costFunction</code>.</p>
+               </dd>
+               <dt class="body-small">
+                Example
+               </dt>
+               <dd class="body-medium">
+                <div>
+                 <div>
+                  <div class="snippet mono-small-block">
+                   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val cf: LanguageCostFunction[Expr, BigDecimal] = ...
+</span><span line-number="2" class=""><span class="tooltip-container"></span><span class="hideable"> </span>val best: Expr = g.extract(myExpr, cf)
+</span></code></pre>
+                   <div class="buttons"></div>
+                  </div>
+                 </div>
+                </div>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li><li><a href="#Types">Types</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Extensions">Extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

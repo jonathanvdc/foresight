@@ -1,0 +1,2241 @@
+<!DOCTYPE html><html data-pathToRoot="../../" data-rawLocation="foresight/eqsat/saturation" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>foresight.eqsat.saturation</title><link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico"></link><script type="text/javascript" src="../../scripts/theme.js"></script><script type="text/javascript" src="../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../styles/nord-light.css"></link><link rel="stylesheet" href="../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../styles/code-snippets.css"></link><link rel="stylesheet" href="../../styles/searchbar.css"></link><link rel="stylesheet" href="../../styles/social-links.css"></link><link rel="stylesheet" href="../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../styles/content-contributors.css"></link><link rel="stylesheet" href="../../styles/fontawesome.css"></link><script type="text/javascript" src="../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../scripts/data.js" defer="true"></script><link rel="stylesheet" href="../../styles/apistyles.css"></link><script>var pathToRoot = "../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../" class="logo-container"><span class="project-name h300">foresight</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">foresight</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="api-nav-button" class="switcher h100 selected" href="../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../foresight.html"><span class="micon pa"></span><span>foresight</span></a></span><div class="ni n1 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../eqsat.html"><span class="micon pa"></span><span>eqsat</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="commands.html"><span class="micon pa"></span><span>commands</span></a></span><div class="ni n3 "><span class="nh "><a href="commands/AddManyCommand.html"><span class="micon cl"></span><span>AddManyCommand</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/Command.html"><span class="micon tr"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/Command$.html"><span class="micon ob"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueue.html"><span class="micon cl"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueue$.html"><span class="micon ob"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/CommandQueueBuilder.html"><span class="micon cl"></span><span>CommandQueueBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/EClassSymbol.html"><span class="micon tr"></span><span>EClassSymbol</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="commands/EClassSymbol$.html"><span class="micon ob"></span><span>EClassSymbol</span></a></span><div class="ni n4 "><span class="nh "><a href="commands/EClassSymbol$$Real.html"><span class="micon cl"></span><span>Real</span></a></span></div><div class="ni n4 "><span class="nh "><a href="commands/EClassSymbol$$Virtual.html"><span class="micon cl"></span><span>Virtual</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="commands/ENodeSymbol.html"><span class="micon cl"></span><span>ENodeSymbol</span></a></span></div><div class="ni n3 "><span class="nh "><a href="commands/UnionManyCommand.html"><span class="micon cl"></span><span>UnionManyCommand</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="extraction.html"><span class="micon pa"></span><span>extraction</span></a></span><div class="ni n3 "><span class="nh "><a href="extraction/CostAnalysis.html"><span class="micon cl"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostAnalysis$.html"><span class="micon ob"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostFunction.html"><span class="micon tr"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/CostFunction$.html"><span class="micon ob"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionAnalysis.html"><span class="micon cl"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionAnalysis$.html"><span class="micon ob"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTree.html"><span class="micon cl"></span><span>ExtractionTree</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTreeCall.html"><span class="micon cl"></span><span>ExtractionTreeCall</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/ExtractionTreeOrdering.html"><span class="micon cl"></span><span>ExtractionTreeOrdering</span></a></span></div><div class="ni n3 "><span class="nh "><a href="extraction/Extractor.html"><span class="micon tr"></span><span>Extractor</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="lang.html"><span class="micon pa"></span><span>lang</span></a></span><div class="ni n3 "><span class="nh "><a href="lang/AnalysisBox.html"><span class="micon tr"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AnalysisBox$.html"><span class="micon ob"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AnalysisFact.html"><span class="micon cl"></span><span>AnalysisFact</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AsAtom.html"><span class="micon tr"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AsAtom$.html"><span class="micon ob"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AtomDecoder$.html"><span class="micon ob"></span><span>AtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/AtomEncoder$.html"><span class="micon ob"></span><span>AtomEncoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Box.html"><span class="micon tr"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Box$.html"><span class="micon ob"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Def.html"><span class="micon cl"></span><span>Def</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="lang/Def$.html"><span class="micon ob"></span><span>Def</span></a></span><div class="ni n4 "><span class="nh "><a href="lang/Def$$given_Conversion_Slot_Def$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Def</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="lang/Language.html"><span class="micon tr"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Language$.html"><span class="micon ob"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageAnalysis.html"><span class="micon tr"></span><span>LanguageAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageCostFunction.html"><span class="micon tr"></span><span>LanguageCostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageExtractor.html"><span class="micon tr"></span><span>LanguageExtractor</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageOp.html"><span class="micon cl"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LanguageOp$.html"><span class="micon ob"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/LowPriorityAtomDecoder.html"><span class="micon tr"></span><span>LowPriorityAtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="lang/Use.html"><span class="micon cl"></span><span>Use</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="lang/Use$.html"><span class="micon ob"></span><span>Use</span></a></span><div class="ni n4 "><span class="nh "><a href="lang/Use$$given_Conversion_Slot_Use$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Use</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="metadata.html"><span class="micon pa"></span><span>metadata</span></a></span><div class="ni n3 "><span class="nh "><a href="metadata/Analysis.html"><span class="micon tr"></span><span>Analysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="metadata/AnalysisMetadata.html"><span class="micon cl"></span><span>AnalysisMetadata</span></a></span></div><div class="ni n3 "><span class="nh "><a href="metadata/Metadata.html"><span class="micon tr"></span><span>Metadata</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="parallel.html"><span class="micon pa"></span><span>parallel</span></a></span><div class="ni n3 "><span class="nh "><a href="parallel/CancellationToken.html"><span class="micon cl"></span><span>CancellationToken</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/OperationCanceledException.html"><span class="micon cl"></span><span>OperationCanceledException</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/ParallelMap.html"><span class="micon tr"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/ParallelMap$.html"><span class="micon ob"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimedParallelMap.html"><span class="micon cl"></span><span>TimedParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimingReport.html"><span class="micon cl"></span><span>TimingReport</span></a></span></div><div class="ni n3 "><span class="nh "><a href="parallel/TimingReport$.html"><span class="micon ob"></span><span>TimingReport</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="rewriting.html"><span class="micon pa"></span><span>rewriting</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns.html"><span class="micon pa"></span><span>patterns</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/CompiledPattern.html"><span class="micon cl"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/CompiledPattern$.html"><span class="micon ob"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/Instruction.html"><span class="micon tr"></span><span>Instruction</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/Instruction$.html"><span class="micon ob"></span><span>Instruction</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$BindNode.html"><span class="micon cl"></span><span>BindNode</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$BindVar.html"><span class="micon cl"></span><span>BindVar</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Instruction$$Compare.html"><span class="micon cl"></span><span>Compare</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/Machine$.html"><span class="micon ob"></span><span>Machine</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineError.html"><span class="micon tr"></span><span>MachineError</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/MachineError$.html"><span class="micon ob"></span><span>MachineError</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineError$$InconsistentVars.html"><span class="micon cl"></span><span>InconsistentVars</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineError$$NoMatchingNode.html"><span class="micon cl"></span><span>NoMatchingNode</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineResult.html"><span class="micon tr"></span><span>MachineResult</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/MachineResult$.html"><span class="micon ob"></span><span>MachineResult</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineResult$$Failure.html"><span class="micon cl"></span><span>Failure</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/MachineResult$$Success.html"><span class="micon cl"></span><span>Success</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineSearcherPhase.html"><span class="micon cl"></span><span>MachineSearcherPhase</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineState.html"><span class="micon cl"></span><span>MachineState</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/MachineState$.html"><span class="micon ob"></span><span>MachineState</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/patterns/Pattern$.html"><span class="micon ob"></span><span>Pattern</span></a></span><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Pattern$$Var.html"><span class="micon cl"></span><span>Var</span></a></span></div><div class="ni n5 "><span class="nh "><a href="rewriting/patterns/Pattern$$Var$.html"><span class="micon ob"></span><span>Var</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternApplier.html"><span class="micon cl"></span><span>PatternApplier</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternCompiler$.html"><span class="micon ob"></span><span>PatternCompiler</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/patterns/PatternMatch.html"><span class="micon cl"></span><span>PatternMatch</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/PortableMatch.html"><span class="micon tr"></span><span>PortableMatch</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleApplier.html"><span class="micon tr"></span><span>ReversibleApplier</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleSearcher.html"><span class="micon tr"></span><span>ReversibleSearcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/ReversibleSearcher$.html"><span class="micon ob"></span><span>ReversibleSearcher</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/ReversibleSearcher$$SinglePhaseReversibleSearcher.html"><span class="micon cl"></span><span>SinglePhaseReversibleSearcher</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/ReversibleSearcherPhase.html"><span class="micon tr"></span><span>ReversibleSearcherPhase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="rewriting/Searcher.html"><span class="micon tr"></span><span>Searcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="rewriting/Searcher$.html"><span class="micon ob"></span><span>Searcher</span></a></span><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Filter.html"><span class="micon cl"></span><span>Filter</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Flatten.html"><span class="micon cl"></span><span>Flatten</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$Map.html"><span class="micon cl"></span><span>Map</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfPatternMatch.html"><span class="micon cl"></span><span>SearcherOfPatternMatch</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfPatternMatchProductOps.html"><span class="micon cl"></span><span>SearcherOfPatternMatchProductOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfSeqOfTraversableOps.html"><span class="micon cl"></span><span>SearcherOfSeqOfTraversableOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="rewriting/Searcher$$SearcherOfSeqOps.html"><span class="micon cl"></span><span>SearcherOfSeqOps</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="rewriting/SearcherPhase.html"><span class="micon tr"></span><span>SearcherPhase</span></a></span></div></div><div class="ni n2 expanded"><span class="nh h100 selected"><button class="ar icon-button expanded"></button><a href="#"><span class="micon pa"></span><span>saturation</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="saturation/priorities.html"><span class="micon pa"></span><span>priorities</span></a></span><div class="ni n4 "><span class="nh "><a href="saturation/priorities/CurveFittedPriorities.html"><span class="micon cl"></span><span>CurveFittedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/MatchPriorities.html"><span class="micon tr"></span><span>MatchPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/PrioritizedMatch.html"><span class="micon cl"></span><span>PrioritizedMatch</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/ReweightedPriorities.html"><span class="micon tr"></span><span>ReweightedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/priorities/UniformPriorities.html"><span class="micon cl"></span><span>UniformPriorities</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRule.html"><span class="micon cl"></span><span>BackoffRule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleApplication.html"><span class="micon cl"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleApplication$.html"><span class="micon ob"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/BackoffRuleStats.html"><span class="micon cl"></span><span>BackoffRuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRecordedApplications.html"><span class="micon cl"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRecordedApplications$.html"><span class="micon ob"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRoot.html"><span class="micon cl"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/EGraphWithRoot$.html"><span class="micon ob"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplication.html"><span class="micon cl"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplication$.html"><span class="micon ob"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/MaximalRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>MaximalRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Rebase.html"><span class="micon cl"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Rebase$.html"><span class="micon ob"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/RepeatUntilStableBuilder.html"><span class="micon cl"></span><span>RepeatUntilStableBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/RuleStats.html"><span class="micon cl"></span><span>RuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/SearchAndApply.html"><span class="micon tr"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/SearchAndApply$.html"><span class="micon ob"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplication.html"><span class="micon cl"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplication$.html"><span class="micon ob"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/StochasticRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>StochasticRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/Strategy.html"><span class="micon tr"></span><span>Strategy</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="saturation/Strategy$.html"><span class="micon ob"></span><span>Strategy</span></a></span><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithMetadata.html"><span class="micon cl"></span><span>WithMetadata</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithMetadataAndRoot.html"><span class="micon cl"></span><span>WithMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRecordedApplications.html"><span class="micon cl"></span><span>WithRecordedApplications</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRecordingMetadataAndRoot.html"><span class="micon cl"></span><span>WithRecordingMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="saturation/Strategy$$WithRoot.html"><span class="micon cl"></span><span>WithRoot</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="saturation/TransformAndRebase.html"><span class="micon cl"></span><span>TransformAndRebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="saturation/TransformAndRebase$.html"><span class="micon ob"></span><span>TransformAndRebase</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="AddNodeResult.html"><span class="micon tr"></span><span>AddNodeResult</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="AddNodeResult$.html"><span class="micon ob"></span><span>AddNodeResult</span></a></span><div class="ni n3 "><span class="nh "><a href="AddNodeResult$$Added.html"><span class="micon cl"></span><span>Added</span></a></span></div><div class="ni n3 "><span class="nh "><a href="AddNodeResult$$AlreadyThere.html"><span class="micon cl"></span><span>AlreadyThere</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="EClassCall.html"><span class="micon cl"></span><span>EClassCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EClassRef.html"><span class="micon cl"></span><span>EClassRef</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraph.html"><span class="micon tr"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraph$.html"><span class="micon ob"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphLike.html"><span class="micon tr"></span><span>EGraphLike</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphWithPendingUnions.html"><span class="micon cl"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="EGraphWithPendingUnions$.html"><span class="micon ob"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ENode.html"><span class="micon cl"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ENode$.html"><span class="micon ob"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="MixedTree.html"><span class="micon tr"></span><span>MixedTree</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="MixedTree$.html"><span class="micon ob"></span><span>MixedTree</span></a></span><div class="ni n3 "><span class="nh "><a href="MixedTree$$Atom.html"><span class="micon cl"></span><span>Atom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$MixedTreeOfEClassCallOps.html"><span class="micon cl"></span><span>MixedTreeOfEClassCallOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$MixedTreeOfPatternOps.html"><span class="micon cl"></span><span>MixedTreeOfPatternOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="MixedTree$$Node.html"><span class="micon cl"></span><span>Node</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="Permutation.html"><span class="micon tr"></span><span>Permutation</span></a></span></div><div class="ni n2 "><span class="nh "><a href="ShapeCall.html"><span class="micon cl"></span><span>ShapeCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Slot.html"><span class="micon tr"></span><span>Slot</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="Slot$.html"><span class="micon ob"></span><span>Slot</span></a></span><div class="ni n3 "><span class="nh "><a href="Slot$$NumberedSlot.html"><span class="micon cl"></span><span>NumberedSlot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="Slot$$UniqueSlot.html"><span class="micon cl"></span><span>UniqueSlot</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="SlotMap.html"><span class="micon cl"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="SlotMap$.html"><span class="micon ob"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Tree.html"><span class="micon cl"></span><span>Tree</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Tree$.html"><span class="micon ob"></span><span>Tree</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../util.html"><span class="micon pa"></span><span>util</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/collections.html"><span class="micon pa"></span><span>collections</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../util/collections/StrictMapOps$.html"><span class="micon ob"></span><span>StrictMapOps</span></a></span><div class="ni n4 "><span class="nh "><a href="../util/collections/StrictMapOps$$Ops.html"><span class="micon cl"></span><span>Ops</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/ordering.html"><span class="micon pa"></span><span>ordering</span></a></span><div class="ni n3 "><span class="nh "><a href="../util/ordering/SeqOrdering$.html"><span class="micon ob"></span><span>SeqOrdering</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../util/random.html"><span class="micon pa"></span><span>random</span></a></span><div class="ni n3 "><span class="nh "><a href="../util/random/DiscreteDistribution.html"><span class="micon tr"></span><span>DiscreteDistribution</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Random.html"><span class="micon tr"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Random$.html"><span class="micon ob"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/Sample$.html"><span class="micon ob"></span><span>Sample</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../util/random/ShiftedGeometricDistribution.html"><span class="micon cl"></span><span>ShiftedGeometricDistribution</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../util/DotPrinter.html"><span class="micon cl"></span><span>DotPrinter</span></a></span></div></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../index.html">foresight</a>/<a href="../../foresight.html">foresight</a>/<a href="../eqsat.html">foresight.eqsat</a>/<a href="saturation.html">foresight.eqsat.saturation</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon pa"></span></span>
+ <h1 class="h600 single">foresight.eqsat.saturation</h1>
+</div>
+<div class="fqname body-large">
+ <span></span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="saturation.html" t="n" class="documentableName ">foresight.eqsat.saturation</a>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc">
+  <p>Defines core abstractions and concrete strategies for saturation-based rewriting over e-graphs. Saturation refers to the process of repeatedly applying rewrite rules until no new terms can be discovered or until a budget is exhausted.</p>
+  <p>The key component is the <a href="saturation/Strategy.html">Strategy</a> trait, which encapsulates a step-by-step transformation over an e-graph with user-defined data and iteration control. Strategies can be composed, repeated, rebased, and extended with metadata.</p>
+  <h2><a href="#key-concepts" id="key-concepts">Key Concepts</a></h2>
+  <ul>
+   <li><a href="saturation/Strategy.html">Strategy</a>: Core trait representing a saturation step that transforms an e-graph.</li>
+   <li><a href="saturation/SearchAndApply.html">SearchAndApply</a>: Separates search from application logic for fine-grained control.</li>
+   <li><a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a>: Applies every match for each rule once per iteration (no fixpoint).</li>
+   <li><a href="saturation/MaximalRuleApplicationWithCaching$.html">MaximalRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+   <li><a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a>: Applies rules with dynamic quotas and cooldown periods to balance rule usage.</li>
+   <li><a href="saturation/StochasticRuleApplication.html">StochasticRuleApplication</a>: Applies a batch of matches selected probabilistically based on priorities.</li>
+   <li><a href="saturation/StochasticRuleApplicationWithCaching$.html">StochasticRuleApplicationWithCaching</a>: Same as above, but avoids reapplying matches across iterations.</li>
+  </ul>
+  <h2><a href="#typical-usage" id="typical-usage">Typical Usage</a></h2>
+  <p>More sophisticated strategies are constructed using built-in or user-defined combinators. For example, to run a maximal application strategy to convergence with a timeout and periodic rebasing:</p>
+  <div class="snippet mono-small-block">
+   <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span> val strategy = MaximalRuleApplication(myRules)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>   .withTimeout(30.seconds)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   .thenRebase(extractor)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   .withIterationLimit(5)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span> val result = strategy.run(myEGraph)
+</span></code></pre>
+   <div class="buttons"></div>
+  </div>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes"></dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Packages">
+     <div data-togglable="packages" class="tab expand">
+      <div class="documentableList expand">
+       <div class="documentableList-expander">
+        <button class="icon-button show-content expand"></button>
+        <h3 class="groupHeader h400">Packages</h3>
+       </div>
+       <div class="documentableElement">
+        <div class="documentableElement-expander">
+         <button class="icon-button ar show-content"></button>
+         <div class="header monospace mono-medium">
+          <div class="signature">
+           <span class="modifiers"></span><span class="kind"><span t="k">package </span></span><a href="saturation/priorities.html" t="n" class="documentableName ">foresight.eqsat.saturation.priorities</a>
+          </div>
+         </div>
+        </div>
+        <div class="docs">
+         <span class="modifiers"></span>
+         <div>
+          <div class="originInfo"></div>
+          <div class="memberDocumentation">
+           <div class="documentableBrief doc">
+            <p>Provides strategies for prioritizing rule matches in equality saturation.</p>
+           </div>
+           <div class="cover">
+            <div class="doc">
+             <p>Provides strategies for prioritizing rule matches in equality saturation.</p>
+             <p>In saturation-based rewrite systems, many rule matches may be discovered in a single iteration. Applying all of them can be expensive, redundant, or counterproductive. This package defines abstractions and implementations for prioritizing and selecting a subset of matches to apply per iteration.</p>
+             <p>The core abstraction is <a href="saturation/priorities/MatchPriorities.html">MatchPriorities</a>, which defines a trait for assigning priority scores to rule matches and determining the batch size to apply. These priorities are consumed by stochastic strategies like <a href="saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>, which use them to bias sampling.</p>
+             <h2><a href="#included-prioritization-strategies" id="included-prioritization-strategies">Included prioritization strategies</a></h2>
+             <ul>
+              <li><a href="saturation/priorities/UniformPriorities.html">UniformPriorities</a> assigns equal priority to all matches, applying up to a fixed batch size.</li>
+              <li><a href="saturation/priorities/ReweightedPriorities.html">ReweightedPriorities</a> is a compositional trait for transforming priorities produced by another strategy.</li>
+              <li><a href="saturation/priorities/CurveFittedPriorities.html">CurveFittedPriorities</a> reweights matches using a <a href="../util/random/DiscreteDistribution.html">foresight.util.random.DiscreteDistribution</a>.</li>
+             </ul>
+             <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
+             <div class="snippet mono-small-block">
+              <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val base = MyDomainPriorities
+</span><span line-number="2" class=""><span class="tooltip-container"></span>val curve = ShiftedGeometricDistribution(0.5)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>val priorities = CurveFittedPriorities(base, curve)
+</span></code></pre>
+              <div class="buttons"></div>
+             </div>
+             <p>These prioritizers can be plugged into <a href="saturation/StochasticRuleApplication.html">StochasticRuleApplication</a> to guide rule application.</p>
+            </div>
+            <h2 class="h200">Attributes</h2>
+            <dl class="attributes attributes-small"></dl>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+    <section id="Type-members">
+     <div data-togglable="Type members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Type members" class="h400">Type members</h3>
+      </div>
+      <section id="Classlikes">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Classlikes</h4>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/BackoffRule.html" t="n" class="documentableName ">BackoffRule</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rule</span>: <span data-unresolved-link="" t="t">RuleT</span>, <span t="k"></span><span data-unresolved-link="" t="n">initialMatchLimit</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">initialBanLength</span>: <span data-unresolved-link="" t="t">Int</span>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Annotates a rewrite rule with initial scheduling parameters for backoff.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Annotates a rewrite rule with initial scheduling parameters for backoff.</p>
+              <p>The backoff strategy limits how often a rule can fire. Each rule is given an initial match limit (i.e., how many matches it may apply before being paused) and an initial ban length (how long it is paused once exhausted). Both are doubled after each cooldown cycle.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               initialBanLength
+              </dt>
+              <dd class="body-medium">
+               <p>The number of iterations the rule is banned after hitting its match limit.</p>
+              </dd>
+              <dt class="body-small">
+               initialMatchLimit
+              </dt>
+              <dd class="body-medium">
+               <p>The initial number of matches this rule can apply before being temporarily banned.</p>
+              </dd>
+              <dt class="body-small">
+               rule
+              </dt>
+              <dd class="body-medium">
+               <p>The rewrite rule.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/BackoffRuleApplication.html" t="n" class="documentableName ">BackoffRuleApplication</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rules</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="saturation/BackoffRule.html" t="t">BackoffRule</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">MatchT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">searchAndApply</span>: <a href="saturation/SearchAndApply.html" t="t">SearchAndApply</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>])<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <a href="saturation/BackoffRuleStats.html" t="t">BackoffRuleStats</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A saturation strategy that applies rules with a backoff heuristic.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A saturation strategy that applies rules with a backoff heuristic.</p>
+              <p>Rules are initially allowed to apply a limited number of matches. Once this quota is exhausted, the rule is banned for a fixed number of iterations. After the ban period ends, the rule is re-enabled with both its match limit and ban duration doubled. This encourages frequent early exploration and gradual fading out of overly eager rules.</p>
+              <p>Rules apply up to their remaining match limits each iteration, chosen uniformly at random from the match set.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of rule match.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The node type in the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               RuleT
+              </dt>
+              <dd class="body-medium">
+               <p>The rewrite rule type.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               rules
+              </dt>
+              <dd class="body-medium">
+               <p>Rules annotated with initial match limits and ban lengths.</p>
+              </dd>
+              <dt class="body-small">
+               searchAndApply
+              </dt>
+              <dd class="body-medium">
+               <p>Strategy for finding and applying rule matches to the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/BackoffRuleApplication$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <a href="saturation/BackoffRuleStats.html" t="t">BackoffRuleStats</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">MatchT</span>]]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/BackoffRuleApplication$.html" t="n" class="documentableName ">BackoffRuleApplication</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A companion object for <a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a> providing factory methods and utilities.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A companion object for <a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a> providing factory methods and utilities.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/BackoffRuleApplication.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/BackoffRuleApplication$.html" t="n">BackoffRuleApplication</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/BackoffRuleStats.html" t="n" class="documentableName ">BackoffRuleStats</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">iteration</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">stats</span>: <span data-unresolved-link="" t="t">Map</span>[<span data-unresolved-link="" t="t">String</span>, <a href="saturation/RuleStats.html" t="t">RuleStats</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">MatchT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">random</span>: <span data-unresolved-link="" t="t">Random</span>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Represents the state of a backoff strategy across iterations.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Represents the state of a backoff strategy across iterations.</p>
+              <p>Used as the persistent state (<code>DataT</code>) for <a href="saturation/BackoffRuleApplication.html">BackoffRuleApplication</a>, it tracks the number of iterations so far, all rule-specific scheduling state, and the random generator used for sampling.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               iteration
+              </dt>
+              <dd class="body-medium">
+               <p>The current iteration count.</p>
+              </dd>
+              <dt class="body-small">
+               random
+              </dt>
+              <dd class="body-medium">
+               <p>Random number generator used to shuffle matches.</p>
+              </dd>
+              <dt class="body-small">
+               stats
+              </dt>
+              <dd class="body-medium">
+               <p>Per-rule statistics, keyed by rule name.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/EGraphWithRecordedApplications.html" t="n" class="documentableName ">EGraphWithRecordedApplications</a>[<span t="k"></span><span data-unresolved-link="" t="t">Node</span>, <span t="k"></span><span data-unresolved-link="" t="t">Repr</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">Node</span>, <span t="t">Repr</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">Node</span>], <span t="k"></span><span data-unresolved-link="" t="t">Match</span><span t="k"> &lt;: </span><a href="rewriting/PortableMatch.html" t="t">PortableMatch</a>[<span t="t">Node</span>, <span t="t">Match</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span data-unresolved-link="" t="t">Repr</span>, <span t="k"></span><span data-unresolved-link="" t="n">applied</span>: <span data-unresolved-link="" t="t">Map</span>[<span data-unresolved-link="" t="t">String</span>, <span data-unresolved-link="" t="t">Set</span>[<span data-unresolved-link="" t="t">Match</span>]])<span t="k"> extends </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">Node</span>, <a href="saturation/EGraphWithRecordedApplications.html" t="t">EGraphWithRecordedApplications</a>[<span t="t">Node</span>, <span t="t">Repr</span>, <span t="t">Match</span>]]<span t="k">, </span></span><span class="signature-long"><a href="EGraph.html" t="t">EGraph</a>[<span t="t">Node</span>]</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>An e-graph that records the set of matches that have been applied to it.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>An e-graph that records the set of matches that have been applied to it.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Match
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the matches that have been applied to the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               Node
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the nodes described by the e-nodes in the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               Repr
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the underlying e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               applied
+              </dt>
+              <dd class="body-medium">
+               <p>The set of matches that have been applied to the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/EGraphWithRecordedApplications$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="EGraph.html" t="n">EGraph</a>[<span t="t">Node</span>]
+                </div>
+                <div>
+                 trait <a href="EGraphLike.html" t="n">EGraphLike</a>[<span t="t">Node</span>, <a href="saturation/EGraphWithRecordedApplications.html" t="t">EGraphWithRecordedApplications</a>[<span t="t">Node</span>, <span t="t">Repr</span>, <span t="t">Match</span>]]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/EGraphWithRecordedApplications$.html" t="n" class="documentableName ">EGraphWithRecordedApplications</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The companion object for the <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> class.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The companion object for the <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> class.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/EGraphWithRecordedApplications.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/EGraphWithRecordedApplications$.html" t="n">EGraphWithRecordedApplications</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/EGraphWithRoot.html" t="n" class="documentableName ">EGraphWithRoot</a>[<span t="k"></span><span data-unresolved-link="" t="t">Node</span>, <span t="k"></span><span data-unresolved-link="" t="t">Repr</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">Node</span>, <span t="t">Repr</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">Node</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span data-unresolved-link="" t="t">Repr</span>, <span t="k"></span><span data-unresolved-link="" t="n">root</span>: <span data-unresolved-link="" t="t">Option</span>[<a href="EClassCall.html" t="t">EClassCall</a>])<span t="k"> extends </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">Node</span>, <a href="saturation/EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">Node</span>, <span t="t">Repr</span>]]<span t="k">, </span></span><span class="signature-long"><a href="EGraph.html" t="t">EGraph</a>[<span t="t">Node</span>]</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>An e-graph that has a root e-class.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>An e-graph that has a root e-class.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Node
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the nodes described by the e-nodes in the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               Repr
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the underlying e-graph that implements the <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a> traits.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The underlying e-graph that contains the nodes and classes.</p>
+              </dd>
+              <dt class="body-small">
+               root
+              </dt>
+              <dd class="body-medium">
+               <p>An optional root e-class call that represents the root of the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/EGraphWithRoot$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="EGraph.html" t="n">EGraph</a>[<span t="t">Node</span>]
+                </div>
+                <div>
+                 trait <a href="EGraphLike.html" t="n">EGraphLike</a>[<span t="t">Node</span>, <a href="saturation/EGraphWithRoot.html" t="t">EGraphWithRoot</a>[<span t="t">Node</span>, <span t="t">Repr</span>]]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/EGraphWithRoot$.html" t="n" class="documentableName ">EGraphWithRoot</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A companion object for the <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a> that provides a convenient way to create an e-graph with a root from a mixed tree of e-class applications and nodes.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A companion object for the <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a> that provides a convenient way to create an e-graph with a root from a mixed tree of e-class applications and nodes.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/EGraphWithRoot.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/EGraphWithRoot$.html" t="n">EGraphWithRoot</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/MaximalRuleApplication.html" t="n" class="documentableName ">MaximalRuleApplication</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rules</span>: <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">RuleT</span>], <span t="k"></span><span data-unresolved-link="" t="n">searchAndApply</span>: <a href="saturation/SearchAndApply.html" t="t">SearchAndApply</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>])<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A strategy that performs a single maximal rewrite pass over a set of rules.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A strategy that performs a single maximal rewrite pass over a set of rules.</p>
+              <p>For each rule in the given sequence, this strategy:</p>
+              <ol>
+               <li>Searches for <strong>all matches</strong> of that rule in the e-graph.</li>
+               <li>Applies <strong>every match</strong> found, in one batch.</li>
+              </ol>
+              <p>This process is repeated once per strategy iteration. Importantly, this strategy does not independently saturate to a fixpoint for each rule—it performs <strong>only one pass</strong> per rule per iteration.</p>
+              <h2><a href="#characteristics" id="characteristics">Characteristics</a></h2>
+              <ul>
+               <li>Exhaustive per-iteration application: all matches of all rules are applied.</li>
+               <li>No internal fixpointing per rule or across the e-graph.</li>
+               <li>Deterministic, non-prioritized, and non-stochastic.</li>
+               <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run to convergence.</li>
+              </ul>
+              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <ul>
+               <li>Baseline comparison against other selective or prioritized strategies.</li>
+               <li>Deterministic debugging and validation of rewrite rule behavior.</li>
+               <li>Scenarios where exhaustive coverage per iteration is preferred.</li>
+              </ul>
+              <h2><a href="#caution" id="caution">Caution</a></h2>
+              <p>This strategy may apply redundant or overlapping rewrites and can cause rapid growth of the e-graph in large or densely connected rule sets.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph implementation (must be both <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>).</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of matches returned by rule search.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of nodes in the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               RuleT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of rules used.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               rules
+              </dt>
+              <dd class="body-medium">
+               <p>The rules to apply.</p>
+              </dd>
+              <dt class="body-small">
+               searchAndApply
+              </dt>
+              <dd class="body-medium">
+               <p>A strategy for rule search and application (may or may not cache matches).</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/MaximalRuleApplication$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Unit</span>]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/MaximalRuleApplication$.html" t="n" class="documentableName ">MaximalRuleApplication</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Factory methods for constructing <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategies.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Factory methods for constructing <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> strategies.</p>
+              <p>These overloads simplify creation of maximal application strategies by configuring default search behavior without caching.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/MaximalRuleApplication.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/MaximalRuleApplication$.html" t="n">MaximalRuleApplication</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/MaximalRuleApplicationWithCaching$.html" t="n" class="documentableName ">MaximalRuleApplicationWithCaching</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A saturation strategy that exhaustively applies all rule matches <strong>once</strong>, with match caching to prevent reapplication.</p>
+              <p>This is a cached variant of <a href="saturation/MaximalRuleApplication.html">MaximalRuleApplication</a> that operates on <a href="saturation/EGraphWithRecordedApplications.html">foresight.eqsat.saturation.EGraphWithRecordedApplications</a>, which tracks which rule–match pairs have already been applied. Once a match has been applied, it is <strong>not re-applied in future iterations</strong>.</p>
+              <p>Like its uncached counterpart, this strategy does not saturate to a fixpoint per iteration. Each iteration simply performs a full match-and-apply sweep over all rules, skipping matches that were already applied previously.</p>
+              <h2><a href="#key-characteristics" id="key-characteristics">Key characteristics</a></h2>
+              <ul>
+               <li>Applies all previously unapplied matches per rule, per iteration.</li>
+               <li>Skips any matches that have already been applied in prior iterations.</li>
+               <li>Avoids redundant reapplication of the same rewrite.</li>
+               <li>Can be composed with <a href="saturation/Strategy.html#repeatUntilStable-0">Strategy.repeatUntilStable</a> to run until no unapplied matches remain.</li>
+              </ul>
+              <h2><a href="#use-cases" id="use-cases">Use cases</a></h2>
+              <ul>
+               <li>Efficient and deterministic saturation when repeat application is unnecessary or undesirable.</li>
+               <li>Gradual saturation where each match is only applied once.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> MaximalRuleApplicationWithCaching(rules)
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val saturated = strategy.run(EGraphWithRecordedApplications(initialEGraph))
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/MaximalRuleApplicationWithCaching$.html" t="n">MaximalRuleApplicationWithCaching</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/Rebase.html" t="n" class="documentableName ">Rebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>], <a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>)<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A strategy that rebases the e-graph by extracting a tree from the e-graph, subsequently adding that tree to a new e-graph.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A strategy that rebases the e-graph by extracting a tree from the e-graph, subsequently adding that tree to a new e-graph.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph that the strategy operates on.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the nodes in the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               areEquivalent
+              </dt>
+              <dd class="body-medium">
+               <p>A function to determine if two trees are equivalent. If a newly extracted tree is equivalent to the previously extracted tree, no rebasing is performed.</p>
+              </dd>
+              <dt class="body-small">
+               extractor
+              </dt>
+              <dd class="body-medium">
+               <p>The extractor to use for extracting the tree.</p>
+              </dd>
+              <dt class="body-small">
+               getRoot
+              </dt>
+              <dd class="body-medium">
+               <p>A function to find the root of the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               setRoot
+              </dt>
+              <dd class="body-medium">
+               <p>A function to create a new e-graph with the specified root.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/Rebase$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]]]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/Rebase$.html" t="n" class="documentableName ">Rebase</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A companion object for the <a href="saturation/Rebase.html">Rebase</a> strategy that provides a convenient way to create a <a href="saturation/Rebase.html">Rebase</a> instance operating on an <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A companion object for the <a href="saturation/Rebase.html">Rebase</a> strategy that provides a convenient way to create a <a href="saturation/Rebase.html">Rebase</a> instance operating on an <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/Rebase.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/Rebase$.html" t="n">Rebase</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/RepeatUntilStableBuilder.html" t="n" class="documentableName ">RepeatUntilStableBuilder</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">DataT</span>, <span t="k"></span><span data-unresolved-link="" t="t">BetweenItersDataT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">body</span>: <a href="saturation/Strategy.html" t="t">Strategy</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">DataT</span>], <span t="k"></span><span data-unresolved-link="" t="n">betweenIterations</span>: <a href="saturation/Strategy.html" t="t">Strategy</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">BetweenItersDataT</span>])
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A builder for creating a strategy that repeatedly applies a given <code>body</code> strategy until it reaches a stable state, executing a <code>betweenIterations</code> strategy between each iteration of <code>body</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A builder for creating a strategy that repeatedly applies a given <code>body</code> strategy until it reaches a stable state, executing a <code>betweenIterations</code> strategy between each iteration of <code>body</code>.</p>
+              <p>The <code>body</code> strategy is applied at least once. After each application of <code>body</code>, the <code>betweenIterations</code> strategy is executed. If <code>body</code> makes no changes to the e-graph (i.e., it returns <code>None</code>), the repetition stops, and the final e-graph and combined data from all iterations are returned.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               BetweenItersDataT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of data produced by the <code>betweenIterations</code> strategy.</p>
+              </dd>
+              <dt class="body-small">
+               DataT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of data produced by the <code>body</code> strategy.</p>
+              </dd>
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph that the strategies operate on, which must be a subtype of both <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of nodes in the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               betweenIterations
+              </dt>
+              <dd class="body-medium">
+               <p>The strategy to be applied between iterations of <code>body</code>.</p>
+              </dd>
+              <dt class="body-small">
+               body
+              </dt>
+              <dd class="body-medium">
+               <p>The main strategy to be applied repeatedly.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/RuleStats.html" t="n" class="documentableName ">RuleStats</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rule</span>: <span data-unresolved-link="" t="t">RuleT</span>, <span t="k"></span><span data-unresolved-link="" t="n">matchLimit</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">banLength</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">bannedUntil</span>: <span data-unresolved-link="" t="t">Option</span>[<span data-unresolved-link="" t="t">Int</span>], <span t="k"></span><span data-unresolved-link="" t="n">remainingMatches</span>: <span data-unresolved-link="" t="t">Int</span>)
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Tracks dynamic backoff statistics for a single rule.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Tracks dynamic backoff statistics for a single rule.</p>
+              <p>These stats are used to determine whether a rule is active, when it becomes eligible again, and how many more matches it may apply in the current activation window.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               banLength
+              </dt>
+              <dd class="body-medium">
+               <p>The number of iterations the rule will be banned after hitting its match limit.</p>
+              </dd>
+              <dt class="body-small">
+               bannedUntil
+              </dt>
+              <dd class="body-medium">
+               <p>If banned, the iteration number at which the rule will become eligible again.</p>
+              </dd>
+              <dt class="body-small">
+               matchLimit
+              </dt>
+              <dd class="body-medium">
+               <p>The total number of matches this rule can apply during its current active window.</p>
+              </dd>
+              <dt class="body-small">
+               remainingMatches
+              </dt>
+              <dd class="body-medium">
+               <p>The number of matches this rule can still apply before triggering a ban.</p>
+              </dd>
+              <dt class="body-small">
+               rule
+              </dt>
+              <dd class="body-medium">
+               <p>The rewrite rule being tracked.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="saturation/SearchAndApply.html" t="n" class="documentableName ">SearchAndApply</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A strategy that searches for matches of a set of rules in an e-graph and applies them.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A strategy that searches for matches of a set of rules in an e-graph and applies them.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the matches produced by the rules.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the nodes in the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               RuleT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the rules to search and apply.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/SearchAndApply$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/SearchAndApply$.html" t="n" class="documentableName ">SearchAndApply</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A companion object for the <a href="saturation/SearchAndApply.html">SearchAndApply</a> trait that provides a factory method for creating a <a href="saturation/SearchAndApply.html">SearchAndApply</a> instance with caching capabilities.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A companion object for the <a href="saturation/SearchAndApply.html">SearchAndApply</a> trait that provides a factory method for creating a <a href="saturation/SearchAndApply.html">SearchAndApply</a> instance with caching capabilities.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/SearchAndApply.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/SearchAndApply$.html" t="n">SearchAndApply</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/StochasticRuleApplication.html" t="n" class="documentableName ">StochasticRuleApplication</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">rules</span>: <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">RuleT</span>], <span t="k"></span><span data-unresolved-link="" t="n">searchAndApply</span>: <a href="saturation/SearchAndApply.html" t="t">SearchAndApply</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>], <span t="k"></span><span data-unresolved-link="" t="n">priorities</span>: <a href="saturation/priorities/MatchPriorities.html" t="t">MatchPriorities</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">RuleT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">MatchT</span>], <span t="k"></span><span data-unresolved-link="" t="n">random</span>: <a href="../util/random/Random.html" t="t">Random</a>)<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <a href="../util/random/Random.html" t="t">Random</a>]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A saturation strategy that applies rewrite rules stochastically, based on user-defined priorities.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A saturation strategy that applies rewrite rules stochastically, based on user-defined priorities.</p>
+              <p>This strategy repeatedly:</p>
+              <ol>
+               <li>Searches for matches of the given rewrite rules in the e-graph.</li>
+               <li>Assigns priorities to each match using the provided <a href="saturation/priorities/MatchPriorities.html">foresight.eqsat.saturation.priorities.MatchPriorities</a>.</li>
+               <li>Selects a batch of matches to apply, using weighted random sampling without replacement.</li>
+               <li>Applies the selected matches using a configurable <a href="saturation/SearchAndApply.html">SearchAndApply</a> strategy.</li>
+              </ol>
+              <p>This approach is useful when it's expensive or unnecessary to apply every match, or when exploration is guided by domain-specific heuristics (e.g., rule priority, match cost).</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph, combining <a href="EGraphLike.html">EGraphLike</a> and <a href="EGraph.html">EGraph</a>.</p>
+              </dd>
+              <dt class="body-small">
+               MatchT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of matches returned by rules.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of e-graph nodes.</p>
+              </dd>
+              <dt class="body-small">
+               RuleT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of rewrite rules.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               priorities
+              </dt>
+              <dd class="body-medium">
+               <p>A prioritization mechanism for matches, including batch size selection.</p>
+              </dd>
+              <dt class="body-small">
+               random
+              </dt>
+              <dd class="body-medium">
+               <p>A random number generator used to sample matches based on priority.</p>
+              </dd>
+              <dt class="body-small">
+               rules
+              </dt>
+              <dd class="body-medium">
+               <p>The set of rewrite rules to apply.</p>
+              </dd>
+              <dt class="body-small">
+               searchAndApply
+              </dt>
+              <dd class="body-medium">
+               <p>A search and apply strategy to find and apply rule matches.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Example
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <div>
+                 <p>To use this strategy without caching, you can create an instance like this:</p>
+                 <div class="snippet mono-small-block">
+                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy = StochasticRuleApplication(
+</span><span line-number="2" class=""><span class="tooltip-container"></span> rules = myRules,
+</span><span line-number="3" class=""><span class="tooltip-container"></span> searchAndApply = SearchAndApply.withoutCaching,
+</span><span line-number="4" class=""><span class="tooltip-container"></span> priorities = MyCustomPriorities,
+</span><span line-number="5" class=""><span class="tooltip-container"></span> random = Random(42)
+</span><span line-number="6" class=""><span class="tooltip-container"></span>)
+</span></code></pre>
+                  <div class="buttons"></div>
+                 </div>
+                </div>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/StochasticRuleApplication$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <a href="../util/random/Random.html" t="t">Random</a>]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/StochasticRuleApplication$.html" t="n" class="documentableName ">StochasticRuleApplication</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Factory methods for creating <a href="saturation/StochasticRuleApplication.html">StochasticRuleApplication</a> strategies.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Factory methods for creating <a href="saturation/StochasticRuleApplication.html">StochasticRuleApplication</a> strategies.</p>
+              <p>These overloaded <code>apply</code> methods allow users to omit explicit construction of <a href="saturation/SearchAndApply.html">SearchAndApply</a> or <a href="../util/random/Random.html">foresight.util.random.Random</a> instances if defaults are acceptable.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/StochasticRuleApplication.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/StochasticRuleApplication$.html" t="n">StochasticRuleApplication</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/StochasticRuleApplicationWithCaching$.html" t="n" class="documentableName ">StochasticRuleApplicationWithCaching</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A strategy that applies a sequence of rules in a stochastic manner, caching the matches that have already been applied. This strategy operates on an <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A strategy that applies a sequence of rules in a stochastic manner, caching the matches that have already been applied. This strategy operates on an <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/StochasticRuleApplicationWithCaching$.html" t="n">StochasticRuleApplicationWithCaching</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="saturation/Strategy.html" t="n" class="documentableName ">Strategy</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">Data</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A generic, composable strategy for saturating an e-graph using rewrite rules.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A generic, composable strategy for saturating an e-graph using rewrite rules.</p>
+              <p>Strategies define the logic for applying one or more transformation steps to an <a href="EGraph.html">foresight.eqsat.EGraph</a>, potentially over multiple iterations. They are responsible for how rewrites are applied, how progress is tracked, and how iteration is controlled (e.g., timeouts, fixpoints, or iteration limits).</p>
+              <h2><a href="#design-philosophy" id="design-philosophy">Design philosophy</a></h2>
+              <p>Strategies are:</p>
+              <ul>
+               <li><strong>Modular</strong> – They can be composed using <code>thenApply</code>, repeated with <code>repeatUntilStable</code>, or extended with features like logging, timeout, or metadata.</li>
+               <li><strong>Stateful</strong> – Each strategy carries a custom <code>Data</code> payload that can track iteration-specific state across calls.</li>
+               <li><strong>Flexible</strong> – They work with different e-graph wrappers like <span data-unresolved-link="">foresight.eqsat.metadata.EGraphWithMetadata</span>, <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a>, and <a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a> via extension methods.</li>
+              </ul>
+              <h2><a href="#key-operations" id="key-operations">Key operations</a></h2>
+              <ul>
+               <li><code>apply</code> performs a single iteration of the strategy.</li>
+               <li><code>initialData</code> provides the initial state for the strategy.</li>
+               <li><code>thenApply</code>, <code>repeatUntilStable</code>, <code>withIterationLimit</code>, and <code>withTimeout</code> allow control-flow composition.</li>
+               <li><code>withChangeLogger</code> allows inspection/debugging after each iteration.</li>
+              </ul>
+              <h2><a href="#usage-example" id="usage-example">Usage example</a></h2>
+              <div class="snippet mono-small-block">
+               <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy: Strategy[Node, MyEGraph, MyState] =
+</span><span line-number="2" class=""><span class="tooltip-container"></span> myRuleApplicationStrategy
+</span><span line-number="3" class=""><span class="tooltip-container"></span>   .withIterationLimit(10)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>   .withTimeout(1.second)
+</span><span line-number="5" class=""><span class="tooltip-container"></span>   .repeatUntilStable
+</span></code></pre>
+               <div class="buttons"></div>
+              </div>
+              <h2><a href="#integration-with-e-graph-wrappers" id="integration-with-e-graph-wrappers">Integration with e-graph wrappers</a></h2>
+              <p>The companion object defines implicit classes that lift strategies to:</p>
+              <ul>
+               <li>e-graphs with metadata (<code>addAnalyses</code>, <code>closeMetadata</code>)</li>
+               <li>e-graphs with roots (<code>withRoot</code>, <code>closeRoot</code>)</li>
+               <li>strategies that rebase after each iteration (<code>thenRebase</code>)</li>
+               <li>strategies that record match applications (<code>closeRecording</code>)</li>
+              </ul>
+              <p>These allow higher-level behavior without modifying the core strategy.</p>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Data
+              </dt>
+              <dd class="body-medium">
+               <p>The type of state carried by the strategy across iterations.</p>
+              </dd>
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph being transformed (e.g., plain, rooted, or metadata-enriched).</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of nodes in the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/Strategy$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Known subtypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block subtypes">
+                <div>
+                 class <a href="saturation/BackoffRuleApplication.html" t="n">BackoffRuleApplication</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+                </div>
+                <div>
+                 class <a href="saturation/MaximalRuleApplication.html" t="n">MaximalRuleApplication</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+                </div>
+                <div>
+                 class <a href="saturation/Rebase.html" t="n">Rebase</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]
+                </div>
+                <div>
+                 class <a href="saturation/StochasticRuleApplication.html" t="n">StochasticRuleApplication</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+                </div>
+                <div>
+                 class <a href="saturation/TransformAndRebase.html" t="n">TransformAndRebase</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, <span t="t">Data</span>]
+                </div><span></span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/Strategy$.html" t="n" class="documentableName ">Strategy</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The companion object for the <a href="saturation/Strategy.html">Strategy</a> class.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The companion object for the <a href="saturation/Strategy.html">Strategy</a> class.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/Strategy.html">trait</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/Strategy$.html" t="n">Strategy</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" data-f-keywords="final,case">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="signature-short"><span class="modifiers"><span t="k">final case </span></span><span class="kind"><span t="k">class </span></span><a href="saturation/TransformAndRebase.html" t="n" class="documentableName ">TransformAndRebase</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">Data</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">transform</span>: <a href="saturation/Strategy.html" t="t">Strategy</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>, <span data-unresolved-link="" t="t">Data</span>], <span t="k"></span><span data-unresolved-link="" t="n">extractor</span>: <a href="extraction/Extractor.html" t="t">Extractor</a>[<span data-unresolved-link="" t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">getRoot</span>: <span data-unresolved-link="" t="t">EGraphT</span><span t="k"> =&gt; </span><a href="EClassCall.html" t="t">EClassCall</a>, <span t="k"></span><span data-unresolved-link="" t="n">setRoot</span>: (<span data-unresolved-link="" t="t">EGraphT</span>, <a href="EClassCall.html" t="t">EClassCall</a>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">EGraphT</span>, <span t="k"></span><span data-unresolved-link="" t="n">areEquivalent</span>: (<a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>], <a href="Tree.html" t="t">Tree</a>[<span data-unresolved-link="" t="t">NodeT</span>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Boolean</span>)<span t="k"> extends </span><a href="saturation/Strategy.html" t="t">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span t="t">Data</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]])]</span><span class="signature-long"></span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A compound strategy that transforms an e-graph and optionally rebases it by extracting and reinserting a tree.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A compound strategy that transforms an e-graph and optionally rebases it by extracting and reinserting a tree.</p>
+              <p>This strategy wraps a transformation strategy (<code>transform</code>) and augments it with <strong>tree rebasing semantics</strong>:</p>
+              <ol>
+               <li>The inner strategy is first applied to the e-graph.</li>
+               <li>If it produces no change, the strategy halts and rebasing is skipped.</li>
+               <li>If it does change the e-graph, the new tree rooted at a given <a href="EClassCall.html">foresight.eqsat.EClassCall</a> is extracted.</li>
+               <li>If the newly extracted tree is equivalent (according to <code>areEquivalent</code>) to the previous one, rebasing is skipped.</li>
+               <li>Otherwise, the new tree is added to an empty e-graph, producing a new root and a freshly rooted e-graph.</li>
+              </ol>
+              <p>This approach is especially useful in fixpoint-style optimization loops, where you want to:</p>
+              <ul>
+               <li>Track convergence at the level of extracted trees, not just internal graph structure.</li>
+               <li>Avoid redundant re-extractions and expansions.</li>
+               <li>Restart from a canonical or minimal representative tree when changes occur.</li>
+              </ul>
+             </div>
+             <h2 class="h200">Type parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Data
+              </dt>
+              <dd class="body-medium">
+               <p>The internal state type carried by the transformation strategy.</p>
+              </dd>
+              <dt class="body-small">
+               EGraphT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of the e-graph, usually a wrapper like <a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a> or <span data-unresolved-link="">foresight.eqsat.metadata.EGraphWithMetadata</span>.</p>
+              </dd>
+              <dt class="body-small">
+               NodeT
+              </dt>
+              <dd class="body-medium">
+               <p>The type of nodes in the e-graph.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               areEquivalent
+              </dt>
+              <dd class="body-medium">
+               <p>A predicate for determining whether two trees are considered the same.</p>
+              </dd>
+              <dt class="body-small">
+               extractor
+              </dt>
+              <dd class="body-medium">
+               <p>A mechanism for extracting a <a href="Tree.html">foresight.eqsat.Tree</a> from an e-graph at a given root.</p>
+              </dd>
+              <dt class="body-small">
+               getRoot
+              </dt>
+              <dd class="body-medium">
+               <p>A function that extracts the <a href="EClassCall.html">foresight.eqsat.EClassCall</a> representing the current root of the e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               setRoot
+              </dt>
+              <dd class="body-medium">
+               <p>A function that inserts a new tree root into an e-graph.</p>
+              </dd>
+              <dt class="body-small">
+               transform
+              </dt>
+              <dd class="body-medium">
+               <p>The core transformation strategy to apply before rebasing.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/TransformAndRebase$.html">object</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Serializable</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Equals</span>
+                </div>
+                <div>
+                 trait <a href="saturation/Strategy.html" t="n">Strategy</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>, (<span t="t">Data</span>, <span data-unresolved-link="" t="t">Option</span>[<a href="Tree.html" t="t">Tree</a>[<span t="t">NodeT</span>]])]
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span class="show-all-code show-content text-button h100">Show all</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="saturation/TransformAndRebase$.html" t="n" class="documentableName ">TransformAndRebase</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Factory methods for constructing <a href="saturation/TransformAndRebase.html">TransformAndRebase</a> strategies with different e-graph wrappers.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Factory methods for constructing <a href="saturation/TransformAndRebase.html">TransformAndRebase</a> strategies with different e-graph wrappers.</p>
+              <p>These helpers simplify creation of rebasing strategies over common e-graph variants, including:</p>
+              <ul>
+               <li><a href="saturation/EGraphWithRoot.html">EGraphWithRoot</a></li>
+               <li><span data-unresolved-link="">foresight.eqsat.metadata.EGraphWithMetadata</span></li>
+               <li><a href="saturation/EGraphWithRecordedApplications.html">EGraphWithRecordedApplications</a></li>
+               <li>combinations of the above</li>
+              </ul>
+              <p>In all cases, the behavior is:</p>
+              <ol>
+               <li>Apply a strategy to the e-graph.</li>
+               <li>If changed, extract a tree and rebase to an empty e-graph if the new tree differs from the old.</li>
+               <li>Return a new rooted e-graph or skip rebasing as needed.</li>
+              </ol>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Companion
+              </dt>
+              <dd class="body-medium">
+               <a href="saturation/TransformAndRebase.html">class</a>
+              </dd>
+              <dt class="body-small">
+               Supertypes
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <div>
+                 trait <span data-unresolved-link="" t="n">Product</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Mirror</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Object</span>
+                </div>
+                <div>
+                 trait <span data-unresolved-link="" t="n">Matchable</span>
+                </div>
+                <div>
+                 class <span data-unresolved-link="" t="n">Any</span>
+                </div><span></span>
+               </div>
+              </dd>
+              <dt class="body-small">
+               Self type
+              </dt>
+              <dd class="body-medium">
+               <div class="mono-small-block supertypes">
+                <span></span>
+                <div>
+                 <a href="saturation/TransformAndRebase$.html" t="n">TransformAndRebase</a>.<span t="k">type</span>
+                </div>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Packages">Packages</a></li><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html><html data-pathToRoot="../../../../" data-rawLocation="foresight/eqsat/saturation/priorities/ReweightedPriorities" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>ReweightedPriorities</title><link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico"></link><script type="text/javascript" src="../../../../scripts/theme.js"></script><script type="text/javascript" src="../../../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../../../styles/nord-light.css"></link><link rel="stylesheet" href="../../../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../../../styles/code-snippets.css"></link><link rel="stylesheet" href="../../../../styles/searchbar.css"></link><link rel="stylesheet" href="../../../../styles/social-links.css"></link><link rel="stylesheet" href="../../../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../../../styles/content-contributors.css"></link><link rel="stylesheet" href="../../../../styles/fontawesome.css"></link><script type="text/javascript" src="../../../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/data.js" defer="true"></script><link rel="stylesheet" href="../../../../styles/apistyles.css"></link><script>var pathToRoot = "../../../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../../../" class="logo-container"><span class="project-name h300">foresight</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">foresight</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="api-nav-button" class="switcher h100 selected" href="../../../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../../../foresight.html"><span class="micon pa"></span><span>foresight</span></a></span><div class="ni n1 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../../eqsat.html"><span class="micon pa"></span><span>eqsat</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../commands.html"><span class="micon pa"></span><span>commands</span></a></span><div class="ni n3 "><span class="nh "><a href="../../commands/AddManyCommand.html"><span class="micon cl"></span><span>AddManyCommand</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/Command.html"><span class="micon tr"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/Command$.html"><span class="micon ob"></span><span>Command</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/CommandQueue.html"><span class="micon cl"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/CommandQueue$.html"><span class="micon ob"></span><span>CommandQueue</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/CommandQueueBuilder.html"><span class="micon cl"></span><span>CommandQueueBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/EClassSymbol.html"><span class="micon tr"></span><span>EClassSymbol</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../commands/EClassSymbol$.html"><span class="micon ob"></span><span>EClassSymbol</span></a></span><div class="ni n4 "><span class="nh "><a href="../../commands/EClassSymbol$$Real.html"><span class="micon cl"></span><span>Real</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../commands/EClassSymbol$$Virtual.html"><span class="micon cl"></span><span>Virtual</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../../commands/ENodeSymbol.html"><span class="micon cl"></span><span>ENodeSymbol</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../commands/UnionManyCommand.html"><span class="micon cl"></span><span>UnionManyCommand</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../extraction.html"><span class="micon pa"></span><span>extraction</span></a></span><div class="ni n3 "><span class="nh "><a href="../../extraction/CostAnalysis.html"><span class="micon cl"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/CostAnalysis$.html"><span class="micon ob"></span><span>CostAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/CostFunction.html"><span class="micon tr"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/CostFunction$.html"><span class="micon ob"></span><span>CostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/ExtractionAnalysis.html"><span class="micon cl"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/ExtractionAnalysis$.html"><span class="micon ob"></span><span>ExtractionAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/ExtractionTree.html"><span class="micon cl"></span><span>ExtractionTree</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/ExtractionTreeCall.html"><span class="micon cl"></span><span>ExtractionTreeCall</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/ExtractionTreeOrdering.html"><span class="micon cl"></span><span>ExtractionTreeOrdering</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../extraction/Extractor.html"><span class="micon tr"></span><span>Extractor</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../lang.html"><span class="micon pa"></span><span>lang</span></a></span><div class="ni n3 "><span class="nh "><a href="../../lang/AnalysisBox.html"><span class="micon tr"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AnalysisBox$.html"><span class="micon ob"></span><span>AnalysisBox</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AnalysisFact.html"><span class="micon cl"></span><span>AnalysisFact</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AsAtom.html"><span class="micon tr"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AsAtom$.html"><span class="micon ob"></span><span>AsAtom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AtomDecoder$.html"><span class="micon ob"></span><span>AtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/AtomEncoder$.html"><span class="micon ob"></span><span>AtomEncoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/Box.html"><span class="micon tr"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/Box$.html"><span class="micon ob"></span><span>Box</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/Def.html"><span class="micon cl"></span><span>Def</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../lang/Def$.html"><span class="micon ob"></span><span>Def</span></a></span><div class="ni n4 "><span class="nh "><a href="../../lang/Def$$given_Conversion_Slot_Def$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Def</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../../lang/Language.html"><span class="micon tr"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/Language$.html"><span class="micon ob"></span><span>Language</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LanguageAnalysis.html"><span class="micon tr"></span><span>LanguageAnalysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LanguageCostFunction.html"><span class="micon tr"></span><span>LanguageCostFunction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LanguageExtractor.html"><span class="micon tr"></span><span>LanguageExtractor</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LanguageOp.html"><span class="micon cl"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LanguageOp$.html"><span class="micon ob"></span><span>LanguageOp</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/LowPriorityAtomDecoder.html"><span class="micon tr"></span><span>LowPriorityAtomDecoder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../lang/Use.html"><span class="micon cl"></span><span>Use</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../lang/Use$.html"><span class="micon ob"></span><span>Use</span></a></span><div class="ni n4 "><span class="nh "><a href="../../lang/Use$$given_Conversion_Slot_Use$.html"><span class="micon ob"></span><span>given_Conversion_Slot_Use</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../metadata.html"><span class="micon pa"></span><span>metadata</span></a></span><div class="ni n3 "><span class="nh "><a href="../../metadata/Analysis.html"><span class="micon tr"></span><span>Analysis</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../metadata/AnalysisMetadata.html"><span class="micon cl"></span><span>AnalysisMetadata</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../metadata/Metadata.html"><span class="micon tr"></span><span>Metadata</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../parallel.html"><span class="micon pa"></span><span>parallel</span></a></span><div class="ni n3 "><span class="nh "><a href="../../parallel/CancellationToken.html"><span class="micon cl"></span><span>CancellationToken</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/OperationCanceledException.html"><span class="micon cl"></span><span>OperationCanceledException</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/ParallelMap.html"><span class="micon tr"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/ParallelMap$.html"><span class="micon ob"></span><span>ParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/TimedParallelMap.html"><span class="micon cl"></span><span>TimedParallelMap</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/TimingReport.html"><span class="micon cl"></span><span>TimingReport</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../parallel/TimingReport$.html"><span class="micon ob"></span><span>TimingReport</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting.html"><span class="micon pa"></span><span>rewriting</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/patterns.html"><span class="micon pa"></span><span>patterns</span></a></span><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/CompiledPattern.html"><span class="micon cl"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/CompiledPattern$.html"><span class="micon ob"></span><span>CompiledPattern</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/Instruction.html"><span class="micon tr"></span><span>Instruction</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/patterns/Instruction$.html"><span class="micon ob"></span><span>Instruction</span></a></span><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/Instruction$$BindNode.html"><span class="micon cl"></span><span>BindNode</span></a></span></div><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/Instruction$$BindVar.html"><span class="micon cl"></span><span>BindVar</span></a></span></div><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/Instruction$$Compare.html"><span class="micon cl"></span><span>Compare</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/Machine$.html"><span class="micon ob"></span><span>Machine</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/MachineError.html"><span class="micon tr"></span><span>MachineError</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/patterns/MachineError$.html"><span class="micon ob"></span><span>MachineError</span></a></span><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/MachineError$$InconsistentVars.html"><span class="micon cl"></span><span>InconsistentVars</span></a></span></div><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/MachineError$$NoMatchingNode.html"><span class="micon cl"></span><span>NoMatchingNode</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/MachineResult.html"><span class="micon tr"></span><span>MachineResult</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/patterns/MachineResult$.html"><span class="micon ob"></span><span>MachineResult</span></a></span><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/MachineResult$$Failure.html"><span class="micon cl"></span><span>Failure</span></a></span></div><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/MachineResult$$Success.html"><span class="micon cl"></span><span>Success</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/MachineSearcherPhase.html"><span class="micon cl"></span><span>MachineSearcherPhase</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/MachineState.html"><span class="micon cl"></span><span>MachineState</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/MachineState$.html"><span class="micon ob"></span><span>MachineState</span></a></span></div><div class="ni n4"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/patterns/Pattern$.html"><span class="micon ob"></span><span>Pattern</span></a></span><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/Pattern$$Var.html"><span class="micon cl"></span><span>Var</span></a></span></div><div class="ni n5 "><span class="nh "><a href="../../rewriting/patterns/Pattern$$Var$.html"><span class="micon ob"></span><span>Var</span></a></span></div></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/PatternApplier.html"><span class="micon cl"></span><span>PatternApplier</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/PatternCompiler$.html"><span class="micon ob"></span><span>PatternCompiler</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/patterns/PatternMatch.html"><span class="micon cl"></span><span>PatternMatch</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/PortableMatch.html"><span class="micon tr"></span><span>PortableMatch</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/ReversibleApplier.html"><span class="micon tr"></span><span>ReversibleApplier</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/ReversibleSearcher.html"><span class="micon tr"></span><span>ReversibleSearcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/ReversibleSearcher$.html"><span class="micon ob"></span><span>ReversibleSearcher</span></a></span><div class="ni n4 "><span class="nh "><a href="../../rewriting/ReversibleSearcher$$SinglePhaseReversibleSearcher.html"><span class="micon cl"></span><span>SinglePhaseReversibleSearcher</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/ReversibleSearcherPhase.html"><span class="micon tr"></span><span>ReversibleSearcherPhase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/Searcher.html"><span class="micon tr"></span><span>Searcher</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../rewriting/Searcher$.html"><span class="micon ob"></span><span>Searcher</span></a></span><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$Filter.html"><span class="micon cl"></span><span>Filter</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$Flatten.html"><span class="micon cl"></span><span>Flatten</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$Map.html"><span class="micon cl"></span><span>Map</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$SearcherOfPatternMatch.html"><span class="micon cl"></span><span>SearcherOfPatternMatch</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$SearcherOfPatternMatchProductOps.html"><span class="micon cl"></span><span>SearcherOfPatternMatchProductOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$SearcherOfSeqOfTraversableOps.html"><span class="micon cl"></span><span>SearcherOfSeqOfTraversableOps</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../../rewriting/Searcher$$SearcherOfSeqOps.html"><span class="micon cl"></span><span>SearcherOfSeqOps</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../../rewriting/SearcherPhase.html"><span class="micon tr"></span><span>SearcherPhase</span></a></span></div></div><div class="ni n2 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../saturation.html"><span class="micon pa"></span><span>saturation</span></a></span><div class="ni n3 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../priorities.html"><span class="micon pa"></span><span>priorities</span></a></span><div class="ni n4 "><span class="nh "><a href="CurveFittedPriorities.html"><span class="micon cl"></span><span>CurveFittedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="MatchPriorities.html"><span class="micon tr"></span><span>MatchPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="PrioritizedMatch.html"><span class="micon cl"></span><span>PrioritizedMatch</span></a></span></div><div class="ni n4 expanded"><span class="nh h100 selected"><a href="#"><span class="micon tr"></span><span>ReweightedPriorities</span></a></span></div><div class="ni n4 "><span class="nh "><a href="UniformPriorities.html"><span class="micon cl"></span><span>UniformPriorities</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../BackoffRule.html"><span class="micon cl"></span><span>BackoffRule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../BackoffRuleApplication.html"><span class="micon cl"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../BackoffRuleApplication$.html"><span class="micon ob"></span><span>BackoffRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../BackoffRuleStats.html"><span class="micon cl"></span><span>BackoffRuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../EGraphWithRecordedApplications.html"><span class="micon cl"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../EGraphWithRecordedApplications$.html"><span class="micon ob"></span><span>EGraphWithRecordedApplications</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../EGraphWithRoot.html"><span class="micon cl"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../EGraphWithRoot$.html"><span class="micon ob"></span><span>EGraphWithRoot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../MaximalRuleApplication.html"><span class="micon cl"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../MaximalRuleApplication$.html"><span class="micon ob"></span><span>MaximalRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../MaximalRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>MaximalRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../Rebase.html"><span class="micon cl"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../Rebase$.html"><span class="micon ob"></span><span>Rebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../RepeatUntilStableBuilder.html"><span class="micon cl"></span><span>RepeatUntilStableBuilder</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../RuleStats.html"><span class="micon cl"></span><span>RuleStats</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../SearchAndApply.html"><span class="micon tr"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../SearchAndApply$.html"><span class="micon ob"></span><span>SearchAndApply</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../StochasticRuleApplication.html"><span class="micon cl"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../StochasticRuleApplication$.html"><span class="micon ob"></span><span>StochasticRuleApplication</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../StochasticRuleApplicationWithCaching$.html"><span class="micon ob"></span><span>StochasticRuleApplicationWithCaching</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../Strategy.html"><span class="micon tr"></span><span>Strategy</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../Strategy$.html"><span class="micon ob"></span><span>Strategy</span></a></span><div class="ni n4 "><span class="nh "><a href="../Strategy$$WithMetadata.html"><span class="micon cl"></span><span>WithMetadata</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../Strategy$$WithMetadataAndRoot.html"><span class="micon cl"></span><span>WithMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../Strategy$$WithRecordedApplications.html"><span class="micon cl"></span><span>WithRecordedApplications</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../Strategy$$WithRecordingMetadataAndRoot.html"><span class="micon cl"></span><span>WithRecordingMetadataAndRoot</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../Strategy$$WithRoot.html"><span class="micon cl"></span><span>WithRoot</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../TransformAndRebase.html"><span class="micon cl"></span><span>TransformAndRebase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../TransformAndRebase$.html"><span class="micon ob"></span><span>TransformAndRebase</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../../AddNodeResult.html"><span class="micon tr"></span><span>AddNodeResult</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../AddNodeResult$.html"><span class="micon ob"></span><span>AddNodeResult</span></a></span><div class="ni n3 "><span class="nh "><a href="../../AddNodeResult$$Added.html"><span class="micon cl"></span><span>Added</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../AddNodeResult$$AlreadyThere.html"><span class="micon cl"></span><span>AlreadyThere</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../../EClassCall.html"><span class="micon cl"></span><span>EClassCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EClassRef.html"><span class="micon cl"></span><span>EClassRef</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EGraph.html"><span class="micon tr"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EGraph$.html"><span class="micon ob"></span><span>EGraph</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EGraphLike.html"><span class="micon tr"></span><span>EGraphLike</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EGraphWithPendingUnions.html"><span class="micon cl"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../EGraphWithPendingUnions$.html"><span class="micon ob"></span><span>EGraphWithPendingUnions</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../ENode.html"><span class="micon cl"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../ENode$.html"><span class="micon ob"></span><span>ENode</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../MixedTree.html"><span class="micon tr"></span><span>MixedTree</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../MixedTree$.html"><span class="micon ob"></span><span>MixedTree</span></a></span><div class="ni n3 "><span class="nh "><a href="../../MixedTree$$Atom.html"><span class="micon cl"></span><span>Atom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../MixedTree$$MixedTreeOfEClassCallOps.html"><span class="micon cl"></span><span>MixedTreeOfEClassCallOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../MixedTree$$MixedTreeOfPatternOps.html"><span class="micon cl"></span><span>MixedTreeOfPatternOps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../MixedTree$$Node.html"><span class="micon cl"></span><span>Node</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../../Permutation.html"><span class="micon tr"></span><span>Permutation</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../ShapeCall.html"><span class="micon cl"></span><span>ShapeCall</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../Slot.html"><span class="micon tr"></span><span>Slot</span></a></span></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../Slot$.html"><span class="micon ob"></span><span>Slot</span></a></span><div class="ni n3 "><span class="nh "><a href="../../Slot$$NumberedSlot.html"><span class="micon cl"></span><span>NumberedSlot</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../Slot$$UniqueSlot.html"><span class="micon cl"></span><span>UniqueSlot</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../../SlotMap.html"><span class="micon cl"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../SlotMap$.html"><span class="micon ob"></span><span>SlotMap</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../Tree.html"><span class="micon cl"></span><span>Tree</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../Tree$.html"><span class="micon ob"></span><span>Tree</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../../../util.html"><span class="micon pa"></span><span>util</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../../util/collections.html"><span class="micon pa"></span><span>collections</span></a></span><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../../../util/collections/StrictMapOps$.html"><span class="micon ob"></span><span>StrictMapOps</span></a></span><div class="ni n4 "><span class="nh "><a href="../../../util/collections/StrictMapOps$$Ops.html"><span class="micon cl"></span><span>Ops</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../../util/ordering.html"><span class="micon pa"></span><span>ordering</span></a></span><div class="ni n3 "><span class="nh "><a href="../../../util/ordering/SeqOrdering$.html"><span class="micon ob"></span><span>SeqOrdering</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../../util/random.html"><span class="micon pa"></span><span>random</span></a></span><div class="ni n3 "><span class="nh "><a href="../../../util/random/DiscreteDistribution.html"><span class="micon tr"></span><span>DiscreteDistribution</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../../util/random/Random.html"><span class="micon tr"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../../util/random/Random$.html"><span class="micon ob"></span><span>Random</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../../util/random/Sample$.html"><span class="micon ob"></span><span>Sample</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../../util/random/ShiftedGeometricDistribution.html"><span class="micon cl"></span><span>ShiftedGeometricDistribution</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="../../../util/DotPrinter.html"><span class="micon cl"></span><span>DotPrinter</span></a></span></div></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../../../index.html">foresight</a>/<a href="../../../../foresight.html">foresight</a>/<a href="../../../eqsat.html">foresight.eqsat</a>/<a href="../../saturation.html">foresight.eqsat.saturation</a>/<a href="../priorities.html">foresight.eqsat.saturation.priorities</a>/<a href="ReweightedPriorities.html">ReweightedPriorities</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon tr"></span></span>
+ <h1 class="h600 single">ReweightedPriorities</h1>
+</div>
+<div class="fqname body-large">
+ <span>foresight.eqsat.saturation.priorities.ReweightedPriorities</span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">trait </span></span><a href="ReweightedPriorities.html" t="n" class="documentableName ">ReweightedPriorities</a>[<span t="k"></span><span data-unresolved-link="" t="t">NodeT</span>, <span t="k"></span><span data-unresolved-link="" t="t">RuleT</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Rule</span>[<span t="t">NodeT</span>, <span t="t">MatchT</span>, <span t="k">_</span>], <span t="k"></span><span data-unresolved-link="" t="t">EGraphT</span><span t="k"> &lt;: </span><a href="../../EGraphLike.html" t="t">EGraphLike</a>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]<span t="k"> &amp; </span><a href="../../EGraph.html" t="t">EGraph</a>[<span t="t">NodeT</span>], <span t="k"></span><span data-unresolved-link="" t="t">MatchT</span>]<span t="k"> extends </span><a href="MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]</span><span class="signature-long"></span>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc">
+  <p>A match prioritization strategy that adjusts the output of an existing <a href="MatchPriorities.html">MatchPriorities</a> instance.</p>
+  <p>This trait wraps a base prioritizer (<code>originalPriorities</code>) and overrides its behavior by reweighting the computed priority scores. This allows users to apply transformations such as scaling, clipping, normalization, or curve-fitting without reimplementing the original matching logic.</p>
+  <p>Implementations only need to define how to reweight a list of <a href="PrioritizedMatch.html">PrioritizedMatch</a>es; all other behavior (e.g. rule searching, batch sizing) is delegated to the wrapped prioritizer.</p>
+  <p>This is commonly used in stochastic rewrite strategies to modify sampling behavior without altering match discovery or ranking heuristics.</p>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Type parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    EGraphT
+   </dt>
+   <dd class="body-medium">
+    <p>The type of e-graph to operate on.</p>
+   </dd>
+   <dt class="body-small">
+    MatchT
+   </dt>
+   <dd class="body-medium">
+    <p>The type of matches found for each rule.</p>
+   </dd>
+   <dt class="body-small">
+    NodeT
+   </dt>
+   <dd class="body-medium">
+    <p>The type of nodes in the e-graph.</p>
+   </dd>
+   <dt class="body-small">
+    RuleT
+   </dt>
+   <dd class="body-medium">
+    <p>The type of rules used to generate matches.</p>
+   </dd>
+  </dl>
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    Graph
+   </dt>
+   <dd class="body-medium">
+    <div id="inheritance-diagram" class="diagram-class showGraph">
+     <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
+     <svg id="graph"></svg>
+     <script type="text/dot" id="dot"> digraph g {
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">trait <a href=\"ReweightedPriorities.html\" t=\"n\">ReweightedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
+node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
+node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
+node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"MatchPriorities.html\" t=\"n\">MatchPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="trait vertex"];
+node5 [id=node5, label="<span style=\"color: #FFFFFF;\">class <a href=\"CurveFittedPriorities.html\" t=\"n\">CurveFittedPriorities</a>[<span t=\"t\">NodeT</span>, <span t=\"t\">RuleT</span>, <span t=\"t\">EGraphT</span>, <span t=\"t\">MatchT</span>]</span>", class="class vertex"];
+
+
+ node0 -> node1;
+node1 -> node2;
+node1 -> node3;
+node3 -> node2;
+node0 -> node4;
+node4 -> node1;
+node5 -> node0;
+
+}
+</script>
+    </div>
+   </dd>
+   <dt class="body-small">
+    Supertypes
+   </dt>
+   <dd class="body-medium">
+    <div class="mono-small-block supertypes">
+     <div>
+      trait <a href="MatchPriorities.html" t="n">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Object</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Matchable</span>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Any</span>
+     </div><span></span>
+    </div>
+   </dd>
+   <dt class="body-small">
+    Known subtypes
+   </dt>
+   <dd class="body-medium">
+    <div class="mono-small-block subtypes">
+     <div>
+      class <a href="CurveFittedPriorities.html" t="n">CurveFittedPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+     </div><span></span>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Value-members">
+     <div data-togglable="Value members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Value members" class="h400">Value members</h3>
+      </div>
+      <section id="Abstract-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Abstract methods</h4>
+        </div>
+        <div class="documentableElement" id="originalPriorities-0">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="ReweightedPriorities.html#originalPriorities-0" t="n" class="documentableName ">originalPriorities</a>: <a href="MatchPriorities.html" t="t">MatchPriorities</a>[<span t="t">NodeT</span>, <span t="t">RuleT</span>, <span t="t">EGraphT</span>, <span t="t">MatchT</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The underlying prioritizer that computes the initial (raw) priority scores.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The underlying prioritizer that computes the initial (raw) priority scores.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="reweight-716">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="ReweightedPriorities.html#reweight-716" t="n" class="documentableName ">reweight</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]): <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Reweights the priority scores of an already-prioritized list of matches.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Reweights the priority scores of an already-prioritized list of matches.</p>
+              <p>The returned sequence must preserve the same matches and rules, but may replace the priority values based on any desired transformation.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               matches
+              </dt>
+              <dd class="body-medium">
+               <p>A sequence of prioritized matches.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A sequence of the same matches with updated priority scores.</p>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+      <section id="Concrete-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Concrete methods</h4>
+        </div>
+        <div class="documentableElement" id="batchSize-fffffbb2" data-f-keywords="override">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="ReweightedPriorities.html#batchSize-fffffbb2" t="n" class="documentableName ">batchSize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>): <span data-unresolved-link="" t="t">Int</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Determines how many of the prioritized matches to apply in this iteration.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Determines how many of the prioritized matches to apply in this iteration.</p>
+              <p>This can be constant or depend on the distribution of priorities, the total number of matches, or other criteria such as heuristics or exploration/exploitation trade-offs.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph in which the matches were found, used for context or additional information.</p>
+              </dd>
+              <dt class="body-small">
+               matches
+              </dt>
+              <dd class="body-medium">
+               <p>The prioritized matches.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>The number of matches to apply.</p>
+              </dd>
+              <dt class="body-small">
+               Definition Classes
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <a href="MatchPriorities.html">MatchPriorities</a>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="prioritize-280" data-f-keywords="override">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="ReweightedPriorities.html#prioritize-280" t="n" class="documentableName ">prioritize</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">matches</span>: <span data-unresolved-link="" t="t">Seq</span>[(<span t="t">RuleT</span>, <span t="t">MatchT</span>)], <span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span t="t">EGraphT</span>): <span data-unresolved-link="" t="t">Seq</span>[<a href="PrioritizedMatch.html" t="t">PrioritizedMatch</a>[<span t="t">RuleT</span>, <span t="t">MatchT</span>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Assigns a priority score to each match, indicating its relative importance or desirability.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               egraph
+              </dt>
+              <dd class="body-medium">
+               <p>The e-graph in which the matches were found, used for context or additional information.</p>
+              </dd>
+              <dt class="body-small">
+               matches
+              </dt>
+              <dd class="body-medium">
+               <p>A sequence of (rule, match) pairs found during rule search.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>A sequence of <a href="PrioritizedMatch.html">PrioritizedMatch</a> instances containing each rule, match, and its computed priority.</p>
+              </dd>
+              <dt class="body-small">
+               Definition Classes
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <a href="MatchPriorities.html">MatchPriorities</a>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Abstract-methods">Abstract methods</a></li><li><a href="#Concrete-methods">Concrete methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
