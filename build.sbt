@@ -147,6 +147,15 @@ lazy val benchmarks = (project in file("benchmarks"))
     },
   )
 
+lazy val root = (project in file("."))
+  .aggregate(foresight, examples, benchmarks)
+  .settings(
+    name := "foresight-root",          // nicer name in IntelliJ
+    publish / skip := true,            // don't publish the aggregate
+    Compile / packageDoc / publishArtifact := false,
+    Compile / packageSrc / publishArtifact := false
+  )
+
 // Publish to GitHub Pages
 enablePlugins(GhpagesPlugin, SitePlugin, SiteScaladocPlugin)
 git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
