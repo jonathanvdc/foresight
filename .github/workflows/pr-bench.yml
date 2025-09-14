@@ -33,7 +33,7 @@ jobs:
       - name: Run JMH on PR (head)
         run: >
           sbt
-          'benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff jmh-current.json'
+          "benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff $GITHUB_WORKSPACE/jmh-current.json"
 
       - name: Checkout base revision
         uses: actions/checkout@v4
@@ -46,7 +46,25 @@ jobs:
         working-directory: base
         run: >
           sbt
-          'benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff ../jmh-baseline.json'
+          "benchmarks/jmh:run ${{ env.JMH_ARGS }} -rf json -rff $GITHUB_WORKSPACE/jmh-baseline.json"
+
+      - name: Verify JMH result files
+        if: always()
+        run: |
+          set -euxo pipefail
+          echo "Workspace is: $GITHUB_WORKSPACE"
+          ls -lah "$GITHUB_WORKSPACE"
+          echo "File details:"
+          for f in "$GITHUB_WORKSPACE/jmh-current.json" "$GITHUB_WORKSPACE/jmh-baseline.json"; do
+            if [[ -f "$f" ]]; then
+              echo "✅ Found $f"
+              wc -c "$f"
+              head -c 200 "$f" || true
+              echo
+            else
+              echo "❌ Missing $f"
+            fi
+          done
 
       - name: Upload JMH artifacts
         if: always()
@@ -54,8 +72,8 @@ jobs:
         with:
           name: jmh-results-${{ github.run_id }}
           path: |
-            jmh-current.json
-            jmh-baseline.json
+            $GITHUB_WORKSPACE/jmh-current.json
+            $GITHUB_WORKSPACE/jmh-baseline.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -63,9 +81,12 @@ jobs:
         id: compare
         shell: bash
         run: |
-          python3 scripts/compare-benchmarks.py jmh-baseline.json jmh-current.json > comment.md
-          # scripts/compare-benchmarks.py should print a markdown table or summary
-          # If you need to expose output as a step output:
+          set -euxo pipefail
+          base_json="$GITHUB_WORKSPACE/jmh-baseline.json"
+          head_json="$GITHUB_WORKSPACE/jmh-current.json"
+          [[ -s "$base_json" ]] || { echo "Missing or empty $base_json"; exit 1; }
+          [[ -s "$head_json" ]] || { echo "Missing or empty $head_json"; exit 1; }
+          python3 scripts/compare-benchmarks.py "$base_json" "$head_json" > comment.md
           echo "comment<<EOF" >> $GITHUB_OUTPUT
           cat comment.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
