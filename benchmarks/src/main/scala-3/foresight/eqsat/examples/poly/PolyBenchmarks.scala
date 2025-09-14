@@ -2,10 +2,11 @@ package foresight.eqsat.examples.poly
 
 import foresight.eqsat.EGraph
 import foresight.eqsat.examples.poly
-import foresight.eqsat.lang._
+import foresight.eqsat.lang.*
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
-import org.openjdk.jmh.annotations._
+import foresight.util.BenchmarksWithParallelMap
+import org.openjdk.jmh.annotations.*
 
 import java.util.concurrent.TimeUnit
 
@@ -13,10 +14,10 @@ import java.util.concurrent.TimeUnit
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-class PolyBenchmarks {
+class PolyBenchmarks extends BenchmarksWithParallelMap {
   @Benchmark
-  def poly5Sequential(): ArithExpr = {
-    poly5Bench(ParallelMap.sequential)
+  def poly5(): ArithExpr = {
+    poly5Bench(parallelMap)
   }
 
   val arithCostFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
