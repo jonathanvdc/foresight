@@ -127,7 +127,6 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
     lines.append("")
     # Append geometric mean rows per threadCount (computed over ratios PR/Base)
     if geomean_logs:
-        lines.append("|  |  |  |  |  |  |")  # keep table format alignment
         # Sort threadCount keys numerically when possible
         def _thread_sort_key(s: str) -> Tuple[int, str]:
             try:
