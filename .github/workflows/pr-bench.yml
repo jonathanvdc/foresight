@@ -1,0 +1,89 @@
+name: PR Benchmarks (compare to base)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}-bench
+  cancel-in-progress: true
+
+jobs:
+  jmh-compare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR (head)
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+
+      - name: Run JMH on PR (head)
+        run: >
+          sbt
+          'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1,2
+           -rf json -rff jmh-current.json'
+
+      - name: Checkout base revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          fetch-depth: 0
+
+      - name: Setup for base
+        working-directory: base
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+
+      - name: Setup sbt for base
+        working-directory: base
+        uses: sbt/setup-sbt@v1
+
+      - name: Run JMH on base
+        working-directory: base
+        run: >
+          sbt
+          'benchmarks/jmh:run -wi 1 -i 1 -f 1 -r 10s -p threadCount=1,2
+           -rf json -rff ../jmh-baseline.json'
+
+      - name: Upload JMH artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmh-results-${{ github.run_id }}
+          path: |
+            jmh-current.json
+            jmh-baseline.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Compare JMH results
+        id: compare
+        shell: bash
+        run: |
+          python3 scripts/compare-benchmarks.py jmh-baseline.json jmh-current.json > comment.md
+          # scripts/compare-benchmarks.py should print a markdown table or summary
+          # If you need to expose output as a step output:
+          echo "comment<<EOF" >> $GITHUB_OUTPUT
+          cat comment.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post sticky comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: jmh-results
+          message: ${{ steps.compare.outputs.comment }}
