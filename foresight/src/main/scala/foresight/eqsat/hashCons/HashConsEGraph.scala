@@ -32,8 +32,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   override def classes: Iterable[EClassRef] = classData.keys
 
-  override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
-    unionFind.tryFind(ref)
+  override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
+    unionFind.findOrNull(ref)
   }
 
   override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
@@ -60,9 +60,9 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     })
   }
 
-  override def find(node: ENode[NodeT]): Option[EClassCall] = {
+  override def findOrNull(node: ENode[NodeT]): EClassCall = {
     // TODO: implement this without going through the mutable e-graph.
-    toMutable.find(node)
+    toMutable.findOrNull(node)
   }
 
   override def tryAddMany(nodes: Seq[ENode[NodeT]],

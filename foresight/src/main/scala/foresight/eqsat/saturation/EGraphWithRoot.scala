@@ -37,12 +37,12 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
     EGraphWithRoot(newGraph, root)
   }
 
-  override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = egraph.tryCanonicalize(ref)
+  override def canonicalizeOrNull(ref: EClassRef): EClassCall = egraph.canonicalizeOrNull(ref)
   override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = egraph.classes
   override def nodes(call: EClassCall): Set[ENode[Node]] = egraph.nodes(call)
   override def users(ref: EClassRef): Set[ENode[Node]] = egraph.users(ref)
-  override def find(node: ENode[Node]): Option[EClassCall] = egraph.find(node)
+  override def findOrNull(node: ENode[Node]): EClassCall = egraph.findOrNull(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
   override def tryAddMany(nodes: Seq[ENode[Node]],
                           parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRoot[Node, Repr]) = {

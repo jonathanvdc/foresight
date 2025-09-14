@@ -34,22 +34,21 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
   }
 
   /**
-   * Finds the representative of the given key and compresses the path. If the key is not in the union-find, None is
-   * returned; otherwise, the representative of the key, the renaming of the path, and the new union-find are
-   * returned.
+   * Finds the representative of the given key and compresses the path. If the key is not in the union-find, null is
+   * returned; otherwise, the representative of the key and the new union-find are returned.
    *
-   * @param key The key to find.
-   * @return The representative of the key, the renaming of the path, and the new union-find, if the key is in the
-   *         union-find. None otherwise.
+   * @param ref The key to find.
+   * @return The representative of the key and the new union-find, if the key is in the union-find.
+   *         Null and the current union-find otherwise.
    */
-  def tryFindAndCompress(key: EClassRef): Option[(EClassCall, SlottedUnionFind)] = {
-    parents.get(key) match {
-      case None => None
-      case Some(parent) if parent.ref == key => Some((parent, this))
-      case Some(parent) =>
-        val (grandparent, newDisjointSet) = findAndCompress(parent)
-        val newMap = newDisjointSet.parents + (key -> grandparent)
-        Some((grandparent, SlottedUnionFind(newMap)))
+  def findAndCompressOrNull(ref: EClassRef): (EClassCall, SlottedUnionFind) = {
+    val parent = parents.getOrElse(ref, return (null, this))
+    if (parent.ref == ref) {
+      (parent, this)
+    } else {
+      val (grandparent, newDisjointSet) = findAndCompress(parent)
+      val newMap = newDisjointSet.parents + (ref -> grandparent)
+      (grandparent, SlottedUnionFind(newMap))
     }
   }
 
@@ -61,38 +60,46 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key and the new union-find.
    */
   def findAndCompress(ref: EClassRef): (EClassCall, SlottedUnionFind) = {
-    val parent = parents(ref)
-    if (parent.ref == ref) {
-      (parent, this)
+    val (result, disjointSet) = findAndCompressOrNull(ref)
+    if (result == null) {
+      throw new NoSuchElementException(s"EClassRef $ref is not in the union-find.")
     } else {
-      val (grandparent, newDisjointSet) = findAndCompress(parent)
-      val newMap = newDisjointSet.parents + (ref -> grandparent)
-      (grandparent, SlottedUnionFind(newMap))
+      (result, disjointSet)
     }
   }
 
   /**
-   * Finds the representative of the given key. If the key is not in the union-find, None is returned; otherwise, the
+   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
    * representative of the key and the new union-find are returned.
    *
    * @param ref The key to find.
-   * @return The representative of the key and the new union-find, if the key is in the union-find. None otherwise.
+   * @return The representative of the key and the new union-find, if the key is in the union-find.
+   *         Null and the current union-find otherwise.
    */
-  def tryFindAndCompress(ref: EClassCall): Option[(EClassCall, SlottedUnionFind)] = {
-    tryFindAndCompress(ref.ref).map {
-      case (rep, disjointSet) => (rep.rename(ref.args), disjointSet)
+  def findAndCompressOrNull(ref: EClassCall): (EClassCall, SlottedUnionFind) = {
+    val (parent, newDisjointSet) = findAndCompressOrNull(ref.ref)
+    if (parent == null) {
+      (null, this)
+    } else {
+      (parent.rename(ref.args), newDisjointSet)
     }
   }
 
+
   /**
-   * Finds the representative of the given key. If the key is not in the union-find, None is returned; otherwise, the
-   * representative of the key and the new union-find are returned.
+   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
+   * representative of the key is returned.
    *
    * @param ref The key to find.
-   * @return The representative of the key and the new union-find, if the key is in the union-find. None otherwise.
+   * @return The representative of the key, if the key is in the union-find. Null otherwise.
    */
-  def tryFind(ref: EClassCall): Option[EClassCall] = {
-    tryFind(ref.ref).map(_.rename(ref.args))
+  def findOrNull(ref: EClassCall): EClassCall = {
+    val parent = findOrNull(ref.ref)
+    if (parent == null) {
+      null
+    } else {
+      parent.rename(ref.args)
+    }
   }
 
   /**
@@ -103,7 +110,11 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key.
    */
   def findAndCompress(ref: EClassCall): (EClassCall, SlottedUnionFind) = {
-    tryFindAndCompress(ref).get
+    val (parent, newDisjointSet) = findAndCompress(ref.ref)
+    if (parent == null) {
+      throw new NoSuchElementException(s"EClassRef ${ref.ref} is not in the union-find.")
+    }
+    (parent.rename(ref.args), newDisjointSet)
   }
 
   /**
@@ -114,26 +125,27 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key.
    */
   def find(ref: EClassCall): EClassCall = {
-    tryFind(ref).get
+    val result = findOrNull(ref)
+    if (result == null) {
+      throw new NoSuchElementException(s"EClassRef ${ref.ref} is not in the union-find.")
+    } else {
+      result
+    }
   }
 
   /**
-   * Finds the representative of the given key. If the key is not in the union-find, None is returned; otherwise, the
+   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
    * representative of the key is returned.
    *
    * @param key The key to find.
-   * @return The representative of the key, if the key is in the union-find. None otherwise.
+   * @return The representative of the key, if the key is in the union-find. Null otherwise.
    */
-  def tryFind(key: EClassRef): Option[EClassCall] = {
-    if (parents.contains(key)) {
-      val parent = parents(key)
-      if (parent.ref == key) {
-        Some(parent)
-      } else {
-        tryFind(parent)
-      }
+  def findOrNull(key: EClassRef): EClassCall = {
+    val parent = parents.getOrElse(key, return null)
+    if (parent.ref == key) {
+      parent
     } else {
-      None
+      findOrNull(parent)
     }
   }
 }

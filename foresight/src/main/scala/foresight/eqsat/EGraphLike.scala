@@ -72,9 +72,9 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
    * e-classes map to a stable representative.
    *
    * @param ref A possibly non-canonical e-class reference.
-   * @return Some(canonical reference) if `ref` exists in this e-graph; otherwise, None.
+   * @return The canonical reference if `ref` exists in this e-graph; otherwise, `ref`.
    */
-  def tryCanonicalize(ref: EClassRef): Option[EClassCall]
+  def canonicalizeOrNull(ref: EClassRef): EClassCall
 
   /**
    * Canonicalizes an e-node: its argument calls are canonicalized, then the node is decomposed
@@ -113,10 +113,12 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   /**
    * Finds the e-class containing the given e-node, if present.
    *
+   * This variant returns null if the e-node is not found, for Java interoperability.
+   *
    * @param node The e-node to look up.
-   * @return Some(e-class call) if the e-node exists in this e-graph; otherwise, None.
+   * @return The e-class call if the e-node exists in this e-graph; otherwise, null.
    */
-  def find(node: ENode[NodeT]): Option[EClassCall]
+  def findOrNull(node: ENode[NodeT]): EClassCall
 
   /**
    * Tests whether two e-class applications refer to the same canonical e-class.
@@ -186,13 +188,31 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   }
 
   /**
+   * Returns the current canonical reference of an e-class if it exists in this e-graph.
+   *
+   * Canonicalization follows all pending/recorded unions so that structurally equal or merged
+   * e-classes map to a stable representative.
+   *
+   * @param ref A possibly non-canonical e-class reference.
+   * @return Some(canonical reference) if `ref` exists in this e-graph; otherwise, None.
+   */
+  final def tryCanonicalize(ref: EClassRef): Option[EClassCall] = Option(canonicalizeOrNull(ref))
+
+  /**
    * Canonicalizes an e-class reference.
    *
    * @throws NoSuchElementException if the e-class does not exist in this e-graph.
    * @param ref The e-class to canonicalize.
    * @return The canonical e-class application.
    */
-  final def canonicalize(ref: EClassRef): EClassCall = tryCanonicalize(ref).get
+  final def canonicalize(ref: EClassRef): EClassCall = {
+    val call = canonicalizeOrNull(ref)
+    if (call == null) {
+      throw new NoSuchElementException(s"EClassRef $ref does not exist in this e-graph")
+    } else {
+      call
+    }
+  }
 
   /**
    * Canonicalizes an e-class application by canonicalizing its reference and then reapplying
@@ -204,6 +224,14 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] {
   final def canonicalize(call: EClassCall): EClassCall = {
     canonicalize(call.ref).renamePartial(call.args)
   }
+
+  /**
+   * Finds the e-class containing the given e-node, if present.
+   *
+   * @param node The e-node to look up.
+   * @return Some(e-class call) if the e-node exists in this e-graph; otherwise, None.
+   */
+  final def find(node: ENode[NodeT]): Option[EClassCall] = Option(findOrNull(node))
 
   /**
    * Checks whether the e-graph contains the given e-class reference.

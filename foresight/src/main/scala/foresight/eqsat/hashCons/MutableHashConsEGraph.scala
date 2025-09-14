@@ -14,10 +14,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     classData(ref).slots
   }
 
-  def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
-    unionFind.tryFindAndCompress(ref)
-  }
-
   def canonicalize(ref: EClassRef): EClassCall = {
     unionFind.findAndCompress(ref)
   }
@@ -71,11 +67,11 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
   }
 
-  def find(node: ENode[NodeT]): Option[EClassCall] = {
+  def findOrNull(node: ENode[NodeT]): EClassCall = {
     if (node.hasSlots) {
-      Option(findUnsafe(canonicalize(node)))
+      findUnsafe(canonicalize(node))
     } else {
-      Option(findUnsafeWithoutSlots(canonicalizeWithoutSlots(node)))
+      findUnsafeWithoutSlots(canonicalizeWithoutSlots(node))
     }
   }
 

@@ -15,8 +15,8 @@ private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
     set.isCanonical(ref)
   }
 
-  def tryFindAndCompress(key: EClassRef): Option[EClassCall] = {
-    foldUpdateIntoSet(set.tryFindAndCompress(key))
+  def findAndCompressOrNull(key: EClassRef): EClassCall = {
+    foldUpdateIntoSet(set.findAndCompressOrNull(key))
   }
 
   def findAndCompress(ref: EClassRef): EClassCall = {
@@ -25,8 +25,8 @@ private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
     result
   }
 
-  def tryFindAndCompress(ref: EClassCall): Option[EClassCall] = {
-    foldUpdateIntoSet(set.tryFindAndCompress(ref))
+  def findAndCompressOrNull(ref: EClassCall): EClassCall = {
+    foldUpdateIntoSet(set.findAndCompressOrNull(ref))
   }
 
   def findAndCompress(ref: EClassCall): EClassCall = {
@@ -35,12 +35,13 @@ private final class MutableSlottedUnionFind(var set: SlottedUnionFind) {
     result
   }
 
-  private def foldUpdateIntoSet[A](pair: Option[(A, SlottedUnionFind)]): Option[A] = {
-    pair match {
-      case None => None
-      case Some((result, newSet)) =>
-        set = newSet
-        Some(result)
+  private def foldUpdateIntoSet[A](pair: (A, SlottedUnionFind)): A = {
+    val (result , newSet) = pair
+    if (result == null) {
+      null.asInstanceOf[A]
+    } else {
+      set = newSet
+      result
     }
   }
 }
