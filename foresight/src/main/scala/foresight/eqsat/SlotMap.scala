@@ -195,7 +195,7 @@ final class SlotMap private(private val _keys: Array[Slot],
 
     if (i == j) {
       // All entries were kept
-      SlotMap(keysBuffer, valuesBuffer)
+      SlotMap(_keys, valuesBuffer)
     } else {
       // Some entries were dropped; return a smaller array
       SlotMap(keysBuffer.take(j), valuesBuffer.take(j))
@@ -209,18 +209,14 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful when you want to apply a renaming where defined, but leave other bindings unchanged.
    */
   def composeRetain(other: SlotMap): SlotMap = {
-    val keysArr = new Array[Slot](size)
     val valuesArr = new Array[Slot](size)
     var i = 0
     while (i < _keys.length) {
-      val k = _keys(i)
       val v = _values(i)
-      val mappedV = other.getOrElse(v, v)
-      keysArr(i) = k
-      valuesArr(i) = mappedV
+      valuesArr(i) = other.getOrElse(v, v)
       i += 1
     }
-    SlotMap(keysArr, valuesArr)
+    SlotMap(_keys, valuesArr)
   }
 
   /**
@@ -230,18 +226,14 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful for isolating unmapped bindings so they cannot alias existing slots.
    */
   def composeFresh(other: SlotMap): SlotMap = {
-    val keysArr = new Array[Slot](size)
     val valuesArr = new Array[Slot](size)
     var i = 0
     while (i < _keys.length) {
-      val k = _keys(i)
       val v = _values(i)
-      val mappedV = other.getOrElse(v, Slot.fresh())
-      keysArr(i) = k
-      valuesArr(i) = mappedV
+      valuesArr(i) = other.getOrElse(v, Slot.fresh())
       i += 1
     }
-    SlotMap(keysArr, valuesArr)
+    SlotMap(_keys, valuesArr)
   }
 
   /**
