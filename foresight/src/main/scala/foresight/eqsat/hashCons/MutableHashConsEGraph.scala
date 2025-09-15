@@ -53,7 +53,8 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
     val canonicalArgs = node.args.map(canonicalize)
     val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
-    groupCompatibleVariants(nodeWithCanonicalizedArgs).toSeq
+    groupCompatibleVariants(nodeWithCanonicalizedArgs)
+      .toSeq
       .map(_.asShapeCall)
       .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
