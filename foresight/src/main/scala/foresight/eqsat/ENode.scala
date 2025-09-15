@@ -75,7 +75,7 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
 
     val newDefinitions = definitions.map(renaming.apply)
     val newUses = uses.map(renaming.apply)
-    val newArgs = args.map(call => call.copy(args = call.args.composeRetain(renaming)))
+    val newArgs = args.map(_.renameRetain(renaming))
     copy(definitions = newDefinitions, uses = newUses, args = newArgs)
   }
 
