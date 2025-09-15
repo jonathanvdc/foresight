@@ -124,7 +124,6 @@ final class ENode[+NodeT] private (
       val renamedArg = _args(i).renameRetain(renaming)
       if (newArgs == null && renamedArg != _args(i)) {
         newArgs = new Array[EClassCall](_args.length)
-        java.util.Arrays.copyOf(_args, i) // create a prefix copy
         // We must actually copy the prefix if we allocated newArgs
         Array.copy(_args, 0, newArgs, 0, i)
       }
@@ -153,18 +152,50 @@ final class ENode[+NodeT] private (
    *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
-    val distinctSlots = {
-      val seen = scala.collection.mutable.LinkedHashSet[Slot]()
-      var i = 0
-      while (i < _definitions.length) { seen += _definitions(i); i += 1 }
-      i = 0
-      while (i < _uses.length) { seen += _uses(i); i += 1 }
-      i = 0
-      while (i < _args.length) { seen ++= _args(i).args.values; i += 1 }
-      seen.toVector
+    // Compute an upper bound on the number of slots and collect distinct slots in encounter order
+    var max = _definitions.length + _uses.length
+    var i = 0
+    while (i < _args.length) { max += _args(i).args.size; i += 1 }
+
+    // Single preallocated buffer for distinct slots (encounter order)
+    val distinct = new Array[Slot](max)
+    var nDistinct = 0
+
+    // small linear-contains for tiny n (almost always < 8)
+    def addIfNew(s: Slot): Unit = {
+      var j = 0
+      var seen = false
+      while (!seen && j < nDistinct) { if (distinct(j) eq s) seen = true; j += 1 }
+      if (!seen) { distinct(nDistinct) = s; nDistinct += 1 }
     }
-    val renamedSlots = SlotMap.fromPairs(distinctSlots.zipWithIndex.map { case (s, idx) => s -> Slot.numeric(idx) })
-    ShapeCall(this.rename(renamedSlots), renamedSlots.inverse)
+
+    i = 0
+    while (i < _definitions.length) { addIfNew(_definitions(i)); i += 1 }
+    i = 0
+    while (i < _uses.length) { addIfNew(_uses(i)); i += 1 }
+    i = 0
+    while (i < _args.length) {
+      val it = _args(i).args.values.iterator
+      while (it.hasNext) addIfNew(it.next())
+      i += 1
+    }
+
+    // Build forward renaming pairs (orig -> $idx) without intermediate maps
+    val pairs = new Array[(Slot, Slot)](nDistinct)
+    i = 0
+    while (i < nDistinct) { pairs(i) = (distinct(i), Slot.numeric(i)); i += 1 }
+
+    val renaming: SlotMap = SlotMap.fromPairs(scala.collection.immutable.ArraySeq.unsafeWrapArray(pairs))
+
+    // Apply renaming on the fly via existing fast-paths in ENode.rename
+    val shaped = this.rename(renaming)
+
+    // We want the inverse mapping (canonical -> original) in the same encounter order.
+    // Using inverse() is acceptable here because keys are tiny; if this becomes a hotspot,
+    // we can add a specialized SlotMap factory that builds numeric keys [0..n) directly.
+    val inverse = renaming.inverse
+
+    ShapeCall(shaped, inverse)
   }
 
   /**
