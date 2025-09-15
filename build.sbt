@@ -7,7 +7,7 @@ ThisBuild / crossScalaVersions := {
   if (sys.props.get("IDEA_IMPORT").contains("1"))
     Seq(devScala)
   else
-    Seq("2.11.12", "2.12.20", "2.13.14", devScala)
+    Seq("2.12.20", "2.13.14", devScala)
 }
 ThisBuild / scalaVersion := devScala
 
