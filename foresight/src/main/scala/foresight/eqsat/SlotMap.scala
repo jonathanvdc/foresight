@@ -96,36 +96,42 @@ final class SlotMap private(private val _keys: Array[Slot],
   override def inverse: SlotMap = {
     // Fast path for empty map
     if (isEmpty) return this
+    else if (size == 1) return SlotMap(_values, _keys)
 
-    // Create an array of indices for the _values array
-    val idx = _values.indices.toArray
-    // Sort the indices based on the corresponding values in _values, preserving order for equal elements
-    scala.util.Sorting.stableSort(idx, (a: Int, b: Int) => _values(a) < _values(b))
+    // Prepare arrays for the inverted map (values become keys, keys become values)
+    val sortedKeys = java.util.Arrays.copyOf(_values, size)
+    val sortedValues = java.util.Arrays.copyOf(_keys, size)
 
-    // Prepare arrays to hold the sorted keys and values for the inverse map
-    val sortedKeys = new Array[Slot](size)
-    val sortedValues = new Array[Slot](size)
-    var j = 0
-    var i = 0
-    while (i < idx.length) {
-      val v = _values(idx(i))
-      // Only add unique values (skip duplicates)
-      if (j == 0 || sortedKeys(j - 1) != v) {
-        sortedKeys(j) = v                // Inverse: value becomes key
-        sortedValues(j) = _keys(idx(i))  // Inverse: key becomes value
-        j += 1
+    // In-place insertion sort on (sortedKeys, sortedValues) by sortedKeys
+    var i = 1
+    while (i < sortedKeys.length) {
+      val k = sortedKeys(i)
+      val v = sortedValues(i)
+      var j = i - 1
+      // Shift larger keys one position to the right
+      while (j >= 0 && (k < sortedKeys(j))) {
+        sortedKeys(j + 1) = sortedKeys(j)
+        sortedValues(j + 1) = sortedValues(j)
+        j -= 1
       }
+
+      // Insert the saved pair
+      sortedKeys(j + 1) = k
+      sortedValues(j + 1) = v
       i += 1
     }
 
-    // Return a new SlotMap with the inverted mapping
-    if (i == j) {
-      // All values were unique
-      SlotMap(sortedKeys, sortedValues)
-    } else {
-      throw new IllegalStateException("Cannot invert SlotMap: duplicate values found.")
+    // Verify bijection (no duplicate values in original, i.e., no duplicate keys now)
+    var d = 1
+    while (d < sortedKeys.length) {
+      if (sortedKeys(d - 1) == sortedKeys(d))
+        throw new IllegalStateException("Cannot invert SlotMap: duplicate values found.")
+      d += 1
     }
+
+    SlotMap(sortedKeys, sortedValues)
   }
+
 
   /**
    * True if each key maps to a unique value (no collisions in `values`).
