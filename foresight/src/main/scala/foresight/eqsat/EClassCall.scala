@@ -76,7 +76,8 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
   def renameRetain(renaming: SlotMap): EClassCall = {
     if (args.isEmpty || renaming.isEmpty) return this
 
-    EClassCall(ref, args.composeRetain(renaming))
+    val newArgs = args.composeRetain(renaming)
+    if (newArgs eq args) this else EClassCall(ref, args.composeRetain(renaming))
   }
 
   /**
