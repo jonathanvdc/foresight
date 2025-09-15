@@ -233,7 +233,9 @@ final class SlotMap private(private val _keys: Array[Slot],
       if (valuesArr != null) valuesArr(i) = mapped
       i += 1
     }
-    SlotMap(_keys, if (valuesArr != null) valuesArr else _values)
+
+    if (valuesArr == null) this
+    else SlotMap(_keys, valuesArr)
   }
 
   /**
