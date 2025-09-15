@@ -78,6 +78,9 @@ final case class ShapeCall[+NodeT](shape: ENode[NodeT], renaming: SlotMap) {
    * @param renaming The partial mapping to apply after the current one.
    * @return A `ShapeCall` with partially composed renaming.
    */
-  def renamePartial(renaming: SlotMap): ShapeCall[NodeT] =
+  def renamePartial(renaming: SlotMap): ShapeCall[NodeT] = {
+    if (this.renaming.isEmpty) return this
+
     ShapeCall(shape, this.renaming.composePartial(renaming))
+  }
 }
