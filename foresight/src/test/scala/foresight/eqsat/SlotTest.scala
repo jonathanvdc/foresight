@@ -39,13 +39,13 @@ class SlotTest {
     val n128 = numeric(128)
     val n129 = numeric(129)
     val nNeg = numeric(-1)
-    assertTrue(n0.isNumbered);
+    assertTrue(n0.isNumbered)
     assertFalse(n0.isUnique)
-    assertTrue(n128.isNumbered);
+    assertTrue(n128.isNumbered)
     assertFalse(n128.isUnique)
-    assertTrue(n129.isNumbered);
+    assertTrue(n129.isNumbered)
     assertFalse(n129.isUnique)
-    assertTrue(nNeg.isNumbered);
+    assertTrue(nNeg.isNumbered)
     assertFalse(nNeg.isUnique)
 
     // reference equality invariants
@@ -59,9 +59,9 @@ class SlotTest {
   def uniqueFreshAreAlwaysDistinct(): Unit = {
     val u1 = Slot.fresh()
     val u2 = Slot.fresh()
-    assertTrue(u1.isUnique);
+    assertTrue(u1.isUnique)
     assertFalse(u1.isNumbered)
-    assertTrue(u2.isUnique);
+    assertTrue(u2.isUnique)
     assertFalse(u2.isNumbered)
     assertFalse("fresh must return distinct objects", u1.asInstanceOf[AnyRef] eq u2.asInstanceOf[AnyRef])
   }
