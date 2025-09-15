@@ -58,13 +58,35 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
 
+  /**
+   * Generates all possible variants of an `ENode` by considering symmetries (permutations)
+   * in its argument e-classes.
+   *
+   * For each argument (`EClassCall`) of the node:
+   *   - Retrieves the associated e-class data and its permutation group.
+   *   - If the permutation group is trivial (no symmetries), only the original call is used.
+   *   - If there are symmetries, applies all permutations to the call, generating multiple variants.
+   *
+   * Computes the cartesian product of all argument variants, creating every possible combination.
+   * Each combination is used to create a new `ENode` variant by copying the original node with the new arguments.
+   * The result is a set of all compatible variants of the input node, accounting for argument symmetries.
+   */
   private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {
+    // For each argument, generate all possible variants by applying its permutation group.
     val groups = node.args.map({
-      case EClassCall(ref, renaming) =>
+      case call@EClassCall(ref, renaming) =>
         val data = classData(ref)
-        data.permutations.allPerms.map(perm => EClassCall(ref, perm.compose(renaming)))
+        val permutations = data.permutations
+        if (permutations.isTrivial) {
+          // No symmetries: only one variant.
+          Seq(call)
+        } else {
+          // Symmetries present: apply all permutations to the e-class call.
+          data.permutations.allPerms.toSeq.map(perm => EClassCall(ref, perm.compose(renaming)))
+        }
     })
 
+    // Compute the cartesian product of all argument variants to get every possible combination.
     Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
   }
 
