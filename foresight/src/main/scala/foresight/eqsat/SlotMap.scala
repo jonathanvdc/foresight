@@ -212,6 +212,28 @@ final class SlotMap private(private val _keys: Array[Slot],
     }
   }
 
+  private def composeWithDefault(other: SlotMap, default: Slot => Slot): SlotMap = {
+    // Allocate values buffer lazily if we need to change anything
+    val len = _keys.length
+    var valuesArr: Array[Slot] = null
+    var i = 0
+    while (i < len) {
+      val v = _values(i)
+      val mapped = other.getOrElse(v, null) match {
+        case null => default(v)
+        case w => w
+      }
+      if (valuesArr == null && mapped != v) {
+        valuesArr = new Array[Slot](size)
+        // Copy previous unchanged values
+        Array.copy(_values, 0, valuesArr, 0, i)
+      }
+      if (valuesArr != null) valuesArr(i) = mapped
+      i += 1
+    }
+    SlotMap(_keys, if (valuesArr != null) valuesArr else _values)
+  }
+
   /**
    * Retaining composition `other ∘ this` with fallback.
    *
@@ -219,14 +241,7 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful when you want to apply a renaming where defined, but leave other bindings unchanged.
    */
   def composeRetain(other: SlotMap): SlotMap = {
-    val valuesArr = new Array[Slot](size)
-    var i = 0
-    while (i < _keys.length) {
-      val v = _values(i)
-      valuesArr(i) = other.getOrElse(v, v)
-      i += 1
-    }
-    SlotMap(_keys, valuesArr)
+    composeWithDefault(other, v => v)
   }
 
   /**
@@ -236,14 +251,7 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful for isolating unmapped bindings so they cannot alias existing slots.
    */
   def composeFresh(other: SlotMap): SlotMap = {
-    val valuesArr = new Array[Slot](size)
-    var i = 0
-    while (i < _keys.length) {
-      val v = _values(i)
-      valuesArr(i) = other.getOrElse(v, Slot.fresh())
-      i += 1
-    }
-    SlotMap(_keys, valuesArr)
+    composeWithDefault(other, _ => Slot.fresh())
   }
 
   /**
