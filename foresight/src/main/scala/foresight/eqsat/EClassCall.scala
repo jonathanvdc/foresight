@@ -63,7 +63,8 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
   def renamePartial(renaming: SlotMap): EClassCall = {
     if (args.isEmpty) return this
 
-    EClassCall(ref, args.composePartial(renaming))
+    val newArgs = args.composePartial(renaming)
+    if (newArgs eq args) this else EClassCall(ref, newArgs)
   }
 
   /**
@@ -77,7 +78,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
     if (args.isEmpty || renaming.isEmpty) return this
 
     val newArgs = args.composeRetain(renaming)
-    if (newArgs eq args) this else EClassCall(ref, args.composeRetain(renaming))
+    if (newArgs eq args) this else EClassCall(ref, newArgs)
   }
 
   /**
