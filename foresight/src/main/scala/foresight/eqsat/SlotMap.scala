@@ -173,41 +173,61 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful for projecting a mapping into a smaller codomain.
    */
   def composePartial(other: SlotMap): SlotMap = {
-    // Fast paths for empty maps
-    if (isEmpty) return this
-    if (other.isEmpty) return other
-
-    // Allocate values buffer eagerly, but keys buffer lazily if we need to drop entries
+    // Lazily allocate (copy-on-write) buffers.
+    // - keysBuffer is allocated only if we *drop* at least one entry.
+    // - valuesBuffer is allocated only if we either drop any entry (we need a compacted array)
+    //   or if a mapped value differs from the original at a kept position.
     var keysBuffer: Array[Slot] = null
-    val valuesBuffer = new Array[Slot](size)
+    var valuesBuffer: Array[Slot] = null
     var i = 0
     var j = 0
     while (i < size) {
       val v = _values(i)
       other.getOrElse(v, null) match {
         case null =>
-          // Drop this entry; allocate buffers if needed
+          // Drop this entry.
           if (keysBuffer == null) {
-            // First drop; allocate buffers and copy kept entries so far
+            // First drop: allocate keys buffer and copy over keys kept so far.
             keysBuffer = new Array[Slot](size)
             Array.copy(_keys, 0, keysBuffer, 0, j)
           }
+          if (valuesBuffer == null) {
+            // First drop also requires compaction of values; copy over kept values so far.
+            valuesBuffer = new Array[Slot](size)
+            Array.copy(_values, 0, valuesBuffer, 0, j)
+          }
+        // Note: do not advance j (we dropped this entry).
+
         case w =>
+          // Keep this entry (possibly with a remapped value).
           if (keysBuffer != null) {
-            // We are dropping some entries; copy kept ones to keys buffer
+            // We're in "dropping" mode; we must compact keys into keysBuffer.
             keysBuffer(j) = _keys(i)
           }
-          valuesBuffer(j) = w
+
+          // Copy-on-write for values:
+          // Allocate valuesBuffer only if (a) we've started dropping (needing compaction), or
+          // (b) the mapped value differs from the original at this kept position.
+          if ((valuesBuffer != null) || (w != _values(i))) {
+            if (valuesBuffer == null) {
+              valuesBuffer = new Array[Slot](size)
+              // Copy previously identical values for kept entries [0, j).
+              Array.copy(_values, 0, valuesBuffer, 0, j)
+            }
+            valuesBuffer(j) = w
+          }
           j += 1
       }
       i += 1
     }
 
-    if (i == j) {
-      // All entries were kept
-      SlotMap(_keys, valuesBuffer)
+    if (keysBuffer == null) {
+      // No drops. If no value changed, we can return `this` unchanged.
+      if (valuesBuffer == null) this
+      else SlotMap(_keys, valuesBuffer)
     } else {
-      // Some entries were dropped; return a smaller array
+      // Some entries were dropped; both buffers must be allocated.
+      // keysBuffer and valuesBuffer are guaranteed non-null by the first-drop logic above.
       SlotMap(keysBuffer.take(j), valuesBuffer.take(j))
     }
   }
