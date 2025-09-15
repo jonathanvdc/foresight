@@ -100,4 +100,48 @@ class SlotMapTest {
     assert(!map.isPermutation)
     map.check()
   }
+
+  @Test
+  def testInverse(): Unit = {
+    val map = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1), Slot.numeric(1) -> Slot.numeric(2))
+    val inv = map.inverse
+    assert(inv.size == 2)
+    assert(inv.contains(Slot.numeric(1)))
+    assert(inv.get(Slot.numeric(1)).contains(Slot.numeric(0)))
+    assert(inv.contains(Slot.numeric(2)))
+    assert(inv.get(Slot.numeric(2)).contains(Slot.numeric(1)))
+    assert(inv.keySet == Set(Slot.numeric(1), Slot.numeric(2)))
+    assert(inv.valueSet == Set(Slot.numeric(0), Slot.numeric(1)))
+    assert(inv.isBijection)
+    assert(!inv.isPermutation)
+    inv.check()
+  }
+
+  @Test
+  def testInverseNoBijection(): Unit = {
+    val map = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1), Slot.numeric(2) -> Slot.numeric(1))
+    try {
+      map.inverse
+      assert(false, "Expected exception")
+    } catch {
+      case _: IllegalStateException => // Expected
+    }
+  }
+
+  @Test
+  def testConcat(): Unit = {
+    val map1 = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1))
+    val map2 = SlotMap.from(Slot.numeric(1) -> Slot.numeric(2))
+    val map3 = map1.concat(map2)
+    assert(map3.size == 2)
+    assert(map3.contains(Slot.numeric(0)))
+    assert(map3.get(Slot.numeric(0)).contains(Slot.numeric(1)))
+    assert(map3.contains(Slot.numeric(1)))
+    assert(map3.get(Slot.numeric(1)).contains(Slot.numeric(2)))
+    assert(map3.keySet == Set(Slot.numeric(0), Slot.numeric(1)))
+    assert(map3.valueSet == Set(Slot.numeric(1), Slot.numeric(2)))
+    assert(map3.isBijection)
+    assert(!map3.isPermutation)
+    map3.check()
+  }
 }
