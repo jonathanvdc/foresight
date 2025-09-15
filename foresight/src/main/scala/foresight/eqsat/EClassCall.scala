@@ -61,9 +61,22 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return A new application with arguments renamed (possibly dropping some).
    */
   def renamePartial(renaming: SlotMap): EClassCall = {
-    if (args.isEmpty || renaming.isEmpty) return this
+    if (args.isEmpty) return this
 
     EClassCall(ref, args.composePartial(renaming))
+  }
+
+  /**
+   * Renames argument slots in this application according to a given mapping.
+   * Argument slots not in the mapping are retained as-is.
+   *
+   * @param renaming The mapping from old argument slots to new argument slots.
+   * @return A new application with arguments renamed (retaining unmapped ones).
+   */
+  def renameRetain(renaming: SlotMap): EClassCall = {
+    if (args.isEmpty || renaming.isEmpty) return this
+
+    EClassCall(ref, args.composeRetain(renaming))
   }
 
   /**
