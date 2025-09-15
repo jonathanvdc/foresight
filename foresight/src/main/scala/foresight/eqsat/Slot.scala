@@ -101,8 +101,8 @@ object Slot {
       Array.tabulate(SMALL_MAX + 1)(new NumberedSlot(_))
 
     // ---- Global canonical registry for other integers ----
-    private val global: java.util.concurrent.ConcurrentHashMap[Integer, NumberedSlot] =
-      new java.util.concurrent.ConcurrentHashMap[Integer, NumberedSlot]()
+    private val global: java.util.concurrent.ConcurrentHashMap[Int, NumberedSlot] =
+      new java.util.concurrent.ConcurrentHashMap[Int, NumberedSlot]()
 
     /**
      * Obtain the canonical instance for `n`.
@@ -120,7 +120,7 @@ object Slot {
     /** Fast path via shared small table; fallback to global registry. */
     private def intern(n: Int): NumberedSlot = {
       if (n >= 0 && n <= SMALL_MAX) small(n)
-      else global.computeIfAbsent(Integer.valueOf(n), _ => new NumberedSlot(n))
+      else global.computeIfAbsent(n, (n: Int) => new NumberedSlot(n))
     }
   }
 
