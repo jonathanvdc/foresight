@@ -15,15 +15,39 @@ import foresight.util.Debug
  * Node types (`NodeT`) supply the operator and any non-structural payload. Slots and arguments are provided here.
  *
  * @param nodeType     Operator or symbol for this node.
- * @param definitions  Slots introduced by this node that are scoped locally and invisible to parents. These are
- *                     redundant by construction at the boundary of this node and exist to model binders such as
- *                     lambda-abstraction or let.
- * @param uses         Slots referenced by this node that are visible to its parent and must be satisfied by the
- *                     surrounding e-class application.
- * @param args         Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
  * @tparam NodeT       The domain-specific node type. It defines operator identity and payload but not slots/children.
  */
-final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]) {
+final class ENode[+NodeT] private (
+  val nodeType: NodeT,
+  private val _definitions: Array[Slot],
+  private val _uses: Array[Slot],
+  private val _args: Array[EClassCall]
+) {
+  import scala.collection.immutable.ArraySeq
+
+  /**
+   * Slots introduced by this node that are scoped locally and invisible to parents. These are
+   * redundant by construction at the boundary of this node and exist to model binders such as
+   * lambda-abstraction or let.
+   *
+   * @return Sequence of definition slots.
+   */
+  def definitions: ArraySeq[Slot] = ArraySeq.unsafeWrapArray(_definitions)
+
+  /**
+   * Slots referenced by this node that are visible to its parent and must be satisfied by the
+   * surrounding e-class application.
+   *
+   * @return Sequence of use slots.
+   */
+  def uses: ArraySeq[Slot] = ArraySeq.unsafeWrapArray(_uses)
+
+  /**
+   * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
+   *
+   * @return Sequence of child e-class calls.
+   */
+  def args: ArraySeq[EClassCall]  = ArraySeq.unsafeWrapArray(_args)
 
   /**
    * All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children.
@@ -31,24 +55,46 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    *
    * @return An ordered sequence of slots used by this node.
    */
-  def slots: Seq[Slot] = definitions ++ uses ++ args.flatMap(_.args.values)
+  def slots: Seq[Slot] = {
+    // tiny sequences: build a compact ArrayBuffer then expose as ArraySeq
+    val buf = new scala.collection.mutable.ArrayBuffer[Slot](_definitions.length + _uses.length + _args.length * 2)
+    buf ++= _definitions
+    buf ++= _uses
+    var i = 0
+    while (i < _args.length) {
+      buf ++= _args(i).args.values
+      i += 1
+    }
+    ArraySeq.unsafeWrapArray(buf.toArray)
+  }
 
   /**
    * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.
    *
    * @return A set of slots used by this node.
    */
-  def slotSet: Set[Slot] = definitions.toSet ++ uses ++ args.flatMap(_.args.valueSet)
+  def slotSet: Set[Slot] = {
+    var s: Set[Slot] = Set.empty
+    var i = 0
+    while (i < _definitions.length) { s = s + _definitions(i); i += 1 }
+    i = 0
+    while (i < _uses.length) { s = s + _uses(i); i += 1 }
+    i = 0
+    while (i < _args.length) { s = s ++ _args(i).args.valueSet; i += 1 }
+    s
+  }
 
   /**
    * Whether this node contains any slots at all: definitions, uses, or children’s argument slots.
    *
    * @return True if this node has any slots; false if it is completely ground.
    */
-  def hasSlots: Boolean = definitions.nonEmpty || uses.nonEmpty || args.exists(!_.args.isEmpty)
+  def hasSlots: Boolean = _definitions.nonEmpty || _uses.nonEmpty || _args.exists(!_.args.isEmpty)
 
   private def containsSlot(slot: Slot): Boolean = {
-    definitions.contains(slot) || uses.contains(slot) || args.exists(_.args.valueSet.contains(slot))
+    _definitions.contains(slot) ||
+    _uses.contains(slot) ||
+    _args.exists(_.args.valueSet.contains(slot))
   }
 
   /**
@@ -64,19 +110,25 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return A node with slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    if (!hasSlots) {
-      // Fast path for slotless nodes: nothing to rename.
-      return this
-    }
-
+    if (!hasSlots) return this
     if (Debug.isEnabled) {
       require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
     }
 
-    val newDefinitions = definitions.map(renaming.apply)
-    val newUses = uses.map(renaming.apply)
-    val newArgs = args.map(_.renameRetain(renaming))
-    copy(definitions = newDefinitions, uses = newUses, args = newArgs)
+    // Map arrays efficiently
+    val newDefs = java.util.Arrays.copyOf(_definitions, _definitions.length)
+    var i = 0
+    while (i < newDefs.length) { newDefs(i) = renaming.apply(newDefs(i)); i += 1 }
+
+    val newUses = java.util.Arrays.copyOf(_uses, _uses.length)
+    i = 0
+    while (i < newUses.length) { newUses(i) = renaming.apply(newUses(i)); i += 1 }
+
+    val newArgs = new Array[EClassCall](_args.length)
+    i = 0
+    while (i < _args.length) { newArgs(i) = _args(i).renameRetain(renaming); i += 1 }
+
+    new ENode(nodeType, newDefs, newUses, newArgs)
   }
 
   /**
@@ -90,8 +142,18 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
-    val renamedSlots = SlotMap.fromPairs(slots.distinct.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)))
-    ShapeCall(rename(renamedSlots), renamedSlots.inverse)
+    val distinctSlots = {
+      val seen = scala.collection.mutable.SortedSet[Slot]()
+      var i = 0
+      while (i < _definitions.length) { seen += _definitions(i); i += 1 }
+      i = 0
+      while (i < _uses.length) { seen += _uses(i); i += 1 }
+      i = 0
+      while (i < _args.length) { seen ++= _args(i).args.values; i += 1 }
+      seen.toVector
+    }
+    val renamedSlots = SlotMap.fromPairs(distinctSlots.zipWithIndex.map { case (s, idx) => s -> Slot.numeric(idx) })
+    ShapeCall(this.rename(renamedSlots), renamedSlots.inverse)
   }
 
   /**
@@ -100,12 +162,61 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return True if equal to `asShapeCall.shape`; false otherwise.
    */
   def isShape: Boolean = this == asShapeCall.shape
+
+  /**
+   * Returns a copy of this node with the given argument e-class calls.
+   *
+   * If the new arguments are identical to the current ones, returns this node unchanged.
+   *
+   * @param newArgs New argument e-class calls.
+   * @return A node identical to this one but with `newArgs` as its arguments.
+   */
+  def withArgs(newArgs: Seq[EClassCall]): ENode[NodeT] = {
+    if (newArgs == args) return this
+
+//    newArgs match {
+//      case calls: ArraySeq[EClassCall] =>
+//        new ENode(nodeType, _definitions, _uses, calls.unsafeArray.asInstanceOf[Array[EClassCall]])
+//
+//      case _ =>
+//        new ENode(nodeType, _definitions, _uses, newArgs.toArray)
+//    }
+    new ENode(nodeType, _definitions, _uses, newArgs.toArray)
+  }
+
+  // --- case-class-like API preservation ---
+  override def toString: String = s"ENode($nodeType, $definitions, $uses, $args)"
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ENode[_] =>
+      (this.nodeType == that.nodeType) &&
+      this.definitions == that.definitions &&
+      this.uses == that.uses &&
+      this.args == that.args
+    case _ => false
+  }
+
+  private lazy val _hash: Int = {
+    var h = 1
+    h = 31 * h + (if (nodeType == null) 0 else nodeType.hashCode)
+    h = 31 * h + java.util.Arrays.hashCode(_definitions.asInstanceOf[Array[AnyRef]])
+    h = 31 * h + java.util.Arrays.hashCode(_uses.asInstanceOf[Array[AnyRef]])
+    h = 31 * h + java.util.Arrays.hashCode(_args.asInstanceOf[Array[AnyRef]])
+    h
+  }
+  override def hashCode(): Int = _hash
 }
 
 /**
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
+  def apply[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]): ENode[NodeT] = {
+    new ENode(nodeType, definitions.toArray, uses.toArray, args.toArray)
+  }
+
+  def unapply[NodeT](n: ENode[NodeT]): Option[(NodeT, Seq[Slot], Seq[Slot], Seq[EClassCall])] =
+    Some((n.nodeType, n.definitions, n.uses, n.args))
 
   /**
    * Builds an e-node that declares no local or free slots.
@@ -122,7 +233,6 @@ object ENode {
    * val n: ENode[Op] = ENode.unslotted(Add, Seq(leftCall, rightCall))
    * }}}
    */
-  def unslotted[NodeT](nodeType: NodeT, args: Seq[EClassCall]): ENode[NodeT] = {
-    ENode(nodeType, Seq.empty, Seq.empty, args)
-  }
+  def unslotted[NodeT](nodeType: NodeT, args: Seq[EClassCall]): ENode[NodeT] =
+    new ENode(nodeType, Array.empty, Array.empty, args.toArray)
 }

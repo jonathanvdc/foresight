@@ -55,7 +55,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       node
     } else {
       val canonicalArgs = node.args.map(canonicalize)
-      node.copy(args = canonicalArgs)
+      node.withArgs(canonicalArgs)
     }
   }
 
@@ -67,7 +67,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
     }
 
     val canonicalArgs = node.args.map(canonicalize)
-    val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
+    val nodeWithCanonicalizedArgs = node.withArgs(canonicalArgs)
     groupCompatibleVariants(nodeWithCanonicalizedArgs)
       .toSeq
       .map(_.asShapeCall)
@@ -103,7 +103,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
     })
 
     // Compute the cartesian product of all argument variants to get every possible combination.
-    Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
+    Helpers.cartesian(groups).map(node.withArgs).toSet
   }
 
   final def findOrNull(node: ENode[NodeT]): EClassCall = {
