@@ -5,7 +5,8 @@ import foresight.util.Debug
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],
-                                                 private var classData: Map[EClassRef, EClassData[NodeT]]) {
+                                                 private var classData: Map[EClassRef, EClassData[NodeT]])
+  extends ReadOnlyHashConsEGraph[NodeT] {
 
   def toImmutable: HashConsEGraph[NodeT] = {
     new HashConsEGraph(unionFind.toImmutable, hashCons, classData)
@@ -15,118 +16,22 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     classData(ref).slots
   }
 
-  def canonicalize(ref: EClassRef): EClassCall = {
-    unionFind.findAndCompress(ref)
+  override def classes: Iterable[EClassRef] = classData.keys
+
+  override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
+    unionFind.findAndCompressOrNull(ref)
   }
 
-  def canonicalize(app: EClassCall): EClassCall = {
-    canonicalize(app.ref).rename(app.args)
-  }
-
-  def isCanonical(ref: EClassRef): Boolean = {
+  override def isCanonical(ref: EClassRef): Boolean = {
     unionFind.isCanonical(ref)
   }
 
-  def isCanonical(call: EClassCall): Boolean = {
-    isCanonical(call.ref)
+  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+    hashCons.getOrElse(node, default)
   }
 
-  private def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
-    if (Debug.isEnabled && node.hasSlots) {
-      throw new IllegalArgumentException("Node has slots.")
-    }
-
-    if (node.args.forall(isCanonical)) {
-      node
-    } else {
-      val canonicalArgs = node.args.map(canonicalize)
-      node.copy(args = canonicalArgs)
-    }
-  }
-
-  def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
-    import foresight.util.ordering.SeqOrdering
-    
-    if (node.args.forall(isCanonical) && !node.hasSlots) {
-      return ShapeCall(node, SlotMap.empty)
-    }
-
-    val canonicalArgs = node.args.map(canonicalize)
-    val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
-    groupCompatibleVariants(nodeWithCanonicalizedArgs)
-      .toSeq
-      .map(_.asShapeCall)
-      .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
-  }
-
-  /**
-   * Generates all possible variants of an `ENode` by considering symmetries (permutations)
-   * in its argument e-classes.
-   *
-   * For each argument (`EClassCall`) of the node:
-   *   - Retrieves the associated e-class data and its permutation group.
-   *   - If the permutation group is trivial (no symmetries), only the original call is used.
-   *   - If there are symmetries, applies all permutations to the call, generating multiple variants.
-   *
-   * Computes the cartesian product of all argument variants, creating every possible combination.
-   * Each combination is used to create a new `ENode` variant by copying the original node with the new arguments.
-   * The result is a set of all compatible variants of the input node, accounting for argument symmetries.
-   */
-  private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {
-    // For each argument, generate all possible variants by applying its permutation group.
-    val groups = node.args.map({
-      case call@EClassCall(ref, renaming) =>
-        val data = classData(ref)
-        val permutations = data.permutations
-        if (permutations.isTrivial) {
-          // No symmetries: only one variant.
-          Seq(call)
-        } else {
-          // Symmetries present: apply all permutations to the e-class call.
-          data.permutations.allPerms.toSeq.map(perm => EClassCall(ref, perm.compose(renaming)))
-        }
-    })
-
-    // Compute the cartesian product of all argument variants to get every possible combination.
-    Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
-  }
-
-  def findOrNull(node: ENode[NodeT]): EClassCall = {
-    if (node.hasSlots) {
-      findUnsafe(canonicalize(node))
-    } else {
-      findUnsafeWithoutSlots(canonicalizeWithoutSlots(node))
-    }
-  }
-
-  /**
-   * Finds the e-class of a given e-node. The e-node must be canonical.
-   * @param renamedShape The canonicalized e-node to find the e-class of.
-   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, null.
-   */
-  private def findUnsafe(renamedShape: ShapeCall[NodeT]): EClassCall = {
-    if (Debug.isEnabled) {
-      assert(renamedShape.shape.isShape)
-    }
-
-    val ref = hashCons.getOrElse(renamedShape.shape, return null)
-
-    if (!renamedShape.shape.hasSlots) {
-      return ref.callWithoutSlots
-    }
-
-    val data = classData(ref)
-    val classToNode = data.nodes(renamedShape.shape)
-    val out = classToNode.inverse.compose(renamedShape.renaming)
-    EClassCall(ref, out)
-  }
-
-  private def findUnsafeWithoutSlots(node: ENode[NodeT]): EClassCall = {
-    if (Debug.isEnabled) {
-      assert(!node.hasSlots)
-    }
-
-    hashCons.getOrElse(node, return null).callWithoutSlots
+  override def dataForClass(ref: EClassRef): EClassData[NodeT] = {
+    classData(ref)
   }
 
   /**
