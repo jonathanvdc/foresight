@@ -54,8 +54,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
     if (node.args.forall(isCanonical)) {
       node
     } else {
-      val canonicalArgs = node.args.map(canonicalize)
-      node.withArgs(canonicalArgs)
+      node.mapArgs(canonicalize)
     }
   }
 
@@ -66,8 +65,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       return ShapeCall(node, SlotMap.empty)
     }
 
-    val canonicalArgs = node.args.map(canonicalize)
-    val nodeWithCanonicalizedArgs = node.withArgs(canonicalArgs)
+    val nodeWithCanonicalizedArgs = node.mapArgs(canonicalize)
     groupCompatibleVariants(nodeWithCanonicalizedArgs)
       .toSeq
       .map(_.asShapeCall)

@@ -143,7 +143,7 @@ final class ENode[+NodeT] private (
    */
   def asShapeCall: ShapeCall[NodeT] = {
     val distinctSlots = {
-      val seen = scala.collection.mutable.SortedSet[Slot]()
+      val seen = scala.collection.mutable.LinkedHashSet[Slot]()
       var i = 0
       while (i < _definitions.length) { seen += _definitions(i); i += 1 }
       i = 0
@@ -162,6 +162,31 @@ final class ENode[+NodeT] private (
    * @return True if equal to `asShapeCall.shape`; false otherwise.
    */
   def isShape: Boolean = this == asShapeCall.shape
+
+  /**
+   * Applies a function to each argument e-class call, returning a new node if any argument changes.
+   *
+   * If the function does not change any arguments, returns this node unchanged.
+   *
+   * @param f Function to apply to each argument e-class call.
+   * @return A node identical to this one but with each argument replaced by `f(arg)`.
+   */
+  def mapArgs(f: EClassCall => EClassCall): ENode[NodeT] = {
+    var newArgs: Array[EClassCall] = null
+    var i = 0
+    while (i < _args.length) {
+      val newArg = f(_args(i))
+      if (newArgs == null && newArg != _args(i)) {
+        newArgs = new Array[EClassCall](_args.length)
+        Array.copy(_args, 0, newArgs, 0, i)
+      }
+      if (newArgs != null) newArgs(i) = newArg
+      i += 1
+    }
+    if (newArgs == null) return this
+
+    new ENode(nodeType, _definitions, _uses, newArgs)
+  }
 
   /**
    * Returns a copy of this node with the given argument e-class calls.
