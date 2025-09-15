@@ -213,6 +213,8 @@ final class SlotMap private(private val _keys: Array[Slot],
   }
 
   private def composeWithDefault(other: SlotMap, default: Slot => Slot): SlotMap = {
+    if (isEmpty) return this
+
     // Allocate values buffer lazily if we need to change anything
     val len = _keys.length
     var valuesArr: Array[Slot] = null
@@ -241,6 +243,8 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful when you want to apply a renaming where defined, but leave other bindings unchanged.
    */
   def composeRetain(other: SlotMap): SlotMap = {
+    if (other.isEmpty) return this
+
     composeWithDefault(other, v => v)
   }
 
