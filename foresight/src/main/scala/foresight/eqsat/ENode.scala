@@ -115,20 +115,31 @@ final class ENode[+NodeT] private (
       require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
     }
 
-    // Map arrays efficiently
-    val newDefs = java.util.Arrays.copyOf(_definitions, _definitions.length)
+    val newDefs = ENode.renameSlotsOrNull(_definitions, renaming)
+    val newUses = ENode.renameSlotsOrNull(_uses, renaming)
+
+    var newArgs: Array[EClassCall] = null
     var i = 0
-    while (i < newDefs.length) { newDefs(i) = renaming.apply(newDefs(i)); i += 1 }
+    while (i < _args.length) {
+      val renamedArg = _args(i).renameRetain(renaming)
+      if (newArgs == null && renamedArg != _args(i)) {
+        newArgs = new Array[EClassCall](_args.length)
+        java.util.Arrays.copyOf(_args, i) // create a prefix copy
+        // We must actually copy the prefix if we allocated newArgs
+        Array.copy(_args, 0, newArgs, 0, i)
+      }
+      if (newArgs != null) newArgs(i) = renamedArg
+      i += 1
+    }
 
-    val newUses = java.util.Arrays.copyOf(_uses, _uses.length)
-    i = 0
-    while (i < newUses.length) { newUses(i) = renaming.apply(newUses(i)); i += 1 }
-
-    val newArgs = new Array[EClassCall](_args.length)
-    i = 0
-    while (i < _args.length) { newArgs(i) = _args(i).renameRetain(renaming); i += 1 }
-
-    new ENode(nodeType, newDefs, newUses, newArgs)
+    // If nothing changed, return this; otherwise, construct with new-or-old arrays
+    if ((newDefs eq null) && (newUses eq null) && (newArgs eq null)) this
+    else new ENode(
+      nodeType,
+      if (newDefs eq null) _definitions else newDefs,
+      if (newUses eq null) _uses else newUses,
+      if (newArgs eq null) _args else newArgs
+    )
   }
 
   /**
@@ -260,4 +271,22 @@ object ENode {
    */
   def unslotted[NodeT](nodeType: NodeT, args: Seq[EClassCall]): ENode[NodeT] =
     new ENode(nodeType, Array.empty, Array.empty, args.toArray)
+
+  private[eqsat] def renameSlotsOrNull(orig: Array[Slot], renaming: SlotMap): Array[Slot] = {
+    var newArr: Array[Slot] = null
+    var i = 0
+    while (i < orig.length) {
+      val mapped = renaming.apply(orig(i))
+      if (newArr == null) {
+        if (mapped != orig(i)) {
+          newArr = java.util.Arrays.copyOf(orig, orig.length)
+          newArr(i) = mapped
+        }
+      } else {
+        newArr(i) = mapped
+      }
+      i += 1
+    }
+    newArr
+  }
 }
