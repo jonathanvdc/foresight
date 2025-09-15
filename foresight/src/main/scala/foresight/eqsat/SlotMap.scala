@@ -88,12 +88,15 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * Inverts the mapping by swapping keys and values.
    *
-   * Only meaningful when this map is a bijection. If multiple keys map to the same value,
-   * later entries overwrite earlier ones in the result.
+   * Only meaningful when this map is a bijection. If not, throws an exception.
    *
    * @return The inverted map (`v -> k` for each `k -> v`).
+   * @throws IllegalStateException If this map is not a bijection.
    */
   override def inverse: SlotMap = {
+    // Fast path for empty map
+    if (isEmpty) return this
+
     // Create an array of indices for the _values array
     val idx = _values.indices.toArray
     // Sort the indices based on the corresponding values in _values, preserving order for equal elements
