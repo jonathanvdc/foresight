@@ -113,7 +113,7 @@ class SlotTest {
           override def call(): (Int, Slot) = (n, numeric(n))
         }
       val results: List[(Int, Slot)] = pool.invokeAll(tasks.asJava).asScala.toList.map(_.get())
-      // For each n, all slots should be the exact same reference
+      // For each n, all slots are the exact same reference
       Ns.foreach { n =>
         val group = results.collect { case (m, s) if m == n => s.asInstanceOf[AnyRef] }
         val head = group.head
