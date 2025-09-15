@@ -64,6 +64,11 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    * @return A node with slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
+    if (!hasSlots) {
+      // Fast path for slotless nodes: nothing to rename.
+      return this
+    }
+
     if (Debug.isEnabled) {
       require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
     }
