@@ -173,18 +173,33 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Useful for projecting a mapping into a smaller codomain.
    */
   def composePartial(other: SlotMap): SlotMap = {
-    val keysBuffer = mutable.ArrayBuffer.empty[Slot]
-    val valuesBuffer = mutable.ArrayBuffer.empty[Slot]
-    for (i <- _keys.indices) {
+    // Fast paths for empty maps
+    if (isEmpty) return this
+    if (other.isEmpty) return other
+
+    val keysBuffer = new Array[Slot](size)
+    val valuesBuffer = new Array[Slot](size)
+    var i = 0
+    var j = 0
+    while (i < size) {
       val v = _values(i)
       other.getOrElse(v, null) match {
         case null => // skip
         case w =>
-          keysBuffer += _keys(i)
-          valuesBuffer += w
+          keysBuffer(j) = _keys(i)
+          valuesBuffer(j) = w
+          j += 1
       }
+      i += 1
     }
-    SlotMap(keysBuffer.toArray, valuesBuffer.toArray)
+
+    if (i == j) {
+      // All entries were kept
+      SlotMap(keysBuffer, valuesBuffer)
+    } else {
+      // Some entries were dropped; return a smaller array
+      SlotMap(keysBuffer.take(j), valuesBuffer.take(j))
+    }
   }
 
   /**
