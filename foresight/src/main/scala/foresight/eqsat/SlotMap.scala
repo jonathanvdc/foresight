@@ -177,16 +177,26 @@ final class SlotMap private(private val _keys: Array[Slot],
     if (isEmpty) return this
     if (other.isEmpty) return other
 
-    val keysBuffer = new Array[Slot](size)
+    // Allocate values buffer eagerly, but keys buffer lazily if we need to drop entries
+    var keysBuffer: Array[Slot] = null
     val valuesBuffer = new Array[Slot](size)
     var i = 0
     var j = 0
     while (i < size) {
       val v = _values(i)
       other.getOrElse(v, null) match {
-        case null => // skip
+        case null =>
+          // Drop this entry; allocate buffers if needed
+          if (keysBuffer == null) {
+            // First drop; allocate buffers and copy kept entries so far
+            keysBuffer = new Array[Slot](size)
+            Array.copy(_keys, 0, keysBuffer, 0, j)
+          }
         case w =>
-          keysBuffer(j) = _keys(i)
+          if (keysBuffer != null) {
+            // We are dropping some entries; copy kept ones to keys buffer
+            keysBuffer(j) = _keys(i)
+          }
           valuesBuffer(j) = w
           j += 1
       }
