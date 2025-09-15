@@ -18,8 +18,7 @@ class SlotMapTest {
 
   @Test
   def testInsert(): Unit = {
-    val map = SlotMap.empty
-    val map2 = map.insert(Slot.numeric(0), Slot.numeric(1))
+    val map2 = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1))
     assert(map2.size == 1)
     assert(map2.contains(Slot.numeric(0)))
     assert(map2.get(Slot.numeric(0)).contains(Slot.numeric(1)))
@@ -32,8 +31,8 @@ class SlotMapTest {
 
   @Test
   def testCompose(): Unit = {
-    val map1 = SlotMap.empty.insert(Slot.numeric(0), Slot.numeric(1))
-    val map2 = SlotMap.empty.insert(Slot.numeric(1), Slot.numeric(2))
+    val map1 = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1))
+    val map2 = SlotMap.from(Slot.numeric(1) -> Slot.numeric(2))
     val map3 = map1.compose(map2)
     assert(map3.size == 1)
     assert(map3.contains(Slot.numeric(0)))
@@ -47,8 +46,8 @@ class SlotMapTest {
 
   @Test
   def testComposePartial(): Unit = {
-    val map1 = SlotMap.empty.insert(Slot.numeric(0), Slot.numeric(1))
-    val map2 = SlotMap.empty.insert(Slot.numeric(1), Slot.numeric(2))
+    val map1 = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1))
+    val map2 = SlotMap.from(Slot.numeric(1) -> Slot.numeric(2))
     val map3 = map1.composePartial(map2)
     assert(map3.size == 1)
     assert(map3.contains(Slot.numeric(0)))
@@ -63,8 +62,8 @@ class SlotMapTest {
   @Test
   def testComposeFresh(): Unit = {
     val known = Set(Slot.numeric(0), Slot.numeric(1), Slot.numeric(2), Slot.numeric(3))
-    val map1 = SlotMap.empty.insert(Slot.numeric(0), Slot.numeric(1)).insert(Slot.numeric(1), Slot.numeric(2))
-    val map2 = SlotMap.empty.insert(Slot.numeric(2), Slot.numeric(3))
+    val map1 = SlotMap.from(Slot.numeric(0) -> Slot.numeric(1), Slot.numeric(1) -> Slot.numeric(2))
+    val map2 = SlotMap.from(Slot.numeric(2) -> Slot.numeric(3))
     val map3 = map1.composeFresh(map2)
     assert(map3.size == 2)
     assert(map3.contains(Slot.numeric(0)))

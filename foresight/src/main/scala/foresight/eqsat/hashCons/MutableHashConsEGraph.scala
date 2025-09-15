@@ -212,8 +212,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     propagatePermutations(ref, shapeCall)
 
     // Construct an e-class call with the node slots to e-class slots bijection.
-    val publicRenaming = SlotMap(
-      canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
+    val publicRenaming = canonicalNode.renaming.filterKeys(!shape.definitions.contains(_))
     EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
   }
 
@@ -348,12 +347,6 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
     }
 
-    def renamePermutation(permutation: SlotMap, renaming: SlotMap): SlotMap = {
-      SlotMap(permutation.iterator.collect {
-        case (k, v) if renaming.contains(k) && renaming.contains(v) => (renaming(k), renaming(v))
-      }.toMap)
-    }
-
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
@@ -378,7 +371,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
       // Merge permutations of subordinate class into dominant class.
       val subToDom = subRoot.args.compose(domRoot.args.inverse)
-      val subPermutations = subData.permutations.generators.map(renamePermutation(_, subToDom))
+      val subPermutations = subData.permutations.generators.map(_.rename(subToDom))
 
       val domData = classData(domRoot.ref)
       domData.permutations.tryAddSet(subPermutations) match {

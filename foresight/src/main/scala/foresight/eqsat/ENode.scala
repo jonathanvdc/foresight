@@ -90,7 +90,7 @@ final case class ENode[+NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Se
    *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
-    val renamedSlots = SlotMap(slots.distinct.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)).toMap)
+    val renamedSlots = SlotMap.fromPairs(slots.distinct.zipWithIndex.map(p => p._1 -> Slot.numeric(p._2)))
     ShapeCall(rename(renamedSlots), renamedSlots.inverse)
   }
 

@@ -10,7 +10,7 @@ class ENodeTest {
 
     val node = ENode(0, Seq(x), Seq.empty, Seq.empty)
 
-    val node2 = node.rename(SlotMap(Map(x -> y)))
+    val node2 = node.rename(SlotMap.from(x -> y))
     assert(node2 == ENode(0, Seq(y), Seq.empty, Seq.empty))
   }
 
@@ -21,7 +21,7 @@ class ENodeTest {
 
     val node = ENode(0, Seq.empty, Seq(x), Seq.empty)
 
-    val node2 = node.rename(SlotMap(Map(x -> y)))
+    val node2 = node.rename(SlotMap.from(x -> y))
     assert(node2 == ENode(0, Seq.empty, Seq(y), Seq.empty))
   }
 
@@ -32,7 +32,7 @@ class ENodeTest {
 
     val node = ENode(0, Seq(x), Seq(x), Seq.empty)
 
-    val node2 = node.rename(SlotMap(Map(x -> y)))
+    val node2 = node.rename(SlotMap.from(x -> y))
     assert(node2 == ENode(0, Seq(y), Seq(y), Seq.empty))
   }
 
@@ -62,10 +62,10 @@ class ENodeTest {
 
     val c = new EClassRef()
 
-    val node = ENode(0, Seq(x, y), Seq(z), Seq(EClassCall(c, SlotMap(Map(w -> v)))))
+    val node = ENode(0, Seq(x, y), Seq(z), Seq(EClassCall(c, SlotMap.from(w -> v))))
 
     val call@ShapeCall(shape, args) = node.asShapeCall
-    assert(shape == ENode(0, Seq(Slot.numeric(0), Slot.numeric(1)), Seq(Slot.numeric(2)), Seq(EClassCall(c, SlotMap(Map(w -> Slot.numeric(3)))))))
+    assert(shape == ENode(0, Seq(Slot.numeric(0), Slot.numeric(1)), Seq(Slot.numeric(2)), Seq(EClassCall(c, SlotMap.from(w -> Slot.numeric(3))))))
     assert(args(Slot.numeric(0)) == x)
     assert(args(Slot.numeric(1)) == y)
     assert(args(Slot.numeric(2)) == z)

@@ -25,7 +25,7 @@ import scala.collection.mutable
  *
  * @param map The underlying immutable mapping from parameter to argument slots.
  */
-final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with Ordered[SlotMap] {
+final case class SlotMap private(private val map: Map[Slot, Slot]) extends Permutation[SlotMap] with Ordered[SlotMap] {
   /**
    * The number of entries in this map.
    */
@@ -40,13 +40,6 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * True if `k` is present as a key.
    */
   def contains(k: Slot): Boolean = map.contains(k)
-
-  /**
-   * Returns a copy with an extra mapping `k -> v`.
-   */
-  def insert(k: Slot, v: Slot): SlotMap = {
-    SlotMap(map + (k -> v))
-  }
 
   private def sortedByKeys = map.toSeq.sortBy(_._1)
 
@@ -107,6 +100,15 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
   def isPermutation: Boolean = isBijection && keySet == valueSet
 
   /**
+   * Concatenation (union) of two slot maps.
+   *
+   * Later entries overwrite earlier ones with the same key.
+   */
+  def concat(other: SlotMap): SlotMap = {
+    SlotMap(this.map ++ other.map)
+  }
+
+  /**
    * Composition `other ∘ this` with a totality check.
    *
    * Requires that every value produced by `this` appears as a key in `other` (`valueSet == other.keySet`).
@@ -126,10 +128,17 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * Useful for projecting a mapping into a smaller codomain.
    */
   def composePartial(other: SlotMap): SlotMap = {
-    val newMap = map.flatMap { case (k, v) =>
-      other.get(v).map(k -> _)
+    val m = mutable.HashMap.empty[Slot, Slot]
+    m.sizeHint(map.size) // best-effort; actual result may be smaller
+
+    val om = other.map
+    map.foreach { case (k, v) =>
+      val w = om.getOrElse(v, null)
+      if (w != null) {
+        m.update(k, w)
+      }
     }
-    SlotMap(newMap)
+    SlotMap(m.toMap)
   }
 
   /**
@@ -139,10 +148,11 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * Useful when you want to apply a renaming where defined, but leave other bindings unchanged.
    */
   def composeRetain(other: SlotMap): SlotMap = {
-    val newMap = map.map { case (k, v) =>
-      k -> other.get(v).getOrElse(v)
+    val builder = Map.newBuilder[Slot, Slot]
+    map.foreach { case (k, v) =>
+      builder += ((k, other.get(v).getOrElse(v)))
     }
-    SlotMap(newMap)
+    SlotMap(builder.result())
   }
 
   /**
@@ -152,10 +162,26 @@ final case class SlotMap(map: Map[Slot, Slot]) extends Permutation[SlotMap] with
    * Useful for isolating unmapped bindings so they cannot alias existing slots.
    */
   def composeFresh(other: SlotMap): SlotMap = {
-    val newMap = map.map { case (k, v) =>
-      k -> other.map.getOrElse(v, Slot.fresh())
+    val builder = Map.newBuilder[Slot, Slot]
+    map.foreach { case (k, v) =>
+      builder += ((k, other.map.getOrElse(v, Slot.fresh())))
     }
-    SlotMap(newMap)
+    SlotMap(builder.result())
+  }
+
+  /**
+   * Renames this mapping by applying `renaming` to both keys and values.
+   *
+   * Only entries whose key and value both appear in `renaming` are kept; others are dropped.
+   * Useful for retargeting a mapping to a fresh slot space.
+   *
+   * @param renaming Mapping from old to new slots.
+   * @return A `SlotMap` with keys and values renamed according to `renaming`.
+   */
+  def rename(renaming: SlotMap): SlotMap = {
+    SlotMap(map.iterator.collect {
+      case (k, v) if renaming.contains(k) && renaming.contains(v) => (renaming(k), renaming(v))
+    }.toMap)
   }
 
   /**
@@ -210,6 +236,11 @@ object SlotMap {
    * The empty mapping.
    */
   val empty: SlotMap = SlotMap(Map.empty)
+
+  /**
+   * Builds a map from `(key, value)` pairs. Later pairs overwrite earlier ones with the same key.
+   */
+  def from(pairs: (Slot, Slot)*): SlotMap = fromPairs(pairs)
 
   /**
    * Builds a map from `(key, value)` pairs. Later pairs overwrite earlier ones with the same key.
