@@ -1,6 +1,6 @@
 package foresight.eqsat
 
-import foresight.util.Debug
+import foresight.util.{Debug, SeqFromArray}
 
 /**
  * A node in a slotted e-graph.
@@ -23,8 +23,6 @@ final class ENode[+NodeT] private (
   private val _uses: Array[Slot],
   private val _args: Array[EClassCall]
 ) {
-  import scala.collection.immutable.ArraySeq
-
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
    * redundant by construction at the boundary of this node and exist to model binders such as
@@ -32,7 +30,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of definition slots.
    */
-  def definitions: ArraySeq[Slot] = ArraySeq.unsafeWrapArray(_definitions)
+  def definitions: SeqFromArray.Seq[Slot] = SeqFromArray(_definitions)
 
   /**
    * Slots referenced by this node that are visible to its parent and must be satisfied by the
@@ -40,14 +38,14 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of use slots.
    */
-  def uses: ArraySeq[Slot] = ArraySeq.unsafeWrapArray(_uses)
+  def uses: SeqFromArray.Seq[Slot] = SeqFromArray(_uses)
 
   /**
    * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
    *
    * @return Sequence of child e-class calls.
    */
-  def args: ArraySeq[EClassCall]  = ArraySeq.unsafeWrapArray(_args)
+  def args: SeqFromArray.Seq[EClassCall]  = SeqFromArray(_args)
 
   /**
    * All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children.
@@ -65,7 +63,7 @@ final class ENode[+NodeT] private (
       buf ++= _args(i).args.values
       i += 1
     }
-    ArraySeq.unsafeWrapArray(buf.toArray)
+    SeqFromArray(buf.toArray)
   }
 
   /**

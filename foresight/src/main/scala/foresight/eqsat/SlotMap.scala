@@ -1,5 +1,6 @@
 package foresight.eqsat
 
+import foresight.util.SeqFromArray
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 import foresight.util.ordering.SeqOrdering
 
@@ -68,12 +69,12 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * Keys in ascending order.
    */
-  def keys: Seq[Slot] = _keys
+  def keys: SeqFromArray.Seq[Slot] = SeqFromArray(_keys)
 
   /**
    * Values in the order of their sorted keys.
    */
-  def values: Seq[Slot] = _values
+  def values: SeqFromArray.Seq[Slot] = SeqFromArray(_values)
 
   /**
    * The set of keys.
