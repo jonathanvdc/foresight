@@ -3,8 +3,7 @@ package foresight.eqsat
 import org.junit.Test
 import org.junit.Assert._
 
-import java.util.concurrent.{Callable, Executors}
-import scala.jdk.CollectionConverters._
+import java.util.concurrent.Executors
 
 class SlotTest {
 
@@ -107,12 +106,22 @@ class SlotTest {
   def multithreadedInterningSameRef(): Unit = {
     val pool = Executors.newFixedThreadPool(math.max(4, Runtime.getRuntime.availableProcessors()))
     try {
-      val Ns = List(-1, 0, 1, 64, 127, 128, 129, 10_000)
-      val tasks: Seq[Callable[(Int, Slot)]] =
-        for (n <- Ns; _ <- 1 to 64) yield new Callable[(Int, Slot)] {
+      val Ns = List(-1, 0, 1, 64, 127, 128, 129, 10000)
+      val tasksJ = new java.util.ArrayList[java.util.concurrent.Callable[(Int, Slot)]]()
+      for (n <- Ns; _ <- 1 to 64) {
+        tasksJ.add(new java.util.concurrent.Callable[(Int, Slot)] {
           override def call(): (Int, Slot) = (n, numeric(n))
-        }
-      val results: List[(Int, Slot)] = pool.invokeAll(tasks.asJava).asScala.toList.map(_.get())
+        })
+      }
+
+      val futuresJ = pool.invokeAll(tasksJ)
+      val resultsBuf = scala.collection.mutable.ListBuffer.empty[(Int, Slot)]
+      val it = futuresJ.iterator()
+      while (it.hasNext) {
+        resultsBuf += it.next().get()
+      }
+      val results: List[(Int, Slot)] = resultsBuf.toList
+
       // For each n, all slots are the exact same reference
       Ns.foreach { n =>
         val group = results.collect { case (m, s) if m == n => s.asInstanceOf[AnyRef] }
