@@ -120,8 +120,13 @@ object Slot {
     /** Fast path via shared small table; fallback to global registry. */
     private def intern(n: Int): NumberedSlot = {
       if (n >= 0 && n <= SMALL_MAX) small(n)
-      else global.computeIfAbsent(n, (n: Int) => new NumberedSlot(n))
+      else global.computeIfAbsent(n, interningFunction)
     }
+
+    private val interningFunction: java.util.function.Function[Int, NumberedSlot] =
+      new java.util.function.Function[Int, NumberedSlot] {
+        override def apply(t: Int): NumberedSlot = new NumberedSlot(t)
+      }
   }
 
   /**
