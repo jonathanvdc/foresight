@@ -183,7 +183,7 @@ final class ENode[+NodeT] private (
     i = 0
     while (i < nDistinct) { pairs(i) = (distinct(i), Slot.numeric(i)); i += 1 }
 
-    val renaming: SlotMap = SlotMap.fromPairs(scala.collection.immutable.ArraySeq.unsafeWrapArray(pairs))
+    val renaming: SlotMap = SlotMap.fromPairs(SeqFromArray(pairs))
 
     // Apply renaming on the fly via existing fast-paths in ENode.rename
     val shaped = this.rename(renaming)
