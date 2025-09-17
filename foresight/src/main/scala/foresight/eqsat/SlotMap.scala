@@ -430,6 +430,21 @@ object SlotMap {
   }
 
   /**
+   * Internal constructor that skips all checks, assuming `keys` are unique and sorted ascending.
+   *
+   * Useful for internal use when you know the arrays are already valid.
+   *
+   * @param keys   Array of keys (must be unique and sorted ascending).
+   * @param values Array of values (same length as keys).
+   * @return A new SlotMap instance.
+   */
+  private[eqsat] def fromArraysUnsafe(keys: Array[Slot], values: Array[Slot]): SlotMap = {
+    // Unsafe: does not check for duplicate keys or sort them.
+    // Useful for internal use when you know the arrays are already valid.
+    new SlotMap(keys, values)
+  }
+
+  /**
    * Identity mapping on the given set (`s -> s` for all `s`).
    */
   def identity(set: Set[Slot]): SlotMap = {
