@@ -37,7 +37,7 @@ final case class ExtractionTree[+NodeT, C](
    *
    * Computed as: `1 + sum(child sizes)`.
    */
-  val size: Int = args.map(_.size).sum + 1
+  val size: Int = args.foldLeft(1)((acc, child) => acc + child.size)
 
   /**
    * Maximum depth of this tree (root has depth 1).
@@ -45,7 +45,7 @@ final case class ExtractionTree[+NodeT, C](
    * Computed as: `1 + max(child depths)`. If there are no children,
    * the depth is 1.
    */
-  val depth: Int = (args.map(_.depth) :+ 0).max + 1
+  val depth: Int = args.foldLeft(0)((maxDepth, child) => math.max(maxDepth, child.depth)) + 1
 
   /**
    * All slots appearing in this tree, in traversal order:
