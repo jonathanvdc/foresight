@@ -171,7 +171,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     val data = classData(ref)
     val nonRedundantPermutations = permutations.map { p =>
       val nonRedundant = p.filterKeys(data.slots)
-      assert(nonRedundant.isPermutation)
+      if (Debug.isEnabled) assert(nonRedundant.isPermutation)
       nonRedundant
     }
 
