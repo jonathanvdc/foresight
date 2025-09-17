@@ -19,6 +19,18 @@ final class SlotSet private(private val _slots: Array[Slot]) extends Set[Slot] {
   private[eqsat] def unsafeArray: Array[Slot] = _slots
 
   override def size: Int = _slots.length
+  override def isEmpty: Boolean = _slots.isEmpty
+
+  override def empty: SlotSet = SlotSet.empty
+
+  /**
+   * Maps the slots in the set using the given function.
+   * @param f The function to map the slots.
+   * @return A new slot set containing the mapped slots.
+   */
+  def map(f: Slot => Slot): SlotSet = {
+    SlotSet.from(_slots.iterator.map(f))
+  }
 
   /**
    * Checks if the array `small` is a subset of the array `big`.
@@ -134,8 +146,157 @@ final class SlotSet private(private val _slots: Array[Slot]) extends Set[Slot] {
       case _ =>
         // Generic path: fall back to constructing via iterator; keeps correctness.
         val it = that.iterator
-        if (!it.hasNext) this else SlotSet(_slots ++ it)
+        if (!it.hasNext) this else SlotSet.from(_slots ++ it)
     }
+  }
+
+  private def removedAll(s: SlotSet): SlotSet = {
+    // Fast paths
+    if ((this eq s) || this.size == 0) return SlotSet.empty
+    if (s.size == 0) return this
+
+    val a = this._slots
+    val b = s._slots
+    val n = a.length
+    val m = b.length
+
+    // If all of `a` is contained in `b`, result is empty.
+    if (isSubset(a, b)) return SlotSet.empty
+
+    // Check for overlap without allocating; if disjoint, return `this`.
+    var i = 0
+    var j = 0
+    var foundOverlap = false
+    while (i < n && j < m && !foundOverlap) {
+      val av = a(i)
+      val bv = b(j)
+      if (av == bv) foundOverlap = true
+      else if (av < bv) i += 1
+      else j += 1
+    }
+    if (!foundOverlap) return this
+
+    // There is at least one element to drop: perform copy-on-write diff.
+    // Allocate an array as large as `a` (max possible after removals),
+    // copy prefix before first overlap, then continue merging.
+    val out = new Array[Slot](n)
+    // `i` and `j` currently point to the first overlap or its vicinity.
+    // Rewind to copy the prefix before the first potential match.
+    // We know the prefix is [0, i) if we stopped because av == bv; if we
+    // stopped because one pointer reached end, we'd have returned above.
+    // Ensure `i` points to the first candidate in `a` for merging.
+    // If the loop ended on av == bv, `i` is correct; otherwise no overlap.
+    val prefixLen = i
+    if (prefixLen > 0) System.arraycopy(a, 0, out, 0, prefixLen)
+    var k = prefixLen
+
+    // Resume from current (i, j); drop matches, keep `a` elements < `b` head.
+    while (i < n && j < m) {
+      val av = a(i)
+      val bv = b(j)
+      if (av == bv) {
+        // drop this element from result
+        i += 1;
+        j += 1
+      } else if (av < bv) {
+        out(k) = av;
+        k += 1;
+        i += 1
+      } else {
+        j += 1
+      }
+    }
+    // Copy any remaining `a` tail (all > last `b` seen)
+    while (i < n) {
+      out(k) = a(i); k += 1; i += 1
+    }
+
+    // Trim if needed, otherwise reuse `out` as-is
+    if (k == out.length) SlotSet.fromArrayUnsafe(out)
+    else {
+      val trimmed = new Array[Slot](k)
+      System.arraycopy(out, 0, trimmed, 0, k)
+      SlotSet.fromArrayUnsafe(trimmed)
+    }
+  }
+
+  override def removedAll(that: IterableOnce[Slot]): SlotSet = that match {
+    case s: SlotSet => removedAll(s)
+    case _ => removedAll(SlotSet.from(that))
+  }
+
+  override def diff(that: collection.Set[Slot]): SlotSet = {
+    if (that.isEmpty) this
+    else removedAll(that)
+  }
+
+  private def intersect(s: SlotSet): SlotSet = {
+    val a = this._slots
+    val b = s._slots
+    val n = a.length
+    val m = b.length
+
+    // Fast paths
+    if (n == 0 || m == 0) return SlotSet.empty
+    // If one is a subset of the other, return the smaller one directly
+    if (isSubset(a, b)) return this
+    if (isSubset(b, a)) return s
+
+    // Check quickly if there is any overlap; if not, return empty without allocating
+    var i = 0
+    var j = 0
+    var hasOverlap = false
+    while (i < n && j < m && !hasOverlap) {
+      val av = a(i)
+      val bv = b(j)
+      if (av == bv) hasOverlap = true
+      else if (av < bv) i += 1
+      else j += 1
+    }
+    if (!hasOverlap) return SlotSet.empty
+
+    // There is at least one common element. Build the intersection using COW.
+    // Maximum possible size is min(n, m).
+    val outCap = if (n < m) n else m
+    val out = new Array[Slot](outCap)
+    var k = 0
+
+    // Continue from current i, j (either at the first overlap or its vicinity).
+    // If we exited on equality, ensure we record that element first.
+    if (i < n && j < m && a(i) == b(j)) {
+      out(k) = a(i);
+      k += 1
+      i += 1;
+      j += 1
+    }
+
+    while (i < n && j < m) {
+      val av = a(i)
+      val bv = b(j)
+      if (av == bv) {
+        out(k) = av;
+        k += 1
+        i += 1;
+        j += 1
+      } else if (av < bv) {
+        i += 1
+      } else {
+        j += 1
+      }
+    }
+
+    if (k == 0) SlotSet.empty
+    else if (k == out.length) SlotSet.fromArrayUnsafe(out)
+    else {
+      val trimmed = new Array[Slot](k)
+      System.arraycopy(out, 0, trimmed, 0, k)
+      SlotSet.fromArrayUnsafe(trimmed)
+    }
+  }
+
+  override def intersect(that: collection.Set[Slot]): SlotSet = that match {
+    case s: SlotSet => intersect(s)
+    case _ => this.intersect(SlotSet.from(that))
   }
 
   override def contains(elem: Slot): Boolean = {
@@ -201,12 +362,21 @@ object SlotSet {
   /**
    * Creates a slot set from the given slots.
    * Duplicates are removed and the slots are sorted.
+   *
    * @param slots The slots to include in the set.
    * @return A new slot set containing the given slots.
    */
-  def apply(slots: Iterable[Slot]): SlotSet = {
-    if (slots.isEmpty) return empty
-    val uniqueSorted = slots.toSet.toArray.sorted
+  def from(slots: IterableOnce[Slot]): SlotSet = {
+    val uniqueSorted = slots.iterator.toArray.sorted.distinct
+    if (uniqueSorted.isEmpty) return empty
     new SlotSet(uniqueSorted)
   }
+
+  /**
+   * Creates a slot set from the given slots.
+   * Duplicates are removed and the slots are sorted.
+   * @param slots The slots to include in the set.
+   * @return A new slot set containing the given slots.
+   */
+  def apply(slots: Slot*): SlotSet = from(slots)
 }

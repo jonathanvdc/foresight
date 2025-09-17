@@ -27,7 +27,7 @@ class SlotSetTest {
     }
 
     def mkSlotSet(xs: Iterable[Int]): SlotSet =
-      SlotSet(slots(xs))
+      SlotSet.from(slots(xs))
   }
 
   import TestSlots._
@@ -207,7 +207,7 @@ class SlotSetTest {
 
   // ---------- Construction contracts ----------
   @Test def applyEmptyIsEmptySingleton(): Unit = {
-    val e = SlotSet(Iterable.empty)
+    val e = SlotSet.from(Iterable.empty)
     assertEquals(SlotSet.empty, e)
     assertTrue(e.isEmpty)
   }
