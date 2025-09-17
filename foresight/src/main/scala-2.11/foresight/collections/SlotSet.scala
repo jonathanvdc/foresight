@@ -111,7 +111,7 @@ object SlotSet {
    * @param arr The array of slots to include in the set.
    * @return A new slot set containing the given slots.
    */
-  private[eqsat] def fromArrayUnsafe(arr: Array[Slot]): SlotSet = new SlotSet(arr)
+  private[eqsat] def fromSortedArrayUnsafe(arr: Array[Slot]): SlotSet = new SlotSet(arr)
 
   /**
    * Creates a slot set from the given slots.
