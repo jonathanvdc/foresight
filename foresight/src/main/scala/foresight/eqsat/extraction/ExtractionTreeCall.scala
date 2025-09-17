@@ -87,4 +87,18 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
     val newArgs = tree.args.map(_.rename(renaming))
     ExtractionTree(tree.cost, tree.nodeType, newDefinitions, newUses, newArgs)
   }
+
+  /**
+   * Returns a new call with the same tree but a different renaming.
+   *
+   * If the provided `newRenaming` is identical to the current one (reference equality),
+   * returns `this` to avoid unnecessary allocations.
+   *
+   * @param newRenaming A total renaming over `tree.slotSet`.
+   * @return A new call with `newRenaming`.
+   */
+  def withRenaming(newRenaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
+    if (newRenaming eq renaming) this
+    else ExtractionTreeCall(tree, newRenaming)
+  }
 }
