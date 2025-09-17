@@ -286,6 +286,7 @@ final class ENode[+NodeT] private (
   // --- case-class-like API preservation ---
   override def toString: String = s"ENode($nodeType, $definitions, $uses, $args)"
 
+  //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
       (this.nodeType == that.nodeType) &&
