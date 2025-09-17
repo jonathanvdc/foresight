@@ -63,6 +63,11 @@ final class ENode[+NodeT] private (
     count
   }
 
+  /**
+   * Collects all slots occurring in this node into a single array, preserving order and duplicates.
+   * Order preserves definitions, then uses, then the values of each child's argument map in child
+   * @return An array of all slots used by this node.
+   */
   private def collectSlots: Array[Slot] = {
     val arr = new Array[Slot](slotCount)
     var idx = 0
@@ -93,14 +98,14 @@ final class ENode[+NodeT] private (
    * @return A set of slots used by this node.
    */
   def slotSet: Set[Slot] = {
-    var s: Set[Slot] = Set.empty
+    val s = Set.newBuilder[Slot]
     var i = 0
-    while (i < _definitions.length) { s = s + _definitions(i); i += 1 }
+    while (i < _definitions.length) { s += _definitions(i); i += 1 }
     i = 0
-    while (i < _uses.length) { s = s + _uses(i); i += 1 }
+    while (i < _uses.length) { s += _uses(i); i += 1 }
     i = 0
-    while (i < _args.length) { s = s ++ _args(i).args.valueSet; i += 1 }
-    s
+    while (i < _args.length) { s ++= _args(i).args.values; i += 1 }
+    s.result()
   }
 
   /**
