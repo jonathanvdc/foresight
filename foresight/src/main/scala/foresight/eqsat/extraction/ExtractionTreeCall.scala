@@ -50,7 +50,8 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
    * The deduplicated set of slots of the tree after applying `renaming`.
    */
   val slotSet: Set[Slot] = {
-    tree.slotSet.map(renaming(_))
+    if (tree.slotSet.isEmpty) Set.empty
+    else tree.slotSet.map(renaming(_))
   }
 
   /**
