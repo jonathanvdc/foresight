@@ -163,10 +163,11 @@ final class ENode[+NodeT] private (
    * @return A node with slots renamed.
    */
   def rename(renaming: SlotMap): ENode[NodeT] = {
-    if (!hasSlots) return this
     if (Debug.isEnabled) {
       require(renaming.keySet.forall(containsSlot), "All slots in the renaming must be present in the e-node.")
     }
+
+    if (!hasSlots) return this
 
     val newDefs = ENode.renameSlotsOrNull(_definitions, renaming)
     val newUses = ENode.renameSlotsOrNull(_uses, renaming)
