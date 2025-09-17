@@ -397,16 +397,40 @@ final class SlotMap private(private val _keys: Array[Slot],
   def filterKeys(p: Slot => Boolean): SlotMap = {
     if (isEmpty) return this
 
-    val newKeys = mutable.ArrayBuffer.empty[Slot]
-    val newValues = mutable.ArrayBuffer.empty[Slot]
-    for (i <- _keys.indices) {
+    // Copy-on-write: allocate only if we actually drop at least one key.
+    val n = _keys.length
+    var keysBuffer: Array[Slot] = null
+    var valuesBuffer: Array[Slot] = null
+    var i = 0
+    var j = 0
+    while (i < n) {
       val k = _keys(i)
       if (p(k)) {
-        newKeys += k
-        newValues += _values(i)
+        // Keep the pair; if we've started dropping, write into compacted buffers.
+        if (keysBuffer != null) {
+          keysBuffer(j) = k
+          valuesBuffer(j) = _values(i)
+        }
+        j += 1
+      } else {
+        // First time we drop an entry, allocate buffers and copy previously kept prefix.
+        if (keysBuffer == null) {
+          keysBuffer = new Array[Slot](n)
+          valuesBuffer = new Array[Slot](n)
+          if (j > 0) {
+            System.arraycopy(_keys, 0, keysBuffer, 0, j)
+            System.arraycopy(_values, 0, valuesBuffer, 0, j)
+          }
+        }
+        // Do not advance j (we dropped this entry).
       }
+      i += 1
     }
-    SlotMap(newKeys.toArray, newValues.toArray)
+
+    // If no drops occurred, return `this` unchanged; otherwise trim buffers.
+    if (keysBuffer == null) this
+    else SlotMap(java.util.Arrays.copyOf(keysBuffer, j),
+                 java.util.Arrays.copyOf(valuesBuffer, j))
   }
 
   /**
