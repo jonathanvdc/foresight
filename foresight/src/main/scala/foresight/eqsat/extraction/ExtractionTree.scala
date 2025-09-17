@@ -89,13 +89,13 @@ final case class ExtractionTree[+NodeT, C](
       }
     } else {
       // General case: build a set that unions all components.
-      val results = Set.newBuilder[Slot]
+      val results = Array.newBuilder[Slot]
       results ++= definitions
       results ++= uses
       for (child <- args) {
-        results ++= child.slotSet
+        results.addAll(child.slotSet.unsafeArray)
       }
-      SlotSet.from(results.result())
+      SlotSet.fromUnsortedMutableArrayUnsafe(results.result())
     }
   }
 
