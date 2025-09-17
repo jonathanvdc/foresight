@@ -45,7 +45,39 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of child e-class calls.
    */
-  def args: SeqFromArray.Seq[EClassCall]  = SeqFromArray(_args)
+  def args: SeqFromArray.Seq[EClassCall] = SeqFromArray(_args)
+
+  /**
+   * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
+   * Includes slots that may be duplicated across these categories.
+   *
+   * @return The total slot count.
+   */
+  private def slotCount: Int = {
+    var count = _definitions.length + _uses.length
+    var i = 0
+    while (i < _args.length) {
+      count += _args(i).args.size
+      i += 1
+    }
+    count
+  }
+
+  private def collectSlots: Array[Slot] = {
+    val arr = new Array[Slot](slotCount)
+    var idx = 0
+    var i = 0
+    while (i < _definitions.length) { arr(idx) = _definitions(i); idx += 1; i += 1 }
+    i = 0
+    while (i < _uses.length) { arr(idx) = _uses(i); idx += 1; i += 1 }
+    i = 0
+    while (i < _args.length) {
+      val it = _args(i).args.values.iterator
+      while (it.hasNext) { arr(idx) = it.next(); idx += 1 }
+      i += 1
+    }
+    arr
+  }
 
   /**
    * All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children.
@@ -53,18 +85,7 @@ final class ENode[+NodeT] private (
    *
    * @return An ordered sequence of slots used by this node.
    */
-  def slots: Seq[Slot] = {
-    // tiny sequences: build a compact ArrayBuffer then expose as ArraySeq
-    val buf = new scala.collection.mutable.ArrayBuffer[Slot](_definitions.length + _uses.length + _args.length * 2)
-    buf ++= _definitions
-    buf ++= _uses
-    var i = 0
-    while (i < _args.length) {
-      buf ++= _args(i).args.values
-      i += 1
-    }
-    SeqFromArray(buf.toArray)
-  }
+  def slots: Seq[Slot] = SeqFromArray(collectSlots)
 
   /**
    * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.
