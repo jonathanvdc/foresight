@@ -155,9 +155,21 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
   final override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
     val data = dataForClass(canonicalApp.ref)
+
+    assert(canonicalApp.args.size == data.slots.size)
+
     if (data.hasSlots) {
-      data.appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
+      if (canonicalApp.args.isIdentity) {
+        // Common case: the e-class call's arguments are the identity mapping.
+        // We can return a precomputed set of applied nodes with identity renaming.
+        data.appliedNodesWithIdentity
+      } else {
+        // E-class has slots and the e-class call's arguments are not the identity mapping.
+        // We rename all applied nodes by the e-class call's arguments.
+        data.appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
+      }
     } else {
+      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
       data.nodes.keySet
     }
   }

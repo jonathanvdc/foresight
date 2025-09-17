@@ -133,6 +133,18 @@ final class SlotMap private(private val _keys: Array[Slot],
     SlotMap(sortedKeys, sortedValues)
   }
 
+  /**
+   * True if this is the identity mapping (`s -> s` for all keys `s`).
+   */
+  def isIdentity: Boolean = {
+    var i = 0
+    while (i < _keys.length) {
+      if (_keys(i) != _values(i)) return false
+      i += 1
+    }
+    true
+  }
+
 
   /**
    * True if each key maps to a unique value (no collisions in `values`).

@@ -26,6 +26,11 @@ private[eqsat] final case class EClassData[NodeT](slots: SlotSet,
     nodes.map { case (node, renaming) => ShapeCall(node, renaming) }.toSet
   }
 
+  lazy val appliedNodesWithIdentity: Set[ENode[NodeT]] = {
+    val mapping = SlotMap.identity(slots)
+    appliedNodes.map(_.renamePartial(mapping).asNode)
+  }
+
   def hasSlots: Boolean = {
     nodes.values.exists(!_.isEmpty)
   }
