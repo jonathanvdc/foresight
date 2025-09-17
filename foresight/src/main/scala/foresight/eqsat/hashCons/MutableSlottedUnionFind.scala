@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.{EClassCall, EClassRef, Slot}
+import foresight.eqsat.{EClassCall, EClassRef}
 
 private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCall]) {
   def toImmutable: SlottedUnionFind = SlottedUnionFind(parents)
