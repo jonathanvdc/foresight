@@ -61,8 +61,15 @@ final case class ExtractionTree[+NodeT, C](
    *
    * Includes slots defined locally and in descendants.
    */
-  val slotSet: Set[Slot] =
-    definitions.toSet ++ uses ++ args.flatMap(_.slotSet)
+  val slotSet: Set[Slot] = {
+    val results = Set.newBuilder[Slot]
+    results ++= definitions
+    results ++= uses
+    for (child <- args) {
+      results ++= child.slotSet
+    }
+    results.result()
+  }
 
   /**
    * Converts this cost-annotated tree into a plain [[Tree]] by:
