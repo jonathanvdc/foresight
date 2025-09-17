@@ -395,6 +395,8 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Keeps only entries whose key satisfies `p`.
    */
   def filterKeys(p: Slot => Boolean): SlotMap = {
+    if (isEmpty) return this
+
     val newKeys = mutable.ArrayBuffer.empty[Slot]
     val newValues = mutable.ArrayBuffer.empty[Slot]
     for (i <- _keys.indices) {
