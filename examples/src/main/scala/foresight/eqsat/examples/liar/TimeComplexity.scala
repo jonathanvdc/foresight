@@ -20,7 +20,7 @@ object TimeComplexity extends CostFunction[ArrayIR, (BigInt, MixedTree[Type, ECl
                      uses: Seq[Slot],
                      args: Seq[(BigInt, MixedTree[Type, EClassCall])]): (BigInt, MixedTree[Type, EClassCall]) = {
 
-    val t = TypeInferenceAnalysis.make(ENode(nodeType, definitions, uses, Seq.empty), args.map(_._2))
+    val t = TypeInferenceAnalysis.make(nodeType, definitions, uses, args.map(_._2))
 
     val argsCosts = args.map(_._1)
     val argTypes = args.map(_._2)
