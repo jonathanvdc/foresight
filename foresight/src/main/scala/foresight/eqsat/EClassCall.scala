@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSet
+
 /**
  * Represents the application of an [[EClassRef]] to a set of argument slots.
  *
@@ -19,7 +21,6 @@ package foresight.eqsat
  *
  * @param ref  The reference to the e-class being applied.
  * @param args The mapping from the e-class's parameter slots to argument slots.
- *
  * @example
  * {{{
  * // EClassRef `subXY` has parameter slots (x, y) representing "x - y"
@@ -37,7 +38,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
   /**
    * The set of distinct slots used as arguments in this application.
    */
-  def slotSet: Set[Slot] = args.valueSet
+  def slotSet: SlotSet = args.valueSet
 
   /**
    * Renames all argument slots in this application according to a given mapping.

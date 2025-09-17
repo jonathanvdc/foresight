@@ -1,5 +1,6 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSet
 import foresight.util.SeqFromArray
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 import foresight.util.ordering.SeqOrdering
@@ -79,12 +80,12 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * The set of keys.
    */
-  def keySet: Set[Slot] = _keys.toSet
+  def keySet: SlotSet = SlotSet.fromArrayUnsafe(_keys)
 
   /**
    * The set of values (distinct).
    */
-  def valueSet: Set[Slot] = _values.toSet
+  def valueSet: SlotSet = SlotSet.from(_values)
 
   /**
    * Inverts the mapping by swapping keys and values.
@@ -529,8 +530,8 @@ object SlotMap {
   /**
    * Identity mapping on the given set (`s -> s` for all `s`).
    */
-  def identity(set: Set[Slot]): SlotMap = {
-    val keys = set.toArray.sorted
+  def identity(set: SlotSet): SlotMap = {
+    val keys = set.unsafeArray
     SlotMap(keys, keys)
   }
 

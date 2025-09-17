@@ -1,5 +1,6 @@
 package foresight.eqsat.extraction
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{Slot, SlotMap}
 
 /**
@@ -49,8 +50,8 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
   /**
    * The deduplicated set of slots of the tree after applying `renaming`.
    */
-  val slotSet: Set[Slot] = {
-    if (tree.slotSet.isEmpty) Set.empty
+  val slotSet: SlotSet = {
+    if (tree.slotSet.isEmpty) SlotSet.empty
     else tree.slotSet.map(renaming(_))
   }
 

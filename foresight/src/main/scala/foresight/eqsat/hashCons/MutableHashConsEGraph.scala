@@ -1,6 +1,7 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat._
+import foresight.eqsat.*
+import foresight.eqsat.collections.SlotSet
 import foresight.util.Debug
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
@@ -39,7 +40,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @param slots The slots of the e-class.
    * @return The reference to the new e-class.
    */
-  private def createEmptyClass(slots: Set[Slot]): EClassRef = {
+  private def createEmptyClass(slots: SlotSet): EClassRef = {
     val ref = new EClassRef()
     unionFind.add(ref, slots)
 
@@ -97,14 +98,14 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
     // Fast path for nodes without slots.
     if (!shape.hasSlots) {
-      val newRef = createEmptyClass(Set.empty)
+      val newRef = createEmptyClass(SlotSet.empty)
       addNodeToClass(newRef, canonicalNode)
       return newRef.callWithoutSlots
     }
 
     // Generate slots for the e-class.
     val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
-    val slots = (shape.slotSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
+    val slots = shape.slotSet.removedAll(shape.definitions).map(nodeSlotsToClassSlots.apply)
 
     // Set up an empty e-class with the slots.
     val ref = createEmptyClass(slots)
@@ -215,7 +216,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       nodesRepairWorklist = nodesRepairWorklist ++ classData(ref).users
     }
 
-    def shrinkSlots(ref: EClassRef, slots: Set[Slot]): Unit = {
+    def shrinkSlots(ref: EClassRef, slots: SlotSet): Unit = {
       val data = classData(ref)
 
       // We first determine the set of slots that are redundant in the e-class. These are the slots that are not in the
@@ -223,7 +224,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // slot are also redundant. We remove both categories of redundant slots from the e-class.
       val redundantSlots = data.slots -- slots
       val inferredRedundantSlots = redundantSlots.flatMap(data.permutations.orbit)
-      val finalSlots = slots -- inferredRedundantSlots
+      val finalSlots = slots.removedAll(inferredRedundantSlots)
 
       // We now restrict the elements of the permutation group to the new slots.
       val generators = data.permutations.generators.map(g =>
@@ -247,7 +248,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       touchedClass(ref)
     }
 
-    def shrinkAppliedSlots(ref: EClassCall, slots: Set[Slot]): Unit = {
+    def shrinkAppliedSlots(ref: EClassCall, slots: SlotSet): Unit = {
       val appSlotsToClassSlots = ref.args.inverse
       shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
     }

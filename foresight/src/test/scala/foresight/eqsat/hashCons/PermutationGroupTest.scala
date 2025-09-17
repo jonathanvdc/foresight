@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{Slot, SlotMap}
 import org.junit.Test
 
@@ -20,7 +21,7 @@ class PermutationGroupTest {
 
     val perm = SlotMap.from(slot0 -> slot1, slot1 -> slot2, slot2 -> slot0)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm))
 
     val orbit = group.orbit(slot0)
@@ -37,7 +38,7 @@ class PermutationGroupTest {
     val perm1 = SlotMap.from(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2)
     val perm2 = SlotMap.from(slot0 -> slot2, slot1 -> slot1, slot2 -> slot0)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm1, perm2))
 
     val orbit = group.orbit(slot0)
@@ -53,7 +54,7 @@ class PermutationGroupTest {
     // The permutation swaps 0 and 1
     val perm = SlotMap.from(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm))
 
     val orbit = group.orbit(slot0)

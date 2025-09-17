@@ -1,5 +1,6 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSet
 import org.junit.Test
 
 class SlotMapTest {
@@ -78,7 +79,7 @@ class SlotMapTest {
 
   @Test
   def testIdentity(): Unit = {
-    val map = SlotMap.identity(Set(Slot.numeric(0), Slot.numeric(1)))
+    val map = SlotMap.identity(SlotSet(Slot.numeric(0), Slot.numeric(1)))
     assert(map.size == 2)
     assert(map.contains(Slot.numeric(0)))
     assert(map.get(Slot.numeric(0)).contains(Slot.numeric(0)))

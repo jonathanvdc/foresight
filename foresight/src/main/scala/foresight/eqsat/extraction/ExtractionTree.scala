@@ -1,5 +1,6 @@
 package foresight.eqsat.extraction
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{Slot, Tree}
 
 /**
@@ -66,18 +67,18 @@ final case class ExtractionTree[+NodeT, C](
     count
   }
 
-  private def buildSlotSet: Set[Slot] = {
+  private def buildSlotSet: SlotSet = {
     // First count the number of components with non-empty slot sets.
     val count = slottedComponentCount
 
     // Common cases: no slots in components or only one component has slots.
     if (count == 0) {
-      Set.empty
+      SlotSet.empty
     } else if (count == 1) {
       if (definitions.nonEmpty) {
-        definitions.toSet
+        SlotSet.from(definitions)
       } else if (uses.nonEmpty) {
-        uses.toSet
+        SlotSet.from(uses)
       } else {
         // Find the single child with a non-empty slot set.
         for (child <- args) {
@@ -94,7 +95,7 @@ final case class ExtractionTree[+NodeT, C](
       for (child <- args) {
         results ++= child.slotSet
       }
-      results.result()
+      SlotSet.from(results.result())
     }
   }
 
@@ -103,7 +104,7 @@ final case class ExtractionTree[+NodeT, C](
    *
    * Includes slots defined locally and in descendants.
    */
-  val slotSet: Set[Slot] = buildSlotSet
+  val slotSet: SlotSet = buildSlotSet
 
   /**
    * Converts this cost-annotated tree into a plain [[Tree]] by:

@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{ENode, ShapeCall, Slot, SlotMap}
 
 /**
@@ -13,7 +14,7 @@ import foresight.eqsat.{ENode, ShapeCall, Slot, SlotMap}
  * @param users The e-nodes that take the e-class as an argument.
  * @tparam NodeT The type of the nodes.
  */
-private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
+private[eqsat] final case class EClassData[NodeT](slots: SlotSet,
                                                   nodes: Map[ENode[NodeT], SlotMap],
                                                   permutations: PermutationGroup[SlotMap],
                                                   users: Set[ENode[NodeT]]) {

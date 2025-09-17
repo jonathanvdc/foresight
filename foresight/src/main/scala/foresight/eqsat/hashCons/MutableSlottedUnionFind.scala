@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{EClassCall, EClassRef, Slot, SlotMap}
 
 private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCall]) {
@@ -15,7 +16,7 @@ private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCa
     parents(ref).ref == ref
   }
 
-  def add(key: EClassRef, slots: Set[Slot]): Unit = {
+  def add(key: EClassRef, slots: SlotSet): Unit = {
     update(key, EClassCall(key, SlotMap.identity(slots)))
   }
 

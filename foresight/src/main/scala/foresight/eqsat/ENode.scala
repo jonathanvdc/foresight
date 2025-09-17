@@ -1,5 +1,6 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSet
 import foresight.util.{Debug, SeqFromArray}
 
 /**
@@ -131,15 +132,9 @@ final class ENode[+NodeT] private (
    *
    * @return A set of slots used by this node.
    */
-  def slotSet: Set[Slot] = {
-    val s = Set.newBuilder[Slot]
-    var i = 0
-    while (i < _definitions.length) { s += _definitions(i); i += 1 }
-    i = 0
-    while (i < _uses.length) { s += _uses(i); i += 1 }
-    i = 0
-    while (i < _args.length) { s ++= _args(i).args.values; i += 1 }
-    s.result()
+  def slotSet: SlotSet = {
+    // TODO: construct array directly without intermediate array
+    SlotSet.from(slotArray)
   }
 
   /**
