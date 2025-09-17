@@ -89,9 +89,10 @@ final class ENode[+NodeT] private (
    * Order preserves definitions, then uses, then the values of each child's argument map in child
    * order.
    *
+   * @param slotCount The total number of slots (including duplicates) in this node.
    * @return An array of distinct slots used by this node.
    */
-  private def distinctSlotArray: Array[Slot] = {
+  private def distinctSlotArray(slotCount: Int): Array[Slot] = {
     val arr = new Array[Slot](slotCount)
     var nDistinct = 0
 
@@ -209,8 +210,12 @@ final class ENode[+NodeT] private (
    *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
+    // Fast path for slotless nodes: they are already in canonical form
+    val numberOfSlots = slotCount
+    if (numberOfSlots == 0) return ShapeCall(this, SlotMap.empty)
+
     // Single preallocated buffer for distinct slots (encounter order)
-    val distinct = distinctSlotArray
+    val distinct = distinctSlotArray(numberOfSlots)
 
     // Build another buffer for the numeric slots
     val numerics = ENode.numericArray(distinct.length)
