@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotMap
+
 /**
  * A stable handle identifying an e-class in an e-graph.
  *

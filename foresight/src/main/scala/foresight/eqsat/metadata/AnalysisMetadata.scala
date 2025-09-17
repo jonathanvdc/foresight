@@ -1,5 +1,6 @@
 package foresight.eqsat.metadata
 
+import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
 

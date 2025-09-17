@@ -2,6 +2,7 @@ package foresight.eqsat.extraction
 
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
 import foresight.eqsat._
+import foresight.eqsat.collections.SlotMap
 import foresight.util.Debug
 
 /**

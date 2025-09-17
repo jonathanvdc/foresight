@@ -1,6 +1,6 @@
 package foresight.eqsat
 
-import foresight.eqsat.collections.SlotSet
+import foresight.eqsat.collections.{SlotMap, SlotSet}
 
 /**
  * Represents the application of an [[EClassRef]] to a set of argument slots.

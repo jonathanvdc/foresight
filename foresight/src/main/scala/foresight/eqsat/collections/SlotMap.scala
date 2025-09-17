@@ -1,6 +1,7 @@
-package foresight.eqsat
+package foresight.eqsat.collections
 
-import foresight.eqsat.collections.SlotSet
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.{EClassCall, Permutation, Slot}
 import foresight.util.SeqFromArray
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 import foresight.util.ordering.SeqOrdering

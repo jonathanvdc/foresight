@@ -1,6 +1,6 @@
 package foresight.eqsat
 
-import foresight.eqsat.collections.SlotSet
+import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.util.{Debug, SeqFromArray}
 
 /**

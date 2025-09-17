@@ -1,6 +1,6 @@
-package foresight.eqsat
+package foresight.eqsat.collections
 
-import foresight.eqsat.collections.SlotSet
+import foresight.eqsat.Slot
 import org.junit.Test
 
 class SlotMapTest {

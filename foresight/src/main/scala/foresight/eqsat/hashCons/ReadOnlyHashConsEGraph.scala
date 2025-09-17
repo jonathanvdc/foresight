@@ -1,6 +1,7 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ReadOnlyEGraph, ShapeCall, Slot, SlotMap}
+import foresight.eqsat.{EClassCall, EClassRef, ENode, ReadOnlyEGraph, ShapeCall, Slot}
+import foresight.eqsat.collections.SlotMap
 import foresight.util.Debug
 
 /**

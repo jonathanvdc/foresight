@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotMap
+
 import org.junit.Test
 
 class ENodeTest {

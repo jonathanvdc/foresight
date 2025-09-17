@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotMap
+
 /**
  * A canonicalized e-node paired with a renaming from its canonical slots back to the original slots.
  *
@@ -18,7 +20,6 @@ package foresight.eqsat
  * @param renaming A map from the shape's numeric slots to the original slots. Applying it to `shape` yields the
  *                 original node.
  * @tparam NodeT   The domain-specific node type.
- *
  * @example
  * {{{
  * // Start with a non-canonical node `n` that uses arbitrary slots:

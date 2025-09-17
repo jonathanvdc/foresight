@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.collections.SlotSet
-import foresight.eqsat.{Slot, SlotMap}
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.Slot
 import org.junit.Test
 
 import scala.collection.mutable

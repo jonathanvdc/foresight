@@ -1,7 +1,7 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.collections.SlotSet
-import foresight.eqsat.{Slot, SlotMap}
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.Slot
 
 /**
  * A cost-annotated extraction tree together with a total slot renaming.
