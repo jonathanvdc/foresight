@@ -30,6 +30,8 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
                                               nodeOrdering: Ordering[NodeT])
   extends Analysis[NodeT, ExtractionTreeCall[NodeT, C]] {
 
+  private val callOrdering = ExtractionTreeOrdering[NodeT, C]().callOrdering
+
   /**
    * Builds an [[Extractor]] that projects the analysis result at a given e-class into a concrete [[Tree]].
    *
@@ -103,7 +105,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    */
   override def join(left: ExtractionTreeCall[NodeT, C],
                     right: ExtractionTreeCall[NodeT, C]): ExtractionTreeCall[NodeT, C] = {
-    ExtractionTreeOrdering[NodeT, C]().callOrdering.min(left, right)
+    callOrdering.min(left, right)
   }
 }
 
