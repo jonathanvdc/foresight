@@ -220,9 +220,13 @@ final class SlotMap private(private val _keys: Array[Slot],
    * @throws IllegalArgumentException if `valueSet != other.keySet`.
    */
   def compose(other: SlotMap): SlotMap = {
-    for (v <- _values) {
+    var i = 0
+    while (i < _values.length) {
+      val v = _values(i)
       if (!other.contains(v))
         throw new IllegalArgumentException(s"Cannot compose SlotMaps: intermediate value $v is not a key in other.")
+
+      i += 1
     }
 
     composePartial(other)
