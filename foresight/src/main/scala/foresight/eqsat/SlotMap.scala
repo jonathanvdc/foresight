@@ -172,7 +172,11 @@ final class SlotMap private(private val _keys: Array[Slot],
    * @throws IllegalArgumentException if `valueSet != other.keySet`.
    */
   def compose(other: SlotMap): SlotMap = {
-    require(valueSet == other.keySet, "Slot maps are not composable")
+    for (v <- _values) {
+      if (!other.contains(v))
+        throw new IllegalArgumentException(s"Cannot compose SlotMaps: intermediate value $v is not a key in other.")
+    }
+
     composePartial(other)
   }
 
