@@ -56,20 +56,54 @@ final case class ExtractionTree[+NodeT, C](
   def slots: Seq[Slot] =
     definitions ++ uses ++ args.flatMap(_.slots)
 
+  private def slottedComponentCount: Int = {
+    var count = 0
+    if (definitions.nonEmpty) count += 1
+    if (uses.nonEmpty) count += 1
+    for (child <- args) {
+      if (child.slotSet.nonEmpty) count += 1
+    }
+    count
+  }
+
+  private def buildSlotSet: Set[Slot] = {
+    // First count the number of components with non-empty slot sets.
+    val count = slottedComponentCount
+
+    // Common cases: no slots in components or only one component has slots.
+    if (count == 0) {
+      Set.empty
+    } else if (count == 1) {
+      if (definitions.nonEmpty) {
+        definitions.toSet
+      } else if (uses.nonEmpty) {
+        uses.toSet
+      } else {
+        // Find the single child with a non-empty slot set.
+        for (child <- args) {
+          if (child.slotSet.nonEmpty) return child.slotSet
+        }
+
+        throw new IllegalStateException("Invariant violation: counted one slotted component but found none")
+      }
+    } else {
+      // General case: build a set that unions all components.
+      val results = Set.newBuilder[Slot]
+      results ++= definitions
+      results ++= uses
+      for (child <- args) {
+        results ++= child.slotSet
+      }
+      results.result()
+    }
+  }
+
   /**
    * All unique slots appearing in this tree (deduplicated, as a set).
    *
    * Includes slots defined locally and in descendants.
    */
-  val slotSet: Set[Slot] = {
-    val results = Set.newBuilder[Slot]
-    results ++= definitions
-    results ++= uses
-    for (child <- args) {
-      results ++= child.slotSet
-    }
-    results.result()
-  }
+  val slotSet: Set[Slot] = buildSlotSet
 
   /**
    * Converts this cost-annotated tree into a plain [[Tree]] by:
