@@ -212,22 +212,17 @@ final class ENode[+NodeT] private (
     // Single preallocated buffer for distinct slots (encounter order)
     val distinct = distinctSlotArray
 
-    // Build forward renaming pairs (orig -> $idx) without intermediate maps
-    val pairs = new Array[(Slot, Slot)](distinct.length)
-    var i = 0
-    while (i < distinct.length) { pairs(i) = (distinct(i), Slot.numeric(i)); i += 1 }
+    // Build another buffer for the numeric slots
+    val numerics = ENode.numericArray(distinct.length)
 
-    val renaming: SlotMap = SlotMap.fromPairs(SeqFromArray(pairs))
+    // Building the inverse renaming (from numeric to original) is easy from these two arrays
+    val invRenaming = SlotMap.fromArraysUnsafe(numerics, distinct)
+    val renaming = invRenaming.inverse
 
     // Apply renaming on the fly via existing fast-paths in ENode.rename
     val shaped = this.rename(renaming)
 
-    // We want the inverse mapping (canonical -> original) in the same encounter order.
-    // Using inverse() is acceptable here because keys are tiny; if this becomes a hotspot,
-    // we can add a specialized SlotMap factory that builds numeric keys [0..n) directly.
-    val inverse = renaming.inverse
-
-    ShapeCall(shaped, inverse)
+    ShapeCall(shaped, invRenaming)
   }
 
   /**
@@ -351,5 +346,32 @@ object ENode {
       i += 1
     }
     newArr
+  }
+
+  /**
+   * Returns an array of numeric slots for the given arity.
+   *
+   * For small arities (0 to 16), returns a shared preallocated array of numeric slots to avoid repeated allocations.
+   * For larger arities, allocates a new array of numeric slots on each call.
+   *
+   * @param arity The desired number of numeric slots.
+   * @return An array of `arity` numeric slots: `0`, `1`, ..., `arity-1`.
+   */
+  private[eqsat] def numericArray(arity: Int): Array[Slot] = {
+    if (arity >= 0 && arity < sharedNumericArrays.length) {
+      sharedNumericArrays(arity)
+    } else {
+      Array.tabulate(arity)(Slot.numeric)
+    }
+  }
+
+  /**
+   * Preallocated arrays of numeric slots for small arities to avoid repeated allocations.
+   * Indexed by arity, each entry is an array of that many numeric slots.
+   * Slots are `0`, `1`, ..., `n-1` for arity `n`.
+   */
+  private[eqsat] val sharedNumericArrays: Array[Array[Slot]] = {
+    val max = 16
+    Array.tabulate(max + 1)(n => Array.tabulate(n)(Slot.numeric))
   }
 }
