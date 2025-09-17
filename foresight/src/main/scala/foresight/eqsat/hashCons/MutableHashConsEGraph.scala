@@ -105,7 +105,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
     // Generate slots for the e-class.
     val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
-    val slots = shape.slotSet.removedAll(shape.definitions).map(nodeSlotsToClassSlots.apply)
+    val slots = shape.slotSet.diff(SlotSet.from(shape.definitions)).map(nodeSlotsToClassSlots.apply(_))
 
     // Set up an empty e-class with the slots.
     val ref = createEmptyClass(slots)
@@ -224,7 +224,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // slot are also redundant. We remove both categories of redundant slots from the e-class.
       val redundantSlots = data.slots -- slots
       val inferredRedundantSlots = redundantSlots.flatMap(data.permutations.orbit)
-      val finalSlots = slots.removedAll(inferredRedundantSlots)
+      val finalSlots = slots.diff(inferredRedundantSlots)
 
       // We now restrict the elements of the permutation group to the new slots.
       val generators = data.permutations.generators.map(g =>
@@ -250,7 +250,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
     def shrinkAppliedSlots(ref: EClassCall, slots: SlotSet): Unit = {
       val appSlotsToClassSlots = ref.args.inverse
-      shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
+      shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply(_)))
     }
 
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
@@ -310,7 +310,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We first determine the set of slots that are common to both e-classes. If this set is smaller than either
       // of the e-classes' slot sets, we shrink the e-classes' slots to the common set. This operation will update
       // the union-find, so we recurse in case of shrinkage.
-      val slots = leftRoot.slotSet intersect rightRoot.slotSet
+      val slots = leftRoot.slotSet.intersect(rightRoot.slotSet)
       if (slots != leftRoot.slotSet) {
         shrinkAppliedSlots(leftRoot, slots)
         unify(leftRoot, rightRoot)

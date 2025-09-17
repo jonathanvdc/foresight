@@ -1,7 +1,8 @@
 package foresight.eqsat.examples.liar
 
+import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.metadata.Analysis
-import foresight.eqsat.{EClassCall, MixedTree, Slot, SlotMap}
+import foresight.eqsat.{EClassCall, MixedTree, Slot}
 
 object TypeInferenceAnalysis extends Analysis[ArrayIR, MixedTree[Type, EClassCall]] {
   override def name: String = "TypeInference"

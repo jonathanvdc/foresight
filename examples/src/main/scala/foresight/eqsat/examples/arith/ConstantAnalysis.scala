@@ -1,7 +1,8 @@
 package foresight.eqsat.examples.arith
 
 import foresight.eqsat.metadata.Analysis
-import foresight.eqsat.{ENode, Slot, SlotMap}
+import foresight.eqsat.collections.SlotMap
+import foresight.eqsat.Slot
 
 /**
  * An analysis that computes constant values for arithmetic expressions.

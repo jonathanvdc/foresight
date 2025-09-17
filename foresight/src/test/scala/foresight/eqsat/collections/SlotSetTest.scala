@@ -51,20 +51,20 @@ class SlotSetTest {
 
   @Test def inclInsertsNewAndKeepsOrder(): Unit = {
     val s0 = mkSlotSet(List(1, 3, 5))
-    val s1 = s0.incl(slot(4))
+    val s1 = s0 + slot(4)
     assertEquals(4, s1.size)
     assertEquals(List(1,3,4,5).map(slot), s1.iterator.toList)
   }
 
   @Test def inclExistingReturnsSameInstance(): Unit = {
     val s0 = mkSlotSet(List(1, 3, 5))
-    val s1 = s0.incl(slot(3))
+    val s1 = s0 + slot(3)
     assertTrue(s1.asInstanceOf[AnyRef] eq s0.asInstanceOf[AnyRef])
   }
 
   @Test def exclExistingShrinks(): Unit = {
     val s0 = mkSlotSet(List(1, 2, 3))
-    val s1 = s0.excl(slot(2)).asInstanceOf[SlotSet]
+    val s1 = s0 - slot(2)
     assertEquals(2, s1.size)
     assertFalse(s1.contains(slot(2)))
     assertEquals(List(1,3).map(slot), s1.iterator.toList)
@@ -72,7 +72,7 @@ class SlotSetTest {
 
   @Test def exclMissingReturnsSameInstance(): Unit = {
     val s0 = mkSlotSet(List(1, 2, 3))
-    val s1 = s0.excl(slot(99))
+    val s1 = s0 - slot(99)
     assertTrue(s1.asInstanceOf[AnyRef] eq s0.asInstanceOf[AnyRef])
   }
 
@@ -158,7 +158,7 @@ class SlotSetTest {
     val s = mkSlotSet(a)
 
     // map(identity) keeps type and content for Set[Slot]
-    val sm = s.map(identity)
+    val sm = s.map((slot: Slot) => slot)
     assertEquals(a, toIntSet(sm))
 
     // filter evens
@@ -177,14 +177,14 @@ class SlotSetTest {
   // ---------- Edge cases ----------
   @Test def inclBeginningMiddleEnd(): Unit = {
     val base = mkSlotSet(List(10, 20, 30))
-    assertEquals(List(5,10,20,30).map(slot),  base.incl(slot(5)).iterator.toList)
-    assertEquals(List(10,20,25,30).map(slot), base.incl(slot(25)).iterator.toList)
-    assertEquals(List(10,20,30,40).map(slot), base.incl(slot(40)).iterator.toList)
+    assertEquals(List(5,10,20,30).map(slot),  (base + slot(5)).iterator.toList)
+    assertEquals(List(10,20,25,30).map(slot), (base + slot(25)).iterator.toList)
+    assertEquals(List(10,20,30,40).map(slot), (base + slot(40)).iterator.toList)
   }
 
   @Test def exclSingleToEmpty(): Unit = {
     val s = mkSlotSet(List(42))
-    val e = s.excl(slot(42)).asInstanceOf[SlotSet]
+    val e = s - slot(42)
     assertEquals(SlotSet.empty, e)
     assertTrue(e.isEmpty)
   }
