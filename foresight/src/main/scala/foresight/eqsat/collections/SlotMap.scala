@@ -79,12 +79,12 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * The set of keys.
    */
-  def keySet: SlotSet = SlotSet.fromArrayUnsafe(_keys)
+  def keySet: SlotSet = SlotSet.fromSortedArrayUnsafe(_keys)
 
   /**
    * The set of values (distinct).
    */
-  def valueSet: SlotSet = SlotSet.from(_values)
+  def valueSet: SlotSet = SlotSet.fromUnsortedArrayUnsafe(_values)
 
   /**
    * Inverts the mapping by swapping keys and values.

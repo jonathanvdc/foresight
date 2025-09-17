@@ -214,7 +214,7 @@ class SlotSetTest {
 
   @Test def fromArrayUnsafeRespectsGivenArray(): Unit = {
     val arr = Array(slot(1), slot(3), slot(7))
-    val s = SlotSet.fromArrayUnsafe(arr)
+    val s = SlotSet.fromSortedArrayUnsafe(arr)
     assertEquals(List(1,3,7).map(slot), s.iterator.toList)
     assertEquals(3, s.size)
   }

@@ -27,7 +27,7 @@ final class SlotSet private (private val _slots: Array[Slot]) extends Set[Slot] 
    */
   def map(f: Slot => Slot): SlotSet = {
     if (isEmpty) this
-    else SlotSet.from(_slots.iterator.map(f))
+    else SlotSet.fromUnsortedMutableArrayUnsafe(_slots.map(f))
   }
 
   override def size: Int = _slots.length
@@ -118,7 +118,34 @@ object SlotSet {
    * @param arr The array of slots to include in the set.
    * @return A new slot set containing the given slots.
    */
-  private[eqsat] def fromArrayUnsafe(arr: Array[Slot]): SlotSet = new SlotSet(arr)
+  private[eqsat] def fromSortedArrayUnsafe(arr: Array[Slot]): SlotSet = new SlotSet(arr)
+
+  /**
+   * Creates a slot set from the given array of slots.
+   * Duplicates are removed and the slots are sorted.
+   * The array is used directly without copying, so it must not
+   * be used or modified after calling this method.
+   *
+   * @param slots The slots to include in the set.
+   * @return A new slot set containing the given slots.
+   */
+  private[eqsat] def fromUnsortedMutableArrayUnsafe(slots: Array[Slot]): SlotSet = {
+    val arr = SlotSetArrayOps.fromUnsortedMutableArray(slots)
+    if (arr.isEmpty) empty else new SlotSet(arr)
+  }
+
+  /**
+   * Creates a slot set from the given array of slots.
+   * Duplicates are removed and the slots are sorted.
+   *
+   * @param slots The slots to include in the set.
+   * @return A new slot set containing the given slots.
+   */
+  private[eqsat] def fromUnsortedArrayUnsafe(slots: Array[Slot]): SlotSet = {
+    if (slots.isEmpty) empty
+    else if (slots.length == 1) new SlotSet(slots)
+    else from(slots)
+  }
 
   /**
    * Creates a slot set from the given slots.

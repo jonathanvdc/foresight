@@ -172,6 +172,30 @@ private[collections] object SlotSetArrayOps {
     else { val trimmed = new Array[Slot](k); System.arraycopy(out, 0, trimmed, 0, k); trimmed }
   }
 
+  /** Build a sorted-unique array from an array (order-insensitive input). */
+  def fromUnsortedMutableArray(arr: Array[Slot]): Array[Slot] = {
+    if (arr.isEmpty) return arr
+
+    scala.util.Sorting.quickSort(arr)
+    // unique in-place into a new array of same size, then trim
+    var k = 1
+    var last = arr(0)
+    var i = 1
+    while (i < arr.length) {
+      val v = arr(i)
+      if (v != last) {
+        arr(k) = v; k += 1; last = v
+      }
+      i += 1
+    }
+    if (k == arr.length) arr
+    else {
+      val trimmed = new Array[Slot](k)
+      System.arraycopy(arr, 0, trimmed, 0, k)
+      trimmed
+    }
+  }
+
   /** Build a sorted-unique array from an iterator (order-insensitive input). */
   def fromIterator(it: Iterator[Slot]): Array[Slot] = {
     // Collect to array buffer

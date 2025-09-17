@@ -133,8 +133,7 @@ final class ENode[+NodeT] private (
    * @return A set of slots used by this node.
    */
   def slotSet: SlotSet = {
-    // TODO: construct array directly without intermediate array
-    SlotSet.from(slotArray)
+    SlotSet.fromUnsortedMutableArrayUnsafe(slotArray)
   }
 
   /**
