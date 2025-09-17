@@ -150,17 +150,65 @@ final class SlotMap private(private val _keys: Array[Slot],
    * Concatenation (union) of two slot maps.
    *
    * Later entries overwrite earlier ones with the same key.
+   *
+   * @param other The other slot map to concatenate.
+   * @return A new `SlotMap` containing all entries from `this` and `other`,
+   *         with `other`'s entries taking precedence on key collisions.
    */
   def concat(other: SlotMap): SlotMap = {
-    // Merge two sorted arrays of (key, value) pairs, with later entries overwriting earlier ones
-    val merged = mutable.LinkedHashMap.empty[Slot, Slot]
-    // Add all entries from this, then overwrite with entries from other
-    for (i <- _keys.indices) merged(_keys(i)) = _values(i)
-    for (i <- other._keys.indices) merged(other._keys(i)) = other._values(i)
-    // Extract keys and values in sorted-key order, aligning values accordingly
-    val keysArr = merged.keys.toArray.sorted
-    val valuesArr = keysArr.map(merged)
-    SlotMap(keysArr, valuesArr)
+    // Fast paths
+    if (this.isEmpty) return other
+    if (other.isEmpty) return this
+
+    val aK = _keys
+    val aV = _values
+    val bK = other._keys
+    val bV = other._values
+
+    // Upper bound on result size is the sum of input sizes
+    val total = aK.length + bK.length
+    val keysBuf = new Array[Slot](total)
+    val valuesBuf = new Array[Slot](total)
+
+    var i = 0  // index in aK/aV (this)
+    var j = 0  // index in bK/bV (other)
+    var k = 0  // size of merged output so far
+
+    // Merge two sorted key arrays in linear time
+    while (i < aK.length && j < bK.length) {
+      val ka = aK(i)
+      val kb = bK(j)
+      if (ka < kb) {
+        keysBuf(k) = ka
+        valuesBuf(k) = aV(i)
+        i += 1; k += 1
+      } else if (kb < ka) {
+        keysBuf(k) = kb
+        valuesBuf(k) = bV(j)
+        j += 1; k += 1
+      } else { // ka == kb -> overwrite with other's value
+        keysBuf(k) = kb
+        valuesBuf(k) = bV(j)
+        i += 1; j += 1; k += 1
+      }
+    }
+
+    // Copy any tail from either side
+    if (i < aK.length) {
+      System.arraycopy(aK, i, keysBuf,   k, aK.length - i)
+      System.arraycopy(aV, i, valuesBuf, k, aV.length - i)
+      k += (aK.length - i)
+    }
+    if (j < bK.length) {
+      System.arraycopy(bK, j, keysBuf,   k, bK.length - j)
+      System.arraycopy(bV, j, valuesBuf, k, bV.length - j)
+      k += (bK.length - j)
+    }
+
+    // Trim to the exact size if we over‑allocated
+    if (k == total) SlotMap(keysBuf, valuesBuf)
+    else SlotMap(java.util.Arrays.copyOf(keysBuf, k),
+                 java.util.Arrays.copyOf(valuesBuf, k))
   }
 
   /**
