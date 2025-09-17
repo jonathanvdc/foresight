@@ -68,7 +68,7 @@ final class ENode[+NodeT] private (
    * Order preserves definitions, then uses, then the values of each child's argument map in child
    * @return An array of all slots used by this node.
    */
-  private def collectSlots: Array[Slot] = {
+  private def slotArray: Array[Slot] = {
     val arr = new Array[Slot](slotCount)
     var idx = 0
     var i = 0
@@ -85,12 +85,45 @@ final class ENode[+NodeT] private (
   }
 
   /**
+   * Collects all distinct slots occurring in this node into a single array, preserving encounter order.
+   * Order preserves definitions, then uses, then the values of each child's argument map in child
+   * order.
+   *
+   * @return An array of distinct slots used by this node.
+   */
+  private def distinctSlotArray: Array[Slot] = {
+    val arr = new Array[Slot](slotCount)
+    var nDistinct = 0
+
+    def addIfNew(s: Slot): Unit = {
+      var j = 0
+      var seen = false
+      while (!seen && j < nDistinct) { if (arr(j) eq s) seen = true; j += 1 }
+      if (!seen) { arr(nDistinct) = s; nDistinct += 1 }
+    }
+
+    var i = 0
+    while (i < _definitions.length) { addIfNew(_definitions(i)); i += 1 }
+    i = 0
+    while (i < _uses.length) { addIfNew(_uses(i)); i += 1 }
+    i = 0
+    while (i < _args.length) {
+      val it = _args(i).args.values.iterator
+      while (it.hasNext) addIfNew(it.next())
+      i += 1
+    }
+
+    if (nDistinct == arr.length) arr
+    else java.util.Arrays.copyOf(arr, nDistinct)
+  }
+
+  /**
    * All slots that appear syntactically in this node: local definitions, free uses, and all argument slots of children.
    * Order preserves definitions, then uses, then the values of each child's argument map in child order.
    *
    * @return An ordered sequence of slots used by this node.
    */
-  def slots: Seq[Slot] = SeqFromArray(collectSlots)
+  def slots: Seq[Slot] = SeqFromArray(slotArray)
 
   /**
    * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -176,38 +209,13 @@ final class ENode[+NodeT] private (
    *         slots back to the original slots of this node.
    */
   def asShapeCall: ShapeCall[NodeT] = {
-    // Compute an upper bound on the number of slots and collect distinct slots in encounter order
-    var max = _definitions.length + _uses.length
-    var i = 0
-    while (i < _args.length) { max += _args(i).args.size; i += 1 }
-
     // Single preallocated buffer for distinct slots (encounter order)
-    val distinct = new Array[Slot](max)
-    var nDistinct = 0
-
-    // small linear-contains for tiny n (almost always < 8)
-    def addIfNew(s: Slot): Unit = {
-      var j = 0
-      var seen = false
-      while (!seen && j < nDistinct) { if (distinct(j) eq s) seen = true; j += 1 }
-      if (!seen) { distinct(nDistinct) = s; nDistinct += 1 }
-    }
-
-    i = 0
-    while (i < _definitions.length) { addIfNew(_definitions(i)); i += 1 }
-    i = 0
-    while (i < _uses.length) { addIfNew(_uses(i)); i += 1 }
-    i = 0
-    while (i < _args.length) {
-      val it = _args(i).args.values.iterator
-      while (it.hasNext) addIfNew(it.next())
-      i += 1
-    }
+    val distinct = distinctSlotArray
 
     // Build forward renaming pairs (orig -> $idx) without intermediate maps
-    val pairs = new Array[(Slot, Slot)](nDistinct)
-    i = 0
-    while (i < nDistinct) { pairs(i) = (distinct(i), Slot.numeric(i)); i += 1 }
+    val pairs = new Array[(Slot, Slot)](distinct.length)
+    var i = 0
+    while (i < distinct.length) { pairs(i) = (distinct(i), Slot.numeric(i)); i += 1 }
 
     val renaming: SlotMap = SlotMap.fromPairs(SeqFromArray(pairs))
 
