@@ -23,7 +23,7 @@ final class ENode[+NodeT] private (
   private val _definitions: Array[Slot],
   private val _uses: Array[Slot],
   private val _args: Array[EClassCall]
-) {
+) extends Node[NodeT, EClassCall] {
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
    * redundant by construction at the boundary of this node and exist to model binders such as
