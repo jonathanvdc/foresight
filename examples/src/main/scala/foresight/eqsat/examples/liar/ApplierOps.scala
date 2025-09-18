@@ -29,8 +29,7 @@ object ApplierOps {
           val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor(m(source), egraph)
 
           def typeOf(tree: MixedTree[ArrayIR, EClassCall]): MixedTree[Type, EClassCall] = {
-            val (toInGraph, newGraph) = egraph.add(tree)
-            TypeInferenceAnalysis.get(newGraph)(toInGraph, newGraph)
+            TypeInferenceAnalysis.get(egraph)(tree, egraph)
           }
 
           def subst(tree: Tree[ArrayIR]): MixedTree[ArrayIR, EClassCall] = {
@@ -54,8 +53,7 @@ object ApplierOps {
 
   implicit class PatternApplierOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val applier: PatternApplier[ArrayIR, EGraphWithMetadata[ArrayIR, EGraphT]]) extends AnyVal {
     private def inferType(tree: MixedTree[ArrayIR, EClassCall], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): MixedTree[ArrayIR, EClassCall] = {
-      val (call, newEGraph) = egraph.add(tree)
-      TypeInferenceAnalysis.get(newEGraph)(call, newEGraph)
+      TypeInferenceAnalysis.get(egraph)(tree, egraph)
     }
 
     /**

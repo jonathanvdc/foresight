@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.arithWithLang
 
-import foresight.eqsat.SlotMap
+import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.lang.LanguageAnalysis
 
 /**

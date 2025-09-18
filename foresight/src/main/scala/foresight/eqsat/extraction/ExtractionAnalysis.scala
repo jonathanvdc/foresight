@@ -2,6 +2,8 @@ package foresight.eqsat.extraction
 
 import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
 import foresight.eqsat._
+import foresight.eqsat.collections.SlotMap
+import foresight.util.Debug
 
 /**
  * An analysis that derives minimal-cost extraction results for each e-class.
@@ -29,6 +31,8 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
                                              (implicit costOrdering: Ordering[C],
                                               nodeOrdering: Ordering[NodeT])
   extends Analysis[NodeT, ExtractionTreeCall[NodeT, C]] {
+
+  private val callOrdering = ExtractionTreeOrdering[NodeT, C]().callOrdering
 
   /**
    * Builds an [[Extractor]] that projects the analysis result at a given e-class into a concrete [[Tree]].
@@ -66,7 +70,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    * @return A result equivalent up to alpha-renaming.
    */
   override def rename(result: ExtractionTreeCall[NodeT, C], renaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
-    ExtractionTreeCall(result.tree, result.renaming.composeRetain(renaming))
+    result.withRenaming(result.renaming.composeRetain(renaming))
   }
 
   /**
@@ -85,7 +89,9 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
   override def make(node: NodeT, defs: Seq[Slot], uses: Seq[Slot], args: Seq[ExtractionTreeCall[NodeT, C]]): ExtractionTreeCall[NodeT, C] = {
     val treeCost = cost(node, defs, uses, args.map(_.cost))
     val tree = ExtractionTree(treeCost, node, defs, uses, args)
-    assert(tree.slotSet.forall(_.isUnique))
+    if (Debug.isEnabled) {
+      assert(tree.slotSet.forall(_.isUnique))
+    }
     // assert(node.slots.toSet.subsetOf(tree.slotSet))
     ExtractionTreeCall(
       tree,
@@ -103,7 +109,7 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    */
   override def join(left: ExtractionTreeCall[NodeT, C],
                     right: ExtractionTreeCall[NodeT, C]): ExtractionTreeCall[NodeT, C] = {
-    ExtractionTreeOrdering[NodeT, C]().callOrdering.min(left, right)
+    callOrdering.min(left, right)
   }
 }
 

@@ -112,14 +112,15 @@ object MixedTree {
    * @param nodeType    The operator or constructor at this node.
    * @param definitions Slots bound/introduced by this node itself.
    * @param uses        Slots consumed by this node but defined elsewhere.
-   * @param children    Ordered children of this node.
+   * @param args        Ordered children of this node.
    * @tparam NodeT      The type used to represent operators/constructors.
    * @tparam AtomT      The type used to represent leaf payloads.
    */
   final case class Node[NodeT, AtomT](nodeType: NodeT,
                                       definitions: Seq[Slot],
                                       uses: Seq[Slot],
-                                      children: Seq[MixedTree[NodeT, AtomT]]) extends MixedTree[NodeT, AtomT]
+                                      args: Seq[MixedTree[NodeT, AtomT]])
+    extends MixedTree[NodeT, AtomT] with foresight.eqsat.Node[NodeT, MixedTree[NodeT, AtomT]]
 
   /**
    * An atom in a mixed tree, which is always a leaf and wraps a `AtomT` payload.

@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotMap
+
 /**
  * A canonicalized e-node paired with a renaming from its canonical slots back to the original slots.
  *
@@ -18,7 +20,6 @@ package foresight.eqsat
  * @param renaming A map from the shape's numeric slots to the original slots. Applying it to `shape` yields the
  *                 original node.
  * @tparam NodeT   The domain-specific node type.
- *
  * @example
  * {{{
  * // Start with a non-canonical node `n` that uses arbitrary slots:
@@ -78,6 +79,9 @@ final case class ShapeCall[+NodeT](shape: ENode[NodeT], renaming: SlotMap) {
    * @param renaming The partial mapping to apply after the current one.
    * @return A `ShapeCall` with partially composed renaming.
    */
-  def renamePartial(renaming: SlotMap): ShapeCall[NodeT] =
+  def renamePartial(renaming: SlotMap): ShapeCall[NodeT] = {
+    if (this.renaming.isEmpty) return this
+
     ShapeCall(shape, this.renaming.composePartial(renaming))
+  }
 }

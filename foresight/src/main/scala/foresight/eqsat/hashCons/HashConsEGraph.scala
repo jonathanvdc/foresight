@@ -14,7 +14,7 @@ import foresight.eqsat._
 private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private val unionFind: SlottedUnionFind,
                                                                         private val hashCons: Map[ENode[NodeT], EClassRef],
                                                                         private val classData: Map[EClassRef, EClassData[NodeT]])
-  extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] {
+  extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] with ReadOnlyHashConsEGraph[NodeT] {
 
   override def emptied: HashConsEGraph[NodeT] = HashConsEGraph.empty
 
@@ -27,42 +27,25 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   //      classData(ref) such that parent is in the e-node's arguments.
 
   private def toMutable: MutableHashConsEGraph[NodeT] = {
-    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind), hashCons, classData)
+    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind.parents), hashCons, classData)
   }
 
   override def classes: Iterable[EClassRef] = classData.keys
 
-  override def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
-    unionFind.tryFind(ref)
+  override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
+    unionFind.findOrNull(ref)
   }
 
-  override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
-    // TODO: implement this without going through the mutable e-graph.
-    toMutable.canonicalize(node)
+  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+    hashCons.getOrElse(node, default)
   }
 
-  override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
-    val canonicalApp = canonicalize(call)
-    val data = classData(canonicalApp.ref)
-    if (data.hasSlots) {
-      data.appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
-    } else {
-      data.nodes.keySet
-    }
+  override def isCanonical(ref: EClassRef): Boolean = {
+    unionFind.isCanonical(ref)
   }
 
-  override def users(ref: EClassRef): Set[ENode[NodeT]] = {
-    val canonicalApp = canonicalize(ref)
-    classData(canonicalApp.ref).users.map(node => {
-      val c = hashCons(node)
-      val mapping = classData(c).nodes(node)
-      ShapeCall(node, mapping).asNode
-    })
-  }
-
-  override def find(node: ENode[NodeT]): Option[EClassCall] = {
-    // TODO: implement this without going through the mutable e-graph.
-    toMutable.find(node)
+  override def dataForClass(ref: EClassRef): EClassData[NodeT] = {
+    classData(ref)
   }
 
   override def tryAddMany(nodes: Seq[ENode[NodeT]],
@@ -136,35 +119,6 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
         val userClassData = classData(userClass)
         assert(userClassData.nodes.keys.exists(_.args.map(_.ref).contains(ref)))
       }
-    }
-  }
-
-  /**
-   * Determines whether two e-classes are the same. Both classes are assumed to be in the e-graph.
-   *
-   * @param first  The first e-class to compare.
-   * @param second The second e-class to compare.
-   * @return True if the e-classes are the same; otherwise, false.
-   */
-  override def areSame(first: EClassCall, second: EClassCall): Boolean = {
-    // First canonicalize the e-classes.
-    val canonicalFirst = canonicalize(first)
-    val canonicalSecond = canonicalize(second)
-
-    if (canonicalFirst.ref != canonicalSecond.ref) {
-      // If the canonical e-class references are different, then the e-classes are different.
-      false
-    } else if (canonicalFirst.args == canonicalSecond.args) {
-      // If the canonical e-class calls are the same, then the argument calls are the same.
-      true
-    } else if (canonicalFirst.args.valueSet == canonicalSecond.args.valueSet) {
-      // If the canonical e-class calls refer to the same e-class but have differently ordered arguments, then the
-      // e-class calls may still be the same if the e-class slots can be permuted.
-      classData(canonicalFirst.ref).permutations.allPerms.exists { perm =>
-        perm.compose(canonicalFirst.args) == canonicalSecond.args
-      }
-    } else {
-      false
     }
   }
 }

@@ -2,11 +2,11 @@ package foresight.eqsat.examples.poly
 
 import foresight.eqsat.EGraph
 import foresight.eqsat.examples.poly
-import foresight.eqsat.lang.*
+import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.util.BenchmarksWithParallelMap
-import org.openjdk.jmh.annotations.*
+import org.openjdk.jmh.annotations._
 
 import java.util.concurrent.TimeUnit
 

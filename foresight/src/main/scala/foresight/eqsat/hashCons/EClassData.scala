@@ -1,6 +1,7 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{ENode, ShapeCall, Slot, SlotMap}
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.{ENode, ShapeCall, Slot}
 
 /**
  * The data of an e-class in a hash-consed e-graph.
@@ -13,7 +14,7 @@ import foresight.eqsat.{ENode, ShapeCall, Slot, SlotMap}
  * @param users The e-nodes that take the e-class as an argument.
  * @tparam NodeT The type of the nodes.
  */
-private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
+private[eqsat] final case class EClassData[NodeT](slots: SlotSet,
                                                   nodes: Map[ENode[NodeT], SlotMap],
                                                   permutations: PermutationGroup[SlotMap],
                                                   users: Set[ENode[NodeT]]) {
@@ -23,6 +24,11 @@ private[eqsat] final case class EClassData[NodeT](slots: Set[Slot],
    */
   lazy val appliedNodes: Set[ShapeCall[NodeT]] = {
     nodes.map { case (node, renaming) => ShapeCall(node, renaming) }.toSet
+  }
+
+  lazy val appliedNodesWithIdentity: Set[ENode[NodeT]] = {
+    val mapping = SlotMap.identity(slots)
+    appliedNodes.map(_.renamePartial(mapping).asNode)
   }
 
   def hasSlots: Boolean = {

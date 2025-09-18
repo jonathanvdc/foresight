@@ -1,6 +1,7 @@
 package foresight.eqsat.metadata
 
-import foresight.eqsat.{EGraph, ENode, Slot, SlotMap}
+import foresight.eqsat.{EGraph, ENode, Slot}
+import foresight.eqsat.collections.SlotMap
 
 /**
  * Defines a dataflow-style analysis over an [[EGraph]].

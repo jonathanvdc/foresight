@@ -1,5 +1,7 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+
 /**
  * Represents the application of an [[EClassRef]] to a set of argument slots.
  *
@@ -19,7 +21,6 @@ package foresight.eqsat
  *
  * @param ref  The reference to the e-class being applied.
  * @param args The mapping from the e-class's parameter slots to argument slots.
- *
  * @example
  * {{{
  * // EClassRef `subXY` has parameter slots (x, y) representing "x - y"
@@ -37,7 +38,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
   /**
    * The set of distinct slots used as arguments in this application.
    */
-  def slotSet: Set[Slot] = args.valueSet
+  def slotSet: SlotSet = args.valueSet
 
   /**
    * Renames all argument slots in this application according to a given mapping.
@@ -47,6 +48,8 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return A new application with arguments renamed.
    */
   def rename(renaming: SlotMap): EClassCall = {
+    if (args.isEmpty) return this
+
     assert(args.valueSet.subsetOf(renaming.keySet), "Argument slots must be in the renaming.")
     EClassCall(ref, args.composePartial(renaming))
   }
@@ -59,9 +62,24 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) {
    * @return A new application with arguments renamed (possibly dropping some).
    */
   def renamePartial(renaming: SlotMap): EClassCall = {
+    if (args.isEmpty) return this
+
+    val newArgs = args.composePartial(renaming)
+    if (newArgs eq args) this else EClassCall(ref, newArgs)
+  }
+
+  /**
+   * Renames argument slots in this application according to a given mapping.
+   * Argument slots not in the mapping are retained as-is.
+   *
+   * @param renaming The mapping from old argument slots to new argument slots.
+   * @return A new application with arguments renamed (retaining unmapped ones).
+   */
+  def renameRetain(renaming: SlotMap): EClassCall = {
     if (args.isEmpty || renaming.isEmpty) return this
 
-    EClassCall(ref, args.composePartial(renaming))
+    val newArgs = args.composeRetain(renaming)
+    if (newArgs eq args) this else EClassCall(ref, newArgs)
   }
 
   /**

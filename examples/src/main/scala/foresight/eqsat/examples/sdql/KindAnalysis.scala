@@ -1,7 +1,8 @@
 package foresight.eqsat.examples.sdql
 
+import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.metadata.Analysis
-import foresight.eqsat.{ENode, Slot, SlotMap}
+import foresight.eqsat.{ENode, Slot}
 
 /**
  * An analysis that determines the kind of a SDQL expression.

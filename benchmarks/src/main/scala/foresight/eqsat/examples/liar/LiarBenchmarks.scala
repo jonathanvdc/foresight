@@ -92,7 +92,7 @@ class LiarBenchmarks extends BenchmarksWithParallelMap {
 
     val (c1, egraph2) = EGraphWithRoot.from(build)
 
-    val egraph4 = strategy(4)(egraph2).get
+    val egraph4 = strategy(4)(egraph2, parallelMap).get
 
     assert(egraph4.contains(gemm))
     assert(egraph4.areSame(c1, egraph4.find(gemm).get))

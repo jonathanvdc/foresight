@@ -51,7 +51,7 @@ sealed trait Slot extends Ordered[Slot] {
    * Numbered slots are equal iff their numbers match. Unique slots are always distinct.
    */
   final def isNumbered: Boolean = this match {
-    case Slot.NumberedSlot(_) => true
+    case _: Slot.NumberedSlot => true
     case _: Slot.UniqueSlot => false
   }
 
@@ -68,17 +68,65 @@ sealed trait Slot extends Ordered[Slot] {
 object Slot {
 
   /**
-   * A value-based, numbered slot. All instances with the same `n` are equal.
+   * A value-based, numbered slot. All instances with the same `n` are referentially equal.
    *
-   * Typical use: canonicalization and shape-normal forms assign `$0, $1, ...` using numbered slots.
+   * Interning strategy:
+   *  - Fast path: a small thread-local array cache for common, non-negative `n` (0..TL_CACHE_MAX).
+   *  - Fallback: a single global ConcurrentHashMap registry ensuring one canonical instance per `n` across threads.
    *
-   * @param n The integer identifier for the slot.
+   * Pattern matching is possible via `unapply`.
    */
-  final case class NumberedSlot(n: Int) extends Slot {
+  final class NumberedSlot private[Slot](val n: Int) extends Slot {
     override def compare(that: Slot): Int = that match {
-      case NumberedSlot(m) => n compare m
-      case _: UniqueSlot => -1
+      case ns: NumberedSlot => n compare ns.n
+      case _: UniqueSlot    => -1
     }
+
+    override def toString: String = s"NumberedSlot($n)"
+
+//    override def equals(other: Any): Boolean = other match {
+//      case ns: NumberedSlot => this.n == ns.n
+//      case _                => false
+//    }
+//    override def hashCode(): Int = java.lang.Integer.hashCode(n)
+  }
+
+  /**
+   * Companion and factory for [[NumberedSlot]].
+   */
+  object NumberedSlot {
+    // ---- Shared, read-only table for small, hot integers ----
+    private final val SMALL_MAX = 128
+    private val small: Array[NumberedSlot] =
+      Array.tabulate(SMALL_MAX + 1)(new NumberedSlot(_))
+
+    // ---- Global canonical registry for other integers ----
+    private val global: java.util.concurrent.ConcurrentHashMap[Int, NumberedSlot] =
+      new java.util.concurrent.ConcurrentHashMap[Int, NumberedSlot]()
+
+    /**
+     * Obtain the canonical instance for `n`.
+     * @param n The integer identifier.
+     * @return The unique `NumberedSlot` instance for `n`.
+     */
+    def apply(n: Int): NumberedSlot = intern(n)
+
+    /** Pattern-matching support: `case NumberedSlot(n)` */
+    def unapply(s: Slot): Option[Int] = s match {
+      case ns: NumberedSlot => Some(ns.n)
+      case _                => None
+    }
+
+    /** Fast path via shared small table; fallback to global registry. */
+    private def intern(n: Int): NumberedSlot = {
+      if (n >= 0 && n <= SMALL_MAX) small(n)
+      else global.computeIfAbsent(n, interningFunction)
+    }
+
+    private val interningFunction: java.util.function.Function[Int, NumberedSlot] =
+      new java.util.function.Function[Int, NumberedSlot] {
+        override def apply(t: Int): NumberedSlot = new NumberedSlot(t)
+      }
   }
 
   /**

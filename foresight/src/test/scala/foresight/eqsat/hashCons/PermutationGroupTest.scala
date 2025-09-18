@@ -1,6 +1,7 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{Slot, SlotMap}
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.Slot
 import org.junit.Test
 
 import scala.collection.mutable
@@ -18,9 +19,9 @@ class PermutationGroupTest {
     val slot1 = Slot.numeric(1)
     val slot2 = Slot.numeric(2)
 
-    val perm = SlotMap(Map(slot0 -> slot1, slot1 -> slot2, slot2 -> slot0))
+    val perm = SlotMap.from(slot0 -> slot1, slot1 -> slot2, slot2 -> slot0)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm))
 
     val orbit = group.orbit(slot0)
@@ -34,10 +35,10 @@ class PermutationGroupTest {
     val slot2 = Slot.numeric(2)
 
     // One permutation swaps 0 and 1, the other swaps 0 and 2
-    val perm1 = SlotMap(Map(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2))
-    val perm2 = SlotMap(Map(slot0 -> slot2, slot1 -> slot1, slot2 -> slot0))
+    val perm1 = SlotMap.from(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2)
+    val perm2 = SlotMap.from(slot0 -> slot2, slot1 -> slot1, slot2 -> slot0)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm1, perm2))
 
     val orbit = group.orbit(slot0)
@@ -51,9 +52,9 @@ class PermutationGroupTest {
     val slot2 = Slot.numeric(2)
 
     // The permutation swaps 0 and 1
-    val perm = SlotMap(Map(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2))
+    val perm = SlotMap.from(slot0 -> slot1, slot1 -> slot0, slot2 -> slot2)
 
-    val identity = SlotMap.identity(Set(slot0, slot1, slot2))
+    val identity = SlotMap.identity(SlotSet(slot0, slot1, slot2))
     val group = PermutationGroup(identity, Set(perm))
 
     val orbit = group.orbit(slot0)
@@ -90,7 +91,7 @@ class PermutationGroupTest {
   }
 
   private def mkPerm(n: Int, f: Int => Int): SlotMap = {
-    SlotMap((0 until n).map(i => Slot.numeric(i) -> Slot.numeric(f(i))).toMap)
+    SlotMap.fromPairs((0 until n).map(i => Slot.numeric(i) -> Slot.numeric(f(i))))
   }
 
   private def checkGroup(generators: Set[SlotMap]): Unit = {

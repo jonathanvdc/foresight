@@ -1,6 +1,7 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.{Slot, SlotMap}
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.Slot
 
 /**
  * A cost-annotated extraction tree together with a total slot renaming.
@@ -49,7 +50,10 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
   /**
    * The deduplicated set of slots of the tree after applying `renaming`.
    */
-  def slotSet: Set[Slot] = tree.slotSet.map(renaming(_))
+  val slotSet: SlotSet = {
+    if (tree.slotSet.isEmpty) SlotSet.empty
+    else tree.slotSet.map(renaming(_))
+  }
 
   /**
    * Composes this call's renaming with an additional renaming defined on its image.
@@ -83,5 +87,19 @@ final case class ExtractionTreeCall[+NodeT, C](tree: ExtractionTree[NodeT, C], r
     val newUses = tree.uses.map(renaming.apply)
     val newArgs = tree.args.map(_.rename(renaming))
     ExtractionTree(tree.cost, tree.nodeType, newDefinitions, newUses, newArgs)
+  }
+
+  /**
+   * Returns a new call with the same tree but a different renaming.
+   *
+   * If the provided `newRenaming` is identical to the current one (reference equality),
+   * returns `this` to avoid unnecessary allocations.
+   *
+   * @param newRenaming A total renaming over `tree.slotSet`.
+   * @return A new call with `newRenaming`.
+   */
+  def withRenaming(newRenaming: SlotMap): ExtractionTreeCall[NodeT, C] = {
+    if (newRenaming eq renaming) this
+    else ExtractionTreeCall(tree, newRenaming)
   }
 }

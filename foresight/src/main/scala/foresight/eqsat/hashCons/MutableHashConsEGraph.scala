@@ -1,120 +1,38 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat._
+import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.util.Debug
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],
-                                                 private var classData: Map[EClassRef, EClassData[NodeT]]) {
+                                                 private var classData: Map[EClassRef, EClassData[NodeT]])
+  extends ReadOnlyHashConsEGraph[NodeT] {
 
   def toImmutable: HashConsEGraph[NodeT] = {
-    new HashConsEGraph(unionFind.set, hashCons, classData)
+    new HashConsEGraph(unionFind.toImmutable, hashCons, classData)
   }
 
   def slots(ref: EClassRef): Set[Slot] = {
     classData(ref).slots
   }
 
-  def tryCanonicalize(ref: EClassRef): Option[EClassCall] = {
-    unionFind.tryFindAndCompress(ref)
+  override def classes: Iterable[EClassRef] = classData.keys
+
+  override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
+    unionFind.findAndCompressOrNull(ref)
   }
 
-  def canonicalize(ref: EClassRef): EClassCall = {
-    unionFind.findAndCompress(ref)
-  }
-
-  def canonicalize(app: EClassCall): EClassCall = {
-    canonicalize(app.ref).rename(app.args)
-  }
-
-  def isCanonical(ref: EClassRef): Boolean = {
+  override def isCanonical(ref: EClassRef): Boolean = {
     unionFind.isCanonical(ref)
   }
 
-  def isCanonical(call: EClassCall): Boolean = {
-    isCanonical(call.ref)
+  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+    hashCons.getOrElse(node, default)
   }
 
-  private def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
-    if (MutableHashConsEGraph.debug && node.hasSlots) {
-      throw new IllegalArgumentException("Node has slots.")
-    }
-
-    if (node.args.forall(isCanonical)) {
-      node
-    } else {
-      val canonicalArgs = node.args.map(canonicalize)
-      node.copy(args = canonicalArgs)
-    }
-  }
-
-  def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
-    import foresight.util.ordering.SeqOrdering
-    
-    if (node.args.forall(isCanonical) && !node.hasSlots) {
-      return ShapeCall(node, SlotMap.empty)
-    }
-
-    val canonicalArgs = node.args.map(canonicalize)
-    val nodeWithCanonicalizedArgs = node.copy(args = canonicalArgs)
-    groupCompatibleVariants(nodeWithCanonicalizedArgs).toSeq
-      .map(_.asShapeCall)
-      .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
-  }
-
-  private def groupCompatibleVariants(node: ENode[NodeT]): Set[ENode[NodeT]] = {
-    val groups = node.args.map({
-      case EClassCall(ref, renaming) =>
-        val data = classData(ref)
-        data.permutations.allPerms.map(perm => EClassCall(ref, perm.compose(renaming)))
-    })
-
-    Helpers.cartesian(groups).map(args => node.copy(args = args)).toSet
-  }
-
-  def find(node: ENode[NodeT]): Option[EClassCall] = {
-    if (node.hasSlots) {
-      Option(findUnsafe(canonicalize(node)))
-    } else {
-      Option(findUnsafeWithoutSlots(canonicalizeWithoutSlots(node)))
-    }
-  }
-
-  /**
-   * Finds the e-class of a given e-node. The e-node must be canonical.
-   * @param renamedShape The canonicalized e-node to find the e-class of.
-   * @return The e-class of the e-node, if it is defined in this e-graph; otherwise, null.
-   */
-  private def findUnsafe(renamedShape: ShapeCall[NodeT]): EClassCall = {
-    if (MutableHashConsEGraph.debug) {
-      assert(renamedShape.shape.isShape)
-    }
-
-    val ref = hashCons.getOrElse(renamedShape.shape, null)
-    if (ref == null) {
-      return null
-    }
-
-    if (!renamedShape.shape.hasSlots) {
-      return EClassCall(ref, SlotMap.empty)
-    }
-
-    val data = classData(ref)
-    val classToNode = data.nodes(renamedShape.shape)
-    val out = classToNode.inverse.compose(renamedShape.renaming)
-    EClassCall(ref, out)
-  }
-
-  private def findUnsafeWithoutSlots(node: ENode[NodeT]): EClassCall = {
-    if (MutableHashConsEGraph.debug) {
-      assert(!node.hasSlots)
-    }
-
-    val result = hashCons.getOrElse(node, null)
-    if (result == null) {
-      null
-    } else {
-      EClassCall(result, SlotMap.empty)
-    }
+  override def dataForClass(ref: EClassRef): EClassData[NodeT] = {
+    classData(ref)
   }
 
   /**
@@ -122,7 +40,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @param slots The slots of the e-class.
    * @return The reference to the new e-class.
    */
-  private def createEmptyClass(slots: Set[Slot]): EClassRef = {
+  private def createEmptyClass(slots: SlotSet): EClassRef = {
     val ref = new EClassRef()
     unionFind.add(ref, slots)
 
@@ -155,7 +73,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
    * @param shape The node to remove.
    */
   private def removeNodeFromClass(ref: EClassRef, shape: ENode[NodeT]): Unit = {
-    if (MutableHashConsEGraph.debug) {
+    if (Debug.isEnabled) {
       assert(shape.isShape)
     }
 
@@ -170,15 +88,24 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   /**
-   * Adds a new node to the e-graph.
+   * Adds a new node to the e-graph. Assumes that the node is not already in the e-graph.
+   * The node is added to a new unique e-class, whose reference is returned.
    * @param canonicalNode A pre-canonicalized node to add to the e-graph.
    * @return The e-class call of the added node.
    */
   private def addNewUnsafe(canonicalNode: ShapeCall[NodeT]): EClassCall = {
-    // Generate slots for the e-class.
     val shape = canonicalNode.shape
+
+    // Fast path for nodes without slots.
+    if (!shape.hasSlots) {
+      val newRef = createEmptyClass(SlotSet.empty)
+      addNodeToClass(newRef, canonicalNode)
+      return newRef.callWithoutSlots
+    }
+
+    // Generate slots for the e-class.
     val nodeSlotsToClassSlots = SlotMap.bijectionFromSetToFresh(shape.slotSet)
-    val slots = (shape.slotSet -- shape.definitions).map(nodeSlotsToClassSlots.apply)
+    val slots = shape.slotSet.diff(SlotSet.from(shape.definitions)).map(nodeSlotsToClassSlots.apply(_))
 
     // Set up an empty e-class with the slots.
     val ref = createEmptyClass(slots)
@@ -191,8 +118,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     propagatePermutations(ref, shapeCall)
 
     // Construct an e-class call with the node slots to e-class slots bijection.
-    val publicRenaming = SlotMap(
-      canonicalNode.renaming.iterator.filter(p => !shape.definitions.contains(p._1)).toMap)
+    val publicRenaming = canonicalNode.renaming.filterKeys(!shape.definitions.contains(_))
     EClassCall(ref, nodeSlotsToClassSlots.inverse.composePartial(publicRenaming))
   }
 
@@ -246,7 +172,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     val data = classData(ref)
     val nonRedundantPermutations = permutations.map { p =>
       val nonRedundant = p.filterKeys(data.slots)
-      assert(nonRedundant.isPermutation)
+      if (Debug.isEnabled) assert(nonRedundant.isPermutation)
       nonRedundant
     }
 
@@ -271,7 +197,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
   }
 
   private def isWellFormed(call: EClassCall): Boolean = {
-    val slots = unionFind.set.findAndCompress(call.ref)._1.args.valueSet
+    val slots = unionFind.toImmutable.find(call.ref).args.valueSet
     slots.subsetOf(call.args.keySet)
   }
 
@@ -290,7 +216,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       nodesRepairWorklist = nodesRepairWorklist ++ classData(ref).users
     }
 
-    def shrinkSlots(ref: EClassRef, slots: Set[Slot]): Unit = {
+    def shrinkSlots(ref: EClassRef, slots: SlotSet): Unit = {
       val data = classData(ref)
 
       // We first determine the set of slots that are redundant in the e-class. These are the slots that are not in the
@@ -298,7 +224,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // slot are also redundant. We remove both categories of redundant slots from the e-class.
       val redundantSlots = data.slots -- slots
       val inferredRedundantSlots = redundantSlots.flatMap(data.permutations.orbit)
-      val finalSlots = slots -- inferredRedundantSlots
+      val finalSlots = slots.diff(inferredRedundantSlots)
 
       // We now restrict the elements of the permutation group to the new slots.
       val generators = data.permutations.generators.map(g =>
@@ -312,7 +238,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We update the union-find with the new slots. Since the e-class is a root in the union-find, its set of slots in
       // the AppliedRef can simply be set to an identity bijection of the new slots. unionFind.add will take care of
       // constructing that bijection.
-      if (MutableHashConsEGraph.debug) {
+      if (Debug.isEnabled) {
         assert(finalSlots.subsetOf(data.slots))
       }
       unionFind.add(ref, finalSlots)
@@ -322,21 +248,15 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       touchedClass(ref)
     }
 
-    def shrinkAppliedSlots(ref: EClassCall, slots: Set[Slot]): Unit = {
+    def shrinkAppliedSlots(ref: EClassCall, slots: SlotSet): Unit = {
       val appSlotsToClassSlots = ref.args.inverse
-      shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply))
-    }
-
-    def renamePermutation(permutation: SlotMap, renaming: SlotMap): SlotMap = {
-      SlotMap(permutation.iterator.collect {
-        case (k, v) if renaming.contains(k) && renaming.contains(v) => (renaming(k), renaming(v))
-      }.toMap)
+      shrinkSlots(ref.ref, slots.map(appSlotsToClassSlots.apply(_)))
     }
 
     def mergeInto(subRoot: EClassCall, domRoot: EClassCall): Unit = {
       // Construct a mapping of the slots of the dominant e-class to the slots of the subordinate e-class.
       val map = domRoot.args.compose(subRoot.args.inverse)
-      if (MutableHashConsEGraph.debug) {
+      if (Debug.isEnabled) {
         assert(map.keySet == slots(domRoot.ref))
         assert(map.valueSet == slots(subRoot.ref))
       }
@@ -357,7 +277,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
 
       // Merge permutations of subordinate class into dominant class.
       val subToDom = subRoot.args.compose(domRoot.args.inverse)
-      val subPermutations = subData.permutations.generators.map(renamePermutation(_, subToDom))
+      val subPermutations = subData.permutations.generators.map(_.rename(subToDom))
 
       val domData = classData(domRoot.ref)
       domData.permutations.tryAddSet(subPermutations) match {
@@ -369,7 +289,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         case None =>
       }
 
-      if (MutableHashConsEGraph.debug) {
+      if (Debug.isEnabled) {
         // Check that all nodes have been removed from the subordinate class.
         assert(classData(subRoot.ref).nodes.isEmpty)
       }
@@ -390,7 +310,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We first determine the set of slots that are common to both e-classes. If this set is smaller than either
       // of the e-classes' slot sets, we shrink the e-classes' slots to the common set. This operation will update
       // the union-find, so we recurse in case of shrinkage.
-      val slots = leftRoot.slotSet intersect rightRoot.slotSet
+      val slots = leftRoot.slotSet.intersect(rightRoot.slotSet)
       if (slots != leftRoot.slotSet) {
         shrinkAppliedSlots(leftRoot, slots)
         unify(leftRoot, rightRoot)
@@ -443,7 +363,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
       // We use composePartial here because the canonical node may have fewer slots than the original node due to
       // slot shrinking in one of the canonical node's argument e-classes. We'll check that the old renaming's
       // keys is a superset of the values of the canonical node renaming.
-      if (MutableHashConsEGraph.debug) {
+      if (Debug.isEnabled) {
         assert(canonicalNode.renaming.valueSet.subsetOf(oldRenaming.keySet))
       }
       val newRenaming = canonicalNode.renaming.composePartial(oldRenaming)
@@ -483,7 +403,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
             val canonicalCallArgs = canonicalNodeRenaming.inverse.compose(canonicalNode.renaming)
             val leftCall = EClassCall(ref, oldRenaming.inverse)
             val rightCall = EClassCall(other, canonicalCallArgs)
-            if (MutableHashConsEGraph.debug) {
+            if (Debug.isEnabled) {
               assert(isWellFormed(leftCall), "Left call is not well-formed.")
               assert(isWellFormed(rightCall), "Right call is not well-formed.")
             }
@@ -522,7 +442,7 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
     classData = classData.filterNot(_._2.nodes.isEmpty)
 
     // Check that all nodes in the class data map are canonicalized.
-    if (MutableHashConsEGraph.debug) {
+    if (Debug.isEnabled) {
       assert(classData.keys.forall(k => canonicalize(k).ref == k), "All e-class references must be canonicalized.")
       assert(toImmutable.nodeCount >= toImmutable.classCount,
         "The number of nodes in the class data must be greater than or equal to the number of e-classes.")
@@ -534,11 +454,4 @@ private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableS
         EClassCall(original, SlotMap.identity(oldClassData(original).slots).composeFresh(canonical.args.inverse))
     }).toSet
   }
-}
-
-private object MutableHashConsEGraph {
-  /**
-   * Tells if debug mode is enabled.
-   */
-  final val debug = false
 }

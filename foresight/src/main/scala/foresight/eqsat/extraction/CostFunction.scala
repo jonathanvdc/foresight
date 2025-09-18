@@ -1,6 +1,7 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.{Slot, SlotMap, Tree}
+import foresight.eqsat.{Slot, Tree}
+import foresight.eqsat.collections.SlotMap
 
 /**
  * A node-local cost model used during extraction.

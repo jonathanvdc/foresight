@@ -1,5 +1,6 @@
 package foresight.eqsat.extraction
 
+import foresight.eqsat.collections.SlotSet
 import foresight.eqsat.{Slot, Tree}
 
 /**
@@ -37,7 +38,7 @@ final case class ExtractionTree[+NodeT, C](
    *
    * Computed as: `1 + sum(child sizes)`.
    */
-  val size: Int = args.map(_.size).sum + 1
+  val size: Int = args.foldLeft(1)((acc, child) => acc + child.size)
 
   /**
    * Maximum depth of this tree (root has depth 1).
@@ -45,7 +46,7 @@ final case class ExtractionTree[+NodeT, C](
    * Computed as: `1 + max(child depths)`. If there are no children,
    * the depth is 1.
    */
-  val depth: Int = (args.map(_.depth) :+ 0).max + 1
+  val depth: Int = args.foldLeft(0)((maxDepth, child) => math.max(maxDepth, child.depth)) + 1
 
   /**
    * All slots appearing in this tree, in traversal order:
@@ -56,13 +57,54 @@ final case class ExtractionTree[+NodeT, C](
   def slots: Seq[Slot] =
     definitions ++ uses ++ args.flatMap(_.slots)
 
+  private def slottedComponentCount: Int = {
+    var count = 0
+    if (definitions.nonEmpty) count += 1
+    if (uses.nonEmpty) count += 1
+    for (child <- args) {
+      if (child.slotSet.nonEmpty) count += 1
+    }
+    count
+  }
+
+  private def buildSlotSet: SlotSet = {
+    // First count the number of components with non-empty slot sets.
+    val count = slottedComponentCount
+
+    // Common cases: no slots in components or only one component has slots.
+    if (count == 0) {
+      SlotSet.empty
+    } else if (count == 1) {
+      if (definitions.nonEmpty) {
+        SlotSet.from(definitions)
+      } else if (uses.nonEmpty) {
+        SlotSet.from(uses)
+      } else {
+        // Find the single child with a non-empty slot set.
+        for (child <- args) {
+          if (child.slotSet.nonEmpty) return child.slotSet
+        }
+
+        throw new IllegalStateException("Invariant violation: counted one slotted component but found none")
+      }
+    } else {
+      // General case: build a set that unions all components.
+      val results = Array.newBuilder[Slot]
+      results ++= definitions
+      results ++= uses
+      for (child <- args) {
+        results ++= child.slotSet.unsafeArray
+      }
+      SlotSet.fromUnsortedMutableArrayUnsafe(results.result())
+    }
+  }
+
   /**
    * All unique slots appearing in this tree (deduplicated, as a set).
    *
    * Includes slots defined locally and in descendants.
    */
-  val slotSet: Set[Slot] =
-    definitions.toSet ++ uses ++ args.flatMap(_.slotSet)
+  val slotSet: SlotSet = buildSlotSet
 
   /**
    * Converts this cost-annotated tree into a plain [[Tree]] by:

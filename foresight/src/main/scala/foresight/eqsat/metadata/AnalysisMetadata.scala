@@ -1,5 +1,6 @@
 package foresight.eqsat.metadata
 
+import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
 
@@ -93,7 +94,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
       case (node, call) =>
         val canonicalizedNode = after.canonicalize(node)
         // Build specialization: args map to the call's slots; definitions get fresh generic slots.
-        val renaming = SlotMap(call.args.inverse.map ++ SlotMap.bijectionFromSetToFresh(canonicalizedNode.definitions.toSet).map)
+        val renaming = call.args.inverse.concat(SlotMap.bijectionFromSetToFresh(canonicalizedNode.definitions.toSet))
         val genericNode = canonicalizedNode.rename(renaming).asNode
         val args = genericNode.args.map(applyPrecanonicalized)
         call.ref -> analysis.make(genericNode, args)
