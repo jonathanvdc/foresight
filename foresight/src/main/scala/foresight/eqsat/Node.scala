@@ -6,7 +6,7 @@ package foresight.eqsat
  * @tparam NodeT The type of the node.
  * @tparam ArgT The type of the arguments of the node.
  */
-trait Node[+NodeT, ArgT] {
+trait Node[+NodeT, +ArgT] {
   /**
    * The type of the node.
    */
