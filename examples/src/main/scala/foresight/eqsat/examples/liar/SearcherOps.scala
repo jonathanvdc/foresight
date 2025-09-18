@@ -7,22 +7,6 @@ import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
 
 object SearcherOps {
-  private def functionTypePattern: CompiledPattern[ArrayIR, EGraph[ArrayIR]] = {
-    FunctionType(
-      MixedTree.Atom(Pattern.Var.fresh()),
-      MixedTree.Atom(Pattern.Var.fresh()))
-      .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
-      .compiled[EGraph[ArrayIR]]
-  }
-
-  private def int32TypePattern = {
-    CompiledPattern[ArrayIR, EGraph[ArrayIR]](Int32Type.toTree)
-  }
-
-  private def doubleTypePattern = {
-    CompiledPattern[ArrayIR, EGraph[ArrayIR]](DoubleType.toTree)
-  }
-
   implicit class SearcherOfMetadataPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]])
     extends AnyVal {
 
@@ -81,7 +65,10 @@ object SearcherOps {
      */
     def requireNonFunctionType(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
-        !functionTypePattern.matches(m(t), egraph)
+        m(t) match {
+          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType != FunctionType
+          case MixedTree.Node(nodeType, _, _, _) => nodeType != FunctionType
+        }
       })
     }
 
@@ -92,7 +79,10 @@ object SearcherOps {
      */
     def requireInt32Type(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
-        int32TypePattern.matches(m(t), egraph)
+        m(t) match {
+          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType == Int32Type
+          case MixedTree.Node(nodeType, _, _, _) => nodeType == Int32Type
+        }
       })
     }
 
@@ -103,7 +93,10 @@ object SearcherOps {
      */
     def requireDoubleType(t: Pattern.Var): Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphT] = {
       searcher.filter((m, egraph) => {
-        doubleTypePattern.matches(m(t), egraph)
+        m(t) match {
+          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType == DoubleType
+          case MixedTree.Node(nodeType, _, _, _) => nodeType == DoubleType
+        }
       })
     }
   }
