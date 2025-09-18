@@ -93,7 +93,7 @@ final case class ExtractionTree[+NodeT, C](
       results ++= definitions
       results ++= uses
       for (child <- args) {
-        results.addAll(child.slotSet.unsafeArray)
+        results ++= child.slotSet.unsafeArray
       }
       SlotSet.fromUnsortedMutableArrayUnsafe(results.result())
     }
