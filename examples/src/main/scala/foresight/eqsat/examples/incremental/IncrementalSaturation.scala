@@ -3,8 +3,8 @@ package foresight.eqsat.examples.incremental
 import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.metadata.{AnalysisMetadata, EGraphWithMetadata}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{ReversibleSearcher, Rule, Searcher}
-import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineSearcherPhase, PatternMatch}
+import foresight.eqsat.rewriting.{EClassSearcher, ReversibleSearcher, Rule, Searcher}
+import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
 import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode}
 
 import scala.collection.mutable.ArrayBuffer
@@ -58,10 +58,10 @@ object IncrementalSaturation {
   ): Rule[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
 
     rule match {
-      case Rule(name, ReversibleSearcher.SinglePhaseReversibleSearcher(MachineSearcherPhase(pattern)), applier) =>
+      case Rule(name, MachineEClassSearcher(pattern: CompiledPattern[NodeT, EGraphT], buildContinuation), applier) =>
         // For machine searchers, convert to an incremental searcher, which only matches on the latest version
         // and for each node binding only matches the top-k cheapest nodes
-        Rule(name, toIncrementalSearcher(pattern, k, versionMetadataName, costAnalysis), applier)
+        Rule(name, toIncrementalSearcher(pattern, k, versionMetadataName, costAnalysis, buildContinuation), applier)
 
       case Rule(name, searcher, applier) =>
         // For other searchers, filter to only apply on the latest version
@@ -91,8 +91,9 @@ object IncrementalSaturation {
     pattern: CompiledPattern[NodeT, EGraphWithMetadata[NodeT, EGraphT]],
     k: Int,
     versionMetadataName: String,
-    costAnalysis: CostAnalysis[NodeT, C]
-  ): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphWithMetadata[NodeT, EGraphT]] = {
+    costAnalysis: CostAnalysis[NodeT, C],
+    buildContinuation: MachineEClassSearcher[NodeT, EGraphWithMetadata[NodeT, EGraphT]]#ContinuationBuilder
+  ): Searcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
     val newInstructions = ArrayBuffer[Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]]]()
     var bindings = 0
     for (instr <- pattern.instructions) {
@@ -107,17 +108,30 @@ object IncrementalSaturation {
 
     val updatedPattern = CompiledPattern(pattern.pattern, newInstructions.toList)
 
-    new Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphWithMetadata[NodeT, EGraphT]] {
-      override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): Seq[PatternMatch[NodeT]] = {
-        val classes = egraph.classes
-        val metadata = egraph.getMetadata[VersionMetadata[NodeT]](versionMetadataName)
-        val currentVersion = metadata.version
-        val classesAtCurrentVersion = classes.filter(c => metadata.data(c) == currentVersion)
-        val searchClass = (c: EClassRef) => {
-          updatedPattern.search(egraph.canonicalize(c), egraph)
+    final case class IncrementalMachineSearcher(buildContinuation: MachineEClassSearcher[NodeT, EGraphWithMetadata[NodeT, EGraphT]]#ContinuationBuilder)
+      extends EClassSearcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] {
+      protected override def search(call: EClassCall, egraph: EGraphWithMetadata[NodeT, EGraphT], continuation: Continuation): Unit = {
+        if (!isLatestVersion(call.ref, egraph, versionMetadataName)) {
+          // Skip searching this e-class if it's not the latest version
+          return
         }
-        parallelize(classesAtCurrentVersion, searchClass).flatten.toSeq
+
+        for (m <- updatedPattern.search(call, egraph)) {
+          if (!continuation(m, egraph)) return
+        }
+      }
+
+      /**
+       * Returns a new instance of this searcher-like object with the specified continuation *builder*.
+       *
+       * @param continuation The new continuation builder to use.
+       * @return A new instance of this searcher-like object with the updated continuation builder.
+       */
+      override def withContinuationBuilder(continuation: ContinuationBuilder): EClassSearcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
+        IncrementalMachineSearcher(continuation)
       }
     }
+
+    IncrementalMachineSearcher(buildContinuation)
   }
 }

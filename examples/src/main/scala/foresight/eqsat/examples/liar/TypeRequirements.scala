@@ -3,8 +3,9 @@ package foresight.eqsat.examples.liar
 import foresight.eqsat.commands.Command
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.rewriting.SearcherContinuation.Continuation
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
-import foresight.eqsat.rewriting.{Applier, ReversibleApplier, ReversibleSearcher, Searcher}
+import foresight.eqsat.rewriting.{Applier, ReversibleApplier, ReversibleSearcher, Searcher, SearcherContinuation}
 import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
 
 object TypeRequirements {
@@ -30,26 +31,25 @@ object TypeRequirements {
     }
   }
 
-  final case class SearcherWithRequirements[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](searcher: Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]],
-                                                                                                          types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
-    extends ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
+  final case class RequirementsSearcherContinuationBuilder[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
+    extends SearcherContinuation.ContinuationBuilder[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
 
     // Precompile the patterns.
     private val compiledPatterns = types.map {
       case (v, t) => v -> t.compiled[EGraph[ArrayIR]]
     }
 
-    override def search(egraph: EGraphWithMetadata[ArrayIR, EGraphT], parallelize: ParallelMap): Seq[PatternMatch[ArrayIR]] = {
-      searcher.flatMap(checkMatch(_, compiledPatterns, _)).search(egraph, parallelize)
+    override def apply(downstream: Continuation[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]): Continuation[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
+      (m, egraph) => {
+        checkMatch(m, compiledPatterns, egraph) match {
+          case Some(m2) => downstream(m2, egraph)
+          case None => true
+        }
+      }
     }
 
-    override def tryReverse: Option[Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
-      searcher match {
-        case searcher: ReversibleSearcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] =>
-          searcher.tryReverse.map(ApplierWithRequirements(_, types))
-
-        case _ => None
-      }
+    override def tryReverse(applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]): Option[Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
+      Some(ApplierWithRequirements(applier, types))
     }
   }
 
@@ -66,10 +66,10 @@ object TypeRequirements {
       applier.flatMap((m2: PatternMatch[ArrayIR], egraph2: EGraphWithMetadata[ArrayIR, EGraphT]) => checkMatch(m2, compiledPatterns, egraph2)).apply(m, egraph)
     }
 
-    override def tryReverse: Option[Searcher[ArrayIR, Seq[PatternMatch[ArrayIR]], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
+    override def tryReverse: Option[Searcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {
       applier match {
         case applier: ReversibleApplier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] =>
-          applier.tryReverse.map(SearcherWithRequirements(_, types))
+          applier.tryReverse.map(_.andThen(RequirementsSearcherContinuationBuilder(types)))
 
         case _ => None
       }

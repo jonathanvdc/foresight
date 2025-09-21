@@ -22,9 +22,7 @@ package foresight.eqsat
  *
  * Components are often **reversible**. A [[ReversibleSearcher]], for example, can
  * be inverted into an applier, while a [[ReversibleApplier]] can become a searcher.
- * Pipelines composed of reversible phases—via [[ReversibleSearcherPhase]]—can be
- * reversed step-by-step, and a [[Rule]] built entirely from reversible parts can
- * be flipped in its entirety using [[Rule.tryReverse]].
+ * A [[Rule]] built from reversible parts can be flipped in its entirety using [[Rule.tryReverse]].
  *
  * Matches are also **portable**. By implementing [[PortableMatch]], a match can
  * remain meaningful across multiple e-graph snapshots, enabling caching and
@@ -34,12 +32,8 @@ package foresight.eqsat
  *
  * ## Typical workflow
  *
- * A typical use of this package begins by defining a searcher. This is often
- * constructed from one or more phases implementing [[SearcherPhase]], which
- * perform per-class work through `search(call, egraph, input)` and aggregate
- * results across the whole graph using `aggregate(map)`. Phases can be composed
- * sequentially with [[Searcher.chain]] or run in parallel with
- * [[Searcher.product]].
+ * A typical use of this package begins by defining a searcher. Searchers
+ * can be enriched with [[Searcher.product]], filter, map and flatMap combinators.
  *
  * Next, an applier is defined to convert each match into a
  * [[foresight.eqsat.commands.Command]]. The searcher and applier are then paired
@@ -69,8 +63,8 @@ package foresight.eqsat
  * Reversal is a key capability for bidirectional reasoning. A
  * [[ReversibleSearcher]] can produce an applier that undoes its transformation,
  * and a [[ReversibleApplier]] can do the opposite. Pipelines can be reversed phase
- * by phase via [[ReversibleSearcherPhase.tryReverse]], and if both the searcher and
- * applier in a [[Rule]] are reversible, the entire rule can be inverted with
+ * by phase via [[SearcherContinuation.ContinuationBuilder.tryReverse]], and if both
+ * the searcher and applier in a [[Rule]] are reversible, the entire rule can be inverted with
  * [[Rule.tryReverse]].
  *
  * ## Portability and caching
@@ -93,8 +87,8 @@ package foresight.eqsat
  *
  * ## Quick reference
  *
- * Main entry points for search are [[Searcher]], [[SearcherPhase]],
- * [[ReversibleSearcher]], and [[ReversibleSearcherPhase]]; for application:
+ * Main entry points for search are [[Searcher]] and
+ * [[ReversibleSearcher]]; for application:
  * [[Applier]] and [[ReversibleApplier]]; for composition: [[Rule]]; for matches
  * across snapshots: [[PortableMatch]]; and for caching and recording:
  * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
@@ -111,8 +105,8 @@ package foresight.eqsat
  * import foresight.eqsat.parallel.ParallelMap
  * import foresight.eqsat.commands.CommandQueue
  *
- * // 1) Search: single-phase searcher (returns Seq[MyMatch])
- * val s: Searcher[MyNode, Seq[MyMatch], MyEGraph] = Searcher(myPhase)
+ * // 1) Search: find matches in the e-graph
+ * val s: Searcher[MyNode, MyMatch, MyEGraph] = ...
  *
  * // 2) Apply: turn a match into a Command program
  * val a: Applier[MyNode, MyMatch, MyEGraph] = (m, g) => buildCommand(m, g) // user-defined
@@ -124,7 +118,6 @@ package foresight.eqsat
  * val batched = CommandQueue(Seq(staged, r2.delayed(egraph))).optimized
  * val (next, _) = batched(egraph, Map.empty, ParallelMap.default)  // execute batch
  * }}}
- *
  * @example Run with a saturation strategy
  * {{{
  * import foresight.eqsat.saturation._
@@ -139,14 +132,12 @@ package foresight.eqsat
  *
  * val result = strategy.run(myEGraph)
  * }}}
- *
  * @example Reversal (bidirectional rules)
  * {{{
  * val forward: Rule[MyNode, MyMatch, MyEGraph] = ...
  * val maybeBack = forward.tryReverse
  * val back = maybeBack.get  // if defined, 'back' applies the inverse transformation
  * }}}
- *
  * @example Portability and caching
  * {{{
  * import foresight.eqsat.saturation._

@@ -72,7 +72,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * }}}
  */
 final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](name: String,
-                                                                                               searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
+                                                                                               searcher: Searcher[NodeT, MatchT, EGraphT],
                                                                                                applier: Applier[NodeT, MatchT, EGraphT]) {
   /**
    * Search the e-graph for matches and apply them immediately, if any.
@@ -112,7 +112,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return Sequence of matches (possibly empty).
    */
   def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
-    searcher.search(egraph, parallelize.child(s"match $name"))
+    searcher.searchAndCollect(egraph, parallelize.child(s"match $name"))
   }
 
   /**

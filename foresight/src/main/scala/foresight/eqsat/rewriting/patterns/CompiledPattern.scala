@@ -1,7 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree}
-import foresight.util.collections.StrictMapOps.toStrictMapOps
+import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, ReadOnlyEGraph}
 
 /**
  * A compiled pattern.
@@ -10,8 +9,8 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
-final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
-                                                                                                  instructions: List[Instruction[NodeT, EGraphT]]) {
+final case class CompiledPattern[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
+                                                                           instructions: List[Instruction[NodeT, EGraphT]]) {
   /**
    * Searches for matches of the pattern in an e-graph.
    * @param call The e-class application to search for.
@@ -42,17 +41,6 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wi
     val state = MachineState[NodeT](call)
     Machine.run(egraph, state, instructions).nonEmpty
   }
-
-  /**
-   * Checks if a tree contains at least one match of the pattern.
-   * @param tree The tree to check.
-   * @param egraph An e-graph whose e-classes may be referenced by the tree.
-   * @return True if the pattern matches the tree, false otherwise.
-   */
-  def matches(tree: MixedTree[NodeT, EClassCall], egraph: EGraphT): Boolean = {
-    val (call, newGraph) = egraph.add(tree)
-    matches(call, newGraph)
-  }
 }
 
 /**
@@ -66,7 +54,7 @@ object CompiledPattern {
    * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
    * @return The compiled pattern.
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): CompiledPattern[NodeT, EGraphT] = {
+  def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): CompiledPattern[NodeT, EGraphT] = {
     CompiledPattern(pattern, PatternCompiler.compile[NodeT, EGraphT](pattern))
   }
 }

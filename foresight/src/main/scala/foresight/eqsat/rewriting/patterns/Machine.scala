@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 /**
  * A pattern-matching virtual machine. The machine executes a sequence of instructions on a graph and maintains a
@@ -18,9 +18,9 @@ object Machine {
    * @tparam GraphT The type of the e-graph.
    * @return A list of final machine states that result from successfully applying all instructions to the machine.
    */
-  def run[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                         machine: MachineState[NodeT],
-                                                                         instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
+  def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                  machine: MachineState[NodeT],
+                                                  instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
 
     //    tryRun(graph, machine, instructions).collect {
     //      case MachineResult.Success(finalMachine) => finalMachine
@@ -45,9 +45,9 @@ object Machine {
    * @return A list of successful and unsuccessful runs of the machine obtained by applying all instructions to the
    *         machine.
    */
-  def tryRun[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                            machine: MachineState[NodeT],
-                                                                            instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
+  def tryRun[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                     machine: MachineState[NodeT],
+                                                     instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
     val results = Seq.newBuilder[MachineResult[NodeT, GraphT]]
     tryRunCPS(graph, machine, instructions,
       onSuccess = (finalMachine: MachineState[NodeT]) => results += MachineResult.Success(finalMachine),
@@ -57,7 +57,7 @@ object Machine {
     results.result()
   }
 
-  private def tryRunCPS[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
+  private def tryRunCPS[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
                                                                                        machine: MachineState[NodeT],
                                                                                        instructions: List[Instruction[NodeT, GraphT]],
                                                                                        onSuccess: MachineState[NodeT] => Unit,
@@ -74,7 +74,7 @@ object Machine {
       }
   }
 
-  private def tryRunCPSWithoutFailure[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
+  private def tryRunCPSWithoutFailure[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
                                                                                                      machine: MachineState[NodeT],
                                                                                                      instructions: List[Instruction[NodeT, GraphT]],
                                                                                                      onSuccess: MachineState[NodeT] => Unit): Unit = instructions match {
