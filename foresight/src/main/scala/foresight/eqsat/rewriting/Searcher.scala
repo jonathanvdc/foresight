@@ -5,7 +5,7 @@ import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.convert.ImplicitConversions._
+import scala.collection.JavaConversions.collectionAsScalaIterable
 
 /**
  * Describes how to find things in an e-graph.
@@ -60,12 +60,14 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
   final def searchAndCollect(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
     val results = new ConcurrentLinkedQueue[MatchT]()
 
-    val builder: ContinuationBuilder = (continuation: Continuation) => (m: MatchT, egraph: EGraphT) => {
-      if (continuation(m, egraph)) {
-        results.add(m)
-        true
-      } else {
-        false
+    val builder = new ContinuationBuilder {
+      def apply(downstream: Continuation): Continuation = (m: MatchT, egraph: EGraphT) => {
+        if (downstream(m, egraph)) {
+          results.add(m)
+          true
+        } else {
+          false
+        }
       }
     }
 
@@ -143,16 +145,19 @@ object Searcher {
 
     override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
       val cont = this.continuation
-      val selfWithContinuation = searcher.andThen(
-        (c: SearcherContinuation.Continuation[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]) =>
+
+      object MergeContinuation extends SearcherContinuation.ContinuationBuilder[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT] {
+        def apply(downstream: SearcherContinuation.Continuation[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]): SearcherContinuation.Continuation[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT] = {
           (m: (PatternMatch[NodeT], PatternMatch[NodeT]), e: EGraphT) =>
-            if (c(m, e)) {
+            if (downstream(m, e)) {
               cont(m._1.merge(m._2), e)
             } else {
               false
             }
-      )
-      selfWithContinuation.search(egraph, parallelize)
+        }
+      }
+
+      searcher.andThen(MergeContinuation).search(egraph, parallelize)
     }
 
     override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, PatternMatch[NodeT], EGraphT]): MergedSearcher[NodeT, EGraphT] = {
