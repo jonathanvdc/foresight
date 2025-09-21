@@ -85,24 +85,6 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
   def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): OutputT
 
   /**
-   * Append a [[SearcherPhase]] that consumes this searcher's output and produces a new output.
-   *
-   * This is the primary way to build multi-stage searches while keeping each stage testable.
-   *
-   * @param phase Phase to run after this searcher.
-   * @tparam IntermediateT The input type that `phase` expects from this searcher (must match this `OutputT`).
-   * @tparam OutputT2      The new output type after applying `phase`.
-   * @return A composed searcher that runs `this` then `phase`.
-   */
-  final def chain[IntermediateT, OutputT2](phase: SearcherPhase[NodeT, OutputT, IntermediateT, OutputT2, EGraphT]): Searcher[NodeT, OutputT2, EGraphT] = {
-    new Searcher[NodeT, OutputT2, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT2 = {
-        phase.search(egraph, Searcher.this.search(egraph, parallelize), parallelize)
-      }
-    }
-  }
-
-  /**
    * Run this searcher **and** another searcher independently over the same e-graph and pair the results.
    *
    * Useful when two match sets are later combined (e.g., via cartesian product or keyed joins).
