@@ -84,6 +84,15 @@ object SearchAndApply {
         ).toMap
       }
 
+      private def performUpdates(updates: Seq[Command[NodeT]], egraph: EGraphT, parallelize: ParallelMap): Option[EGraphT] = {
+        // Construct a command that applies the new matches to the e-graph.
+        val update = CommandQueue(updates).optimized
+
+        // Apply the new matches to the e-graph.
+        val (newEGraph, _) = update(egraph, Map.empty, parallelize)
+        newEGraph
+      }
+
       override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
                          matches: Map[String, Seq[MatchT]],
                          egraph: EGraphT,
@@ -94,12 +103,21 @@ object SearchAndApply {
           rule.delayed(newMatches, egraph, ruleApplicationParallelize)
         }).toSeq
 
-        // Construct a command that applies the new matches to the e-graph.
-        val update = CommandQueue(updateCommands).optimized
+        performUpdates(updateCommands, egraph, parallelize)
+      }
 
-        // Apply the new matches to the e-graph.
-        val (newEGraph, _) = update(egraph, Map.empty, parallelize)
-        newEGraph
+      override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+                         egraph: EGraphT,
+                         parallelize: ParallelMap): Option[EGraphT] = {
+        val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
+        val updates = ruleMatchingAndApplicationParallelize(
+            rules,
+            (rule: Rule[NodeT, MatchT, EGraphT]) => {
+              rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+            }
+          ).toSeq
+
+        performUpdates(updates, egraph, parallelize)
       }
     }
   }
