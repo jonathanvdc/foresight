@@ -1,5 +1,6 @@
 package foresight.eqsat.rewriting
 
+import foresight.eqsat.commands.Command
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
@@ -113,7 +114,7 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
    * @tparam MatchT2 The new match type after transformation.
    * @return A new searcher that produces transformed matches.
    */
-  final def transform[MatchT2](f: MatchT => MatchT2): Searcher[NodeT, MatchT2, EGraphT] = {
+  final def transform[MatchT2](f: (MatchT, EGraphT) => MatchT2): Searcher[NodeT, MatchT2, EGraphT] = {
     final case class TransformSearcher(buildContinuation: SearcherContinuation.ContinuationBuilder[NodeT, MatchT2, EGraphT])
       extends Searcher[NodeT, MatchT2, EGraphT] with SearcherLike[NodeT, MatchT2, EGraphT, TransformSearcher] {
 
@@ -123,7 +124,7 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
           def apply(downstream: SearcherContinuation.Continuation[NodeT, MatchT, EGraphT]): SearcherContinuation.Continuation[NodeT, MatchT, EGraphT] = {
             (m: MatchT, egraph: EGraphT) => {
               if (downstream(m, egraph)) {
-                cont(f(m), egraph)
+                cont(f(m, egraph), egraph)
               } else {
                 false
               }
@@ -138,6 +139,20 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
     }
 
     TransformSearcher(SearcherContinuation.identityBuilder)
+  }
+
+  /**
+   * Chain this searcher with an [[Applier]], producing a searcher that runs this searcher
+   * and then immediately applies each match using the given applier.
+   *
+   * This is useful for building pipelines of searchers and appliers without needing to
+   * construct intermediate sequences of matches.
+   *
+   * @param applier The applier to run on each match found by this searcher.
+   * @return A new searcher that applies the given applier to each match found.
+   */
+  final def andApply(applier: Applier[NodeT, MatchT, EGraphT]): Searcher[NodeT, Command[NodeT], EGraphT] = {
+    transform(applier.apply)
   }
 }
 
@@ -188,7 +203,7 @@ object Searcher {
      * @return A new searcher that merges each pair of matches into a single match.
      */
     def merge: Searcher[NodeT, PatternMatch[NodeT], EGraphT] = {
-      self.transform { case (pm1, pm2) => pm1.merge(pm2) }
+      self.transform { case ((pm1, pm2), _) => pm1.merge(pm2) }
     }
   }
 }
