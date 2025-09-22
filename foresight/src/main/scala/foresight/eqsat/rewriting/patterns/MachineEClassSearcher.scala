@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.rewriting.{Applier, EClassSearcher, ReversibleSearcher, SearcherContinuation}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
 
 /**
  * A phase of a searcher that searches for matches of a pattern machine in an e-graph.
@@ -20,9 +20,7 @@ final case class MachineEClassSearcher[
   with ReversibleSearcher[NodeT, PatternMatch[NodeT], EGraphT] {
 
   protected override def search(call: EClassCall, egraph: EGraphT, continuation: SearcherContinuation.Continuation[NodeT, PatternMatch[NodeT], EGraphT]): Unit = {
-    for (m <- pattern.search(call, egraph)) {
-      if (!continuation(m, egraph)) return
-    }
+    pattern.search(call, egraph, continuation)
   }
 
   override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, PatternMatch[NodeT], EGraphT]): MachineEClassSearcher[NodeT, EGraphT] = {

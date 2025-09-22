@@ -116,9 +116,7 @@ object IncrementalSaturation {
           return
         }
 
-        for (m <- updatedPattern.search(call, egraph)) {
-          if (!continuation(m, egraph)) return
-        }
+        updatedPattern.search(call, egraph, continuation)
       }
 
       /**
