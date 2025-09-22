@@ -179,6 +179,13 @@ object ParallelMap {
     override def child(name: String): ParallelMap = this
     override def apply[A, B](inputs: Iterable[A], f: A => B): Iterable[B] =
       inputs.map(f)
+
+    override def run[A](f: => A): A = f
+    override def collectFrom[A](body: (A => Unit) => Unit): Seq[A] = {
+      val buffer = Seq.newBuilder[A]
+      body(a => buffer += a)
+      buffer.result()
+    }
   }
 
   /**
