@@ -170,7 +170,7 @@ object MixedTree {
       CompiledPattern[NodeT, EGraphT](tree)
 
     def toSearcher[EGraphT <: ReadOnlyEGraph[NodeT]]: MachineEClassSearcher[NodeT, EGraphT] =
-      MachineEClassSearcher[NodeT, EGraphT](compiled)
+      MachineEClassSearcher[NodeT, EGraphT](compiled[EGraphT])
 
     def toApplier[EGraphT <: ReadOnlyEGraph[NodeT]]: PatternApplier[NodeT, EGraphT] =
       PatternApplier(tree)
