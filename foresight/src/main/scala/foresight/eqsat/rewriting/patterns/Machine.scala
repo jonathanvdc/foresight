@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.ReadOnlyEGraph
 
 /**
  * A pattern-matching virtual machine. The machine executes a sequence of instructions on a graph and maintains a
