@@ -1,11 +1,9 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.commands.Command
+import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
-
-import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Describes how to find things in an e-graph.
@@ -152,7 +150,10 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
    * @return A new searcher that applies the given applier to each match found.
    */
   final def andApply(applier: Applier[NodeT, MatchT, EGraphT]): Searcher[NodeT, Command[NodeT], EGraphT] = {
-    transform(applier.apply)
+    transform(applier.apply).filter {
+      case (CommandQueue(Seq()), _) => false
+      case _ => true
+    }
   }
 }
 
