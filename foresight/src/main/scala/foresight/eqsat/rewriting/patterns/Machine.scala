@@ -40,11 +40,6 @@ object Machine {
   def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
                                                   machine: MachineState[NodeT],
                                                   instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
-
-    //    tryRun(graph, machine, instructions).collect {
-    //      case MachineResult.Success(finalMachine) => finalMachine
-    //    }
-
     val results = Seq.newBuilder[MachineState[NodeT]]
     tryRunCPSWithoutFailure(graph, machine, instructions,
       onSuccess = (finalMachine: MachineState[NodeT]) => {
