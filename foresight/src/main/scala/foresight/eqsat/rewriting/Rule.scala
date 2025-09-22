@@ -128,8 +128,10 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return A single, optimized [[Command]] that applies all current matches of this rule.
    */
   def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
-    val matches = search(egraph, parallelize)
-    delayed(matches, egraph, parallelize)
+    val pipeline = searcher.andApply(applier)
+    aggregateCommands(
+      pipeline.searchAndCollect(egraph, parallelize.child(s"match+apply $name")),
+      egraph)
   }
 
   /**
@@ -146,10 +148,14 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * if constructing the per-match commands fails.
    */
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
+    aggregateCommands(
+      parallelize.child(s"apply $name")[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq,
+      egraph)
+  }
+
+  private def aggregateCommands(buildCommands: => Seq[Command[NodeT]], egraph: EGraphT): Command[NodeT] = {
     try {
-      val commands = parallelize.child(s"apply $name")[MatchT, Command[NodeT]](
-        matches, applier.apply(_, egraph)).toSeq
-      CommandQueue(commands)
+      CommandQueue(buildCommands)
     } catch {
       case e: OperationCanceledException => throw e
       case e: Exception =>
