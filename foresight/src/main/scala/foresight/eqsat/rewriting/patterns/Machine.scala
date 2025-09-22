@@ -13,7 +13,7 @@ object Machine {
    *
    * @param graph        The graph to match against.
    * @param machine      The initial machine state.
-   * @param instruction  The instruction to apply to the machine.
+   * @param instructions  The instructions to apply to the machine.
    * @param continuation A continuation that is called for each successful run of the machine. If the continuation
    *                     returns false, the search is stopped.
    * @tparam NodeT  The type of the nodes in the e-graph.
