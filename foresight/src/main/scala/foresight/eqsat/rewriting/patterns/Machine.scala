@@ -80,10 +80,10 @@ object Machine {
   }
 
   private def tryRunCPS[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                                                       machine: MachineState[NodeT],
-                                                                                       instructions: List[Instruction[NodeT, GraphT]],
-                                                                                       onSuccess: MachineState[NodeT] => Unit,
-                                                                                       onFailure: (MachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
+                                                                machine: MachineState[NodeT],
+                                                                instructions: List[Instruction[NodeT, GraphT]],
+                                                                onSuccess: MachineState[NodeT] => Unit,
+                                                                onFailure: (MachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
     case Nil => onSuccess(machine)
     case firstInstruction :: remainingInstructions =>
       firstInstruction.execute(graph, machine) match {
