@@ -128,7 +128,7 @@ object Machine {
           }
           true
 
-        case Right(error) =>
+        case Right(_) =>
           /* Do nothing on failure */
           true
       }
