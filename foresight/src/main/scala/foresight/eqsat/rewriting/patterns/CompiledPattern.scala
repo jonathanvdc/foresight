@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
 
 /**
  * A compiled pattern.
