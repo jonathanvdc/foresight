@@ -1,6 +1,5 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.commands.CommandQueue
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike}
