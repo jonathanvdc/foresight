@@ -51,7 +51,6 @@ final case class MaximalRuleApplication[NodeT,
   override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
     val newEGraph = searchAndApply.apply(
       rules,
-      searchAndApply.search(rules, egraph, parallelize),
       egraph,
       parallelize)
 

@@ -39,6 +39,22 @@ trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLi
             matches: Map[String, Seq[MatchT]],
             egraph: EGraphT,
             parallelize: ParallelMap): Option[EGraphT]
+
+  /**
+   * A convenience method that combines searching and applying in one step.
+   * It first searches for matches of the given rules in the e-graph; then it
+   * applies them to the e-graph.
+   * @param rules The rules to search and apply.
+   * @param egraph The e-graph to search and apply matches to.
+   * @param parallelize A parallelization strategy for both searching and applying.
+   * @return An updated e-graph with the matches applied, or None if no matches were found.
+   */
+  def apply(rules: Seq[RuleT],
+            egraph: EGraphT,
+            parallelize: ParallelMap): Option[EGraphT] = {
+    val matches = search(rules, egraph, parallelize)
+    apply(rules, matches, egraph, parallelize)
+  }
 }
 
 /**
