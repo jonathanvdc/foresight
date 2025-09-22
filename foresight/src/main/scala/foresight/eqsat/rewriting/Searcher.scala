@@ -57,7 +57,7 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
    * @return A sequence of all matches found by this searcher.
    */
   final def searchAndCollect(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
-    parallelize.collectFrom[MatchT] { add: (MatchT => Unit) =>
+    parallelize.collectFrom[MatchT] { (add: MatchT => Unit) =>
       this.andThen(new ContinuationBuilder {
         def apply(downstream: Continuation): Continuation = (m: MatchT, egraph: EGraphT) => {
           if (downstream(m, egraph)) {
