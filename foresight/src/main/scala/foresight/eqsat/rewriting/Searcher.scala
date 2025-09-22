@@ -176,7 +176,7 @@ object Searcher {
   def empty[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, MatchT, EGraphT] = {
     new ReversibleSearcher[NodeT, MatchT, EGraphT] {
       override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {}
-      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore)
+      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore[NodeT, MatchT, EGraphT])
       override def buildContinuation: ContinuationBuilder = SearcherContinuation.identityBuilder
       override def withContinuationBuilder(continuation: ContinuationBuilder): Searcher[NodeT, MatchT, EGraphT] = this
     }
