@@ -25,7 +25,7 @@ import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
  * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
  * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
  */
-trait Applier[NodeT, -MatchT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+trait Applier[NodeT, -MatchT, EGraphT <: ReadOnlyEGraph[NodeT]] {
 
   /**
    * Build a command that applies the effects implied by `m` within `egraph`.
