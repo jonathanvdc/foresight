@@ -178,7 +178,7 @@ object MixedTree {
 
 
   /**
-   * Compares Nodes by (nodeType, defs, uses, children), toms by atom payload. Atoms come before Nodes.
+   * Compares nodes by (nodeType, defs, uses, children), atoms by atom payload. Atoms come before Nodes.
    * This ordering is useful for sorting mixed trees in a way that respects both
    * the structure of nodes and the payloads of atoms.
    * @param oNode The ordering for node types.
