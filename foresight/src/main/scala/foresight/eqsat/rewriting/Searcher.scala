@@ -5,7 +5,6 @@ import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.JavaConversions.collectionAsScalaIterable
 
 /**
  * Describes how to find things in an e-graph.
@@ -58,22 +57,18 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
    * @return A sequence of all matches found by this searcher.
    */
   final def searchAndCollect(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
-    val results = new ConcurrentLinkedQueue[MatchT]()
-
-    val builder = new ContinuationBuilder {
-      def apply(downstream: Continuation): Continuation = (m: MatchT, egraph: EGraphT) => {
-        if (downstream(m, egraph)) {
-          results.add(m)
-          true
-        } else {
-          false
+    parallelize.collectFrom[MatchT] { add: (MatchT => Unit) =>
+      this.andThen(new ContinuationBuilder {
+        def apply(downstream: Continuation): Continuation = (m: MatchT, egraph: EGraphT) => {
+          if (downstream(m, egraph)) {
+            add(m)
+            true
+          } else {
+            false
+          }
         }
-      }
+      }).search(egraph, parallelize)
     }
-
-    this.andThen(builder).search(egraph, parallelize)
-
-    results.toSeq
   }
 
   /**

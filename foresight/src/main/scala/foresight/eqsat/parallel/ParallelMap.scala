@@ -137,6 +137,17 @@ trait ParallelMap {
     apply[Int, A](Seq(0), _ => f).head
 
   /**
+   * Collects elements produced by a callback function into a sequence.
+   * This method is thread-safe wrt parallelism created by this parallel map.
+   * @param body The callback function that produces elements.
+   * @tparam A The type of elements produced by the callback function.
+   * @return A sequence of collected elements.
+   */
+  def collectFrom[A](body: (A => Unit) => Unit): Seq[A] = {
+    run { ParallelMapImpl.collectFrom(body) }
+  }
+
+  /**
    * Wraps this strategy to record execution times.
    *
    * Useful for profiling or monitoring performance. Timing starts at the root
