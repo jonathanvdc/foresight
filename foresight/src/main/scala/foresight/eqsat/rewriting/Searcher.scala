@@ -102,6 +102,43 @@ trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
 
     ProductSearcher(SearcherContinuation.identityBuilder)
   }
+
+  /**
+   * Transform each match produced by this searcher using the given function.
+   *
+   * This is useful for adapting searchers to work with different match types
+   * or for post-processing matches.
+   *
+   * @param f        Function to transform each match.
+   * @tparam MatchT2 The new match type after transformation.
+   * @return A new searcher that produces transformed matches.
+   */
+  final def transform[MatchT2](f: MatchT => MatchT2): Searcher[NodeT, MatchT2, EGraphT] = {
+    final case class TransformSearcher(buildContinuation: SearcherContinuation.ContinuationBuilder[NodeT, MatchT2, EGraphT])
+      extends Searcher[NodeT, MatchT2, EGraphT] with SearcherLike[NodeT, MatchT2, EGraphT, TransformSearcher] {
+
+      override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
+        val cont = continuation
+        Searcher.this.andThen(new SearcherContinuation.ContinuationBuilder[NodeT, MatchT, EGraphT] {
+          def apply(downstream: SearcherContinuation.Continuation[NodeT, MatchT, EGraphT]): SearcherContinuation.Continuation[NodeT, MatchT, EGraphT] = {
+            (m: MatchT, egraph: EGraphT) => {
+              if (downstream(m, egraph)) {
+                cont(f(m), egraph)
+              } else {
+                false
+              }
+            }
+          }
+        }).search(egraph, parallelize)
+      }
+
+      override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, MatchT2, EGraphT]): TransformSearcher = {
+        TransformSearcher(continuation)
+      }
+    }
+
+    TransformSearcher(SearcherContinuation.identityBuilder)
+  }
 }
 
 /**
@@ -129,37 +166,6 @@ object Searcher {
     }
   }
 
-  private final case class MergedSearcher[
-    NodeT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](searcher: Searcher[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT],
-    buildContinuation: SearcherContinuation.ContinuationBuilder[NodeT, PatternMatch[NodeT], EGraphT])
-
-    extends Searcher[NodeT, PatternMatch[NodeT], EGraphT]
-      with SearcherLike[NodeT, PatternMatch[NodeT], EGraphT, MergedSearcher[NodeT, EGraphT]] {
-
-    override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
-      val cont = this.continuation
-
-      object MergeContinuation extends SearcherContinuation.ContinuationBuilder[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT] {
-        def apply(downstream: SearcherContinuation.Continuation[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]): SearcherContinuation.Continuation[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT] = {
-          (m: (PatternMatch[NodeT], PatternMatch[NodeT]), e: EGraphT) =>
-            if (downstream(m, e)) {
-              cont(m._1.merge(m._2), e)
-            } else {
-              false
-            }
-        }
-      }
-
-      searcher.andThen(MergeContinuation).search(egraph, parallelize)
-    }
-
-    override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, PatternMatch[NodeT], EGraphT]): MergedSearcher[NodeT, EGraphT] = {
-      MergedSearcher(searcher, continuation)
-    }
-  }
-
   /**
    * Enhances a searcher that produces pairs of `PatternMatch` results
    * with a `merge` method to combine each pair into a single `PatternMatch`.
@@ -182,7 +188,7 @@ object Searcher {
      * @return A new searcher that merges each pair of matches into a single match.
      */
     def merge: Searcher[NodeT, PatternMatch[NodeT], EGraphT] = {
-      MergedSearcher(self, SearcherContinuation.identityBuilder)
+      self.transform { case (pm1, pm2) => pm1.merge(pm2) }
     }
   }
 }
