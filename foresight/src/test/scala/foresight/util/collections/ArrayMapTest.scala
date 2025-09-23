@@ -135,4 +135,110 @@ class ArrayMapTest {
     val values = Array[AnyRef](1.asInstanceOf[AnyRef])
     ArrayMap.wrapArraysUnsafe(keys, values, 2)
   }
+
+  @Test
+  def mapValuesStrictTransformsValuesCorrectly(): Unit = {
+    val m = ArrayMap("a" -> 1, "b" -> 2, "c" -> 3)
+    val transformed = m.mapValuesStrict(_ * 2)
+    assertEquals(Some(2), transformed.get("a"))
+    assertEquals(Some(4), transformed.get("b"))
+    assertEquals(Some(6), transformed.get("c"))
+  }
+
+  @Test
+  def mapValuesStrictReturnsSameInstanceIfNoChange(): Unit = {
+    val m = ArrayMap("a" -> 1, "b" -> 2, "c" -> 3)
+    val transformed = m.mapValuesStrict(identity)
+    assertTrue(m eq transformed)
+  }
+
+  @Test
+  def removedReturnsEmptyMapWhenLastElementRemoved(): Unit = {
+    val m = ArrayMap("a" -> 1)
+    val m2 = (m - "a").asInstanceOf[ArrayMap[String, Int]]
+    assertEquals(0, m2.size)
+    assertFalse(m2.contains("a"))
+  }
+
+  @Test
+  def updatedAddsNewKeyValuePair(): Unit = {
+    val m = ArrayMap.empty[String, Int]
+    val updated = m.updated("newKey", 42)
+    assertEquals(Some(42), updated.get("newKey"))
+    assertEquals(1, updated.size)
+  }
+
+  @Test
+  def updatedOverwritesExistingKey(): Unit = {
+    val m = ArrayMap("key" -> 1)
+    val updated = m.updated("key", 99)
+    assertEquals(Some(99), updated.get("key"))
+    assertEquals(1, updated.size)
+  }
+
+  @Test
+  def newBuilderBuildsMapFromElements(): Unit = {
+    val builder = ArrayMap.newBuilder[String, Int]
+    builder.addOne("a" -> 1)
+    builder.addOne("b" -> 2)
+    val m = builder.result()
+    assertEquals(2, m.size)
+    assertEquals(Some(1), m.get("a"))
+    assertEquals(Some(2), m.get("b"))
+  }
+
+  @Test
+  def newBuilderOverwritesDuplicateKeys(): Unit = {
+    val builder = ArrayMap.newBuilder[String, Int]
+    builder.addOne("x" -> 1)
+    builder.addOne("x" -> 2)
+    val m = builder.result()
+    assertEquals(1, m.size)
+    assertEquals(Some(2), m.get("x"))
+  }
+
+  @Test
+  def newBuilderClearResetsState(): Unit = {
+    val builder = ArrayMap.newBuilder[String, Int]
+    builder.addOne("a" -> 1)
+    builder.clear()
+    builder.addOne("b" -> 2)
+    val m = builder.result()
+    assertEquals(1, m.size)
+    assertEquals(Some(2), m.get("b"))
+    assertFalse(m.contains("a"))
+  }
+
+  @Test
+  def concatWithEmptyMapReturnsOriginal(): Unit = {
+    val m = ArrayMap("a" -> 1)
+    val m2 = m ++ ArrayMap.empty[String, Int]
+    assertEquals(m, m2)
+  }
+
+  @Test
+  def concatEmptyWithNonEmptyReturnsOther(): Unit = {
+    val m = ArrayMap.empty[String, Int]
+    val m2 = m ++ ArrayMap("x" -> 42)
+    assertEquals(1, m2.size)
+    assertEquals(Some(42), m2.get("x"))
+  }
+
+  @Test
+  def concatCombinesMapsAndOverwritesDuplicates(): Unit = {
+    val m1 = ArrayMap("a" -> 1, "b" -> 2)
+    val m2 = ArrayMap("b" -> 20, "c" -> 3)
+    val m3 = m1 ++ m2
+    assertEquals(3, m3.size)
+    assertEquals(Some(1), m3.get("a"))
+    assertEquals(Some(20), m3.get("b"))
+    assertEquals(Some(3), m3.get("c"))
+  }
+
+  @Test
+  def concatWithItselfKeepsLastValues(): Unit = {
+    val m = ArrayMap("a" -> 1, "b" -> 2)
+    val m2 = m ++ m
+    assertEquals(m, m2)
+  }
 }
