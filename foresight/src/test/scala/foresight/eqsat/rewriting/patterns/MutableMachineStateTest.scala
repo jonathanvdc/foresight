@@ -355,4 +355,85 @@ class MutableMachineStateTest {
     pool.release(a)
     pool.release(b)
   }
+
+  @Test
+  def instanceReleaseDelegatesToPool(): Unit = {
+    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val pool = MutableMachineState.Pool[Any](effects)
+
+    val ms = pool.borrow(null.asInstanceOf[EClassCall])
+    assertEquals(0, pool.available)
+    // Call the instance method; should put it back in the same pool
+    ms.release()
+    assertEquals(1, pool.available)
+  }
+
+  @Test
+  def forkProducesIndependentEqualCopy(): Unit = {
+    val v1 +: v2 +: Nil = List.fill(2)(Pattern.Var.fresh())
+    val pd +: Nil = List(Slot.fresh())
+    val effects = Instruction.Effects(
+      createdRegisters = 2, // enough capacity for two args appended by a node
+      boundVars = Seq(v1, v2),
+      boundSlots = Seq(pd),
+      boundNodes = 1
+    )
+
+    val pool = MutableMachineState.Pool[Any](effects)
+    val root: EClassCall = null.asInstanceOf[EClassCall]
+    val ms = pool.borrow(root)
+
+    // Populate state: two vars and one node with one slot use
+    val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    val mt2: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    ms.bindVar(mt1)
+    ms.bindVar(mt2)
+
+    val actualSlot = Slot.fresh()
+    val node = ENode[Any](
+      nodeType = null.asInstanceOf[Any],
+      args = IndexedSeq(null.asInstanceOf[EClassCall], null.asInstanceOf[EClassCall]),
+      definitions = IndexedSeq.empty,
+      uses = IndexedSeq(actualSlot)
+    )
+    ms.bindNode(node)
+
+    val snap = ms.freeze()
+
+    // Fork and compare contents
+    val copy = ms.fork()
+    assertTrue(copy ne ms)
+    assertEquals(ms.createdRegisters, copy.createdRegisters)
+    assertEquals(ms.boundVarsCount, copy.boundVarsCount)
+    assertEquals(ms.boundSlotsCount, copy.boundSlotsCount)
+    assertEquals(ms.boundNodesCount, copy.boundNodesCount)
+
+    val snapCopy = copy.freeze()
+    assertEquals(snap.registers, snapCopy.registers)
+    assertEquals(snap.boundVars.keySet, snapCopy.boundVars.keySet)
+    assertEquals(snap.boundSlots.keySet, snapCopy.boundSlots.keySet)
+    assertEquals(snap.boundSlots.size, snapCopy.boundSlots.size)
+    assertEquals(snap.boundNodes.size, snapCopy.boundNodes.size)
+
+    // Mutate original (reinit) and ensure fork-copy remains unchanged
+    val newRoot: EClassCall = null.asInstanceOf[EClassCall]
+    ms.reinit(newRoot)
+    val snapAfter = ms.freeze()
+    assertEquals(Seq(newRoot), snapAfter.registers)
+    // copy still has old snapshot contents
+    assertEquals(snap.registers, snapCopy.registers)
+
+    // Return both to pool
+    ms.release()
+    copy.release()
+  }
+
+  @Test
+  def standaloneApplyCreatesPrivatePoolReleaseDoesNotThrow(): Unit = {
+    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val root: EClassCall = null.asInstanceOf[EClassCall]
+    val lone = MutableMachineState[Any](root, effects)
+    // Safe to call, even though we don't have a handle to its private pool
+    lone.release()
+  }
 }
