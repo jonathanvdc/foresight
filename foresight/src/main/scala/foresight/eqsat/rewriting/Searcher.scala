@@ -1,10 +1,9 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.saturation.EGraphWithRoot
-import foresight.eqsat.{EGraph, EGraphLike, Slot}
+import foresight.eqsat.rewriting.patterns.PatternMatch
+import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 /**
  * Describes how to find things in an e-graph.
@@ -17,52 +16,12 @@ import foresight.eqsat.{EGraph, EGraphLike, Slot}
  * with respect to the e-graph. Determinism of output order is not guaranteed unless explicitly
  * documented by the concrete implementation.
  *
- * # Phased search
- * Complex searches can be expressed as a pipeline of [[SearcherPhase]] instances. Use:
- *  - [[Searcher.apply]] to build a searcher from a single phase;
- *  - [[chain]] to append a phase that consumes the previous output;
- *  - [[product]] to run two independent searchers and pair their results.
- *
- * # Adapters
- * Use [[requireMetadata]] and [[requireRoot]] when the caller passes decorated e-graphs
- * (e.g., in saturation loops that carry extra context) but your search logic needs only
- * the underlying base e-graph.
- *
- * # Parallelism
  * The `parallelize` parameter allows callers to structure/label work and control parallel map
- * behavior. Implementations should call `parallelize.child("label")` to create scoped tasks.
+ * behavior.
  *
  * @tparam NodeT   Node payload type stored in the e-graph.
- * @tparam OutputT Result type produced by this searcher (e.g., `Seq[PatternMatch[NodeT]]`).
+ * @tparam MatchT Result type produced by this searcher (e.g., `PatternMatch[NodeT]`).
  * @tparam EGraphT The concrete e-graph type, constrained to be both [[EGraphLike]] and [[EGraph]].
- * @example Single-phase pattern search
- * {{{
- * // Suppose `patternPhase` finds Seq[PatternMatch[MyNode]]
- * val patSearch: Searcher[MyNode, Seq[PatternMatch[MyNode]], MyEGraph] =
- *   Searcher(patternPhase)
- *
- * val matches = patSearch.search(egraph)
- * }}}
- * @example Pipelining with `chain` (search -> filter -> transform)
- * {{{
- * val searchA: Searcher[MyNode, Seq[MatchA], MyEGraph] = Searcher(phaseA)
- *
- * // PhaseB consumes A's Seq[MatchA] and returns Seq[MatchB]
- * val refined: Searcher[MyNode, Seq[MatchB], MyEGraph] =
- *   searchA.chain(phaseB)
- *
- * val bs: Seq[MatchB] = refined.search(egraph)
- * }}}
- * @example Running two searches together and pairing the results
- * {{{
- * val defs:  Searcher[MyNode, Seq[PatternMatch[MyNode]], MyEGraph] = Searcher(defsPhase)
- * val uses:  Searcher[MyNode, Seq[PatternMatch[MyNode]], MyEGraph] = Searcher(usesPhase)
- *
- * val both: Searcher[MyNode, (Seq[PatternMatch[MyNode]], Seq[PatternMatch[MyNode]]), MyEGraph] =
- *   defs.product(uses)
- *
- * val (defMs, useMs) = both.search(egraph)
- * }}}
  * @example Pair with an [[Applier]] to build a [[Rule]]
  * {{{
  * val searcher: Searcher[MyNode, Seq[MyMatch], MyEGraph] = ...
@@ -71,81 +30,129 @@ import foresight.eqsat.{EGraph, EGraphLike, Slot}
  * val updated = rule(egraph) // search + apply
  * }}}
  */
-trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
+  extends SearcherLike[NodeT, MatchT, EGraphT, Searcher[NodeT, MatchT, EGraphT]] {
 
   /**
-   * Execute this search over the given e-graph.
+   * Execute this search over the given e-graph. Invokes the searcher's continuation
+   * for each match until all matches are processed or the continuation returns `false`.
    *
    * For structured parallel work, use `parallelize.child("phase-name")`.
    *
    * @param egraph      E-graph to search.
    * @param parallelize Parallel mapping/labeling strategy.
-   * @return Search output (often a sequence of matches).
    */
-  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): OutputT
+  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Unit
 
   /**
-   * Append a [[SearcherPhase]] that consumes this searcher's output and produces a new output.
+   * Run this searcher and collect all matches into a sequence.
    *
-   * This is the primary way to build multi-stage searches while keeping each stage testable.
+   * Note: this eagerly allocates a sequence of all matches. For large match sets,
+   * consider using the continuation-based `search` method to process matches
+   * incrementally or short-circuit early.
    *
-   * @param phase Phase to run after this searcher.
-   * @tparam IntermediateT The input type that `phase` expects from this searcher (must match this `OutputT`).
-   * @tparam OutputT2      The new output type after applying `phase`.
-   * @return A composed searcher that runs `this` then `phase`.
+   * @param egraph      E-graph to search.
+   * @param parallelize Parallel mapping/labeling strategy.
+   * @return A sequence of all matches found by this searcher.
    */
-  final def chain[IntermediateT, OutputT2](phase: SearcherPhase[NodeT, OutputT, IntermediateT, OutputT2, EGraphT]): Searcher[NodeT, OutputT2, EGraphT] = {
-    new Searcher[NodeT, OutputT2, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT2 = {
-        phase.search(egraph, Searcher.this.search(egraph, parallelize), parallelize)
-      }
+  final def searchAndCollect(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
+    parallelize.collectFrom[MatchT] { (add: MatchT => Unit) =>
+      this.andThen(new ContinuationBuilder {
+        def apply(downstream: Continuation): Continuation = (m: MatchT, egraph: EGraphT) => {
+          if (downstream(m, egraph)) {
+            add(m)
+            true
+          } else {
+            false
+          }
+        }
+      }).search(egraph, parallelize)
     }
   }
 
   /**
-   * Run this searcher **and** another searcher independently over the same e-graph and pair the results.
-   *
-   * Useful when two match sets are later combined (e.g., via cartesian product or keyed joins).
+   * Run this searcher **and** another searcher independently over the same e-graph and generate
+   * the cartesian product of their results.
    *
    * @param other The other searcher to execute alongside this one.
-   * @tparam OutputT2 The other searcher's output type.
+   * @tparam MatchT2 The other searcher's match type.
    * @return A searcher that returns `(thisOutput, otherOutput)`.
    */
-  final def product[OutputT2](other: Searcher[NodeT, OutputT2, EGraphT]): Searcher[NodeT, (OutputT, OutputT2), EGraphT] = {
-    new Searcher[NodeT, (OutputT, OutputT2), EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): (OutputT, OutputT2) = {
-        (Searcher.this.search(egraph, parallelize), other.search(egraph, parallelize))
+  final def product[MatchT2](other: Searcher[NodeT, MatchT2, EGraphT]): Searcher[NodeT, (MatchT, MatchT2), EGraphT] = {
+    final case class ProductSearcher(buildContinuation: SearcherContinuation.ContinuationBuilder[NodeT, (MatchT, MatchT2), EGraphT])
+      extends Searcher[NodeT, (MatchT, MatchT2), EGraphT] with SearcherLike[NodeT, (MatchT, MatchT2), EGraphT, ProductSearcher] {
+
+      override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
+        val leftMatches = Searcher.this.searchAndCollect(egraph, parallelize)
+        val rightMatches = other.searchAndCollect(egraph, parallelize)
+        val cont = continuation
+        for {
+          m1 <- leftMatches
+          m2 <- rightMatches
+        } {
+          if (!cont((m1, m2), egraph)) return
+        }
+      }
+
+      override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, (MatchT, MatchT2), EGraphT]): ProductSearcher = {
+        ProductSearcher(continuation)
       }
     }
+
+    ProductSearcher(SearcherContinuation.identityBuilder)
   }
 
   /**
-   * Adapt this searcher so it accepts an [[foresight.eqsat.metadata.EGraphWithMetadata]] without changing the search logic.
+   * Transform each match produced by this searcher using the given function.
    *
-   * The adapter simply unwraps `.egraph` and delegates to this searcher.
+   * This is useful for adapting searchers to work with different match types
+   * or for post-processing matches.
    *
-   * @return A searcher over [[foresight.eqsat.metadata.EGraphWithMetadata]] that forwards to this searcher.
+   * @param f        Function to transform each match.
+   * @tparam MatchT2 The new match type after transformation.
+   * @return A new searcher that produces transformed matches.
    */
-  final def requireMetadata: Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] = {
-    new Searcher[NodeT, OutputT, EGraphWithMetadata[NodeT, EGraphT]] {
-      override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
-        Searcher.this.search(egraph.egraph, parallelize)
+  final def transform[MatchT2](f: (MatchT, EGraphT) => MatchT2): Searcher[NodeT, MatchT2, EGraphT] = {
+    final case class TransformSearcher(buildContinuation: SearcherContinuation.ContinuationBuilder[NodeT, MatchT2, EGraphT])
+      extends Searcher[NodeT, MatchT2, EGraphT] with SearcherLike[NodeT, MatchT2, EGraphT, TransformSearcher] {
+
+      override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
+        val cont = continuation
+        Searcher.this.andThen(new SearcherContinuation.ContinuationBuilder[NodeT, MatchT, EGraphT] {
+          def apply(downstream: SearcherContinuation.Continuation[NodeT, MatchT, EGraphT]): SearcherContinuation.Continuation[NodeT, MatchT, EGraphT] = {
+            (m: MatchT, egraph: EGraphT) => {
+              if (downstream(m, egraph)) {
+                cont(f(m, egraph), egraph)
+              } else {
+                false
+              }
+            }
+          }
+        }).search(egraph, parallelize)
+      }
+
+      override def withContinuationBuilder(continuation: SearcherContinuation.ContinuationBuilder[NodeT, MatchT2, EGraphT]): TransformSearcher = {
+        TransformSearcher(continuation)
       }
     }
+
+    TransformSearcher(SearcherContinuation.identityBuilder)
   }
 
   /**
-   * Adapt this searcher so it accepts an [[foresight.eqsat.saturation.EGraphWithRoot]] without changing the search logic.
+   * Chain this searcher with an [[Applier]], producing a searcher that runs this searcher
+   * and then immediately applies each match using the given applier.
    *
-   * The adapter simply unwraps `.egraph` and delegates to this searcher.
+   * This is useful for building pipelines of searchers and appliers without needing to
+   * construct intermediate sequences of matches.
    *
-   * @return A searcher over [[foresight.eqsat.saturation.EGraphWithRoot]] that forwards to this searcher.
+   * @param applier The applier to run on each match found by this searcher.
+   * @return A new searcher that applies the given applier to each match found.
    */
-  final def requireRoot: Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] = {
-    new Searcher[NodeT, OutputT, EGraphWithRoot[NodeT, EGraphT]] {
-      override def search(egraph: EGraphWithRoot[NodeT, EGraphT], parallelize: ParallelMap): OutputT = {
-        Searcher.this.search(egraph.egraph, parallelize)
-      }
+  final def andApply(applier: Applier[NodeT, MatchT, EGraphT]): Searcher[NodeT, Command[NodeT], EGraphT] = {
+    transform(applier.apply).filter {
+      case (CommandQueue(Seq()), _) => false
+      case _ => true
     }
   }
 }
@@ -156,7 +163,7 @@ trait Searcher[NodeT, +OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGrap
 object Searcher {
 
   /**
-   * A no-op searcher that returns an empty sequence of matches but is considered reversible.
+   * A no-op searcher that returns an empty sequence of matches and is considered reversible.
    *
    * Reversal yields [[Applier.ignore]], allowing rules to treat the empty searcher
    * as a structural placeholder in reversible pipelines.
@@ -166,216 +173,38 @@ object Searcher {
    * @tparam EGraphT E-graph type.
    * @return A [[ReversibleSearcher]] that always returns `Seq.empty`.
    */
-  def empty[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, Seq[MatchT], EGraphT] = {
+  def empty[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: Searcher[NodeT, MatchT, EGraphT] = {
     new ReversibleSearcher[NodeT, MatchT, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = Seq.empty
-
-      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore)
+      override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {}
+      override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore[NodeT, MatchT, EGraphT])
+      override def buildContinuation: ContinuationBuilder = SearcherContinuation.identityBuilder
+      override def withContinuationBuilder(continuation: ContinuationBuilder): Searcher[NodeT, MatchT, EGraphT] = this
     }
   }
 
   /**
-   * Build a `Searcher` from a single [[SearcherPhase]].
+   * Enhances a searcher that produces pairs of `PatternMatch` results
+   * with a `merge` method to combine each pair into a single `PatternMatch`.
    *
-   * This is often the entry point for pattern-based searches where the phase's input
-   * is `Unit` and the output is a sequence of matches.
-   *
-   * @param phase First/only phase of the searcher.
-   * @tparam NodeT   Node payload type.
-   * @tparam OutputT Output produced by `phase`.
-   * @tparam EGraphT E-graph type.
-   * @tparam T1      Intermediate type generated inside `phase` (if any).
-   * @return A searcher whose `search` delegates to `phase.search(egraph, (), parallelize)`.
-   * @example
-   * {{{
-   * val base: Searcher[MyNode, Seq[PatternMatch[MyNode]], MyEGraph] =
-   *   Searcher(patternPhase)
-   * }}}
+   * @param self         The searcher that works on the e-graph.
+   * @tparam NodeT       Node payload type.
+   * @tparam EGraphT     Base e-graph type.
    */
-  def apply[NodeT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], T1](phase: SearcherPhase[NodeT, Unit, T1, OutputT, EGraphT]): Searcher[NodeT, OutputT, EGraphT] = {
-    new Searcher[NodeT, OutputT, EGraphT] {
-      override def search(egraph: EGraphT, parallelize: ParallelMap): OutputT =
-        phase.search(egraph, (), parallelize)
-    }
-  }
-
-  /**
-   * Map over the elements produced by an inner sequence-producing searcher.
-   *
-   * The mapping function receives both the element and the same e-graph snapshot the inner
-   * searcher ran on (useful for structural queries or lookups).
-   *
-   * @param searcher Inner searcher producing `Seq[InputT]`.
-   * @param f        Mapping `(InputT, EGraphT) => OutputT`.
-   * @tparam NodeT   Node payload type.
-   * @tparam InputT  Inner element type.
-   * @tparam OutputT Mapped element type.
-   * @tparam EGraphT E-graph type.
-   */
-  final case class Map[NodeT, InputT, OutputT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](searcher: Searcher[NodeT, Seq[InputT], EGraphT],
-                                                                                                         f: (InputT, EGraphT) => OutputT) extends Searcher[NodeT, Seq[OutputT], EGraphT] {
-
-    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[OutputT] = {
-      val matches = searcher.search(egraph, parallelize)
-      parallelize(matches, (x: InputT) => f(x, egraph)).toSeq
-    }
-  }
-
-  /**
-   * Filter the sequence output of another searcher using a predicate that can inspect the e-graph.
-   *
-   * If the inner searcher is [[ReversibleSearcher]], reversal is preserved by wrapping the
-   * corresponding [[Applier]] with [[Applier.Filter]].
-   *
-   * @param searcher  Inner searcher producing `Seq[MatchT]`.
-   * @param predicate `(MatchT, EGraphT) => Boolean` deciding retention.
-   * @tparam NodeT   Node payload type.
-   * @tparam MatchT  Match element type.
-   * @tparam EGraphT E-graph type.
-   */
-  final case class Filter[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
-                                                                                                   predicate: (MatchT, EGraphT) => Boolean) extends ReversibleSearcher[NodeT, MatchT, EGraphT] {
-
-    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
-      val matches = searcher.search(egraph, parallelize)
-      parallelize(matches, (x: MatchT) => predicate(x, egraph))
-        .zip(matches)
-        .collect { case (true, m) => m }
-        .toSeq
-    }
-
-    override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = {
-      searcher match {
-        case r: ReversibleSearcher[NodeT, MatchT, EGraphT] => r.tryReverse.map(Applier.Filter(_, predicate))
-        case _ => None
-      }
-    }
-  }
-
-  /**
-   * Flatten a searcher that yields nested sequences, e.g., from a `flatMap`-like phase.
-   *
-   * @param searcher Inner searcher producing `Seq[Iterable[MatchT]]`.
-   * @tparam NodeT   Node payload type.
-   * @tparam MatchT  Match element type.
-   * @tparam EGraphT E-graph type.
-   */
-  final case class Flatten[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](searcher: Searcher[NodeT, Seq[Iterable[MatchT]], EGraphT]) extends Searcher[NodeT, Seq[MatchT], EGraphT] {
-    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] =
-      searcher.search(egraph, parallelize).flatten
-  }
-
-  // ------------ Extension syntax for sequence-producing searchers ------------
-
-  /**
-   * Enrichment for `Searcher[Seq[MatchT]]` providing `filter`/`map`/`flatMap` combinators.
-   */
-  implicit class SearcherOfSeqOps[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](private val searcher: Searcher[NodeT, Seq[MatchT], EGraphT]) extends AnyVal {
+  implicit class SearcherOfPatternMatchPairsOps[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](val self: Searcher[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]) extends AnyVal {
+    type MatchT = (PatternMatch[NodeT], PatternMatch[NodeT])
+    type Continuation = self.Continuation
+    type ContinuationBuilder = self.ContinuationBuilder
 
     /**
-     * Keep only elements satisfying `f`.
+     * Merges pairs of `PatternMatch` results into single `PatternMatch` results by calling
+     * `PatternMatch.merge` on each pair.
      *
-     * @param f Predicate receiving the element and the e-graph.
-     * @return A filtered searcher.
+     * The resulting searcher produces `PatternMatch` results instead of pairs.
+     *
+     * @return A new searcher that merges each pair of matches into a single match.
      */
-    def filter(f: (MatchT, EGraphT) => Boolean): Searcher[NodeT, Seq[MatchT], EGraphT] =
-      Filter(searcher, f)
-
-    /**
-     * Transform each element using `f`.
-     *
-     * @param f Mapping function receiving the element and the e-graph.
-     * @tparam OutputT Result element type.
-     * @return A mapped searcher.
-     */
-    def map[OutputT](f: (MatchT, EGraphT) => OutputT): Searcher[NodeT, Seq[OutputT], EGraphT] =
-      Map(searcher, f)
-
-    /**
-     * Transform each element to a collection and flatten the results.
-     *
-     * @param f Flat-mapping function receiving the element and the e-graph.
-     * @tparam OutputT Result element type.
-     * @return A flattened searcher.
-     */
-    def flatMap[OutputT](f: (MatchT, EGraphT) => Iterable[OutputT]): Searcher[NodeT, Seq[OutputT], EGraphT] =
-      map(f).flatten
-  }
-
-  /**
-   * Enrichment for `Searcher[Seq[Iterable[MatchT]]]` providing `flatten`.
-   */
-  implicit class SearcherOfSeqOfTraversableOps[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](private val searcher: Searcher[NodeT, Seq[Iterable[MatchT]], EGraphT]) extends AnyVal {
-
-    /**
-     * Creates a new searcher that flattens a sequence of matches.
-     * @return A flattened searcher.
-     */
-    def flatten: Searcher[NodeT, Seq[MatchT], EGraphT] = Flatten(searcher)
-  }
-
-  /**
-   * Enrichment for `Searcher[Seq[PatternMatch]]` with pattern-specific helpers.
-   */
-  implicit class SearcherOfPatternMatch[
-    NodeT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](private val searcher: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]) extends AnyVal {
-
-    /**
-     * Require that the expression bound to `expr` be independent of the given slots.
-     *
-     * Independence means the bound expression does not contain any of `slots`.
-     * Matches violating this condition are filtered out.
-     *
-     * @param expr  Pattern variable whose binding is checked.
-     * @param slots Slots the binding must not reference.
-     * @return A filtered searcher that enforces independence.
-     * @example Forbid captures of loop index slots
-     * {{{
-     * val s: Searcher[MyNode, Seq[PatternMatch[MyNode]], MyEGraph] = ...
-     * val safe = s.requireIndependent(loopVar, iSlot, jSlot)
-     * }}}
-     */
-    def requireIndependent(expr: Pattern.Var, slots: Slot*): Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
-      searcher.filter((m, _) => m.isIndependent(expr, slots.toSet))
-    }
-  }
-
-  /**
-   * Enrichment for a searcher that returns a pair of pattern-match lists,
-   * providing `merge` to combine them via cartesian product and `PatternMatch.merge`.
-   */
-  implicit class SearcherOfPatternMatchProductOps[
-    NodeT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](private val searcher: Searcher[NodeT, (Seq[PatternMatch[NodeT]], Seq[PatternMatch[NodeT]]), EGraphT]) extends AnyVal {
-
-    /**
-     * Merge the two match sets pairwise over their cartesian product using [[patterns.PatternMatch.merge]].
-     *
-     * Note: this may be expensive if both sides are large; consider early filtering.
-     *
-     * @return A searcher producing the merged matches.
-     */
-    def merge: Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] = {
-      new Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT] {
-        override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[PatternMatch[NodeT]] = {
-          val (matches1, matches2) = searcher.search(egraph, parallelize)
-          for {
-            m1 <- matches1
-            m2 <- matches2
-          } yield m1.merge(m2)
-        }
-      }
+    def merge: Searcher[NodeT, PatternMatch[NodeT], EGraphT] = {
+      self.transform { case ((pm1, pm2), _) => pm1.merge(pm2) }
     }
   }
 }

@@ -74,9 +74,9 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
     Rule(
       "x -> x + 0",
       MixedTree.Atom[ArrayIR, Pattern.Var](x)
-        .toSearcher
-        .requireMetadata
-        .bindTypes(Map(x -> xType)).requireDoubleType(xType),
+        .toSearcher[MetadataEGraph]
+        .bindTypes(Map(x -> xType))
+        .requireDoubleType(xType),
       Add(MixedTree.Atom(x), ConstDouble(0.0).toTree)
         .toApplier[MetadataEGraph]
         .typeChecked)
@@ -89,8 +89,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
     Rule(
       "x -> 1 * x",
       MixedTree.Atom[ArrayIR, Pattern.Var](x)
-        .toSearcher
-        .requireMetadata
+        .toSearcher[MetadataEGraph]
         .bindTypes(Map(x -> xType))
         .requireDoubleType(xType),
       Mul(ConstDouble(1.0).toTree, MixedTree.Atom(x))
@@ -105,8 +104,7 @@ final case class ArithRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with E
     Rule(
       "x -> x * 1",
       MixedTree.Atom[ArrayIR, Pattern.Var](x)
-        .toSearcher
-        .requireMetadata
+        .toSearcher[MetadataEGraph]
         .bindTypes(Map(x -> xType))
         .requireInt32Type(xType),
       Mul(MixedTree.Atom(x), ConstInt32(1).toTree)

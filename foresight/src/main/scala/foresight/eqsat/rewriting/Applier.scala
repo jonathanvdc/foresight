@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
@@ -25,7 +25,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
  * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
  */
-trait Applier[NodeT, -MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Applier[NodeT, -MatchT, EGraphT <: ReadOnlyEGraph[NodeT]] {
 
   /**
    * Build a command that applies the effects implied by `m` within `egraph`.
@@ -56,7 +56,7 @@ object Applier {
     new ReversibleApplier[NodeT, MatchT, EGraphT] {
       override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = CommandQueue.empty
 
-      override def tryReverse: Option[Searcher[NodeT, Seq[MatchT], EGraphT]] = Some(Searcher.empty)
+      override def tryReverse: Option[Searcher[NodeT, MatchT, EGraphT]] = Some(Searcher.empty)
     }
 
   /**
@@ -92,7 +92,7 @@ object Applier {
    */
   final case class Filter[
     NodeT, MatchT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
+    EGraphT <: ReadOnlyEGraph[NodeT]
   ](applier: Applier[NodeT, MatchT, EGraphT],
     filter: (MatchT, EGraphT) => Boolean)
     extends ReversibleApplier[NodeT, MatchT, EGraphT] {
@@ -100,8 +100,8 @@ object Applier {
     override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] =
       if (filter(m, egraph)) applier.apply(m, egraph) else CommandQueue.empty
 
-    override def tryReverse: Option[Searcher[NodeT, Seq[MatchT], EGraphT]] = applier match {
-      case r: ReversibleApplier[NodeT, MatchT, EGraphT] => r.tryReverse.map(Searcher.Filter(_, filter))
+    override def tryReverse: Option[Searcher[NodeT, MatchT, EGraphT]] = applier match {
+      case r: ReversibleApplier[NodeT, MatchT, EGraphT] => r.tryReverse.map(_.filter(filter))
       case _ => None
     }
   }

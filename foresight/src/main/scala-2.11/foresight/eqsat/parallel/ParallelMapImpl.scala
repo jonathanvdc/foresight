@@ -1,5 +1,8 @@
 package foresight.eqsat.parallel
 
+import java.util.concurrent.ConcurrentLinkedQueue
+import scala.collection.JavaConversions.collectionAsScalaIterable
+
 /**
  * An implementation of the [[ParallelMap]] trait that provides parallel processing capabilities. This implementation
  * is designed for Scala 2.11.
@@ -34,5 +37,18 @@ private[parallel] object ParallelMapImpl {
         parInputs.map(f).seq
       }
     }
+  }
+
+  /**
+   * Collects elements produced by a callback function into a sequence.
+   * This method is thread-safe and can be used in parallel contexts.
+   * @param body The callback function that produces elements.
+   * @tparam A The type of elements produced by the callback function.
+   * @return A sequence of collected elements.
+   */
+  def collectFrom[A](body: (A => Unit) => Unit): Seq[A] = {
+    val queue = new ConcurrentLinkedQueue[A]()
+    body(a => queue.add(a))
+    queue.toSeq
   }
 }

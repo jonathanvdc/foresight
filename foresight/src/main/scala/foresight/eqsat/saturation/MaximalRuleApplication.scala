@@ -1,6 +1,5 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.commands.CommandQueue
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.{EGraph, EGraphLike}
@@ -51,7 +50,6 @@ final case class MaximalRuleApplication[NodeT,
   override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
     val newEGraph = searchAndApply.apply(
       rules,
-      searchAndApply.search(rules, egraph, parallelize),
       egraph,
       parallelize)
 

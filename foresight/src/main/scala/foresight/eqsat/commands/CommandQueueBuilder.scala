@@ -98,7 +98,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param tree Tree to insert.
    * @return The [[EClassSymbol]] for the tree’s root e-class.
    */
-  def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: EGraph[NodeT]): EClassSymbol = {
+  def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         val argSymbols = args.map(addSimplified(_, egraph))
@@ -112,7 +112,7 @@ final class CommandQueueBuilder[NodeT] {
                                        definitions: Seq[Slot],
                                        uses: Seq[Slot],
                                        args: Seq[EClassSymbol],
-                                       egraph: EGraph[NodeT]): EClassSymbol = {
+                                       egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
 
     // Check if all children are already in the graph
     val argCalls = CommandQueueBuilder.resolveAllOrNull(args)
@@ -136,7 +136,7 @@ final class CommandQueueBuilder[NodeT] {
     result
   }
 
-  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: EGraph[NodeT]): EClassSymbol = {
+  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         val argSymbols = args.map(addSimplifiedReal(_, egraph))
@@ -170,7 +170,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param b Second class symbol.
    * @param egraph E-graph used to check existing equivalences.
    */
-  def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: EGraph[NodeT]): Unit = {
+  def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: ReadOnlyEGraph[NodeT]): Unit = {
     (a, b) match {
       case (EClassSymbol.Real(callA), EClassSymbol.Real(callB)) =>
         if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {

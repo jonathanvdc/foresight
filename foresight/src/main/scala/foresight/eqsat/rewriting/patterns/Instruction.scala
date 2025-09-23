@@ -8,7 +8,7 @@ import foresight.eqsat._
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph.
  */
-trait Instruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]] {
+trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
   /**
    * Executes the instruction on the given machine state.
    * @param graph The e-graph to execute the instruction on.
@@ -32,11 +32,11 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class BindNode[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register: Int,
-                                                                                             nodeType: NodeT,
-                                                                                             definitions: Seq[Slot],
-                                                                                             uses: Seq[Slot],
-                                                                                             argCount: Int)
+  final case class BindNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
+                                                                     nodeType: NodeT,
+                                                                     definitions: Seq[Slot],
+                                                                     uses: Seq[Slot],
+                                                                     argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
     private def matchesSlot(machine: MachineState[NodeT], pair: (Slot, Slot)): Boolean = {
@@ -79,8 +79,8 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class BindVar[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register: Int,
-                                                                                            variable: Pattern.Var)
+  final case class BindVar[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
+                                                                    variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
@@ -95,7 +95,7 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class Compare[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](register1: Int, register2: Int)
+  final case class Compare[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       if (graph.areSame(machine.registers(register1), machine.registers(register2))) {

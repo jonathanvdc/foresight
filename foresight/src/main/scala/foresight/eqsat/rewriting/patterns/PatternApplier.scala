@@ -1,8 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.commands.{Command, CommandQueueBuilder, EClassSymbol}
-import foresight.eqsat.rewriting.{Applier, ReversibleApplier, Searcher}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
+import foresight.eqsat.{MixedTree, ReadOnlyEGraph, Slot}
 
 /**
  * An applier that applies a pattern match to an e-graph.
@@ -11,7 +11,7 @@ import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
-final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
+final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
@@ -21,7 +21,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] wit
     builder.result()
   }
 
-  override def tryReverse: Option[Searcher[NodeT, Seq[PatternMatch[NodeT]], EGraphT]] = {
+  override def tryReverse: Option[Searcher[NodeT, PatternMatch[NodeT], EGraphT]] = {
     Some(pattern.toSearcher)
   }
 

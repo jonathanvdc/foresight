@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 
 /**
  * A [[Searcher]] whose results can be **reversed** into an [[Applier]].
@@ -36,8 +36,8 @@ import foresight.eqsat.{EGraph, EGraphLike}
 trait ReversibleSearcher[
   NodeT,
   MatchT,
-  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-] extends Searcher[NodeT, Seq[MatchT], EGraphT] {
+  EGraphT <: ReadOnlyEGraph[NodeT]
+] extends Searcher[NodeT, MatchT, EGraphT] {
 
   /**
    * Attempt to reverse this searcher into an [[Applier]] that accepts the same
@@ -46,65 +46,4 @@ trait ReversibleSearcher[
    * @return `Some(applier)` if reversal is possible, `None` otherwise.
    */
   def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]]
-}
-
-/**
- * Factory and utilities for [[ReversibleSearcher]]
- */
-object ReversibleSearcher {
-  /**
-   * A simple reversible searcher built from a single [[ReversibleSearcherPhase]].
-   *
-   * This is a convenience for the common case where the searcher is built from
-   * exactly one reversible phase whose input type is `Unit` (i.e., it does not
-   * depend on prior phase results).
-   *
-   * @param phase The reversible searcher phase to wrap.
-   * @tparam NodeT   Node payload type.
-   * @tparam MatchT  Match type produced by the phase.
-   * @tparam EGraphT Concrete e-graph type (must mix in [[EGraphLike]] and [[EGraph]]).
-   */
-  final case class SinglePhaseReversibleSearcher[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](phase: ReversibleSearcherPhase[NodeT, Unit, _, MatchT, EGraphT])
-    extends ReversibleSearcher[NodeT, MatchT, EGraphT] {
-
-    override def search(egraph: EGraphT, parallelize: ParallelMap): Seq[MatchT] = {
-      phase.search(egraph, (), parallelize)
-    }
-
-    override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = {
-      phase.tryReverse(Applier.ignore)
-    }
-  }
-
-  /**
-   * Create a single-phase reversible searcher from a [[ReversibleSearcherPhase]].
-   *
-   * This is a convenience for the common case where the searcher is built from
-   * exactly one reversible phase whose input type is `Unit` (i.e., it does not
-   * depend on prior phase results).
-   *
-   * @example
-   * {{{
-   * val phase: ReversibleSearcherPhase[MyNode, Unit, _, MyMatch, MyEGraph] = ...
-   * val searcher = ReversibleSearcher(phase)
-   *
-   * val matches = searcher.search(egraph)
-   * val reverse  = searcher.tryReverse
-   * }}}
-   * @param phase The reversible searcher phase to wrap.
-   * @tparam NodeT   Node payload type.
-   * @tparam MatchT  Match type produced by the phase.
-   * @tparam EGraphT Concrete e-graph type (must mix in [[EGraphLike]] and [[EGraph]]).
-   */
-  def apply[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]
-  ](phase: ReversibleSearcherPhase[NodeT, Unit, _, MatchT, EGraphT]): SinglePhaseReversibleSearcher[NodeT, MatchT, EGraphT] = {
-    SinglePhaseReversibleSearcher(phase)
-  }
 }

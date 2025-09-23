@@ -72,7 +72,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * }}}
  */
 final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](name: String,
-                                                                                               searcher: Searcher[NodeT, Seq[MatchT], EGraphT],
+                                                                                               searcher: Searcher[NodeT, MatchT, EGraphT],
                                                                                                applier: Applier[NodeT, MatchT, EGraphT]) {
   /**
    * Search the e-graph for matches and apply them immediately, if any.
@@ -112,7 +112,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return Sequence of matches (possibly empty).
    */
   def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
-    searcher.search(egraph, parallelize.child(s"match $name"))
+    searcher.searchAndCollect(egraph, parallelize.child(s"match $name"))
   }
 
   /**
@@ -128,8 +128,10 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * @return A single, optimized [[Command]] that applies all current matches of this rule.
    */
   def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
-    val matches = search(egraph, parallelize)
-    delayed(matches, egraph, parallelize)
+    val pipeline = searcher.andApply(applier)
+    aggregateCommands(
+      pipeline.searchAndCollect(egraph, parallelize.child(s"match+apply $name")),
+      egraph)
   }
 
   /**
@@ -146,10 +148,14 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * if constructing the per-match commands fails.
    */
   def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
+    aggregateCommands(
+      parallelize.child(s"apply $name")[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq,
+      egraph)
+  }
+
+  private def aggregateCommands(buildCommands: => Seq[Command[NodeT]], egraph: EGraphT): Command[NodeT] = {
     try {
-      val commands = parallelize.child(s"apply $name")[MatchT, Command[NodeT]](
-        matches, applier.apply(_, egraph)).toSeq
-      CommandQueue(commands)
+      CommandQueue(buildCommands)
     } catch {
       case e: OperationCanceledException => throw e
       case e: Exception =>

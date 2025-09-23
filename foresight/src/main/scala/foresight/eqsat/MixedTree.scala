@@ -166,17 +166,19 @@ object MixedTree {
 
   /** Extension methods for `MixedTree`s whose leaves are patterns. */
   implicit class MixedTreeOfPatternOps[NodeT](val tree: MixedTree[NodeT, Pattern.Var]) extends AnyVal {
-    def compiled[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: CompiledPattern[NodeT, EGraphT] =
-      CompiledPattern(tree)
-    def toSearcher[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: ReversibleSearcher[NodeT, PatternMatch[NodeT], EGraphT] =
-      ReversibleSearcher(MachineSearcherPhase(compiled))
-    def toApplier[EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]: PatternApplier[NodeT, EGraphT] =
+    def compiled[EGraphT <: ReadOnlyEGraph[NodeT]]: CompiledPattern[NodeT, EGraphT] =
+      CompiledPattern[NodeT, EGraphT](tree)
+
+    def toSearcher[EGraphT <: ReadOnlyEGraph[NodeT]]: MachineEClassSearcher[NodeT, EGraphT] =
+      MachineEClassSearcher[NodeT, EGraphT](compiled[EGraphT])
+
+    def toApplier[EGraphT <: ReadOnlyEGraph[NodeT]]: PatternApplier[NodeT, EGraphT] =
       PatternApplier(tree)
   }
 
 
   /**
-   * Compares Nodes by (nodeType, defs, uses, children), toms by atom payload. Atoms come before Nodes.
+   * Compares nodes by (nodeType, defs, uses, children), atoms by atom payload. Atoms come before Nodes.
    * This ordering is useful for sorting mixed trees in a way that respects both
    * the structure of nodes and the payloads of atoms.
    * @param oNode The ordering for node types.

@@ -39,23 +39,20 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
     Rule(
       "e -> (build (λi. e) N)[j]",
       MixedTree.Atom[ArrayIR, Pattern.Var](e)
-        .toSearcher[BaseEGraph]
+        .toSearcher[MetadataEGraph]
         .requireValues(e)
-        .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
           MixedTree.Atom[ArrayIR, Pattern.Var](j)
-            .toSearcher[BaseEGraph]
+            .toSearcher[MetadataEGraph]
             .requireValues(j)
-            .requireMetadata
             .requireTypes(Map(j -> Int32Type.toTree)))
         .merge
         .product(
           ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
             .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
-            .toSearcher
-            .requireMetadata)
+            .toSearcher[MetadataEGraph])
         .merge,
       IndexAt(Build(MixedTree.Atom(N), Lambda(i, Int32Type.toTree, MixedTree.Atom(e))), MixedTree.Atom(j))
         .toApplier[MetadataEGraph]
@@ -72,16 +69,14 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
     Rule(
       "e -> (λx. e) y",
       MixedTree.Atom[ArrayIR, Pattern.Var](e)
-        .toSearcher[BaseEGraph]
+        .toSearcher[MetadataEGraph]
         .requireValues(e)
-        .requireMetadata
         .bindTypes(Map(e -> eType))
         .requireNonFunctionType(eType)
         .product(
           MixedTree.Atom[ArrayIR, Pattern.Var](y)
-            .toSearcher[BaseEGraph]
+            .toSearcher[MetadataEGraph]
             .requireValues(y)
-            .requireMetadata
             .bindTypes(Map(y -> yType))
             .requireNonFunctionType(yType))
         .merge,
@@ -99,15 +94,13 @@ final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EG
     Rule(
       "f i -> (build f N)[i]",
       Apply(MixedTree.Atom(f), MixedTree.Atom(i))
-        .toSearcher[BaseEGraph]
-        .requireMetadata
+        .toSearcher[MetadataEGraph]
         .bindTypes(Map(i -> iType))
         .requireInt32Type(iType)
         .product(
           ArrayType(MixedTree.Atom(Pattern.Var.fresh()), MixedTree.Atom(N))
             .asInstanceOf[MixedTree[ArrayIR, Pattern.Var]]
-            .toSearcher
-            .requireMetadata)
+            .toSearcher[MetadataEGraph])
         .merge,
       IndexAt(Build(MixedTree.Atom(N), MixedTree.Atom(f)), MixedTree.Atom(i))
         .toApplier[MetadataEGraph]

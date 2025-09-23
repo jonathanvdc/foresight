@@ -1,12 +1,31 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.ReadOnlyEGraph
 
 /**
  * A pattern-matching virtual machine. The machine executes a sequence of instructions on a graph and maintains a
  * machine state that is updated after each instruction.
  */
 object Machine {
+  /**
+   * Runs a pattern-matching virtual machine on a graph with a given initial machine state and a single instruction.
+   * The continuation is called for each successful run of the machine. Unsuccessful runs are not listed.
+   *
+   * @param graph        The graph to match against.
+   * @param machine      The initial machine state.
+   * @param instructions  The instructions to apply to the machine.
+   * @param continuation A continuation that is called for each successful run of the machine. If the continuation
+   *                     returns false, the search is stopped.
+   * @tparam NodeT  The type of the nodes in the e-graph.
+   * @tparam GraphT The type of the e-graph.
+   */
+  def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                  machine: MachineState[NodeT],
+                                                  instructions: List[Instruction[NodeT, GraphT]],
+                                                  continuation: MachineState[NodeT] => Boolean): Unit = {
+    tryRunCPSWithoutFailure(graph, machine, instructions, continuation)
+  }
+
   /**
    * Runs a pattern-matching virtual machine on a graph with a given initial machine state and list of instructions.
    * Returns all successful runs of the machine. Unsuccessful runs are not listed.
@@ -18,17 +37,15 @@ object Machine {
    * @tparam GraphT The type of the e-graph.
    * @return A list of final machine states that result from successfully applying all instructions to the machine.
    */
-  def run[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                         machine: MachineState[NodeT],
-                                                                         instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
-
-    //    tryRun(graph, machine, instructions).collect {
-    //      case MachineResult.Success(finalMachine) => finalMachine
-    //    }
-
+  def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                  machine: MachineState[NodeT],
+                                                  instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
     val results = Seq.newBuilder[MachineState[NodeT]]
     tryRunCPSWithoutFailure(graph, machine, instructions,
-      onSuccess = (finalMachine: MachineState[NodeT]) => results += finalMachine
+      onSuccess = (finalMachine: MachineState[NodeT]) => {
+        results += finalMachine
+        true // Continue searching for more results
+      }
     )
     results.result()
   }
@@ -45,9 +62,9 @@ object Machine {
    * @return A list of successful and unsuccessful runs of the machine obtained by applying all instructions to the
    *         machine.
    */
-  def tryRun[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                            machine: MachineState[NodeT],
-                                                                            instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
+  def tryRun[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                     machine: MachineState[NodeT],
+                                                     instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
     val results = Seq.newBuilder[MachineResult[NodeT, GraphT]]
     tryRunCPS(graph, machine, instructions,
       onSuccess = (finalMachine: MachineState[NodeT]) => results += MachineResult.Success(finalMachine),
@@ -57,11 +74,11 @@ object Machine {
     results.result()
   }
 
-  private def tryRunCPS[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                                       machine: MachineState[NodeT],
-                                                                                       instructions: List[Instruction[NodeT, GraphT]],
-                                                                                       onSuccess: MachineState[NodeT] => Unit,
-                                                                                       onFailure: (MachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
+  private def tryRunCPS[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                                machine: MachineState[NodeT],
+                                                                instructions: List[Instruction[NodeT, GraphT]],
+                                                                onSuccess: MachineState[NodeT] => Unit,
+                                                                onFailure: (MachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
     case Nil => onSuccess(machine)
     case firstInstruction :: remainingInstructions =>
       firstInstruction.execute(graph, machine) match {
@@ -74,20 +91,46 @@ object Machine {
       }
   }
 
-  private def tryRunCPSWithoutFailure[NodeT, GraphT <: EGraphLike[NodeT, GraphT] with EGraph[NodeT]](graph: GraphT,
-                                                                                                     machine: MachineState[NodeT],
-                                                                                                     instructions: List[Instruction[NodeT, GraphT]],
-                                                                                                     onSuccess: MachineState[NodeT] => Unit): Unit = instructions match {
+  /**
+   * A continuation-passing style implementation of the pattern-matching virtual machine that does not report failures.
+   * Instead, it simply ignores failures and continues searching for other successful runs of the machine.
+   *
+   * This is more efficient than the version that reports failures, as it avoids the overhead of constructing
+   * failure results.
+   *
+   * The continuation is called for each successful run of the machine. If the continuation returns false,
+   * the search is stopped.
+   *
+   * @param graph The graph to match against.
+   * @param machine The initial machine state.
+   * @param instructions The instructions to apply to the machine.
+   * @param onSuccess A continuation that is called for each successful run of the machine. If the continuation
+   *                  returns false, the search is stopped.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam GraphT The type of the e-graph.
+   * @return True if the search completed without the continuation requesting to stop, false otherwise.
+   */
+  private def tryRunCPSWithoutFailure[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
+                                                                              machine: MachineState[NodeT],
+                                                                              instructions: List[Instruction[NodeT, GraphT]],
+                                                                              onSuccess: MachineState[NodeT] => Boolean): Boolean = instructions match {
     case Nil => onSuccess(machine)
     case firstInstruction :: remainingInstructions =>
       firstInstruction.execute(graph, machine) match {
         case Left(newMachines) if newMachines.size == 1 =>
           tryRunCPSWithoutFailure(graph, newMachines.head, remainingInstructions, onSuccess)
+
         case Left(newMachines) =>
-          newMachines.foreach(newMachine => tryRunCPSWithoutFailure(graph, newMachine, remainingInstructions, onSuccess))
-        case Right(error) => {
+          for (newMachine <- newMachines) {
+            if (!tryRunCPSWithoutFailure(graph, newMachine, remainingInstructions, onSuccess)) {
+              return false
+            }
+          }
+          true
+
+        case Right(_) =>
           /* Do nothing on failure */
-        }
+          true
       }
   }
 }
