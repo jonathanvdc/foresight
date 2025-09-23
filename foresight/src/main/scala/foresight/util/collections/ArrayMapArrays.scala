@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.AbstractIterator
 
 private[collections] object ArrayMapArrays {
-  type ArrRef = Array[AnyRef]
+  type ArrRef = ArrayMap.ArrRef
 
   @inline def keyAt[K](keys: ArrRef, i: Int): K = keys(i).asInstanceOf[K]
   @inline def valueAt[V](values: ArrRef, i: Int): V = values(i).asInstanceOf[V]
@@ -29,15 +29,18 @@ private[collections] object ArrayMapArrays {
   }
 
   @inline def copyUpdateAt(keys: ArrRef, values: ArrRef, size: Int, idx: Int, newVal: AnyRef): (ArrRef, ArrRef, Int) = {
-    val vs = java.util.Arrays.copyOf(values, size)
+    val vs = new Array[AnyRef](size)
+    System.arraycopy(values, 0, vs, 0, size)
     vs(idx) = newVal
     (keys, vs, size)
   }
 
   @inline def copyAppend(keys: ArrRef, values: ArrRef, size: Int, k: AnyRef, v: AnyRef): (ArrRef, ArrRef, Int) = {
     val n  = size + 1
-    val ks = java.util.Arrays.copyOf(keys, n)
-    val vs = java.util.Arrays.copyOf(values, n)
+    val ks = new Array[AnyRef](n)
+    val vs = new Array[AnyRef](n)
+    System.arraycopy(keys, 0, ks, 0, size)
+    System.arraycopy(values, 0, vs, 0, size)
     ks(size) = k
     vs(size) = v
     (ks, vs, n)

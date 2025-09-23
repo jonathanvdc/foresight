@@ -18,8 +18,8 @@ import scala.collection.{MapFactory, MapFactoryDefaults, immutable, mutable}
  * @tparam V The type of values.
  */
 final class ArrayMap[K, +V] private[collections] (
-                                                   private val _keys: ArrayMapArrays.ArrRef,
-                                                   private val _values: ArrayMapArrays.ArrRef,
+                                                   private val _keys: Array[_],
+                                                   private val _values: Array[_],
                                                    override val size: Int
                                                  )
   extends AbstractMap[K, V]
@@ -30,8 +30,8 @@ final class ArrayMap[K, +V] private[collections] (
 
   import foresight.util.collections.ArrayMapArrays._
 
-  private[foresight] def unsafeKeysArray: ArrayMapArrays.ArrRef = _keys
-  private[foresight] def unsafeValuesArray: ArrayMapArrays.ArrRef = _values
+  private[foresight] def unsafeKeysArray: ArrRef = _keys
+  private[foresight] def unsafeValuesArray: ArrRef = _values
 
   override def mapFactory: MapFactory[ArrayMap] = ArrayMap
 
@@ -86,7 +86,7 @@ final class ArrayMap[K, +V] private[collections] (
     while (i < this.size) {
       val oldRef = _values(i)
       val mapped = f(oldRef.asInstanceOf[V]).asInstanceOf[AnyRef]
-      if (mapped ne oldRef) {
+      if (mapped != oldRef) {
         // First difference found: allocate once and finish mapping
         val newValues = new Array[AnyRef](this.size)
         // values for [0, i) are unchanged; copy existing refs
@@ -107,6 +107,8 @@ final class ArrayMap[K, +V] private[collections] (
 }
 
 object ArrayMap extends MapFactory[ArrayMap] {
+  type ArrRef = Array[_]
+
   private val _empty: ArrayMap[Any, Any] = new ArrayMap[Any, Any](new Array[AnyRef](0), new Array[AnyRef](0), 0)
 
   def empty[K, V]: ArrayMap[K, V] = _empty.asInstanceOf[ArrayMap[K, V]]
@@ -115,7 +117,6 @@ object ArrayMap extends MapFactory[ArrayMap] {
     case am: ArrayMap[K, V] => am
     case _ =>
       val builder = newBuilder[K, V]
-      builder.sizeHint(it.size)
       builder ++= it
       builder.result()
   }
@@ -133,7 +134,7 @@ object ArrayMap extends MapFactory[ArrayMap] {
   private[foresight] def unsafeWrapArrays[K, V](keys: Array[_], values: Array[_], size: Int): ArrayMap[K, V] = {
     require(keys.length >= size, "Keys array length must be at least size")
     require(values.length >= size, "Values array length must be at least size")
-    new ArrayMap[K, V](keys.asInstanceOf, values.asInstanceOf, size)
+    new ArrayMap[K, V](keys, values, size)
   }
 
   override def newBuilder[K, V]: ArrayMapBuilder[K, V] = new ArrayMapBuilder[K, V]()

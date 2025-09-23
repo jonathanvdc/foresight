@@ -112,6 +112,8 @@ final class ArrayMap[K, +V] private[collections] (
 }
 
 object ArrayMap extends ImmutableMapFactory[ArrayMap] {
+  type ArrRef = Array[AnyRef]
+
   def empty[K, V]: ArrayMap[K, V] = new ArrayMap[K, V](new Array[AnyRef](0), new Array[AnyRef](0), 0)
   def from[K, V](it: TraversableOnce[(K, V)]): ArrayMap[K, V] = it match {
     case am: ArrayMap[K, V] => am
