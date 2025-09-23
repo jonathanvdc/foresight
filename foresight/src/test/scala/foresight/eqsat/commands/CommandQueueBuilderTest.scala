@@ -46,7 +46,7 @@ class CommandQueueBuilderTest {
     val builder = new CommandQueueBuilder[Int]
     val egraph = EGraph.empty[Int]
 
-    val tree = MixedTree.Node[Int, EClassSymbol](0, Seq.empty, Seq.empty, Seq.empty)
+    val tree = MixedTree.Node[Int, EClassSymbol](0, Seq.empty[Slot], Seq.empty[Slot], Seq.empty[MixedTree[Int, EClassSymbol]])
     builder.add(tree)
 
     val queue = builder.result()
@@ -65,8 +65,8 @@ class CommandQueueBuilderTest {
     val builder = new CommandQueueBuilder[Int]
     val egraph = EGraph.empty[Int]
 
-    val child = MixedTree.Node[Int, EClassSymbol](1, Seq.empty, Seq.empty, Seq.empty)
-    val tree = MixedTree.Node[Int, EClassSymbol](0, Seq.empty, Seq.empty, Seq(child))
+    val child = MixedTree.unslotted(1, Seq.empty[MixedTree[Int, EClassSymbol]])
+    val tree = MixedTree.unslotted(0, Seq(child))
     builder.add(tree)
 
     val queue = builder.result()

@@ -36,7 +36,7 @@ object Var extends ArithIR {
    * @param slot The slot representing the variable.
    * @return An ENode representing the variable reference.
    */
-  def apply[A](slot: Slot): MixedTree[ArithIR, A] = MixedTree.Node[ArithIR, A](this, Seq.empty, Seq(slot), Seq.empty)
+  def apply[A](slot: Slot): MixedTree[ArithIR, A] = MixedTree.Node(this, Seq.empty, Seq(slot), Seq.empty)
 }
 
 /**
@@ -52,7 +52,7 @@ object Lam extends ArithIR {
    * @return A MixedTree representing the lambda expression.
    */
   def apply[A](param: Slot, body: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
-    MixedTree.Node[ArithIR, A](this, Seq(param), Seq.empty, Seq(body))
+    MixedTree.Node(this, Seq(param), Seq.empty, Seq(body))
 }
 
 /**
@@ -68,7 +68,7 @@ object App extends ArithIR {
    * @return A MixedTree representing the application of the lambda.
    */
   def apply[A](lambda: MixedTree[ArithIR, A], arg: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
-    MixedTree.Node[ArithIR, A](this, Seq.empty, Seq.empty, Seq(lambda, arg))
+    MixedTree.Node(this, Seq.empty, Seq.empty, Seq(lambda, arg))
 }
 
 /**
@@ -84,7 +84,7 @@ object Add extends ArithIR {
    * @return A MixedTree representing the addition operation.
    */
   def apply[A](lhs: MixedTree[ArithIR, A], rhs: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
-    MixedTree.Node[ArithIR, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
+    MixedTree.Node(this, Seq.empty, Seq.empty, Seq(lhs, rhs))
 }
 
 /**
@@ -100,7 +100,7 @@ object Mul extends ArithIR {
    * @return A MixedTree representing the multiplication operation.
    */
   def apply[A](lhs: MixedTree[ArithIR, A], rhs: MixedTree[ArithIR, A]): MixedTree[ArithIR, A] =
-    MixedTree.Node[ArithIR, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
+    MixedTree.Node(this, Seq.empty, Seq.empty, Seq(lhs, rhs))
 }
 
 /**

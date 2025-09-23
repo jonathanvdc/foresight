@@ -134,9 +134,9 @@ object ArrayMap extends ImmutableMapFactory[ArrayMap] {
    * @param size   The number of valid entries in the arrays.
    * @return An ArrayMap wrapping the given arrays.
    */
-  private[foresight] def unsafeWrapArrays[K, V](keys: Array[AnyRef], values: Array[AnyRef], size: Int): ArrayMap[K, V] = {
+  private[foresight] def unsafeWrapArrays[K, V](keys: Array[_], values: Array[_], size: Int): ArrayMap[K, V] = {
     require(keys.length >= size, "Keys array length must be at least size")
     require(values.length >= size, "Values array length must be at least size")
-    new ArrayMap[K, V](keys, values, size)
+    new ArrayMap[K, V](keys.asInstanceOf[ArrayMapArrays.ArrRef], values.asInstanceOf[ArrayMapArrays.ArrRef], size)
   }
 }

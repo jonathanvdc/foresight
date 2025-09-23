@@ -171,17 +171,11 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
   }
 
   private def boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]] = {
-    val m = ArrayMap.newBuilder[Pattern.Var, MixedTree[NodeT, EClassCall]]
-    var i = 0
-    while (i < varIdx) { val v = effects.boundVars(i); val mt = boundVarsArr(i); m.addOne(v, mt); i += 1 }
-    m.result()
+    ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, java.util.Arrays.copyOf(boundVarsArr, varIdx), varIdx)
   }
 
   private def boundSlots: ArrayMap[Slot, Slot] = {
-    val m = ArrayMap.newBuilder[Slot, Slot]
-    var j = 0
-    while (j < slotIdx) { val s = effects.boundSlots(j); val s2 = boundSlotsArr(j); m.addOne(s, s2); j += 1 }
-    m.result()
+    ArrayMap.unsafeWrapArrays(effects.boundSlots.unsafeArray, java.util.Arrays.copyOf(boundSlotsArr, slotIdx), slotIdx)
   }
 
   /** Convert to an immutable MachineState snapshot. */

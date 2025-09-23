@@ -3,13 +3,16 @@ package foresight.eqsat.rewriting.patterns
 import org.junit.Test
 import org.junit.Assert._
 import foresight.eqsat._
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
 
 class InstructionEffectsTest {
 
   // Small helper to count lengths by constructing fresh Pattern.Var / Slot values.
-  private def vars(n: Int): Seq[Pattern.Var] = List.fill(n)(Pattern.Var.fresh())
+  private def vars(n: Int): immutable.ArraySeq[Pattern.Var] = UnsafeSeqFromArray(Seq.fill(n)(Pattern.Var.fresh()))
 
-  private def slots(n: Int): Seq[Slot] = List.fill(n)(Slot.fresh())
+  private def slots(n: Int): immutable.ArraySeq[Slot] = UnsafeSeqFromArray(Seq.fill(n)(Slot.fresh()))
 
   @Test
   def noneIsIdentity(): Unit = {
@@ -89,8 +92,8 @@ class InstructionEffectsTest {
 
   @Test
   def bindNodeEffects(): Unit = {
-    val defs = Seq(Slot.fresh(), Slot.fresh())
-    val uses = Seq(Slot.fresh())
+    val defs = immutable.ArraySeq(Slot.fresh(), Slot.fresh())
+    val uses = immutable.ArraySeq(Slot.fresh())
     val instr = Instruction.BindNode(
       register   = 0,
       nodeType   = "dummy",

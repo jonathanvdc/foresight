@@ -2,7 +2,10 @@ package foresight.eqsat
 
 import foresight.eqsat.rewriting.ReversibleSearcher
 import foresight.eqsat.rewriting.patterns._
+import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering
+
+import scala.collection.compat._
 
 /**
  * A heterogeneous term tree that interleaves node-typed interiors with leaf atoms.
@@ -95,6 +98,26 @@ sealed trait MixedTree[+NodeT, +AtomT] {
 object MixedTree {
   import scala.language.implicitConversions
 
+  object Node {
+    /**
+     * Constructs a node with the given slot definitions and uses.
+     *
+     * @param nodeType    The operator or constructor at this node.
+     * @param definitions Slots bound/introduced by this node itself.
+     * @param uses        Slots consumed by this node but defined elsewhere.
+     * @param children    Ordered children of this node.
+     * @tparam NodeT The type used to represent operators/constructors.
+     * @tparam AtomT The type used to represent leaf payloads.
+     * @return A new `MixedTree` node with the specified properties.
+     */
+    def apply[NodeT, AtomT](nodeType: NodeT,
+                            definitions: Seq[Slot],
+                            uses: Seq[Slot],
+                            children: Seq[MixedTree[NodeT, AtomT]]): MixedTree[NodeT, AtomT] = {
+      Node(nodeType, UnsafeSeqFromArray(definitions), UnsafeSeqFromArray(uses), UnsafeSeqFromArray(children))
+    }
+  }
+
   /**
    * Constructs a node with no bound or used slots.
    * @param nodeType The operator or constructor at this node.
@@ -104,7 +127,7 @@ object MixedTree {
    * @return         A new `MixedTree` with empty `definitions` and `uses`.
    */
   def unslotted[NodeT, AtomT](nodeType: NodeT, children: Seq[MixedTree[NodeT, AtomT]]): MixedTree[NodeT, AtomT] = {
-    MixedTree.Node(nodeType, Seq.empty, Seq.empty, children)
+    MixedTree.Node(nodeType, immutable.ArraySeq.empty[Slot], immutable.ArraySeq.empty[Slot], UnsafeSeqFromArray(children))
   }
 
   /**
@@ -117,9 +140,9 @@ object MixedTree {
    * @tparam AtomT      The type used to represent leaf payloads.
    */
   final case class Node[NodeT, AtomT](nodeType: NodeT,
-                                      definitions: Seq[Slot],
-                                      uses: Seq[Slot],
-                                      args: Seq[MixedTree[NodeT, AtomT]])
+                                      definitions: immutable.ArraySeq[Slot],
+                                      uses: immutable.ArraySeq[Slot],
+                                      args: immutable.ArraySeq[MixedTree[NodeT, AtomT]])
     extends MixedTree[NodeT, AtomT] with foresight.eqsat.Node[NodeT, MixedTree[NodeT, AtomT]]
 
   /**

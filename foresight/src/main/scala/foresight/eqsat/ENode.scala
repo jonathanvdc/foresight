@@ -1,7 +1,10 @@
 package foresight.eqsat
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.util.{Debug, SeqFromArray}
+import foresight.util.Debug
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
 
 /**
  * A node in a slotted e-graph.
@@ -31,7 +34,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of definition slots.
    */
-  def definitions: SeqFromArray.Seq[Slot] = SeqFromArray(_definitions)
+  def definitions: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_definitions)
 
   /**
    * Slots referenced by this node that are visible to its parent and must be satisfied by the
@@ -39,14 +42,14 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of use slots.
    */
-  def uses: SeqFromArray.Seq[Slot] = SeqFromArray(_uses)
+  def uses: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_uses)
 
   /**
    * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
    *
    * @return Sequence of child e-class calls.
    */
-  def args: SeqFromArray.Seq[EClassCall] = SeqFromArray(_args)
+  def args: immutable.ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -125,7 +128,7 @@ final class ENode[+NodeT] private (
    *
    * @return An ordered sequence of slots used by this node.
    */
-  def slots: Seq[Slot] = SeqFromArray(slotArray)
+  def slots: Seq[Slot] = UnsafeSeqFromArray(slotArray)
 
   /**
    * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.

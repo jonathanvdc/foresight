@@ -3,13 +3,16 @@ package foresight.eqsat.rewriting.patterns
 import org.junit.Test
 import org.junit.Assert._
 import foresight.eqsat._
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
 
 class MutableMachineStateTest {
 
   // Helpers to make fresh values
-  private def vars(n: Int): Seq[Pattern.Var] = List.fill(n)(Pattern.Var.fresh())
+  private def vars(n: Int): immutable.ArraySeq[Pattern.Var] = UnsafeSeqFromArray(Seq.fill(n)(Pattern.Var.fresh()))
 
-  private def slots(n: Int): Seq[Slot] = List.fill(n)(Slot.fresh())
+  private def slots(n: Int): immutable.ArraySeq[Slot] = UnsafeSeqFromArray(Seq.fill(n)(Slot.fresh()))
 
   @Test
   def allocateInitializesRootAndCounts(): Unit = {
@@ -19,8 +22,8 @@ class MutableMachineStateTest {
     // Effects: 0 created registers beyond root, 1 var slot, 1 slot, 0 nodes
     val effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = Seq(v),
-      boundSlots = Seq(s),
+      boundVars = immutable.ArraySeq(v),
+      boundSlots = immutable.ArraySeq(s),
       boundNodes = 0
     )
 
@@ -43,13 +46,15 @@ class MutableMachineStateTest {
 
   @Test
   def bindVarAppendsAndFreezeUsesEffectsVarsAsKeys(): Unit = {
-    val v1 +: v2 +: Nil = vars(2)
+    val vs = vars(2)
+    val v1 = vs(0)
+    val v2 = vs(1)
 
     // Effects declares the variable binding order (keys); values are supplied later via bindVar
     val effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = Seq(v1, v2),
-      boundSlots = Seq.empty,
+      boundVars = immutable.ArraySeq(v1, v2),
+      boundSlots = immutable.ArraySeq.empty,
       boundNodes = 0
     )
 
@@ -90,7 +95,7 @@ class MutableMachineStateTest {
     val argCount = 3
     val effects = Instruction.Effects(
       createdRegisters = argCount, // preallocate for args
-      boundVars = Seq.empty, // no vars in this test
+      boundVars = immutable.ArraySeq.empty, // no vars in this test
       boundSlots = patDefs ++ patUses, // order must match bindNode recording: defs then uses
       boundNodes = 1
     )
@@ -137,7 +142,7 @@ class MutableMachineStateTest {
 
   @Test
   def mixedProgramMultipleBindsAndFreezeAggregatesAll(): Unit = {
-    val (v1 +: v2 +: Nil) = vars(2)
+    val Seq(v1, v2) = vars(2)
 
     val patDefs1@Seq(pd1a, pd1b) = slots(2)
     val patUses1@Seq(pu1a) = slots(1)
@@ -155,7 +160,7 @@ class MutableMachineStateTest {
     // Effects describe full program footprint (registers = args sum; vars and slots in order)
     val effects = Instruction.Effects(
       createdRegisters = args1Count + args2Count,
-      boundVars = Seq(v1, v2),
+      boundVars = immutable.ArraySeq(v1, v2),
       boundSlots = (patDefs1 ++ patUses1) ++ (patDefs2 ++ patUses2),
       boundNodes = 2
     )
@@ -221,8 +226,8 @@ class MutableMachineStateTest {
   def poolBorrowInitializesRootAndCounts(): Unit = {
     val effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = Seq.empty,
-      boundSlots = Seq.empty,
+      boundVars = immutable.ArraySeq.empty,
+      boundSlots = immutable.ArraySeq.empty,
       boundNodes = 0
     )
 
@@ -249,11 +254,11 @@ class MutableMachineStateTest {
   @Test
   def poolReusesInstanceAndReinitResetsCounts(): Unit = {
     // Make effects allocate space for 2 vars so we can mutate counters
-    val v1 +: v2 +: Nil = List.fill(2)(Pattern.Var.fresh())
+    val Seq(v1, v2) = List.fill(2)(Pattern.Var.fresh())
     val effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = Seq(v1, v2),
-      boundSlots = Seq.empty,
+      boundVars = immutable.ArraySeq(v1, v2),
+      boundSlots = immutable.ArraySeq.empty,
       boundNodes = 0
     )
 
@@ -289,7 +294,7 @@ class MutableMachineStateTest {
 
   @Test
   def poolAvailableTracksReleases(): Unit = {
-    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val effects = Instruction.Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
     val pool = MutableMachineState.Pool[Any](effects)
 
     val a = pool.borrow(null.asInstanceOf[EClassCall])
@@ -314,8 +319,8 @@ class MutableMachineStateTest {
 
   @Test
   def poolRejectsMismatchedEffectsOnRelease(): Unit = {
-    val effects1 = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
-    val effects2 = Instruction.Effects(1, Seq.empty, Seq.empty, 0) // different profile
+    val effects1 = Instruction.Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
+    val effects2 = Instruction.Effects(1, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0) // different profile
 
     val p1 = MutableMachineState.Pool[Any](effects1)
     val p2 = MutableMachineState.Pool[Any](effects2)
@@ -336,7 +341,7 @@ class MutableMachineStateTest {
 
   @Test
   def poolUsesLifoOrderOnReuse(): Unit = {
-    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val effects = Instruction.Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
     val pool = MutableMachineState.Pool[Any](effects)
 
     val s1 = pool.borrow(null.asInstanceOf[EClassCall])
@@ -358,7 +363,7 @@ class MutableMachineStateTest {
 
   @Test
   def instanceReleaseDelegatesToPool(): Unit = {
-    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val effects = Instruction.Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
     val pool = MutableMachineState.Pool[Any](effects)
 
     val ms = pool.borrow(null.asInstanceOf[EClassCall])
@@ -370,12 +375,12 @@ class MutableMachineStateTest {
 
   @Test
   def forkProducesIndependentEqualCopy(): Unit = {
-    val v1 +: v2 +: Nil = List.fill(2)(Pattern.Var.fresh())
-    val pd +: Nil = List(Slot.fresh())
+    val Seq(v1, v2) = List.fill(2)(Pattern.Var.fresh())
+    val pd = Slot.fresh()
     val effects = Instruction.Effects(
       createdRegisters = 2, // enough capacity for two args appended by a node
-      boundVars = Seq(v1, v2),
-      boundSlots = Seq(pd),
+      boundVars = immutable.ArraySeq(v1, v2),
+      boundSlots = immutable.ArraySeq(pd),
       boundNodes = 1
     )
 
@@ -430,7 +435,7 @@ class MutableMachineStateTest {
 
   @Test
   def standaloneApplyCreatesPrivatePoolReleaseDoesNotThrow(): Unit = {
-    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val effects = Instruction.Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
     val root: EClassCall = null.asInstanceOf[EClassCall]
     val lone = MutableMachineState[Any](root, effects)
     // Safe to call, even though we don't have a handle to its private pool
