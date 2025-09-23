@@ -1,6 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat._
+import foresight.util.collections.UnsafeSeqFromArray
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
@@ -119,7 +120,7 @@ final class CommandQueueBuilder[NodeT] {
 
     // If the children are already present, we might not need to add a new node
     if (argCalls != null) {
-      val candidateNode = ENode(nodeType, definitions, uses, argCalls)
+      val candidateNode = ENode(nodeType, definitions, uses, UnsafeSeqFromArray(argCalls))
       egraph.find(candidateNode) match {
         case Some(existingCall) =>
           // Node already exists in the graph; reuse its class
@@ -183,12 +184,18 @@ final class CommandQueueBuilder[NodeT] {
 }
 
 private object CommandQueueBuilder {
-  def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+  def resolveAllOrNull(args: Seq[EClassSymbol]): Array[EClassCall] = {
     if (args.forall(_.isReal)) {
-      args.map {
-        case EClassSymbol.Real(call) => call
-        case _ => throw new IllegalStateException("Unreachable")
+      val arr = new Array[EClassCall](args.length)
+      var i = 0
+      while (i < args.length) {
+        args(i) match {
+          case EClassSymbol.Real(call) => arr(i) = call
+          case _ => throw new IllegalStateException("Unreachable")
+        }
+        i += 1
       }
+      arr
     } else {
       null
     }

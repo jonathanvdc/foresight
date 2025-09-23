@@ -5,6 +5,7 @@ import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat._
+import scala.reflect.ClassTag
 
 /**
  * A node in a slotted e-graph.
@@ -309,8 +310,29 @@ final class ENode[+NodeT] private (
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
+  private val emptySlotArray: Array[Slot] = Array.empty
+  private val emptyCallArray: Array[EClassCall] = Array.empty
+
+  private def arrayFromSlotSeq(s: Seq[Slot]): Array[Slot] = s match {
+    case as: immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
+      as.unsafeArray.asInstanceOf[Array[Slot]]
+    case _ if s.isEmpty =>
+      emptySlotArray
+    case _ =>
+      s.toArray[Slot]
+  }
+
+  private def arrayFromCallSeq(s: Seq[EClassCall]): Array[EClassCall] = s match {
+    case as: immutable.ArraySeq[EClassCall] if as.unsafeArray.isInstanceOf[Array[EClassCall]] =>
+      as.unsafeArray.asInstanceOf[Array[EClassCall]]
+    case _ if s.isEmpty =>
+      emptyCallArray
+    case _ =>
+      s.toArray[EClassCall]
+  }
+
   def apply[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]): ENode[NodeT] = {
-    new ENode(nodeType, definitions.toArray, uses.toArray, args.toArray)
+    new ENode(nodeType, arrayFromSlotSeq(definitions), arrayFromSlotSeq(uses), arrayFromCallSeq(args))
   }
 
   def unapply[NodeT](n: ENode[NodeT]): Option[(NodeT, Seq[Slot], Seq[Slot], Seq[EClassCall])] =
