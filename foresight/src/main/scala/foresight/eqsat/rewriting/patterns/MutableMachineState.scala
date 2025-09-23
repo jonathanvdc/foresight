@@ -17,6 +17,15 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
   private var slotIdx: Int = 0
   private var nodeIdx: Int = 0
 
+  /** Reinitialize indices and set a new root so this instance can be reused. */
+  private[patterns] def reinit(newRoot: EClassCall): Unit = {
+    regIdx = 0
+    varIdx = 0
+    slotIdx = 0
+    nodeIdx = 0
+    initRoot(newRoot)
+  }
+
   /** Initialize the first register (root). */
   private[patterns] def initRoot(root: EClassCall): Unit = {
     registersArr(0) = root
@@ -108,10 +117,9 @@ object MutableMachineState {
    * @param root The root e-class call.
    * @param effects The effects to infer capacities from.
    * @tparam NodeT The type of the nodes in the e-graph.
-   * @tparam EG The type of the e-graph.
    * @return A new MutableMachineState with preallocated arrays.
    */
-  def apply[NodeT, EG <: ReadOnlyEGraph[NodeT]](root: EClassCall, effects: Instruction.Effects): MutableMachineState[NodeT] = {
+  def apply[NodeT](root: EClassCall, effects: Instruction.Effects): MutableMachineState[NodeT] = {
     val varsLen  = effects.boundVars.length
     val slotsLen = effects.boundSlots.length
     val nodesLen = effects.boundNodes
@@ -126,5 +134,59 @@ object MutableMachineState {
 
     m.initRoot(root)
     m
+  }
+
+  /**
+   * A simple pool for reusing `MutableMachineState` instances that all share the same `effects`.
+   * The capacities are fixed by `effects`, and each borrowed instance is initialized with the
+   * provided root. Returned instances are kept for reuse.
+   */
+  final class Pool[NodeT](val effects: Instruction.Effects, initialCapacity: Int = 0) {
+    private val deque = new java.util.ArrayDeque[MutableMachineState[NodeT]](math.max(0, initialCapacity))
+
+    /** Number of currently available instances in the pool. */
+    def available: Int = deque.size()
+
+    /**
+     * Obtain a `MutableMachineState` initialized with `root`.
+     * If the pool is empty, a new instance is allocated.
+     * @param root The root e-class call to initialize the instance with.
+     * @return A `MutableMachineState` instance ready for use.
+     */
+    def borrow(root: EClassCall): MutableMachineState[NodeT] = {
+      if (deque.isEmpty) {
+        MutableMachineState[NodeT](root, effects)
+      } else {
+        val inst = deque.pop()
+        inst.reinit(root)
+        inst
+      }
+    }
+
+    /**
+     * Return an instance to the pool for reuse.
+     * The instance must have been obtained from this pool (same effects).
+     * @param state The instance to return to the pool.
+     */
+    def release(state: MutableMachineState[NodeT]): Unit = {
+      // Ensure the state's sizing matches this pool.
+      require(state.effects eq effects, "Releasing state into a Pool with different effects")
+      deque.push(state)
+    }
+  }
+
+  /**
+   * Convenience constructor for a `Pool` with fixed `effects`.
+   */
+  object Pool {
+    /**
+     * Create a pool for a fixed `effects` profile.
+     * @param effects The effects that determine the sizing of pooled instances.
+     * @param initialCapacity Optional initial capacity of the pool.
+     * @tparam NodeT The type of the nodes in the e-graph.
+     * @return A new pool for `MutableMachineState` instances with the given effects.
+     */
+    def apply[NodeT](effects: Instruction.Effects, initialCapacity: Int = 0): Pool[NodeT] =
+      new Pool[NodeT](effects, initialCapacity)
   }
 }
