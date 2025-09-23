@@ -6,7 +6,8 @@ import foresight.eqsat.{EClassCall, ENode, MixedTree, ReadOnlyEGraph, Slot}
  * A mutable machine state that preallocates fixed-size arrays
  * for registers, bound vars, bound slots, and bound nodes.
  */
-final class MutableMachineState[NodeT] private(private val registersArr: Array[EClassCall],
+final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
+                                               private val registersArr: Array[EClassCall],
                                                private val boundVarsArr: Array[MixedTree[NodeT, EClassCall]],
                                                private val boundSlotsArr: Array[Slot],
                                                private val boundNodesArr: Array[ENode[NodeT]]) {
@@ -75,7 +76,7 @@ final class MutableMachineState[NodeT] private(private val registersArr: Array[E
   }
 
   /** Convert to an immutable MachineState snapshot. */
-  def freeze(effects: Instruction.Effects): MachineState[NodeT] = {
+  def freeze(): MachineState[NodeT] = {
     val regs  = registersArr.slice(0, regIdx).toIndexedSeq
     val varsM = scala.collection.mutable.Map.empty[Pattern.Var, MixedTree[NodeT, EClassCall]]
     var i = 0
@@ -116,6 +117,7 @@ object MutableMachineState {
     val nodesLen = effects.boundNodes
 
     val m = new MutableMachineState[NodeT](
+      effects,
       new Array[EClassCall](1 + effects.createdRegisters),
       if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
       if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,

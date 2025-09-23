@@ -34,7 +34,7 @@ class MutableMachineStateTest {
     assertEquals(0, m.boundNodesCount)
 
     // Freezing without any binds should reflect just the root register
-    val snap = m.freeze(effects)
+    val snap = m.freeze()
     assertEquals(Seq(root), snap.registers)
     assertTrue(snap.boundVars.isEmpty)
     assertTrue(snap.boundSlots.isEmpty)
@@ -68,7 +68,7 @@ class MutableMachineStateTest {
     assertEquals(0, m.boundSlotsCount)
     assertEquals(0, m.boundNodesCount)
 
-    val snap = m.freeze(effects)
+    val snap = m.freeze()
     assertEquals(Set(v1, v2), snap.boundVars.keySet)
     // We can only assert mapping size / keys; values are opaque here
     assertEquals(2, snap.boundVars.size)
@@ -119,7 +119,7 @@ class MutableMachineStateTest {
     assertEquals(1, m.boundNodesCount)
     assertEquals(0, m.boundVarsCount)
 
-    val snap = m.freeze(effects)
+    val snap = m.freeze()
 
     // Registers: root + 3 args captured
     assertEquals(1 + argCount, snap.registers.size)
@@ -193,7 +193,7 @@ class MutableMachineStateTest {
     assertEquals((patDefs1.size + patUses1.size) + (patDefs2.size + patUses2.size), m.boundSlotsCount)
     assertEquals(2, m.boundNodesCount)
 
-    val snap = m.freeze(effects)
+    val snap = m.freeze()
 
     // Registers: root + 3 args
     assertEquals(1 + args1Count + args2Count, snap.registers.size)
