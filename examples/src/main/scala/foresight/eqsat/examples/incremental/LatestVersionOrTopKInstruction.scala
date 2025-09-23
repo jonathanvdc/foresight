@@ -27,4 +27,6 @@ final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[Nod
       Right(NotLatestVersionOrTopKError(this, node, eclass))
     }
   }
+
+  override def effects: Instruction.Effects = Instruction.Effects.none
 }

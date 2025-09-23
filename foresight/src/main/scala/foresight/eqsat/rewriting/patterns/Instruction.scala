@@ -9,6 +9,9 @@ import foresight.eqsat._
  * @tparam EGraphT The type of the e-graph.
  */
 trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+  /** A compact summary of what this instruction will create and bind. */
+  def effects: Instruction.Effects
+
   /**
    * Executes the instruction on the given machine state.
    * @param graph The e-graph to execute the instruction on.
@@ -22,6 +25,26 @@ trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
  * A companion object for the `Instruction` trait.
  */
 object Instruction {
+  /**
+   * Summarizes the static effects of an instruction on the matching VM.
+   * @param createdRegisters The number of virtual-machine registers created.
+   * @param boundVars The sequence of pattern variables bound.
+   * @param boundSlots The sequence of slots bound (ordered).
+   * @param boundNodes The number of e-nodes bound.
+   */
+  final case class Effects(
+    createdRegisters: Int,
+    boundVars: Seq[Pattern.Var],
+    boundSlots: Seq[Slot],
+    boundNodes: Int
+  )
+
+  /** A companion object for [[Effects]]. */
+  object Effects {
+    /** An effect summary for an instruction that does nothing. */
+    val none: Effects = Effects(0, Seq.empty, Seq.empty, 0)
+  }
+
   /**
    * An instruction that binds an e-node to a register.
    * @param register The index of the register to bind the e-node to.
@@ -38,6 +61,13 @@ object Instruction {
                                                                      uses: Seq[Slot],
                                                                      argCount: Int)
     extends Instruction[NodeT, EGraphT] {
+
+    override val effects: Instruction.Effects = Instruction.Effects(
+      createdRegisters = argCount,
+      boundVars = Seq.empty,
+      boundSlots = definitions ++ uses,
+      boundNodes = 1
+    )
 
     private def matchesSlot(machine: MachineState[NodeT], pair: (Slot, Slot)): Boolean = {
       val (expected, actual) = pair
@@ -83,6 +113,13 @@ object Instruction {
                                                                     variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
+    override val effects: Instruction.Effects = Instruction.Effects(
+      createdRegisters = 0,
+      boundVars = Seq(variable),
+      boundSlots = Seq.empty,
+      boundNodes = 0
+    )
+
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       Left(Seq(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
     }
@@ -97,6 +134,9 @@ object Instruction {
    */
   final case class Compare[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
+
+    override def effects: Instruction.Effects = Instruction.Effects.none
+
     override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
       if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
         Left(Seq(machine))
