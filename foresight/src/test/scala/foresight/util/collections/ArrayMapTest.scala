@@ -115,7 +115,7 @@ class ArrayMapTest {
   def wrapArraysUnsafeCreatesValidMap(): Unit = {
     val keys = Array[AnyRef]("a", "b", "c")
     val values = Array[AnyRef](1.asInstanceOf[AnyRef], 2.asInstanceOf[AnyRef], 3.asInstanceOf[AnyRef])
-    val m = ArrayMap.wrapArraysUnsafe[String, Int](keys, values, 3)
+    val m = ArrayMap.unsafeWrapArrays[String, Int](keys, values, 3)
     assertEquals(3, m.size)
     assertEquals(Some(1), m.get("a"))
     assertEquals(Some(2), m.get("b"))
@@ -126,14 +126,14 @@ class ArrayMapTest {
   def wrapArraysUnsafeThrowsIfKeysArrayTooShort(): Unit = {
     val keys = Array[AnyRef]("a")
     val values = Array[AnyRef](1.asInstanceOf[AnyRef], 2.asInstanceOf[AnyRef])
-    ArrayMap.wrapArraysUnsafe(keys, values, 2)
+    ArrayMap.unsafeWrapArrays(keys, values, 2)
   }
 
   @Test(expected = classOf[IllegalArgumentException])
   def wrapArraysUnsafeThrowsIfValuesArrayTooShort(): Unit = {
     val keys = Array[AnyRef]("a", "b")
     val values = Array[AnyRef](1.asInstanceOf[AnyRef])
-    ArrayMap.wrapArraysUnsafe(keys, values, 2)
+    ArrayMap.unsafeWrapArrays(keys, values, 2)
   }
 
   @Test

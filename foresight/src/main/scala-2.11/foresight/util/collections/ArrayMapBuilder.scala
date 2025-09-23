@@ -42,7 +42,7 @@ class ArrayMapBuilder[K, V] extends mutable.Builder[(K, V), ArrayMap[K, V]] {
   }
 
   override def result(): ArrayMap[K, V] = {
-    ArrayMap.wrapArraysUnsafe[K, V](keys, values, n)
+    ArrayMap.unsafeWrapArrays[K, V](keys, values, n)
   }
 
   override def +=(elem: (K, V)): this.type = addOne(elem)
