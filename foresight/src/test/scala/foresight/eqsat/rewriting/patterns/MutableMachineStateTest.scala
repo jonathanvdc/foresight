@@ -33,7 +33,7 @@ class MutableMachineStateTest {
     assertEquals(0, m.boundSlotsCount)
     assertEquals(0, m.boundNodesCount)
 
-    // Freezing without any binds should reflect just the root register
+    // Freezing without any binds reflects just the root register
     val snap = m.freeze()
     assertEquals(Seq(root), snap.registers)
     assertTrue(snap.boundVars.isEmpty)
@@ -215,5 +215,144 @@ class MutableMachineStateTest {
 
     // Two nodes recorded
     assertEquals(2, snap.boundNodes.size)
+  }
+
+  @Test
+  def poolBorrowInitializesRootAndCounts(): Unit = {
+    val effects = Instruction.Effects(
+      createdRegisters = 0,
+      boundVars = Seq.empty,
+      boundSlots = Seq.empty,
+      boundNodes = 0
+    )
+
+    val pool = MutableMachineState.Pool[Any](effects, initialCapacity = 0)
+    assertEquals(0, pool.available)
+
+    val root1: EClassCall = null.asInstanceOf[EClassCall]
+    val ms1 = pool.borrow(root1)
+
+    // On fresh borrow: only root register is counted, others zero
+    assertEquals(1, ms1.createdRegisters)
+    assertEquals(0, ms1.boundVarsCount)
+    assertEquals(0, ms1.boundSlotsCount)
+    assertEquals(0, ms1.boundNodesCount)
+
+    val snap1 = ms1.freeze()
+    assertEquals(Seq(root1), snap1.registers)
+
+    // Return to pool
+    pool.release(ms1)
+    assertEquals(1, pool.available)
+  }
+
+  @Test
+  def poolReusesInstanceAndReinitResetsCounts(): Unit = {
+    // Make effects allocate space for 2 vars so we can mutate counters
+    val v1 +: v2 +: Nil = List.fill(2)(Pattern.Var.fresh())
+    val effects = Instruction.Effects(
+      createdRegisters = 0,
+      boundVars = Seq(v1, v2),
+      boundSlots = Seq.empty,
+      boundNodes = 0
+    )
+
+    val pool = MutableMachineState.Pool[Any](effects, initialCapacity = 1)
+
+    val root1: EClassCall = null.asInstanceOf[EClassCall]
+    val ms1 = pool.borrow(root1)
+
+    // Mutate state to non-zero indices
+    val mt: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    ms1.bindVar(mt)
+    ms1.bindVar(mt)
+    assertEquals(2, ms1.boundVarsCount)
+
+    pool.release(ms1)
+    assertEquals(1, pool.available)
+
+    val root2: EClassCall = null.asInstanceOf[EClassCall]
+    val ms2 = pool.borrow(root2)
+
+    // Same instance and fully reset to just-root
+    assertTrue(ms1 eq ms2)
+    assertEquals(1, ms2.createdRegisters)
+    assertEquals(0, ms2.boundVarsCount)
+    assertEquals(0, ms2.boundSlotsCount)
+    assertEquals(0, ms2.boundNodesCount)
+
+    val snap2 = ms2.freeze()
+    assertEquals(Seq(root2), snap2.registers)
+
+    pool.release(ms2)
+  }
+
+  @Test
+  def poolAvailableTracksReleases(): Unit = {
+    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val pool = MutableMachineState.Pool[Any](effects)
+
+    val a = pool.borrow(null.asInstanceOf[EClassCall])
+    val b = pool.borrow(null.asInstanceOf[EClassCall])
+    assertEquals(0, pool.available) // nothing returned yet
+
+    pool.release(a)
+    assertEquals(1, pool.available)
+    pool.release(b)
+    assertEquals(2, pool.available)
+
+    // Borrow twice reduces available accordingly
+    val x = pool.borrow(null.asInstanceOf[EClassCall])
+    assertEquals(1, pool.available)
+    val y = pool.borrow(null.asInstanceOf[EClassCall])
+    assertEquals(0, pool.available)
+
+    // Clean up
+    pool.release(x)
+    pool.release(y)
+  }
+
+  @Test
+  def poolRejectsMismatchedEffectsOnRelease(): Unit = {
+    val effects1 = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val effects2 = Instruction.Effects(1, Seq.empty, Seq.empty, 0) // different profile
+
+    val p1 = MutableMachineState.Pool[Any](effects1)
+    val p2 = MutableMachineState.Pool[Any](effects2)
+
+    val s = p1.borrow(null.asInstanceOf[EClassCall])
+
+    // Attempting to release into a pool with different effects will throw
+    try {
+      p2.release(s)
+      fail("Expected IllegalArgumentException due to effects mismatch")
+    } catch {
+      case _: IllegalArgumentException => // expected
+    } finally {
+      // Properly return to original pool
+      p1.release(s)
+    }
+  }
+
+  @Test
+  def poolUsesLifoOrderOnReuse(): Unit = {
+    val effects = Instruction.Effects(0, Seq.empty, Seq.empty, 0)
+    val pool = MutableMachineState.Pool[Any](effects)
+
+    val s1 = pool.borrow(null.asInstanceOf[EClassCall])
+    val s2 = pool.borrow(null.asInstanceOf[EClassCall])
+
+    // Return in order: s1 then s2 (s2 will be on top)
+    pool.release(s1)
+    pool.release(s2)
+
+    val a = pool.borrow(null.asInstanceOf[EClassCall])
+    assertTrue("Expected LIFO reuse to return s2 first", a eq s2)
+    val b = pool.borrow(null.asInstanceOf[EClassCall])
+    assertTrue("Next is s1", b eq s1)
+
+    // Clean up
+    pool.release(a)
+    pool.release(b)
   }
 }
