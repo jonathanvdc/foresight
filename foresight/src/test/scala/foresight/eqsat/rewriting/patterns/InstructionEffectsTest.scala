@@ -68,7 +68,7 @@ class InstructionEffectsTest {
       override def effects: Instruction.Effects = e
 
       override def execute(graph: ReadOnlyEGraph[Any],
-                           machine: MachineState[Any]) =
+                           machine: MutableMachineState[Any]) =
         Left(Seq(machine)) // not exercised
     }
 
