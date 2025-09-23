@@ -18,7 +18,7 @@ trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
    * @param machine The machine state to execute the instruction on.
    * @return Either a nonempty set of new machine states or a machine error.
    */
-  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]]
+  def execute(graph: EGraphT, machine: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]]
 }
 
 /**
@@ -97,22 +97,25 @@ object Instruction {
       boundNodes = 1
     )
 
-    private def matchesSlot(machine: MachineState[NodeT], pair: (Slot, Slot)): Boolean = {
-      val (expected, actual) = pair
-      machine.boundSlots.get(expected).forall(_ == actual)
+    private def matchesSlot(machine: MutableMachineState[NodeT], expected: Slot, actual: Slot): Boolean = {
+      machine.boundSlotOrElse(expected, null) match {
+        case null => true // expected slot is unbound, so it can match anything
+        case bound if bound == actual => true // expected slot is bound to the actual slot
+        case _ => false // expected slot is bound to a different slot
+      }
     }
 
-    private def allSlotsMatch(machine: MachineState[NodeT], expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
+    private def allSlotsMatch(machine: MutableMachineState[NodeT], expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
       if (expected.length != actual.length) return false
       var i = 0
       while (i < expected.length) {
-        if (!matchesSlot(machine, (expected(i), actual(i)))) return false
+        if (!matchesSlot(machine, expected(i), actual(i))) return false
         i += 1
       }
       true
     }
 
-    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Seq[ENode[NodeT]] = {
+    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MutableMachineState[NodeT]): Seq[ENode[NodeT]] = {
       graph.nodes(call).toSeq.filter { node =>
         node.nodeType == nodeType &&
           node.args.size == argCount &&
@@ -121,11 +124,22 @@ object Instruction {
       }
     }
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      val call = machine.registers(register)
-      findInEClass(graph, call, machine) match {
-        case nodes if nodes.isEmpty => Right(MachineError.NoMatchingNode(this, call))
-        case nodes => Left(nodes.map(machine.bindNode(_, definitions, uses)))
+    override def execute(graph: EGraphT, machine: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
+      val call = machine.registerAt(register)
+      val nodes = findInEClass(graph, call, machine)
+      nodes.size match {
+        case 0 => Right(MachineError.NoMatchingNode(this, call))
+        case 1 =>
+          machine.bindNode(nodes.head)
+          Left(Seq(machine))
+        case _ =>
+          val forks = nodes.tail.map { node =>
+            val forked = machine.fork()
+            forked.bindNode(node)
+            forked
+          }
+          machine.bindNode(nodes.head)
+          Left(machine +: forks)
       }
     }
   }
@@ -148,8 +162,10 @@ object Instruction {
       boundNodes = 0
     )
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      Left(Seq(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
+    override def execute(graph: EGraphT, machine: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
+      val value = MixedTree.Atom[NodeT, EClassCall](machine.registerAt(register))
+      machine.bindVar(value)
+      Left(Seq(machine))
     }
   }
 
@@ -165,11 +181,11 @@ object Instruction {
 
     override def effects: Instruction.Effects = Instruction.Effects.none
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
+    override def execute(graph: EGraphT, machine: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
+      if (graph.areSame(machine.registerAt(register1), machine.registerAt(register2))) {
         Left(Seq(machine))
       } else {
-        Right(MachineError.InconsistentVars(this, machine.registers(register1), machine.registers(register2)))
+        Right(MachineError.InconsistentVars(this, machine.registerAt(register1), machine.registerAt(register2)))
       }
     }
   }

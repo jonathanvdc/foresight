@@ -12,7 +12,9 @@ object Machine {
    * The continuation is called for each successful run of the machine. Unsuccessful runs are not listed.
    *
    * @param graph        The graph to match against.
-   * @param machine      The initial machine state.
+   * @param machine      The initial machine state. This method takes ownership of all machines that are not passed
+   *                     to the continuation and will release them. The continuation takes ownership of the machines
+   *                     passed to it and must release them.
    * @param instructions  The instructions to apply to the machine.
    * @param continuation A continuation that is called for each successful run of the machine. If the continuation
    *                     returns false, the search is stopped.
@@ -20,9 +22,9 @@ object Machine {
    * @tparam GraphT The type of the e-graph.
    */
   def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                  machine: MachineState[NodeT],
+                                                  machine: MutableMachineState[NodeT],
                                                   instructions: List[Instruction[NodeT, GraphT]],
-                                                  continuation: MachineState[NodeT] => Boolean): Unit = {
+                                                  continuation: MutableMachineState[NodeT] => Boolean): Unit = {
     tryRunCPSWithoutFailure(graph, machine, instructions, continuation)
   }
 
@@ -31,19 +33,19 @@ object Machine {
    * Returns all successful runs of the machine. Unsuccessful runs are not listed.
    *
    * @param graph        The graph to match against.
-   * @param machine      The initial machine state.
+   * @param machine      The initial machine state. This method takes ownership of the machine and will release it.
    * @param instructions The instructions to apply to the machine.
    * @tparam NodeT  The type of the nodes in the e-graph.
    * @tparam GraphT The type of the e-graph.
    * @return A list of final machine states that result from successfully applying all instructions to the machine.
    */
   def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                  machine: MachineState[NodeT],
+                                                  machine: MutableMachineState[NodeT],
                                                   instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
     val results = Seq.newBuilder[MachineState[NodeT]]
     tryRunCPSWithoutFailure(graph, machine, instructions,
-      onSuccess = (finalMachine: MachineState[NodeT]) => {
-        results += finalMachine
+      onSuccess = (finalMachine: MutableMachineState[NodeT]) => {
+        results += finalMachine.freeze()
         true // Continue searching for more results
       }
     )
@@ -55,7 +57,7 @@ object Machine {
    * Lists all successfully and unsuccessfully terminated machine runs.
    *
    * @param graph        The graph to match against.
-   * @param machine      The initial machine state.
+   * @param machine      The initial machine state. This method takes ownership of the machine and will release it.
    * @param instructions The instructions to apply to the machine.
    * @tparam NodeT  The type of the nodes in the e-graph.
    * @tparam GraphT The type of the e-graph.
@@ -63,22 +65,27 @@ object Machine {
    *         machine.
    */
   def tryRun[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                     machine: MachineState[NodeT],
+                                                     machine: MutableMachineState[NodeT],
                                                      instructions: List[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
     val results = Seq.newBuilder[MachineResult[NodeT, GraphT]]
     tryRunCPS(graph, machine, instructions,
-      onSuccess = (finalMachine: MachineState[NodeT]) => results += MachineResult.Success(finalMachine),
-      onFailure = (failedMachine: MachineState[NodeT], error: MachineError[NodeT], remainingInstructions: List[Instruction[NodeT, GraphT]]) =>
-        results += MachineResult.Failure(failedMachine, error, remainingInstructions)
+      onSuccess = (finalMachine: MutableMachineState[NodeT]) => {
+        results += MachineResult.Success(finalMachine.freeze())
+        finalMachine.release()
+      },
+      onFailure = (failedMachine: MutableMachineState[NodeT], error: MachineError[NodeT], remainingInstructions: List[Instruction[NodeT, GraphT]]) => {
+        results += MachineResult.Failure(failedMachine.freeze(), error, remainingInstructions)
+        failedMachine.release()
+      }
     )
     results.result()
   }
 
   private def tryRunCPS[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                                machine: MachineState[NodeT],
+                                                                machine: MutableMachineState[NodeT],
                                                                 instructions: List[Instruction[NodeT, GraphT]],
-                                                                onSuccess: MachineState[NodeT] => Unit,
-                                                                onFailure: (MachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
+                                                                onSuccess: MutableMachineState[NodeT] => Unit,
+                                                                onFailure: (MutableMachineState[NodeT], MachineError[NodeT], List[Instruction[NodeT, GraphT]]) => Unit): Unit = instructions match {
     case Nil => onSuccess(machine)
     case firstInstruction :: remainingInstructions =>
       firstInstruction.execute(graph, machine) match {
@@ -111,9 +118,9 @@ object Machine {
    * @return True if the search completed without the continuation requesting to stop, false otherwise.
    */
   private def tryRunCPSWithoutFailure[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                                              machine: MachineState[NodeT],
+                                                                              machine: MutableMachineState[NodeT],
                                                                               instructions: List[Instruction[NodeT, GraphT]],
-                                                                              onSuccess: MachineState[NodeT] => Boolean): Boolean = instructions match {
+                                                                              onSuccess: MutableMachineState[NodeT] => Boolean): Boolean = instructions match {
     case Nil => onSuccess(machine)
     case firstInstruction :: remainingInstructions =>
       firstInstruction.execute(graph, machine) match {
@@ -123,13 +130,16 @@ object Machine {
         case Left(newMachines) =>
           for (newMachine <- newMachines) {
             if (!tryRunCPSWithoutFailure(graph, newMachine, remainingInstructions, onSuccess)) {
+              // Continuation requested to stop searching
+              machine.release()
               return false
             }
           }
           true
 
         case Right(_) =>
-          /* Do nothing on failure */
+          /* On failure, release the machine and return true to continue searching. */
+          machine.release()
           true
       }
   }

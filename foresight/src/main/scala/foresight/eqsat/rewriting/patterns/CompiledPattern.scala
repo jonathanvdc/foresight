@@ -12,6 +12,20 @@ import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
 final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
                                                                           instructions: List[Instruction[NodeT, EGraphT]]) {
 
+  private val effects = Instruction.Effects.from(instructions)
+
+  private val threadLocalPool = new ThreadLocal[MutableMachineState.Pool[NodeT]] {
+    override def initialValue(): MutableMachineState.Pool[NodeT] = {
+      MutableMachineState.Pool[NodeT](effects)
+    }
+  }
+
+  /**
+   * Gets the thread-local pool of mutable machine states.
+   * @return The thread-local pool of mutable machine states.
+   */
+  private def pool: MutableMachineState.Pool[NodeT] = threadLocalPool.get()
+
   /**
    * Searches for matches of the pattern in an e-graph, calling a continuation for each match.
    * If the continuation returns false, the search is stopped.
@@ -21,9 +35,12 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    *                     the search is stopped.
    */
   def search(call: EClassCall, egraph: EGraphT, continuation: (PatternMatch[NodeT], EGraphT) => Boolean): Unit = {
-    val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions, (state: MachineState[NodeT]) =>
-      continuation(PatternMatch(call, state.boundVars, state.boundSlots), egraph))
+    val state = pool.borrow(call)
+    Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
+      val m = state.toPatternMatch
+      state.release()
+      continuation(m, egraph)
+    })
   }
 
   /**
@@ -33,7 +50,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return The matches of the pattern in the e-graph.
    */
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
-    val state = MachineState[NodeT](call)
+    val state = pool.borrow(call)
     val matches = Machine.run(egraph, state, instructions).map { state =>
       PatternMatch(call, state.boundVars, state.boundSlots)
     }
@@ -53,8 +70,14 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return True if the pattern matches the e-class application, false otherwise.
    */
   def matches(call: EClassCall, egraph: EGraphT): Boolean = {
-    val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions).nonEmpty
+    val state = pool.borrow(call)
+    var anyMatches = false
+    Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
+      anyMatches = true
+      state.release()
+      false // Stop searching after the first match
+    })
+    anyMatches
   }
 }
 

@@ -2,7 +2,7 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.metadata.{AnalysisMetadata, EGraphWithMetadata}
-import foresight.eqsat.rewriting.patterns.{Instruction, MachineError, MachineState}
+import foresight.eqsat.rewriting.patterns.{Instruction, MachineError, MachineState, MutableMachineState}
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode}
 
 final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], C]
@@ -15,9 +15,9 @@ final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[Nod
 ) extends Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]] {
   require(k > 0, "k must be greater than 0")
 
-  override def execute(egraph: EGraphWithMetadata[NodeT, EGraphT], state: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-    val node = state.boundNodes(nodeIndex)
-    val eclass = state.registers(register)
+  override def execute(egraph: EGraphWithMetadata[NodeT, EGraphT], state: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
+    val node = state.boundNodeAt(nodeIndex)
+    val eclass = state.registerAt(register)
 
     if (IncrementalSaturation.isLatestVersion(eclass.ref, egraph, versionMetadataName)
       || IncrementalSaturation.isTopK(node, eclass, egraph, k, costAnalysis)) {

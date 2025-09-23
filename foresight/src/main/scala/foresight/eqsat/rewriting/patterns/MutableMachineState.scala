@@ -2,6 +2,8 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 
+import scala.collection.mutable
+
 /**
  * A mutable machine state that preallocates fixed-size arrays
  * for registers, bound vars, bound slots, and bound nodes.
@@ -17,6 +19,38 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
   private var varIdx: Int = 0
   private var slotIdx: Int = 0
   private var nodeIdx: Int = 0
+
+  /**
+   * Access a register by index.
+   * @param idx The index of the register to access.
+   * @return The e-class call in the register.
+   */
+  def registerAt(idx: Int): EClassCall = {
+    require(idx >= 0 && idx < regIdx, s"Register index $idx out of bounds [0, $regIdx)")
+    registersArr(idx)
+  }
+
+  /**
+   * Lookup the node bound at a given index.
+   * @param idx The index of the bound node to look up.
+   * @return The bound node at the given index.
+   */
+  def boundNodeAt(idx: Int): ENode[NodeT] = {
+    require(idx >= 0 && idx < nodeIdx, s"Bound node index $idx out of bounds [0, $nodeIdx)")
+    boundNodesArr(idx)
+  }
+
+  /**
+   * Lookup the value bound to a slot.
+   * @param slot The slot to look up.
+   * @param default The value bound to the slot.
+   * @return The value bound to the slot, or `default` if the slot is not bound.
+   */
+  def boundSlotOrElse(slot: Slot, default: => Slot): Slot = {
+    val i = effects.boundSlots.indexOf(slot)
+    if (i >= 0 && i < slotIdx) boundSlotsArr(i)
+    else default
+  }
 
   /** Return this instance to its originating pool. */
   def release(): Unit = homePool.release(this)
@@ -65,10 +99,28 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
     regIdx = 1
   }
 
-  /** Current counts (useful for assertions in tests). */
+  /**
+   * Number of registers created so far (including root).
+   * @return The number of registers created so far.
+   */
   def createdRegisters: Int = regIdx
+
+  /**
+   * Number of bound variables so far.
+   * @return The number of bound variables so far.
+   */
   def boundVarsCount: Int = varIdx
+
+  /**
+   * Number of bound slots so far.
+   * @return The number of bound slots so far.
+   */
   def boundSlotsCount: Int = slotIdx
+
+  /**
+   * Number of bound nodes so far.
+   * @return The number of bound nodes so far.
+   */
   def boundNodesCount: Int = nodeIdx
 
   /**
@@ -117,17 +169,32 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
     varIdx += 1
   }
 
+  private def boundVars: Map[Pattern.Var, MixedTree[NodeT, EClassCall]] = {
+    val m = mutable.Map.empty[Pattern.Var, MixedTree[NodeT, EClassCall]]
+    var i = 0
+    while (i < varIdx) { val v = effects.boundVars(i); val mt = boundVarsArr(i); m.update(v, mt); i += 1 }
+    m.toMap
+  }
+
+  private def boundSlots: Map[Slot, Slot] = {
+    val m = mutable.Map.empty[Slot, Slot]
+    var j = 0
+    while (j < slotIdx) { val s = effects.boundSlots(j); val s2 = boundSlotsArr(j); m.update(s, s2); j += 1 }
+    m.toMap
+  }
+
   /** Convert to an immutable MachineState snapshot. */
   def freeze(): MachineState[NodeT] = {
     val regs  = registersArr.slice(0, regIdx).toIndexedSeq
-    val varsM = scala.collection.mutable.Map.empty[Pattern.Var, MixedTree[NodeT, EClassCall]]
-    var i = 0
-    while (i < varIdx) { val v = effects.boundVars(i); val mt = boundVarsArr(i); varsM.update(v, mt); i += 1 }
-    val slotsM = scala.collection.mutable.Map.empty[Slot, Slot]
-    var j = 0
-    while (j < slotIdx) { val s = effects.boundSlots(j); val s2 = boundSlotsArr(j); slotsM.update(s, s2); j += 1 }
     val nodes = boundNodesArr.slice(0, nodeIdx).toIndexedSeq
-    MachineState(regs, varsM.toMap, slotsM.toMap, nodes)
+    MachineState(regs, boundVars, boundSlots, nodes)
+  }
+
+  /**
+   * Convert to a PatternMatch snapshot.
+   */
+  def toPatternMatch: PatternMatch[NodeT] = {
+    PatternMatch(registersArr(0), boundVars, boundSlots)
   }
 }
 
