@@ -10,12 +10,16 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
                                                private val registersArr: Array[EClassCall],
                                                private val boundVarsArr: Array[MixedTree[NodeT, EClassCall]],
                                                private val boundSlotsArr: Array[Slot],
-                                               private val boundNodesArr: Array[ENode[NodeT]]) {
+                                               private val boundNodesArr: Array[ENode[NodeT]],
+                                               private val homePool: MutableMachineState.Pool[NodeT]) {
 
   private var regIdx: Int = 0
   private var varIdx: Int = 0
   private var slotIdx: Int = 0
   private var nodeIdx: Int = 0
+
+  /** Return this instance to its originating pool. */
+  def release(): Unit = homePool.release(this)
 
   /** Reinitialize indices and set a new root so this instance can be reused. */
   private[patterns] def reinit(newRoot: EClassCall): Unit = {
@@ -109,6 +113,26 @@ object MutableMachineState {
   private val emptySlots = new Array[Slot](0)
   private val emptyNodes = new Array[ENode[_]](0)
 
+  /** Internal: construct a state wired to a given pool. */
+  private def makeWithPool[NodeT](root: EClassCall,
+                                  effects: Instruction.Effects,
+                                  pool: MutableMachineState.Pool[NodeT]): MutableMachineState[NodeT] = {
+    val varsLen  = effects.boundVars.length
+    val slotsLen = effects.boundSlots.length
+    val nodesLen = effects.boundNodes
+
+    val m = new MutableMachineState[NodeT](
+      effects,
+      new Array[EClassCall](1 + effects.createdRegisters),
+      if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
+      if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,
+      if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]],
+      pool
+    )
+    m.init(root)
+    m
+  }
+
   /**
    * Allocate a MutableMachineState with exact capacities inferred from given effects.
    * Registers capacity includes the root register plus any created registers reported by effects.
@@ -119,20 +143,8 @@ object MutableMachineState {
    * @return A new MutableMachineState with preallocated arrays.
    */
   def apply[NodeT](root: EClassCall, effects: Instruction.Effects): MutableMachineState[NodeT] = {
-    val varsLen  = effects.boundVars.length
-    val slotsLen = effects.boundSlots.length
-    val nodesLen = effects.boundNodes
-
-    val m = new MutableMachineState[NodeT](
-      effects,
-      new Array[EClassCall](1 + effects.createdRegisters),
-      if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
-      if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,
-      if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]]
-    )
-
-    m.init(root)
-    m
+    val p = new Pool[NodeT](effects, initialCapacity = 0)
+    makeWithPool(root, effects, p)
   }
 
   /**
@@ -153,13 +165,8 @@ object MutableMachineState {
      * @return A `MutableMachineState` instance ready for use.
      */
     def borrow(root: EClassCall): MutableMachineState[NodeT] = {
-      if (deque.isEmpty) {
-        MutableMachineState[NodeT](root, effects)
-      } else {
-        val inst = deque.pop()
-        inst.reinit(root)
-        inst
-      }
+      if (deque.isEmpty) makeWithPool(root, effects, this)
+      else { val inst = deque.pop(); inst.reinit(root); inst }
     }
 
     /**
