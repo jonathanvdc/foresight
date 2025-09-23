@@ -1,6 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
+import foresight.util.collections.ArrayMap
+
+import scala.collection.compat._
 
 /**
  * The state of a pattern machine.
@@ -11,10 +14,10 @@ import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
  * @param boundNodes The nodes that are bound in the machine.
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-final case class MachineState[NodeT](registers: Seq[EClassCall],
-                                     boundVars: Map[Pattern.Var, MixedTree[NodeT, EClassCall]],
-                                     boundSlots: Map[Slot, Slot],
-                                     boundNodes: Seq[ENode[NodeT]]) {
+final case class MachineState[NodeT](registers: immutable.ArraySeq[EClassCall],
+                                     boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]],
+                                     boundSlots: ArrayMap[Slot, Slot],
+                                     boundNodes: immutable.ArraySeq[ENode[NodeT]]) {
 
   /**
    * Binds the given node to the machine state.
@@ -42,20 +45,5 @@ final case class MachineState[NodeT](registers: Seq[EClassCall],
   def bindVar(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): MachineState[NodeT] = {
     val newBoundVars = boundVars.updated(variable, value)
     MachineState(registers, newBoundVars, boundSlots, boundNodes)
-  }
-}
-
-/**
- * A companion object for machine states.
- */
-object MachineState {
-  /**
-   * Creates a new machine state from the given root e-class call.
-   * @param root The root e-class call.
-   * @tparam NodeT The type of the nodes in the e-graph.
-   * @return The new machine state.
-   */
-  def apply[NodeT](root: EClassCall): MachineState[NodeT] = {
-    MachineState(Seq(root), Map.empty, Map.empty, Seq.empty)
   }
 }
