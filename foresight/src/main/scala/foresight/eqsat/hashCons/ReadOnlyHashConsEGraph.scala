@@ -123,7 +123,10 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       assert(renamedShape.shape.isShape)
     }
 
-    val ref = nodeToRefOrElse(renamedShape.shape, return null)
+    val ref = nodeToRefOrElse(renamedShape.shape, null)
+    if (ref == null) {
+      return null
+    }
 
     if (!renamedShape.shape.hasSlots) {
       return ref.callWithoutSlots
@@ -140,7 +143,12 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       assert(!node.hasSlots)
     }
 
-    nodeToRefOrElse(node, return null).callWithoutSlots
+    val ref = nodeToRefOrElse(node, null)
+    if (ref == null) {
+      return null
+    }
+
+    ref.callWithoutSlots
   }
 
   final override def users(ref: EClassRef): Set[ENode[NodeT]] = {
