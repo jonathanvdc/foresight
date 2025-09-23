@@ -130,8 +130,8 @@ object Machine {
         case Left(newMachines) =>
           for (newMachine <- newMachines) {
             if (!tryRunCPSWithoutFailure(graph, newMachine, remainingInstructions, onSuccess)) {
-              // Continuation requested to stop searching
-              machine.release()
+              // Continuation requested to stop searching. Do not release the machine, as it is
+              // owned by the continuation.
               return false
             }
           }
