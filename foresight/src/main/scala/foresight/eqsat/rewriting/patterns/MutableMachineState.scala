@@ -92,6 +92,14 @@ final class MutableMachineState[NodeT] private(private val registersArr: Array[E
  * Companion object for [[MutableMachineState]].
  */
 object MutableMachineState {
+
+  // Preallocate single empty arrays of the right types to avoid repeated allocations
+  // when effects report zero bound vars/slots/nodes.
+  // Unsafe casts are safe because these arrays are never written to.
+  private val emptyVars  = new Array[MixedTree[_, EClassCall]](0)
+  private val emptySlots = new Array[Slot](0)
+  private val emptyNodes = new Array[ENode[_]](0)
+
   /**
    * Allocate a MutableMachineState with exact capacities inferred from given effects.
    * Registers capacity includes the root register plus any created registers reported by effects.
@@ -103,11 +111,15 @@ object MutableMachineState {
    * @return A new MutableMachineState with preallocated arrays.
    */
   def apply[NodeT, EG <: ReadOnlyEGraph[NodeT]](root: EClassCall, effects: Instruction.Effects): MutableMachineState[NodeT] = {
+    val varsLen  = effects.boundVars.length
+    val slotsLen = effects.boundSlots.length
+    val nodesLen = effects.boundNodes
+
     val m = new MutableMachineState[NodeT](
       new Array[EClassCall](1 + effects.createdRegisters),
-      new Array[MixedTree[NodeT, EClassCall]](effects.boundVars.length),
-      new Array[Slot](effects.boundSlots.length),
-      new Array[ENode[NodeT]](effects.boundNodes)
+      if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
+      if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,
+      if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]]
     )
 
     m.initRoot(root)
