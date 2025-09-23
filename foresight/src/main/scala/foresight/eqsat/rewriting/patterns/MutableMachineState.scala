@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 
 /**
  * A mutable machine state that preallocates fixed-size arrays
