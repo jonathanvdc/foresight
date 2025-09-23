@@ -14,7 +14,7 @@ private[collections] object ArrayMapArrays {
     else if (keys(i) == key) i
     else indexOf(keys, key, size, i + 1)
 
-  def copyRemoveAt(keys: ArrRef, values: ArrRef, size: Int, idx: Int): (ArrRef, ArrRef, Int) = {
+  @inline def copyRemoveAt(keys: ArrRef, values: ArrRef, size: Int, idx: Int): (ArrRef, ArrRef, Int) = {
     val n  = size - 1
     val ks = new Array[AnyRef](n)
     val vs = new Array[AnyRef](n)
@@ -28,13 +28,13 @@ private[collections] object ArrayMapArrays {
     (ks, vs, n)
   }
 
-  def copyUpdateAt(keys: ArrRef, values: ArrRef, size: Int, idx: Int, newVal: AnyRef): (ArrRef, ArrRef, Int) = {
+  @inline def copyUpdateAt(keys: ArrRef, values: ArrRef, size: Int, idx: Int, newVal: AnyRef): (ArrRef, ArrRef, Int) = {
     val vs = java.util.Arrays.copyOf(values, size)
     vs(idx) = newVal
     (keys, vs, size)
   }
 
-  def copyAppend(keys: ArrRef, values: ArrRef, size: Int, k: AnyRef, v: AnyRef): (ArrRef, ArrRef, Int) = {
+  @inline def copyAppend(keys: ArrRef, values: ArrRef, size: Int, k: AnyRef, v: AnyRef): (ArrRef, ArrRef, Int) = {
     val n  = size + 1
     val ks = java.util.Arrays.copyOf(keys, n)
     val vs = java.util.Arrays.copyOf(values, n)
@@ -43,7 +43,7 @@ private[collections] object ArrayMapArrays {
     (ks, vs, n)
   }
 
-  def iterator[K, V](keys: ArrRef, values: ArrRef, sz: Int): Iterator[(K, V)] = new AbstractIterator[(K, V)] {
+  @inline def iterator[K, V](keys: ArrRef, values: ArrRef, sz: Int): Iterator[(K, V)] = new AbstractIterator[(K, V)] {
     private var i = 0
     override def hasNext: Boolean = i < sz
     override def next(): (K, V) = {
