@@ -22,11 +22,11 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
     varIdx = 0
     slotIdx = 0
     nodeIdx = 0
-    initRoot(newRoot)
+    init(newRoot)
   }
 
   /** Initialize the first register (root). */
-  private[patterns] def initRoot(root: EClassCall): Unit = {
+  private[patterns] def init(root: EClassCall): Unit = {
     registersArr(0) = root
     regIdx = 1
   }
@@ -131,7 +131,7 @@ object MutableMachineState {
       if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]]
     )
 
-    m.initRoot(root)
+    m.init(root)
     m
   }
 
