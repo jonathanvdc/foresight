@@ -2,6 +2,8 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat._
 
+import scala.collection.compat._
+
 /**
  * An instruction for the pattern-matching virtual machine.
  *
@@ -34,8 +36,8 @@ object Instruction {
    */
   final case class Effects(
     createdRegisters: Int,
-    boundVars: Seq[Pattern.Var],
-    boundSlots: Seq[Slot],
+    boundVars: immutable.ArraySeq[Pattern.Var],
+    boundSlots: immutable.ArraySeq[Slot],
     boundNodes: Int
   ) {
     /**
@@ -54,7 +56,7 @@ object Instruction {
   /** A companion object for [[Effects]]. */
   object Effects {
     /** An effect summary for an instruction that does nothing. */
-    val none: Effects = Effects(0, Seq.empty, Seq.empty, 0)
+    val none: Effects = Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
 
     /**
      * Aggregate a collection of effect summaries into a single summary.
@@ -85,14 +87,14 @@ object Instruction {
    */
   final case class BindNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
                                                                      nodeType: NodeT,
-                                                                     definitions: Seq[Slot],
-                                                                     uses: Seq[Slot],
+                                                                     definitions: immutable.ArraySeq[Slot],
+                                                                     uses: immutable.ArraySeq[Slot],
                                                                      argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = argCount,
-      boundVars = Seq.empty,
+      boundVars = immutable.ArraySeq.empty[Pattern.Var],
       boundSlots = definitions ++ uses,
       boundNodes = 1
     )
@@ -157,8 +159,8 @@ object Instruction {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = Seq(variable),
-      boundSlots = Seq.empty,
+      boundVars = immutable.ArraySeq(variable),
+      boundSlots = immutable.ArraySeq.empty[Slot],
       boundNodes = 0
     )
 
