@@ -19,7 +19,6 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
 
   /** Reinitialize indices and set a new root so this instance can be reused. */
   private[patterns] def reinit(newRoot: EClassCall): Unit = {
-    regIdx = 0
     varIdx = 0
     slotIdx = 0
     nodeIdx = 0
