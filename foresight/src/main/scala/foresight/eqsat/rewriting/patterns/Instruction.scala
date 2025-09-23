@@ -37,12 +37,40 @@ object Instruction {
     boundVars: Seq[Pattern.Var],
     boundSlots: Seq[Slot],
     boundNodes: Int
-  )
+  ) {
+    /**
+     * Combine this effect summary with another by summing counts and concatenating sequences.
+     * @param other The other effect summary to combine with.
+     * @return The combined effect summary.
+     */
+    def ++(other: Effects): Effects = Effects(
+      createdRegisters = this.createdRegisters + other.createdRegisters,
+      boundVars = this.boundVars ++ other.boundVars,
+      boundSlots = this.boundSlots ++ other.boundSlots,
+      boundNodes = this.boundNodes + other.boundNodes
+    )
+  }
 
   /** A companion object for [[Effects]]. */
   object Effects {
     /** An effect summary for an instruction that does nothing. */
     val none: Effects = Effects(0, Seq.empty, Seq.empty, 0)
+
+    /**
+     * Aggregate a collection of effect summaries into a single summary.
+     * @param effects The collection of effect summaries to aggregate.
+     * @return The aggregated effect summary.
+     */
+    def aggregate(effects: Iterable[Effects]): Effects =
+      effects.foldLeft(none)(_ ++ _)
+
+    /**
+     * Aggregate the effects of a collection of instructions.
+     * @param instructions The collection of instructions to aggregate the effects of.
+     * @return The aggregated effect summary.
+     */
+    def from(instructions: Iterable[Instruction[_, _]]): Effects =
+      aggregate(instructions.map(_.effects))
   }
 
   /**
