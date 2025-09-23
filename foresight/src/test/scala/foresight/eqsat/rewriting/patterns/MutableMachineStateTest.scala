@@ -25,7 +25,7 @@ class MutableMachineStateTest {
     )
 
     val root: EClassCall = null.asInstanceOf[EClassCall] // not dereferenced
-    val m = MutableMachineState[Any, ReadOnlyEGraph[Any]](root, effects)
+    val m = MutableMachineState[Any](root, effects)
 
     // After initRoot: one register used (the root), others zero
     assertEquals(1, m.createdRegisters)
@@ -54,7 +54,7 @@ class MutableMachineStateTest {
     )
 
     val root: EClassCall = null.asInstanceOf[EClassCall]
-    val m = MutableMachineState[Any, ReadOnlyEGraph[Any]](root, effects)
+    val m = MutableMachineState[Any](root, effects)
 
     // Values for the variables
     val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
@@ -96,7 +96,7 @@ class MutableMachineStateTest {
     )
 
     val root: EClassCall = null.asInstanceOf[EClassCall]
-    val m = MutableMachineState[Any, ReadOnlyEGraph[Any]](root, effects)
+    val m = MutableMachineState[Any](root, effects)
 
     // Dummy node: we never dereference op/args beyond length and identity
     val args: Seq[EClassCall] = Seq(
@@ -161,7 +161,7 @@ class MutableMachineStateTest {
     )
 
     val root: EClassCall = null.asInstanceOf[EClassCall]
-    val m = MutableMachineState[Any, ReadOnlyEGraph[Any]](root, effects)
+    val m = MutableMachineState[Any](root, effects)
 
     // Bind two variables
     val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
