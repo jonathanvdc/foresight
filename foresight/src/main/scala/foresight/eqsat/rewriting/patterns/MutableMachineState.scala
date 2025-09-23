@@ -21,6 +21,36 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
   /** Return this instance to its originating pool. */
   def release(): Unit = homePool.release(this)
 
+  /**
+   * Create a copy of this state, borrowed from the same pool.
+   * The copy has identical registers, bound vars/slots/nodes and indices.
+   */
+  def fork(): MutableMachineState[NodeT] = {
+    val root = registersArr(0)
+    val dest = homePool.borrow(root)
+    dest.assignFrom(this)
+    dest
+  }
+
+  /** Internal: overwrite this instance with the contents of `src`. */
+  private[patterns] def assignFrom(src: MutableMachineState[NodeT]): Unit = {
+    require(this.effects eq src.effects, "Cannot assign from a state with different effects")
+    // Copy counts first to bound arraycopy lengths correctly
+    this.regIdx  = src.regIdx
+    this.varIdx  = src.varIdx
+    this.slotIdx = src.slotIdx
+    this.nodeIdx = src.nodeIdx
+
+    if (this.regIdx > 0)
+      System.arraycopy(src.registersArr, 0, this.registersArr, 0, this.regIdx)
+    if (this.varIdx > 0)
+      System.arraycopy(src.boundVarsArr, 0, this.boundVarsArr, 0, this.varIdx)
+    if (this.slotIdx > 0)
+      System.arraycopy(src.boundSlotsArr, 0, this.boundSlotsArr, 0, this.slotIdx)
+    if (this.nodeIdx > 0)
+      System.arraycopy(src.boundNodesArr, 0, this.boundNodesArr, 0, this.nodeIdx)
+  }
+
   /** Reinitialize indices and set a new root so this instance can be reused. */
   private[patterns] def reinit(newRoot: EClassCall): Unit = {
     varIdx = 0
