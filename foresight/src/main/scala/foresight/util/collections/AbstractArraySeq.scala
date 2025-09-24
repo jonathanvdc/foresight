@@ -11,7 +11,7 @@ package foresight.util.collections
  * @tparam A    The type of elements in the sequence.
  * @tparam This The concrete type of the subclass extending this abstract class.
  */
-abstract class AbstractArraySeq[A <: AnyRef, +This <: AbstractArraySeq[A, This]](private val _array: Array[A], val length: Int)
+abstract class AbstractArraySeq[A <: AnyRef, This <: AbstractArraySeq[A, This]](private val _array: Array[A], val length: Int)
   extends IndexedSeq[A] {
 
   /**
@@ -77,4 +77,33 @@ abstract class AbstractArraySeq[A <: AnyRef, +This <: AbstractArraySeq[A, This]]
     if (newArr eq null) this.asInstanceOf[This]
     else create(newArr, length)
   }
+
+  /**
+   * Concatenates this sequence with another sequence of the same type.
+   * If either sequence is empty, the other sequence is returned.
+   *
+   * @param that The sequence to concatenate with this one.
+   * @return A new sequence containing elements from both sequences.
+   */
+  def concat(that: This): This = {
+    if (this.length == 0) {
+      that
+    } else if (that.length == 0) {
+      this.asInstanceOf[This]
+    } else {
+      val newArr = newArray(this.length + that.length)
+      Array.copy(this._array, 0, newArr, 0, this.length)
+      Array.copy(that._array, 0, newArr, this.length, that.length)
+      create(newArr, this.length + that.length)
+    }
+  }
+
+  /**
+   * Concatenates this sequence with another sequence of the same type.
+   * If either sequence is empty, the other sequence is returned.
+   *
+   * @param that The sequence to concatenate with this one.
+   * @return A new sequence containing elements from both sequences.
+   */
+  def ++(that: This): This = concat(that)
 }
