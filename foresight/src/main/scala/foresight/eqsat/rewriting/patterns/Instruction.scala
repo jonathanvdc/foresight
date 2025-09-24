@@ -223,7 +223,11 @@ object Instruction {
   }
 
   object Execution {
-    private val threadLocalPool: ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] = ThreadLocal.withInitial(() => new Pool(4))
+    private val threadLocalPool: ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] = new ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] {
+      override def initialValue(): Pool[_, _ <: ReadOnlyEGraph[_]] = {
+        new Pool()
+      }
+    }
 
     /** Get the thread-local pool of execution contexts. */
     def pool[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]]: Pool[NodeT, EGraphT] = {
