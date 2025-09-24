@@ -118,9 +118,8 @@ object Instruction {
     }
 
     private def findInEClass(graph: EGraphT, call: EClassCall, machine: MutableMachineState[NodeT]): Seq[ENode[NodeT]] = {
-      graph.nodes(call)
+      graph.nodes(call, nodeType)
         .filter { node =>
-          node.nodeType == nodeType &&
             node.args.size == argCount &&
             allSlotsMatch(machine, definitions, node.definitions) &&
             allSlotsMatch(machine, uses, node.uses)
