@@ -101,7 +101,7 @@ final case class AddManyCommand[NodeT](
       val resolvedArgs = Seq.newBuilder[EClassCall]
       for (arg <- args) {
         arg match {
-          case EClassSymbol.Real(call) =>
+          case call: EClassCall =>
             resolvedArgs += call
           case v: EClassSymbol.Virtual if partialReification.contains(v) =>
             resolvedArgs += partialReification(v)
@@ -122,7 +122,7 @@ final case class AddManyCommand[NodeT](
           case Some(call) =>
             resolvedBuilder += (result -> call)
           case None =>
-            val refined = node.copy(args = resolvedArgs.map(EClassSymbol.Real(_)))
+            val refined = node.copy(args = resolvedArgs)
             unresolvedBuilder += (result -> refined)
         }
       } else {

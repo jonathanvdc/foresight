@@ -173,7 +173,7 @@ final class CommandQueueBuilder[NodeT] {
    */
   def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: ReadOnlyEGraph[NodeT]): Unit = {
     (a, b) match {
-      case (EClassSymbol.Real(callA), EClassSymbol.Real(callB)) =>
+      case (callA: EClassCall, callB: EClassCall) =>
         if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {
           commands += UnionManyCommand(Seq((a, b)))
         }
@@ -190,7 +190,7 @@ private object CommandQueueBuilder {
       var i = 0
       while (i < args.length) {
         args(i) match {
-          case EClassSymbol.Real(call) => arr(i) = call
+          case call: EClassCall => arr(i) = call
           case _ => throw new IllegalStateException("Unreachable")
         }
         i += 1

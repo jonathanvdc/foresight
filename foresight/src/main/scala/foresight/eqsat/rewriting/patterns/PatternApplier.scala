@@ -1,8 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.commands.{Command, CommandQueueBuilder, EClassSymbol}
+import foresight.eqsat.commands.{Command, CommandQueueBuilder}
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
-import foresight.eqsat.{MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassSymbol, MixedTree, ReadOnlyEGraph, Slot}
 
 /**
  * An applier that applies a pattern match to an e-graph.

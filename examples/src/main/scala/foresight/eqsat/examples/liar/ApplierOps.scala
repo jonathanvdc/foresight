@@ -1,7 +1,7 @@
 
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.commands.{Command, EClassSymbol}
+import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Applier
@@ -64,7 +64,7 @@ object ApplierOps {
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
           val tree = applier.instantiate(m)
-          inferType(tree.mapAtoms(_.asInstanceOf[EClassSymbol.Real].call), egraph)
+          inferType(tree.mapAtoms(_.asInstanceOf[EClassCall]), egraph)
           Command.equivalenceSimplified(EClassSymbol.real(m.root), tree, egraph)
         }
       }

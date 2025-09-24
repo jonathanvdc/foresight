@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, EGraphWithPendingUnions}
+import foresight.eqsat.{EClassCall, EClassSymbol, EGraph, EGraphLike, EGraphWithPendingUnions}
 
 /**
  * A [[Command]] that unions multiple pairs of e-classes in a single batch.
@@ -92,7 +92,7 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
       val lRefined = left.refine(partialReification)
       val rRefined = right.refine(partialReification)
       (lRefined, rRefined) match {
-        case (EClassSymbol.Real(l), EClassSymbol.Real(r)) =>
+        case (l: EClassCall, r: EClassCall) =>
           if (!egraph.areSame(l, r)) builder += ((lRefined, rRefined))
         case _ =>
           builder += ((lRefined, rRefined))
