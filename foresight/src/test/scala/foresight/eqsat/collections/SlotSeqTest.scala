@@ -128,7 +128,7 @@ class SlotSeqTest {
   def mapIdentityReturnsSameInstance(): Unit = {
     val base = freshSlots(4)
     val s = mkSeq(base, 4)
-    val t = s.map(x => x) // identity by reference
+    val t = s.map((x: Slot) => x) // identity by reference
     assertTrue("map(identity) must return the same instance", (t.asInstanceOf[AnyRef] eq s.asInstanceOf[AnyRef]))
     // also ensure elements are unchanged by identity
     var i = 0
@@ -169,7 +169,7 @@ class SlotSeqTest {
     val s = mkSeq(base, 3)
     val replacement0 = Slot.fresh()
 
-    val t = s.map(x => if (x eq base(0)) replacement0 else x)
+    val t = s.map((x: Slot) => if (x eq base(0)) replacement0 else x)
 
     // must be a new instance
     assertFalse(t.asInstanceOf[AnyRef] eq s.asInstanceOf[AnyRef])
@@ -186,7 +186,7 @@ class SlotSeqTest {
     val s = mkSeq(base, 4)
     val repl = Array.fill[Slot](4)(Slot.fresh())
 
-    val t = s.map(x => repl(base.indexOf(x)))
+    val t = s.map((x: Slot) => repl(base.indexOf(x)))
 
     // must be new instance
     assertFalse(t.asInstanceOf[AnyRef] eq s.asInstanceOf[AnyRef])
@@ -202,7 +202,7 @@ class SlotSeqTest {
   @Test
   def mapOnEmptyIsIdentityInstance(): Unit = {
     val s = mkSeq(new Array[Slot](0), 0)
-    val t = s.map(x => x)
+    val t = s.map((x: Slot) => x)
     assertTrue(t.asInstanceOf[AnyRef] eq s.asInstanceOf[AnyRef])
     assertEquals(0, t.length)
   }
@@ -218,7 +218,7 @@ class SlotSeqTest {
     assertArrayEquals(Array(backing(0), backing(1), backing(2)).asInstanceOf[Array[AnyRef]], s.iterator.toArray.asInstanceOf[Array[AnyRef]])
 
     // mapping that keeps identity should preserve instance
-    val t = s.map(x => x)
+    val t = s.map((x: Slot) => x)
     assertTrue(t.asInstanceOf[AnyRef] eq s.asInstanceOf[AnyRef])
   }
 
@@ -283,7 +283,7 @@ class SlotSeqTest {
   def hashCodeConsistentWithEqualsAfterMapIdentity(): Unit = {
     val arr = freshSlots(5)
     val s1 = mkSeq(arr)
-    val s2 = s1.map(x => x) // same instance by our COW map(identity)
+    val s2 = s1.map((x: Slot) => x) // same instance by our COW map(identity)
     assertTrue(s1 == s2)
     assertEquals(s1.hashCode, s2.hashCode)
   }

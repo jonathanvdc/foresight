@@ -49,17 +49,17 @@ final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern
 
       case MixedTree.Node(t, Seq(), uses, args) =>
         // No definitions, so we can reuse the PatternMatch and its original slot mapping
-        MixedTree.Node[NodeT, EClassSymbol](t, Seq(), uses.map(m(_)), args.map(instantiate(_, m)))
+        MixedTree.Node[NodeT, EClassSymbol](t, Seq(), uses.map(m.apply: Slot => Slot), args.map(instantiate(_, m)))
 
       case MixedTree.Node(t, defs, uses, args) =>
-        val defSlots = defs.map { s =>
+        val defSlots = defs.map { (s: Slot) =>
           m.slotMapping.get(s) match {
             case Some(v) => v
             case None => Slot.fresh()
           }
         }
         val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-        MixedTree.Node[NodeT, EClassSymbol](t, defSlots, uses.map(newMatch(_)), args.map(instantiate(_, newMatch)))
+        MixedTree.Node[NodeT, EClassSymbol](t, defSlots, uses.map(newMatch.apply: Slot => Slot), args.map(instantiate(_, newMatch)))
     }
   }
 
@@ -73,11 +73,11 @@ final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern
       case MixedTree.Node(t, Seq(), uses, args) =>
         // No definitions, so we can reuse the PatternMatch and its original slot mapping
         val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, m, egraph, builder))
-        val useSymbols = uses.map(m(_))
+        val useSymbols = uses.map(m.apply: Slot => Slot)
         builder.addSimplifiedNode(t, Seq(), useSymbols, argSymbols, egraph)
 
       case MixedTree.Node(t, defs, uses, args) =>
-        val defSlots = defs.map { s =>
+        val defSlots = defs.map { (s: Slot) =>
           m.slotMapping.get(s) match {
             case Some(v) => v
             case None => Slot.fresh()
@@ -85,7 +85,7 @@ final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern
         }
         val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
         val argSymbols = args.map(instantiateAsSimplifiedAddCommand(_, newMatch, egraph, builder))
-        builder.addSimplifiedNode(t, defSlots, uses.map(newMatch(_)), argSymbols, egraph)
+        builder.addSimplifiedNode(t, defSlots, uses.map(newMatch.apply: Slot => Slot), argSymbols, egraph)
     }
   }
 }
