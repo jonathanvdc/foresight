@@ -113,6 +113,7 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = egraph.classes
   override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = egraph.nodes(call)
+  override def nodes(call: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = egraph.nodes(call, nodeType)
   override def users(ref: EClassRef): Set[ENode[NodeT]] = egraph.users(ref)
   override def findOrNull(node: ENode[NodeT]): EClassCall = egraph.findOrNull(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
