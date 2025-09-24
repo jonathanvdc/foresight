@@ -35,7 +35,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of definition slots.
    */
-  val definitions: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_definitions)
+  def definitions: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_definitions)
 
   /**
    * Slots referenced by this node that are visible to its parent and must be satisfied by the
@@ -43,14 +43,14 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of use slots.
    */
-  val uses: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_uses)
+  def uses: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_uses)
 
   /**
    * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
    *
    * @return Sequence of child e-class calls.
    */
-  val args: immutable.ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
+  def args: immutable.ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
