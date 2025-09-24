@@ -106,7 +106,7 @@ object IncrementalSaturation {
       }
     }
 
-    val updatedPattern = CompiledPattern(pattern.pattern, newInstructions.toList)
+    val updatedPattern = CompiledPattern(pattern.pattern, newInstructions.toSeq)
 
     final case class IncrementalMachineSearcher(buildContinuation: MachineEClassSearcher[NodeT, EGraphWithMetadata[NodeT, EGraphT]]#ContinuationBuilder)
       extends EClassSearcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] {

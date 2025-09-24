@@ -15,18 +15,25 @@ final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[Nod
 ) extends Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]] {
   require(k > 0, "k must be greater than 0")
 
-  override def execute(egraph: EGraphWithMetadata[NodeT, EGraphT], state: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
-    val node = state.boundNodeAt(nodeIndex)
-    val eclass = state.registerAt(register)
+  override def effects: Instruction.Effects = Instruction.Effects.none
+
+  /**
+   * Executes the instruction on the given machine state.
+   *
+   * @param ctx The execution context for running instructions.
+   * @return true to continue search, false to abort.
+   */
+  override def execute(ctx: Instruction.Execution[NodeT, EGraphWithMetadata[NodeT, EGraphT]]): Boolean = {
+    val egraph = ctx.graph
+    val node = ctx.machine.boundNodeAt(nodeIndex)
+    val eclass = ctx.machine.registerAt(register)
 
     if (IncrementalSaturation.isLatestVersion(eclass.ref, egraph, versionMetadataName)
       || IncrementalSaturation.isTopK(node, eclass, egraph, k, costAnalysis)) {
 
-      Left(Seq(state))
+      ctx.continue()
     } else {
-      Right(NotLatestVersionOrTopKError(this, node, eclass))
+      ctx.error(NotLatestVersionOrTopKError(this, node, eclass))
     }
   }
-
-  override def effects: Instruction.Effects = Instruction.Effects.none
 }

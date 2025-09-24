@@ -70,9 +70,9 @@ class InstructionEffectsTest {
       extends Instruction[Any, ReadOnlyEGraph[Any]] {
       override def effects: Instruction.Effects = e
 
-      override def execute(graph: ReadOnlyEGraph[Any],
-                           machine: MutableMachineState[Any]) =
-        Left(Seq(machine)) // not exercised
+      override def execute(ctx: Instruction.Execution[Any, ReadOnlyEGraph[Any]]): Boolean = {
+        ctx.continue()
+      }
     }
 
     val instrs = List(

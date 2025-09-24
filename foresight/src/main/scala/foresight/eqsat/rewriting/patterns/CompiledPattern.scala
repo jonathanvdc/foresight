@@ -2,6 +2,8 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
 
+import scala.collection.compat._
+
 /**
  * A compiled pattern.
  *
@@ -10,11 +12,11 @@ import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
 final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
-                                                                          instructions: List[Instruction[NodeT, EGraphT]]) {
+                                                                          instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]]) {
 
   private val effects = Instruction.Effects.from(instructions)
 
-  private val threadLocalPool = new ThreadLocal[MutableMachineState.Pool[NodeT]] {
+  private val threadLocalMachinePool = new ThreadLocal[MutableMachineState.Pool[NodeT]] {
     override def initialValue(): MutableMachineState.Pool[NodeT] = {
       MutableMachineState.Pool[NodeT](effects)
     }
@@ -24,7 +26,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * Gets the thread-local pool of mutable machine states.
    * @return The thread-local pool of mutable machine states.
    */
-  private def pool: MutableMachineState.Pool[NodeT] = threadLocalPool.get()
+  private def machinePool: MutableMachineState.Pool[NodeT] = threadLocalMachinePool.get()
 
   /**
    * Searches for matches of the pattern in an e-graph, calling a continuation for each match.
@@ -35,7 +37,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    *                     the search is stopped.
    */
   def search(call: EClassCall, egraph: EGraphT, continuation: (PatternMatch[NodeT], EGraphT) => Boolean): Unit = {
-    val state = pool.borrow(call)
+    val state = machinePool.borrow(call)
     Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
       val m = state.toPatternMatch
       state.release()
@@ -50,7 +52,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return The matches of the pattern in the e-graph.
    */
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
-    val state = pool.borrow(call)
+    val state = machinePool.borrow(call)
     val matches = Machine.run(egraph, state, instructions).map { state =>
       PatternMatch(call, state.boundVars, state.boundSlots)
     }
@@ -70,7 +72,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return True if the pattern matches the e-class application, false otherwise.
    */
   def matches(call: EClassCall, egraph: EGraphT): Boolean = {
-    val state = pool.borrow(call)
+    val state = machinePool.borrow(call)
     var anyMatches = false
     Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
       anyMatches = true
@@ -85,6 +87,19 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
  * A companion object for [[CompiledPattern]].
  */
 object CompiledPattern {
+  /**
+   * Creates a compiled pattern from a pattern and a sequence of instructions.
+   * @param pattern The pattern to compile.
+   * @param instructions The instructions of the compiled pattern.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
+   * @return The compiled pattern.
+   */
+  def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
+                                                     instructions: Seq[Instruction[NodeT, EGraphT]]): CompiledPattern[NodeT, EGraphT] = {
+    new CompiledPattern(pattern, immutable.ArraySeq.from(instructions))
+  }
+
   /**
    * Compiles a pattern into a compiled pattern.
    * @param pattern The pattern to compile.
