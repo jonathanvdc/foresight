@@ -29,9 +29,25 @@ package foresight.eqsat.lang
  *
  * @tparam E the surface language this node belongs to.
  */
-final case class LanguageOp[E] private[lang](private[lang] ord: Int,
-                                             private[lang] schema: Seq[Byte],
-                                             private[lang] payload: Seq[Any])
+final class LanguageOp[E] private[lang](private[lang] val ord: Int,
+                                        private[lang] val schema: Seq[Byte],
+                                        private[lang] val payload: Seq[Any]) {
+
+  override def equals(obj: Any): Boolean = obj match {
+    case that: LanguageOp[_] =>
+      (this eq that) || (this.ord == that.ord && this.payload == that.payload)
+
+    case _ => false
+  }
+
+  private val _hash: Int = {
+    var h = ord.##
+    h = 31 * h + payload.##
+    h
+  }
+
+  override def hashCode: Int = _hash
+}
 
 /**
  * Companion object for [[LanguageOp]].
@@ -39,6 +55,20 @@ final case class LanguageOp[E] private[lang](private[lang] ord: Int,
  * Provides utilities and implicits related to `LanguageOp`.
  */
 object LanguageOp {
+  /**
+   * Constructs a new `LanguageOp`.
+   *
+   * This is primarily intended for use by `Language` implementations.
+   *
+   * @param ord     The unique ordinal of the operation within its language.
+   * @param schema  The schema bytes describing the structure of the payload.
+   * @param payload The actual data of the operation.
+   * @tparam E The surface language this node belongs to.
+   * @return A new `LanguageOp` instance.
+   */
+  def apply[E](ord: Int, schema: Seq[Byte], payload: Seq[Any]): LanguageOp[E] =
+    new LanguageOp[E](ord, schema, payload)
+
   /**
    * Provides an ordering over nodes whenever a [[Language]] is in scope.
    *
