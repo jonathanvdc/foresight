@@ -345,6 +345,14 @@ object ENode {
     new ENode(nodeType, arrayFromSlotSeq(definitions), arrayFromSlotSeq(uses), arrayFromCallSeq(args))
   }
 
+  private[foresight] def unsafeWrapArrays[NodeT](nodeType: NodeT, definitions: Array[Slot], uses: Array[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+    new ENode(nodeType, definitions, uses, args)
+  }
+
+  private[foresight] def unsafeWrapArrays[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+    new ENode(nodeType, arrayFromSlotSeq(definitions), arrayFromSlotSeq(uses), args)
+  }
+
   def unapply[NodeT](n: ENode[NodeT]): Option[(NodeT, Seq[Slot], Seq[Slot], Seq[EClassCall])] =
     Some((n.nodeType, n.definitions, n.uses, n.args))
 
