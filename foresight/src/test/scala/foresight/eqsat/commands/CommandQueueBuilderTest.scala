@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, ENode, MixedTree, Slot}
+import foresight.eqsat.{EClassSymbol, EGraph, ENode, MixedTree, Slot}
 import org.junit.Test
 
 class CommandQueueBuilderTest {
