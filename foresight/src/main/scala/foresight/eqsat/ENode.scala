@@ -288,10 +288,9 @@ final class ENode[+NodeT] private (
   //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
-      (this.nodeType == that.nodeType) &&
-      this.definitions == that.definitions &&
-      this.uses == that.uses &&
-      this.args == that.args
+      ENode.arraysEqual(this._definitions, that._definitions) &&
+      ENode.arraysEqual(this._uses, that._uses) &&
+      ENode.arraysEqual(this._args, that._args)
     case _ => false
   }
 
@@ -310,6 +309,17 @@ final class ENode[+NodeT] private (
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
+  private[eqsat] def arraysEqual[T](a: Array[T], b: Array[T]): Boolean = {
+    if (a eq b) return true
+    if (a.length != b.length) return false
+    var i = 0
+    while (i < a.length) {
+      if (a(i) != b(i)) return false
+      i += 1
+    }
+    true
+  }
+
   private val emptySlotArray: Array[Slot] = Array.empty
   private val emptyCallArray: Array[EClassCall] = Array.empty
 
