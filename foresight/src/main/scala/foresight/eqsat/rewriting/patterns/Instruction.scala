@@ -1,9 +1,10 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat._
+import foresight.eqsat.*
+import foresight.eqsat.collections.SlotSeq
 
 import java.util
-import scala.collection.compat._
+import scala.collection.compat.*
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -37,7 +38,7 @@ object Instruction {
   final case class Effects(
     createdRegisters: Int,
     boundVars: immutable.ArraySeq[Pattern.Var],
-    boundSlots: immutable.ArraySeq[Slot],
+    boundSlots: SlotSeq,
     boundNodes: Int
   ) {
     /**
@@ -56,7 +57,7 @@ object Instruction {
   /** A companion object for [[Effects]]. */
   object Effects {
     /** An effect summary for an instruction that does nothing. */
-    val none: Effects = Effects(0, immutable.ArraySeq.empty, immutable.ArraySeq.empty, 0)
+    val none: Effects = Effects(0, immutable.ArraySeq.empty, SlotSeq.empty, 0)
 
     /**
      * Aggregate a collection of effect summaries into a single summary.
@@ -312,8 +313,8 @@ object Instruction {
    */
   final case class BindNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
                                                                      nodeType: NodeT,
-                                                                     definitions: immutable.ArraySeq[Slot],
-                                                                     uses: immutable.ArraySeq[Slot],
+                                                                     definitions: SlotSeq,
+                                                                     uses: SlotSeq,
                                                                      argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
@@ -396,7 +397,7 @@ object Instruction {
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = 0,
       boundVars = immutable.ArraySeq(variable),
-      boundSlots = immutable.ArraySeq.empty[Slot],
+      boundSlots = SlotSeq.empty,
       boundNodes = 0
     )
 

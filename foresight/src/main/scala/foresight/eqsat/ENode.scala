@@ -1,10 +1,10 @@
 package foresight.eqsat
 
-import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat._
+import scala.collection.compat.*
 import scala.reflect.ClassTag
 
 /**
@@ -35,7 +35,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of definition slots.
    */
-  def definitions: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_definitions)
+  def definitions: SlotSeq = SlotSeq.unsafeWrapArray(_definitions)
 
   /**
    * Slots referenced by this node that are visible to its parent and must be satisfied by the
@@ -43,7 +43,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of use slots.
    */
-  def uses: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_uses)
+  def uses: SlotSeq = SlotSeq.unsafeWrapArray(_uses)
 
   /**
    * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
@@ -325,6 +325,7 @@ object ENode {
   private val emptyCallArray: Array[EClassCall] = Array.empty
 
   private def arrayFromSlotSeq(s: Seq[Slot]): Array[Slot] = s match {
+    case slotSeq: SlotSeq => slotSeq.unsafeArray
     case as: immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
       as.unsafeArray.asInstanceOf[Array[Slot]]
     case _ if s.isEmpty =>

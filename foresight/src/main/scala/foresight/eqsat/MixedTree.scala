@@ -1,11 +1,12 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.rewriting.ReversibleSearcher
-import foresight.eqsat.rewriting.patterns._
+import foresight.eqsat.rewriting.patterns.*
 import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering
 
-import scala.collection.compat._
+import scala.collection.compat.*
 
 /**
  * A heterogeneous term tree that interleaves node-typed interiors with leaf atoms.
@@ -114,7 +115,7 @@ object MixedTree {
                             definitions: Seq[Slot],
                             uses: Seq[Slot],
                             children: Seq[MixedTree[NodeT, AtomT]]): MixedTree[NodeT, AtomT] = {
-      Node(nodeType, UnsafeSeqFromArray(definitions), UnsafeSeqFromArray(uses), UnsafeSeqFromArray(children))
+      Node(nodeType, SlotSeq.from(definitions), SlotSeq.from(uses), UnsafeSeqFromArray(children))
     }
   }
 
@@ -140,8 +141,8 @@ object MixedTree {
    * @tparam AtomT      The type used to represent leaf payloads.
    */
   final case class Node[NodeT, AtomT](nodeType: NodeT,
-                                      definitions: immutable.ArraySeq[Slot],
-                                      uses: immutable.ArraySeq[Slot],
+                                      definitions: SlotSeq,
+                                      uses: SlotSeq,
                                       args: immutable.ArraySeq[MixedTree[NodeT, AtomT]])
     extends MixedTree[NodeT, AtomT] with foresight.eqsat.Node[NodeT, MixedTree[NodeT, AtomT]]
 

@@ -1,8 +1,9 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat._
+import scala.collection.compat.*
 
 /**
  * An immutable, slot-aware, ordered tree representation of a term.
@@ -43,8 +44,8 @@ import scala.collection.compat._
  */
 final case class Tree[+NodeT](
                                nodeType: NodeT,
-                               definitions: immutable.ArraySeq[Slot],
-                               uses: immutable.ArraySeq[Slot],
+                               definitions: SlotSeq,
+                               uses: SlotSeq,
                                args: immutable.ArraySeq[Tree[NodeT]]
                              ) {
 
@@ -79,8 +80,8 @@ object Tree {
   def apply[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[Tree[NodeT]]): Tree[NodeT] = {
     new Tree(
       nodeType,
-      UnsafeSeqFromArray(definitions),
-      UnsafeSeqFromArray(uses),
+      SlotSeq.from(definitions),
+      SlotSeq.from(uses),
       UnsafeSeqFromArray(args))
   }
 

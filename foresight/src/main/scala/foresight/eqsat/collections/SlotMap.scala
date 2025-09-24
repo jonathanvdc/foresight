@@ -70,12 +70,12 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * Keys in ascending order.
    */
-  def keys: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_keys)
+  def keys: SlotSeq = SlotSeq.unsafeWrapArray(_keys)
 
   /**
    * Values in the order of their sorted keys.
    */
-  def values: immutable.ArraySeq[Slot] = UnsafeSeqFromArray(_values)
+  def values: SlotSeq = SlotSeq.unsafeWrapArray(_values)
 
   /**
    * The set of keys.
