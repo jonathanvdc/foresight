@@ -1,10 +1,10 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.*
+import foresight.eqsat._
 import foresight.eqsat.collections.SlotSeq
 
 import java.util
-import scala.collection.compat.*
+import scala.collection.compat._
 
 /**
  * An instruction for the pattern-matching virtual machine.

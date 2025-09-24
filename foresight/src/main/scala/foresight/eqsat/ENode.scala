@@ -4,8 +4,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat.*
-import scala.reflect.ClassTag
+import scala.collection.compat._
 
 /**
  * A node in a slotted e-graph.

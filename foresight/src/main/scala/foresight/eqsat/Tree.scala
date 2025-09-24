@@ -3,7 +3,7 @@ package foresight.eqsat
 import foresight.eqsat.collections.SlotSeq
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat.*
+import scala.collection.compat._
 
 /**
  * An immutable, slot-aware, ordered tree representation of a term.

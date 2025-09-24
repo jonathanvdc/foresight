@@ -1,12 +1,12 @@
 package foresight.eqsat.rewriting.patterns
 
 import org.junit.Test
-import org.junit.Assert.*
-import foresight.eqsat.*
+import org.junit.Assert._
+import foresight.eqsat._
 import foresight.eqsat.collections.SlotSeq
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat.*
+import scala.collection.compat._
 
 class MutableMachineStateTest {
 

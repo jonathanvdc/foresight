@@ -1,12 +1,11 @@
 package foresight.eqsat
 
 import foresight.eqsat.collections.SlotSeq
-import foresight.eqsat.rewriting.ReversibleSearcher
-import foresight.eqsat.rewriting.patterns.*
+import foresight.eqsat.rewriting.patterns._
 import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering
 
-import scala.collection.compat.*
+import scala.collection.compat._
 
 /**
  * A heterogeneous term tree that interleaves node-typed interiors with leaf atoms.
