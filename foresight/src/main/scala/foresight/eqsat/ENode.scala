@@ -288,6 +288,7 @@ final class ENode[+NodeT] private (
   //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
+      this.nodeType == that.nodeType &&
       ENode.arraysEqual(this._definitions, that._definitions) &&
       ENode.arraysEqual(this._uses, that._uses) &&
       ENode.arraysEqual(this._args, that._args)
