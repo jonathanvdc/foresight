@@ -1,6 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
 
 /**
  * A compiled pattern.
@@ -10,7 +13,21 @@ import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
 final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
-                                                                          instructions: List[Instruction[NodeT, EGraphT]]) {
+                                                                          instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]]) {
+
+  private val effects = Instruction.Effects.from(instructions)
+
+  private val threadLocalMachinePool = new ThreadLocal[MutableMachineState.Pool[NodeT]] {
+    override def initialValue(): MutableMachineState.Pool[NodeT] = {
+      MutableMachineState.Pool[NodeT](effects)
+    }
+  }
+
+  /**
+   * Gets the thread-local pool of mutable machine states.
+   * @return The thread-local pool of mutable machine states.
+   */
+  private def machinePool: MutableMachineState.Pool[NodeT] = threadLocalMachinePool.get()
 
   /**
    * Searches for matches of the pattern in an e-graph, calling a continuation for each match.
@@ -21,9 +38,12 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    *                     the search is stopped.
    */
   def search(call: EClassCall, egraph: EGraphT, continuation: (PatternMatch[NodeT], EGraphT) => Boolean): Unit = {
-    val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions, (state: MachineState[NodeT]) =>
-      continuation(PatternMatch(call, state.boundVars, state.boundSlots), egraph))
+    val state = machinePool.borrow(call)
+    Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
+      val m = state.toPatternMatch
+      state.release()
+      continuation(m, egraph)
+    })
   }
 
   /**
@@ -33,7 +53,7 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return The matches of the pattern in the e-graph.
    */
   def search(call: EClassCall, egraph: EGraphT): Seq[PatternMatch[NodeT]] = {
-    val state = MachineState[NodeT](call)
+    val state = machinePool.borrow(call)
     val matches = Machine.run(egraph, state, instructions).map { state =>
       PatternMatch(call, state.boundVars, state.boundSlots)
     }
@@ -53,8 +73,14 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
    * @return True if the pattern matches the e-class application, false otherwise.
    */
   def matches(call: EClassCall, egraph: EGraphT): Boolean = {
-    val state = MachineState[NodeT](call)
-    Machine.run(egraph, state, instructions).nonEmpty
+    val state = machinePool.borrow(call)
+    var anyMatches = false
+    Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
+      anyMatches = true
+      state.release()
+      false // Stop searching after the first match
+    })
+    anyMatches
   }
 }
 
@@ -62,6 +88,19 @@ final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](patter
  * A companion object for [[CompiledPattern]].
  */
 object CompiledPattern {
+  /**
+   * Creates a compiled pattern from a pattern and a sequence of instructions.
+   * @param pattern The pattern to compile.
+   * @param instructions The instructions of the compiled pattern.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
+   * @return The compiled pattern.
+   */
+  def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
+                                                     instructions: Seq[Instruction[NodeT, EGraphT]]): CompiledPattern[NodeT, EGraphT] = {
+    new CompiledPattern(pattern, UnsafeSeqFromArray(instructions))
+  }
+
   /**
    * Compiles a pattern into a compiled pattern.
    * @param pattern The pattern to compile.

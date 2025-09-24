@@ -34,6 +34,6 @@ object MachineResult {
    */
   final case class Failure[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](state: MachineState[NodeT],
                                                                     error: MachineError[NodeT],
-                                                                    remainingInstructions: List[Instruction[NodeT, EGraphT]])
+                                                                    remainingInstructions: Seq[Instruction[NodeT, EGraphT]])
     extends MachineResult[NodeT, EGraphT]
 }

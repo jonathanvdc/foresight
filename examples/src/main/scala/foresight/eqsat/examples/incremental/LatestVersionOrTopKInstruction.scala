@@ -2,7 +2,7 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.metadata.{AnalysisMetadata, EGraphWithMetadata}
-import foresight.eqsat.rewriting.patterns.{Instruction, MachineError, MachineState}
+import foresight.eqsat.rewriting.patterns.{Instruction, MachineError, MachineState, MutableMachineState}
 import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode}
 
 final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], C]
@@ -15,16 +15,25 @@ final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[Nod
 ) extends Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]] {
   require(k > 0, "k must be greater than 0")
 
-  override def execute(egraph: EGraphWithMetadata[NodeT, EGraphT], state: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-    val node = state.boundNodes(nodeIndex)
-    val eclass = state.registers(register)
+  override def effects: Instruction.Effects = Instruction.Effects.none
+
+  /**
+   * Executes the instruction on the given machine state.
+   *
+   * @param ctx The execution context for running instructions.
+   * @return true to continue search, false to abort.
+   */
+  override def execute(ctx: Instruction.Execution[NodeT, EGraphWithMetadata[NodeT, EGraphT]]): Boolean = {
+    val egraph = ctx.graph
+    val node = ctx.machine.boundNodeAt(nodeIndex)
+    val eclass = ctx.machine.registerAt(register)
 
     if (IncrementalSaturation.isLatestVersion(eclass.ref, egraph, versionMetadataName)
       || IncrementalSaturation.isTopK(node, eclass, egraph, k, costAnalysis)) {
 
-      Left(Seq(state))
+      ctx.continue()
     } else {
-      Right(NotLatestVersionOrTopKError(this, node, eclass))
+      ctx.error(NotLatestVersionOrTopKError(this, node, eclass))
     }
   }
 }

@@ -2,6 +2,8 @@ package foresight.eqsat.commands
 
 import foresight.eqsat._
 
+import scala.collection.mutable
+
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
  *
@@ -26,12 +28,19 @@ import foresight.eqsat._
  * }}}
  */
 final class CommandQueueBuilder[NodeT] {
-  private val commands = Seq.newBuilder[Command[NodeT]]
+  private var commands: mutable.Builder[Command[NodeT], Seq[Command[NodeT]]] = null
 
   /**
    * The [[CommandQueue]] accumulated so far.
    */
-  def result(): CommandQueue[NodeT] = CommandQueue(commands.result())
+  def result(): CommandQueue[NodeT] = {
+    if (commands == null) CommandQueue.empty
+    else CommandQueue(commands.result())
+  }
+
+  private def initCommands(): Unit = {
+    if (commands == null) commands = Seq.newBuilder[Command[NodeT]]
+  }
 
   /**
    * Appends a [[Command]] to the queue.
@@ -39,6 +48,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param cmd Command to append.
    */
   def append(cmd: Command[NodeT]): Unit = {
+    initCommands()
     commands += cmd
   }
 
@@ -48,6 +58,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param cmds Commands to append.
    */
   def appendAll(cmds: Iterable[Command[NodeT]]): Unit = {
+    initCommands()
     commands ++= cmds
   }
 
@@ -61,7 +72,7 @@ final class CommandQueueBuilder[NodeT] {
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
     val result = EClassSymbol.virtual()
-    commands += AddManyCommand(Seq(result -> node))
+    append(AddManyCommand(Seq(result -> node)))
     result
   }
 
@@ -79,7 +90,7 @@ final class CommandQueueBuilder[NodeT] {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         val result = EClassSymbol.virtual()
-        commands += AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add))))
+        append(AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add)))))
         result
 
       case MixedTree.Atom(call) =>
@@ -119,20 +130,20 @@ final class CommandQueueBuilder[NodeT] {
 
     // If the children are already present, we might not need to add a new node
     if (argCalls != null) {
-      val candidateNode = ENode(nodeType, definitions, uses, argCalls)
-      egraph.find(candidateNode) match {
-        case Some(existingCall) =>
+      val candidateNode = ENode.unsafeWrapArrays(nodeType, definitions, uses, argCalls)
+      egraph.findOrNull(candidateNode) match {
+        case null =>
+          // Node does not exist in the graph; we will add it below
+
+        case existingCall =>
           // Node already exists in the graph; reuse its class
           return EClassSymbol.real(existingCall)
-
-        case None =>
-          // Node does not exist; we will add it below
       }
     }
 
     val result = EClassSymbol.virtual()
     val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, args)
-    commands += AddManyCommand(Seq(result -> candidateNode))
+    append(AddManyCommand(Seq(result -> candidateNode)))
     result
   }
 
@@ -153,7 +164,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param b Second class symbol.
    */
   def union(a: EClassSymbol, b: EClassSymbol): Unit = {
-    commands += UnionManyCommand(Seq((a, b)))
+    append(UnionManyCommand(Seq((a, b))))
   }
 
   /**
@@ -172,23 +183,29 @@ final class CommandQueueBuilder[NodeT] {
    */
   def unionSimplified(a: EClassSymbol, b: EClassSymbol, egraph: ReadOnlyEGraph[NodeT]): Unit = {
     (a, b) match {
-      case (EClassSymbol.Real(callA), EClassSymbol.Real(callB)) =>
+      case (callA: EClassCall, callB: EClassCall) =>
         if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {
-          commands += UnionManyCommand(Seq((a, b)))
+          append(UnionManyCommand(Seq((a, b))))
         }
       case _ =>
-        commands += UnionManyCommand(Seq((a, b)))
+        append(UnionManyCommand(Seq((a, b))))
     }
   }
 }
 
 private object CommandQueueBuilder {
-  def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
+  def resolveAllOrNull(args: Seq[EClassSymbol]): Array[EClassCall] = {
     if (args.forall(_.isReal)) {
-      args.map {
-        case EClassSymbol.Real(call) => call
-        case _ => throw new IllegalStateException("Unreachable")
+      val arr = new Array[EClassCall](args.length)
+      var i = 0
+      while (i < args.length) {
+        args(i) match {
+          case call: EClassCall => arr(i) = call
+          case _ => throw new IllegalStateException("Unreachable")
+        }
+        i += 1
       }
+      arr
     } else {
       null
     }

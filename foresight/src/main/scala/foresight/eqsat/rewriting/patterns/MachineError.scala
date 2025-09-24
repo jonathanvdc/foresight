@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
 
 /**
  * An error that occurs during the execution of a pattern machine.

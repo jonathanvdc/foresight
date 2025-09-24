@@ -1,7 +1,10 @@
 package foresight.eqsat
 
-import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.util.{Debug, SeqFromArray}
+import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
+import foresight.util.Debug
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
 
 /**
  * A node in a slotted e-graph.
@@ -31,7 +34,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of definition slots.
    */
-  def definitions: SeqFromArray.Seq[Slot] = SeqFromArray(_definitions)
+  def definitions: SlotSeq = SlotSeq.unsafeWrapArray(_definitions)
 
   /**
    * Slots referenced by this node that are visible to its parent and must be satisfied by the
@@ -39,14 +42,14 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of use slots.
    */
-  def uses: SeqFromArray.Seq[Slot] = SeqFromArray(_uses)
+  def uses: SlotSeq = SlotSeq.unsafeWrapArray(_uses)
 
   /**
    * Child e-class applications, each with its own parameter-to-argument [[SlotMap]].
    *
    * @return Sequence of child e-class calls.
    */
-  def args: SeqFromArray.Seq[EClassCall] = SeqFromArray(_args)
+  def args: immutable.ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -125,7 +128,7 @@ final class ENode[+NodeT] private (
    *
    * @return An ordered sequence of slots used by this node.
    */
-  def slots: Seq[Slot] = SeqFromArray(slotArray)
+  def slots: Seq[Slot] = UnsafeSeqFromArray(slotArray)
 
   /**
    * The set of all distinct slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -284,10 +287,10 @@ final class ENode[+NodeT] private (
   //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
-      (this.nodeType == that.nodeType) &&
-      this.definitions == that.definitions &&
-      this.uses == that.uses &&
-      this.args == that.args
+      this.nodeType == that.nodeType &&
+      ENode.arraysEqual(this._definitions, that._definitions) &&
+      ENode.arraysEqual(this._uses, that._uses) &&
+      ENode.arraysEqual(this._args, that._args)
     case _ => false
   }
 
@@ -306,8 +309,49 @@ final class ENode[+NodeT] private (
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
+  private[eqsat] def arraysEqual[T](a: Array[T], b: Array[T]): Boolean = {
+    if (a eq b) return true
+    if (a.length != b.length) return false
+    var i = 0
+    while (i < a.length) {
+      if (a(i) != b(i)) return false
+      i += 1
+    }
+    true
+  }
+
+  private val emptySlotArray: Array[Slot] = Array.empty
+  private val emptyCallArray: Array[EClassCall] = Array.empty
+
+  private def arrayFromSlotSeq(s: Seq[Slot]): Array[Slot] = s match {
+    case slotSeq: SlotSeq => slotSeq.unsafeArray
+    case as: immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
+      as.unsafeArray.asInstanceOf[Array[Slot]]
+    case _ if s.isEmpty =>
+      emptySlotArray
+    case _ =>
+      s.toArray[Slot]
+  }
+
+  private def arrayFromCallSeq(s: Seq[EClassCall]): Array[EClassCall] = s match {
+    case as: immutable.ArraySeq[EClassCall] if as.unsafeArray.isInstanceOf[Array[EClassCall]] =>
+      as.unsafeArray.asInstanceOf[Array[EClassCall]]
+    case _ if s.isEmpty =>
+      emptyCallArray
+    case _ =>
+      s.toArray[EClassCall]
+  }
+
   def apply[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]): ENode[NodeT] = {
-    new ENode(nodeType, definitions.toArray, uses.toArray, args.toArray)
+    new ENode(nodeType, arrayFromSlotSeq(definitions), arrayFromSlotSeq(uses), arrayFromCallSeq(args))
+  }
+
+  private[foresight] def unsafeWrapArrays[NodeT](nodeType: NodeT, definitions: Array[Slot], uses: Array[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+    new ENode(nodeType, definitions, uses, args)
+  }
+
+  private[foresight] def unsafeWrapArrays[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+    new ENode(nodeType, arrayFromSlotSeq(definitions), arrayFromSlotSeq(uses), args)
   }
 
   def unapply[NodeT](n: ENode[NodeT]): Option[(NodeT, Seq[Slot], Seq[Slot], Seq[EClassCall])] =

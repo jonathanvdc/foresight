@@ -9,15 +9,15 @@ import scala.language.implicitConversions
 class RewriteArithTest {
   sealed trait Arith
   object Var extends Arith {
-    def apply[A](slot: Slot): MixedTree[Arith, A] = MixedTree.Node[Arith, A](this, Seq.empty, Seq(slot), Seq.empty)
+    def apply[A](slot: Slot): MixedTree[Arith, A] = MixedTree.Node[Arith, A](this, Seq.empty[Slot], Seq(slot), Seq.empty[MixedTree[Arith, A]])
   }
   object Add extends Arith {
     def apply[A](lhs: MixedTree[Arith, A], rhs: MixedTree[Arith, A]): MixedTree[Arith, A] =
-      MixedTree.Node[Arith, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
+      MixedTree.unslotted(this, Seq(lhs, rhs))
   }
   object Minus extends Arith {
     def apply[A](lhs: MixedTree[Arith, A], rhs: MixedTree[Arith, A]): MixedTree[Arith, A] =
-      MixedTree.Node[Arith, A](this, Seq.empty, Seq.empty, Seq(lhs, rhs))
+      MixedTree.unslotted(this, Seq(lhs, rhs))
   }
   final case class Number(value: Int) extends Arith
   object Number {

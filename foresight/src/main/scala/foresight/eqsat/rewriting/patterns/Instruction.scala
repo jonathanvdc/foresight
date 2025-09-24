@@ -1,6 +1,10 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat._
+import foresight.eqsat.collections.SlotSeq
+
+import java.util
+import scala.collection.compat._
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -9,19 +13,294 @@ import foresight.eqsat._
  * @tparam EGraphT The type of the e-graph.
  */
 trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+  /** A compact summary of what this instruction will create and bind. */
+  def effects: Instruction.Effects
+
   /**
    * Executes the instruction on the given machine state.
-   * @param graph The e-graph to execute the instruction on.
-   * @param machine The machine state to execute the instruction on.
-   * @return Either a nonempty set of new machine states or a machine error.
+   * @param ctx The execution context for running instructions.
+   * @return true to continue search, false to abort.
    */
-  def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]]
+  def execute(ctx: Instruction.Execution[NodeT, EGraphT]): Boolean
 }
 
 /**
  * A companion object for the `Instruction` trait.
  */
 object Instruction {
+  /**
+   * Summarizes the static effects of an instruction on the matching VM.
+   * @param createdRegisters The number of virtual-machine registers created.
+   * @param boundVars The sequence of pattern variables bound.
+   * @param boundSlots The sequence of slots bound (ordered).
+   * @param boundNodes The number of e-nodes bound.
+   */
+  final case class Effects(
+    createdRegisters: Int,
+    boundVars: immutable.ArraySeq[Pattern.Var],
+    boundSlots: SlotSeq,
+    boundNodes: Int
+  ) {
+    /**
+     * Combine this effect summary with another by summing counts and concatenating sequences.
+     * @param other The other effect summary to combine with.
+     * @return The combined effect summary.
+     */
+    def ++(other: Effects): Effects = Effects(
+      createdRegisters = this.createdRegisters + other.createdRegisters,
+      boundVars = this.boundVars ++ other.boundVars,
+      boundSlots = this.boundSlots ++ other.boundSlots,
+      boundNodes = this.boundNodes + other.boundNodes
+    )
+  }
+
+  /** A companion object for [[Effects]]. */
+  object Effects {
+    /** An effect summary for an instruction that does nothing. */
+    val none: Effects = Effects(0, immutable.ArraySeq.empty, SlotSeq.empty, 0)
+
+    /**
+     * Aggregate a collection of effect summaries into a single summary.
+     * @param effects The collection of effect summaries to aggregate.
+     * @return The aggregated effect summary.
+     */
+    def aggregate(effects: Iterable[Effects]): Effects =
+      effects.foldLeft(none)(_ ++ _)
+
+    /**
+     * Aggregate the effects of a collection of instructions.
+     * @param instructions The collection of instructions to aggregate the effects of.
+     * @return The aggregated effect summary.
+     */
+    def from(instructions: Iterable[Instruction[_, _]]): Effects =
+      aggregate(instructions.map(_.effects))
+  }
+
+  /**
+   * An execution context that manages running a sequence of instructions without extra allocations.
+   * Reused via a user-creatable pool. Each instruction advances execution by calling `continue()`
+   * or reports errors via `error(...)`.
+   */
+  sealed trait Execution[NodeT, +EGraphT <: ReadOnlyEGraph[NodeT]] {
+    /** The current e-graph. */
+    def graph: EGraphT
+
+    /** The current machine state. */
+    def machine: MutableMachineState[NodeT]
+
+    /** The current instruction pointer. This is the index of the instruction that will be executed next. */
+    def instructionPointer: Int
+
+    /** Continue execution with the current machine, advancing the instruction pointer by one. */
+    def continue(): Boolean
+
+    /**
+     * Continue execution with a different machine (used for forked search paths).
+     * Restores the original machine afterward.
+     * @param newMachine The new machine state to use for the next instruction.
+     * @return true to continue search, false to abort (as determined by continuations and instruction logic).
+     */
+    def continueWith(newMachine: MutableMachineState[NodeT]): Boolean
+
+    /**
+     * Report an error and delegate to the failure continuation.
+     * @param err The error to report.
+     * @return true to continue search, false to abort (as determined by continuations and instruction logic).
+     */
+    def error(err: MachineError[NodeT]): Boolean
+
+    /** Run starting at the current instruction pointer. */
+    def run(): Boolean
+
+    /**
+     * Terminate this execution context and release the machine.
+     */
+    def terminate(): Unit
+  }
+
+  /**
+   * An execution context that manages running a sequence of instructions without extra allocations.
+   * Reused via a user-creatable pool. Each instruction advances execution by calling `continue()`
+   * or reports errors via `error(...)`.
+   */
+  private final class ExecutionImpl[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](private val pool: Execution.Pool[NodeT, EGraphT])
+    extends Execution[NodeT, EGraphT] {
+    // Mutable fields intentionally use null-sentinels for cross-version compatibility and low overhead.
+    private var _graph: EGraphT = null.asInstanceOf[EGraphT]
+    private var _machine: MutableMachineState[NodeT] = null
+    private var _instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]] = null
+    private var _onSuccess: MutableMachineState[NodeT] => Boolean = null
+    private var _onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean = null
+    private var _ip: Int = 0
+
+    override def instructionPointer: Int = _ip
+
+    /** Initialize this execution context for a fresh run. */
+    def init(graph: EGraphT,
+             machine: MutableMachineState[NodeT],
+             instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+             onSuccess: MutableMachineState[NodeT] => Boolean,
+             onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean): Unit = {
+      _graph = graph
+      _machine = machine
+      _instructions = instructions
+      _onSuccess = onSuccess
+      _onFailure = onFailure
+      _ip = 0
+    }
+
+    /** The current e-graph. */
+    def graph: EGraphT = _graph
+
+    /** The current machine state. */
+    def machine: MutableMachineState[NodeT] = _machine
+
+    /** Transfer ownership of the current machine to the caller. The caller is responsible for releasing it. */
+    private def transferMachine(): MutableMachineState[NodeT] = {
+      val m = _machine
+      _machine = null
+      m
+    }
+
+    /**
+     * Continue execution with the current machine, advancing the instruction pointer by one.
+     * @return true to continue search, false to abort (as determined by continuations and instruction logic)
+     */
+    def continue(): Boolean = {
+      _ip += 1
+      if (_ip >= _instructions.length) {
+        // Successful completion of all instructions.
+        _onSuccess(transferMachine())
+      } else {
+        _instructions(_ip).execute(this)
+      }
+    }
+
+    /**
+     * Continue execution with a different machine (used for forked search paths),
+     * restoring the original machine afterwards.
+     */
+    def continueWith(newMachine: MutableMachineState[NodeT]): Boolean = {
+      val saved = _machine
+      val savedIp = _ip
+      _machine = newMachine
+      val res = continue()
+      _machine = saved
+      _ip = savedIp
+      res
+    }
+
+    /** Report an error and delegate to the failure continuation. */
+    def error(err: MachineError[NodeT]): Boolean = {
+      if (_onFailure == null) {
+        // No failure continuation; just continue search. Release the machine.
+        terminate()
+        true
+      } else {
+        _onFailure(this, err)
+      }
+    }
+
+    /** Run starting at the current instruction pointer. */
+    def run(): Boolean = {
+      if (_instructions == null) true
+      else if (_ip >= _instructions.length) _onSuccess(_machine)
+      else _instructions(_ip).execute(this)
+    }
+
+    override def terminate(): Unit = {
+      transferMachine().release()
+    }
+
+    /** Reset all internal state before pooling. */
+    private[Instruction] def reset(): Unit = {
+      _graph = null.asInstanceOf[EGraphT]
+      _machine = null
+      _instructions = null
+      _onSuccess = null
+      _onFailure = null
+      _ip = 0
+    }
+  }
+
+  object Execution {
+    private val threadLocalPool: ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] = new ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] {
+      override def initialValue(): Pool[_, _ <: ReadOnlyEGraph[_]] = {
+        new Pool()
+      }
+    }
+
+    /** Get the thread-local pool of execution contexts. */
+    def pool[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]]: Pool[NodeT, EGraphT] = {
+      threadLocalPool.get().asInstanceOf[Pool[NodeT, EGraphT]]
+    }
+
+    /** Pool for reusing `Execution` contexts to avoid allocations. */
+    final class Pool[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](initialCapacity: Int = 0) {
+      private val stack = new util.ArrayDeque[ExecutionImpl[NodeT, EGraphT]](math.max(1, initialCapacity))
+
+      /** Borrow an execution context from the pool. */
+      private def borrow(): ExecutionImpl[NodeT, EGraphT] = {
+        val ctx = stack.pollFirst()
+        if (ctx != null) ctx else new ExecutionImpl[NodeT, EGraphT](this)
+      }
+
+      /** Release a previously borrowed execution context back to the pool. */
+      private def release(ctx: ExecutionImpl[NodeT, EGraphT]): Unit = {
+        if (ctx ne null) {
+          ctx.reset()
+          stack.addFirst(ctx)
+        }
+      }
+
+      /**
+       * Run a sequence of instructions on a machine and graph, reusing an execution context from the pool.
+       *
+       * @param graph        The e-graph to match against.
+       * @param machine      The initial machine state. This method takes ownership of the machine and will release it.
+       * @param instructions The instructions to apply to the machine.
+       * @param onSuccess    A continuation called for each successful termination of the machine.
+       *                     If it returns false, the search is aborted.
+       * @param onFailure    A continuation called for each unsuccessful termination of the machine.
+       *                     If it returns false, the search is aborted.
+       * @return true if the search completed (all continuations returned true); false if aborted early.
+       */
+      def run(
+               graph: EGraphT,
+               machine: MutableMachineState[NodeT],
+               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               onSuccess: MutableMachineState[NodeT] => Boolean,
+               onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean
+             ): Boolean = {
+        val ctx = borrow()
+        try {
+          ctx.init(graph, machine, instructions, onSuccess, onFailure)
+          ctx.run()
+        } finally {
+          release(ctx)
+        }
+      }
+
+      /**
+       * Run a sequence of instructions on a machine and graph, reusing an execution context from the pool.
+       *
+       * @param graph        The e-graph to match against.
+       * @param machine      The initial machine state. This method takes ownership of the machine and will release it.
+       * @param instructions The instructions to apply to the machine.
+       * @param onSuccess    A continuation called for each successful termination of the machine.
+       * @return true if the search completed (all continuations returned true); false if aborted early.
+       */
+      def run(
+               graph: EGraphT,
+               machine: MutableMachineState[NodeT],
+               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               onSuccess: MutableMachineState[NodeT] => Boolean
+             ): Boolean = {
+        run(graph, machine, instructions, onSuccess, null)
+      }
+    }
+  }
+
   /**
    * An instruction that binds an e-node to a register.
    * @param register The index of the register to bind the e-node to.
@@ -34,40 +313,72 @@ object Instruction {
    */
   final case class BindNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
                                                                      nodeType: NodeT,
-                                                                     definitions: Seq[Slot],
-                                                                     uses: Seq[Slot],
+                                                                     definitions: SlotSeq,
+                                                                     uses: SlotSeq,
                                                                      argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
-    private def matchesSlot(machine: MachineState[NodeT], pair: (Slot, Slot)): Boolean = {
-      val (expected, actual) = pair
-      machine.boundSlots.get(expected).forall(_ == actual)
-    }
+    override val effects: Instruction.Effects = Instruction.Effects(
+      createdRegisters = argCount,
+      boundVars = immutable.ArraySeq.empty[Pattern.Var],
+      boundSlots = definitions ++ uses,
+      boundNodes = 1
+    )
 
-    private def allSlotsMatch(machine: MachineState[NodeT], expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
-      if (expected.length != actual.length) return false
-      var i = 0
-      while (i < expected.length) {
-        if (!matchesSlot(machine, (expected(i), actual(i)))) return false
-        i += 1
+    override def execute(ctx: Instruction.Execution[NodeT, EGraphT]): Boolean = {
+      val machine = ctx.machine
+      val call = machine.registerAt(register)
+
+      // Local helpers moved to use ctx.graph / ctx.machine
+      def matchesSlot(expected: Slot, actual: Slot): Boolean = {
+        machine.boundSlotOrElse(expected, null) match {
+          case null => true
+          case bound if bound == actual => true
+          case _ => false
+        }
       }
-      true
-    }
-
-    private def findInEClass(graph: EGraphT, call: EClassCall, machine: MachineState[NodeT]): Seq[ENode[NodeT]] = {
-      graph.nodes(call).toSeq.filter { node =>
-        node.nodeType == nodeType &&
-          node.args.size == argCount &&
-          allSlotsMatch(machine, definitions, node.definitions) &&
-          allSlotsMatch(machine, uses, node.uses)
+      def allSlotsMatch(expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
+        if (expected.length != actual.length) return false
+        var i = 0
+        while (i < expected.length) {
+          if (!matchesSlot(expected(i), actual(i))) return false
+          i += 1
+        }
+        true
       }
-    }
+      def findInEClass(): Seq[ENode[NodeT]] = {
+        ctx.graph.nodes(call, nodeType)
+          .filter { node =>
+            node.args.size == argCount &&
+            allSlotsMatch(definitions, node.definitions) &&
+            allSlotsMatch(uses, node.uses)
+          }
+          .toSeq
+      }
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      val call = machine.registers(register)
-      findInEClass(graph, call, machine) match {
-        case nodes if nodes.isEmpty => Right(MachineError.NoMatchingNode(this, call))
-        case nodes => Left(nodes.map(machine.bindNode(_, definitions, uses)))
+      val nodes = findInEClass()
+      nodes.size match {
+        case 0 =>
+          ctx.error(MachineError.NoMatchingNode(this, call))
+        case 1 =>
+          machine.bindNode(nodes.head)
+          ctx.continue()
+        case _ =>
+          // Try forks first, then continue with the original machine last.
+          var continueSearch = true
+          var i = 1
+          while (continueSearch && i < nodes.size) {
+            val forked = machine.fork()
+            forked.bindNode(nodes(i))
+            continueSearch = ctx.continueWith(forked)
+            i += 1
+          }
+          if (continueSearch) {
+            machine.bindNode(nodes.head)
+            ctx.continue()
+          } else {
+            continueSearch
+          }
       }
     }
   }
@@ -83,8 +394,17 @@ object Instruction {
                                                                     variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      Left(Seq(machine.bindVar(variable, MixedTree.Atom[NodeT, EClassCall](machine.registers(register)))))
+    override val effects: Instruction.Effects = Instruction.Effects(
+      createdRegisters = 0,
+      boundVars = immutable.ArraySeq(variable),
+      boundSlots = SlotSeq.empty,
+      boundNodes = 0
+    )
+
+    override def execute(ctx: Instruction.Execution[NodeT, EGraphT]): Boolean = {
+      val value = MixedTree.Atom[NodeT, EClassCall](ctx.machine.registerAt(register))
+      ctx.machine.bindVar(value)
+      ctx.continue()
     }
   }
 
@@ -97,11 +417,15 @@ object Instruction {
    */
   final case class Compare[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
-    override def execute(graph: EGraphT, machine: MachineState[NodeT]): Either[Seq[MachineState[NodeT]], MachineError[NodeT]] = {
-      if (graph.areSame(machine.registers(register1), machine.registers(register2))) {
-        Left(Seq(machine))
+
+    override def effects: Instruction.Effects = Instruction.Effects.none
+
+    override def execute(ctx: Instruction.Execution[NodeT, EGraphT]): Boolean = {
+      val m = ctx.machine
+      if (ctx.graph.areSame(m.registerAt(register1), m.registerAt(register2))) {
+        ctx.continue()
       } else {
-        Right(MachineError.InconsistentVars(this, machine.registers(register1), machine.registers(register2)))
+        ctx.error(MachineError.InconsistentVars(this, m.registerAt(register1), m.registerAt(register2)))
       }
     }
   }

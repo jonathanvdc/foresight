@@ -123,7 +123,10 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       assert(renamedShape.shape.isShape)
     }
 
-    val ref = nodeToRefOrElse(renamedShape.shape, return null)
+    val ref = nodeToRefOrElse(renamedShape.shape, null)
+    if (ref == null) {
+      return null
+    }
 
     if (!renamedShape.shape.hasSlots) {
       return ref.callWithoutSlots
@@ -140,7 +143,12 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       assert(!node.hasSlots)
     }
 
-    nodeToRefOrElse(node, return null).callWithoutSlots
+    val ref = nodeToRefOrElse(node, null)
+    if (ref == null) {
+      return null
+    }
+
+    ref.callWithoutSlots
   }
 
   final override def users(ref: EClassRef): Set[ENode[NodeT]] = {
@@ -152,7 +160,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
     })
   }
 
-  final override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
+  final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
     val data = dataForClass(canonicalApp.ref)
 
@@ -170,7 +178,31 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       }
     } else {
       // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      data.nodes.keySet
+      data.nodes.keys
+    }
+  }
+
+  final override def nodes(call: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = {
+    val canonicalApp = canonicalize(call)
+    val data = dataForClass(canonicalApp.ref)
+
+    assert(canonicalApp.args.size == data.slots.size)
+
+    if (data.hasSlots) {
+      if (canonicalApp.args.isIdentity) {
+        // Common case: the e-class call's arguments are the identity mapping.
+        // We can return a precomputed set of applied nodes with identity renaming, filtered by node type.
+        data.appliedNodesWithIdentity.filter(_.nodeType == nodeType)
+      } else {
+        // E-class has slots and the e-class call's arguments are not the identity mapping.
+        // We first filter, then rename all applied nodes by the e-class call's arguments.
+        // Filtering first is more efficient than renaming first then filtering as it avoids unnecessary
+        // renaming work and allocations.
+        data.appliedNodes.filter(_.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
+      }
+    } else {
+      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
+      data.nodes.keys.filter(_.nodeType == nodeType)
     }
   }
 

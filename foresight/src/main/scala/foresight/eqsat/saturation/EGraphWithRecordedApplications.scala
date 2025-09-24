@@ -31,7 +31,8 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = egraph.canonicalizeOrNull(ref)
   override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = egraph.classes
-  override def nodes(call: EClassCall): Set[ENode[Node]] = egraph.nodes(call)
+  override def nodes(call: EClassCall): Iterable[ENode[Node]] = egraph.nodes(call)
+  override def nodes(call: EClassCall, nodeType: Node): Iterable[ENode[Node]] = egraph.nodes(call, nodeType)
   override def users(ref: EClassRef): Set[ENode[Node]] = egraph.users(ref)
   override def findOrNull(node: ENode[Node]): EClassCall = egraph.findOrNull(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)

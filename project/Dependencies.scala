@@ -18,6 +18,8 @@ object Dependencies {
       "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
     )
 
+    val collectionCompat = Seq("org.scala-lang.modules" %% "scala-collection-compat" % "2.13.0")
+
     val reflectDeps =
       if (isScala211(scalaVersion))
         Seq(
@@ -31,7 +33,7 @@ object Dependencies {
         Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       else Nil
 
-    baseDeps ++ reflectDeps ++ parallelCollections
+    baseDeps ++ collectionCompat ++ reflectDeps ++ parallelCollections
   }
 
   def testDependencies(scalaVersion: String): Seq[ModuleID] = {

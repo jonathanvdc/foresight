@@ -1,9 +1,10 @@
 package foresight.eqsat.collections
 
 import foresight.eqsat.{Permutation, Slot}
-import foresight.util.SeqFromArray
+import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering
 
+import scala.collection.compat._
 import scala.collection.mutable
 
 /**
@@ -69,12 +70,12 @@ final class SlotMap private(private val _keys: Array[Slot],
   /**
    * Keys in ascending order.
    */
-  def keys: SeqFromArray.Seq[Slot] = SeqFromArray(_keys)
+  def keys: SlotSeq = SlotSeq.unsafeWrapArray(_keys)
 
   /**
    * Values in the order of their sorted keys.
    */
-  def values: SeqFromArray.Seq[Slot] = SeqFromArray(_values)
+  def values: SlotSeq = SlotSeq.unsafeWrapArray(_values)
 
   /**
    * The set of keys.

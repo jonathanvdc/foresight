@@ -2,6 +2,7 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.rewriting.PortableMatch
 import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
+import foresight.util.collections.ArrayMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
@@ -13,8 +14,8 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class PatternMatch[NodeT](root: EClassCall,
-                                     varMapping: Map[Pattern.Var, MixedTree[NodeT, EClassCall]],
-                                     slotMapping: Map[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
+                                     varMapping: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]],
+                                     slotMapping: ArrayMap[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
 
   /**
    * Gets the tree that corresponds to a variable.
@@ -37,8 +38,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @return The updated match with the new binding.
    */
   def bind(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): PatternMatch[NodeT] = {
-    val newVarMapping = varMapping + (variable -> value)
-    PatternMatch(root, newVarMapping, slotMapping)
+    PatternMatch(root, varMapping.updated(variable, value), slotMapping)
   }
 
   /**

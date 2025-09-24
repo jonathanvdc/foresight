@@ -1,5 +1,10 @@
 package foresight.eqsat
 
+import foresight.eqsat.collections.SlotSeq
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat._
+
 /**
  * An immutable, slot-aware, ordered tree representation of a term.
  *
@@ -39,9 +44,9 @@ package foresight.eqsat
  */
 final case class Tree[+NodeT](
                                nodeType: NodeT,
-                               definitions: Seq[Slot],
-                               uses: Seq[Slot],
-                               args: Seq[Tree[NodeT]]
+                               definitions: SlotSeq,
+                               uses: SlotSeq,
+                               args: immutable.ArraySeq[Tree[NodeT]]
                              ) {
 
   /**
@@ -63,6 +68,24 @@ final case class Tree[+NodeT](
 object Tree {
 
   /**
+   * Construct a `Tree` node.
+   *
+   * @param nodeType    The operator or constructor at this node.
+   * @param definitions Slots bound/introduced by this node itself.
+   * @param uses        Slots consumed by this node but defined elsewhere.
+   * @param args        Ordered children of this node.
+   * @tparam NodeT      The type used to represent operators/constructors.
+   * @return            A new `Tree` with the given structure.
+   */
+  def apply[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[Tree[NodeT]]): Tree[NodeT] = {
+    new Tree(
+      nodeType,
+      SlotSeq.from(definitions),
+      SlotSeq.from(uses),
+      UnsafeSeqFromArray(args))
+  }
+
+  /**
    * Construct a `Tree` node with no bound or used slots.
    *
    * This is useful for building trees in contexts without any slot bindings.
@@ -73,5 +96,5 @@ object Tree {
    * @return         A new `Tree` with empty `definitions` and `uses`.
    */
   def unslotted[NodeT](nodeType: NodeT, args: Seq[Tree[NodeT]]): Tree[NodeT] =
-    Tree(nodeType, Seq.empty, Seq.empty, args)
+    Tree(nodeType, immutable.ArraySeq.empty[Slot], immutable.ArraySeq.empty[Slot], args)
 }

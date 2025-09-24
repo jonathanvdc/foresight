@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{EClassCall, ENode, Slot}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, Slot}
 
 /**
  * Symbolic handle for an [[ENode]] in an e-graph.
@@ -31,7 +31,7 @@ final case class ENodeSymbol[NodeT](
    * Resolves this symbolic node to a concrete [[ENode]] using the given reification.
    *
    * All [[EClassSymbol.Virtual]]s in [[args]] must be present in the `reification` map.
-   * Any [[EClassSymbol.Real]] in [[args]] is left unchanged.
+   * Any [[EClassCall]] in [[args]] is left unchanged.
    *
    * @param reification Mapping from virtual e-class symbols to concrete [[EClassCall]]s.
    * @return An [[ENode]] with all arguments fully resolved.
