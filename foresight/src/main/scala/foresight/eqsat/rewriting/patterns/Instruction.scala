@@ -296,11 +296,6 @@ object Instruction {
     }
   }
 
-  /** Normalize an iterable of instructions into an immutable ArraySeq for runners. */
-  def toArraySeq[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](xs: Iterable[Instruction[NodeT, EGraphT]]): immutable.ArraySeq[Instruction[NodeT, EGraphT]] = {
-    immutable.ArraySeq.from(xs)
-  }
-
   /**
    * An instruction that binds an e-node to a register.
    * @param register The index of the register to bind the e-node to.

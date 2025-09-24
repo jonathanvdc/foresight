@@ -1,8 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
+import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat._
+import scala.collection.compat.*
 
 /**
  * A compiled pattern.
@@ -97,7 +98,7 @@ object CompiledPattern {
    */
   def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
                                                      instructions: Seq[Instruction[NodeT, EGraphT]]): CompiledPattern[NodeT, EGraphT] = {
-    new CompiledPattern(pattern, immutable.ArraySeq.from(instructions))
+    new CompiledPattern(pattern, UnsafeSeqFromArray(instructions))
   }
 
   /**
