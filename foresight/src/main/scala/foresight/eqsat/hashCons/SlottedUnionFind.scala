@@ -53,8 +53,10 @@ private[hashCons] final case class SlottedUnionFind(parents: Map[EClassRef, ECla
    * @return The representative of the key, if the key is in the union-find. Null otherwise.
    */
   def findOrNull(key: EClassRef): EClassCall = {
-    val parent = parents.getOrElse(key, return null)
-    if (parent.ref == key) {
+    val parent = parents.getOrElse(key, null)
+    if (parent == null) {
+      null
+    } else if (parent.ref == key) {
       parent
     } else {
       findOrNull(parent)
