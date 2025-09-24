@@ -121,13 +121,13 @@ final class CommandQueueBuilder[NodeT] {
     // If the children are already present, we might not need to add a new node
     if (argCalls != null) {
       val candidateNode = ENode.unsafeWrapArrays(nodeType, definitions, uses, argCalls)
-      egraph.find(candidateNode) match {
-        case Some(existingCall) =>
+      egraph.findOrNull(candidateNode) match {
+        case null =>
+          // Node does not exist in the graph; we will add it below
+
+        case existingCall =>
           // Node already exists in the graph; reuse its class
           return EClassSymbol.real(existingCall)
-
-        case None =>
-          // Node does not exist; we will add it below
       }
     }
 
