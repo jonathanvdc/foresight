@@ -100,12 +100,49 @@ node7 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="execute-fffffff6" data-f-keywords="override">
+        <div class="documentableElement" id="effects-0" data-f-keywords="override">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="LatestVersionOrTopKInstruction.html#execute-fffffff6" t="n" class="documentableName ">execute</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">egraph</span>: <span data-unresolved-link="" t="t">EGraphWithMetadata</span>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>], <span t="k"></span><span data-unresolved-link="" t="n">state</span>: <span data-unresolved-link="" t="t">MachineState</span>[<span t="t">NodeT</span>]): <span data-unresolved-link="" t="t">Either</span>[<span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">MachineState</span>[<span t="t">NodeT</span>]], <span data-unresolved-link="" t="t">MachineError</span>[<span t="t">NodeT</span>]]
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="LatestVersionOrTopKInstruction.html#effects-0" t="n" class="documentableName ">effects</a>: <span data-unresolved-link="" t="t">Effects</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>A compact summary of what this instruction will create and bind.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>A compact summary of what this instruction will create and bind.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Definition Classes
+              </dt>
+              <dd class="body-medium">
+               <div>
+                <span data-unresolved-link="">Instruction</span>
+               </div>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="execute-fb" data-f-keywords="override">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">override </span></span><span class="kind"><span t="k">def </span></span><a href="LatestVersionOrTopKInstruction.html#execute-fb" t="n" class="documentableName ">execute</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ctx</span>: <span data-unresolved-link="" t="t">Execution</span>[<span t="t">NodeT</span>, <span data-unresolved-link="" t="t">EGraphWithMetadata</span>[<span t="t">NodeT</span>, <span t="t">EGraphT</span>]]): <span data-unresolved-link="" t="t">Boolean</span>
            </div>
           </div>
          </div>
@@ -124,16 +161,10 @@ node7 -> node2;
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
-               graph
+               ctx
               </dt>
               <dd class="body-medium">
-               <p>The e-graph to execute the instruction on.</p>
-              </dd>
-              <dt class="body-small">
-               machine
-              </dt>
-              <dd class="body-medium">
-               <p>The machine state to execute the instruction on.</p>
+               <p>The execution context for running instructions.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
@@ -142,7 +173,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>Either a nonempty set of new machine states or a machine error.</p>
+               <p>true to continue search, false to abort.</p>
               </dd>
               <dt class="body-small">
                Definition Classes
