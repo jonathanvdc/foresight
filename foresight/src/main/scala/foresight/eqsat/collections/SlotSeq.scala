@@ -3,6 +3,8 @@ package foresight.eqsat.collections
 import foresight.eqsat.Slot
 import foresight.util.collections.AbstractArraySeq
 
+import scala.collection.compat.immutable
+
 /**
  * A sequence of slots backed by an array.
  *
@@ -80,7 +82,10 @@ object SlotSeq {
    */
   def from(slots: Iterable[Slot]): SlotSeq = {
     slots match {
-      case s: SlotSeq => s // avoid copy
+      case s: SlotSeq => s
+      case as: immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
+        unsafeWrapArray(as.unsafeArray.asInstanceOf[Array[Slot]])
+      case _ if slots.isEmpty => empty
       case _ => unsafeWrapArray(slots.toArray)
     }
   }
