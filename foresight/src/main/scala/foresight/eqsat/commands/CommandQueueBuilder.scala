@@ -1,7 +1,8 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat._
-import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.mutable
 
 /**
  * Incrementally constructs a [[CommandQueue]] for later execution.
@@ -27,12 +28,19 @@ import foresight.util.collections.UnsafeSeqFromArray
  * }}}
  */
 final class CommandQueueBuilder[NodeT] {
-  private val commands = Seq.newBuilder[Command[NodeT]]
+  private var commands: mutable.Builder[Command[NodeT], Seq[Command[NodeT]]] = null
 
   /**
    * The [[CommandQueue]] accumulated so far.
    */
-  def result(): CommandQueue[NodeT] = CommandQueue(commands.result())
+  def result(): CommandQueue[NodeT] = {
+    if (commands == null) CommandQueue.empty
+    else CommandQueue(commands.result())
+  }
+
+  private def initCommands(): Unit = {
+    if (commands == null) commands = Seq.newBuilder[Command[NodeT]]
+  }
 
   /**
    * Appends a [[Command]] to the queue.
@@ -40,6 +48,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param cmd Command to append.
    */
   def append(cmd: Command[NodeT]): Unit = {
+    initCommands()
     commands += cmd
   }
 
@@ -49,6 +58,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param cmds Commands to append.
    */
   def appendAll(cmds: Iterable[Command[NodeT]]): Unit = {
+    initCommands()
     commands ++= cmds
   }
 
@@ -62,7 +72,7 @@ final class CommandQueueBuilder[NodeT] {
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
     val result = EClassSymbol.virtual()
-    commands += AddManyCommand(Seq(result -> node))
+    append(AddManyCommand(Seq(result -> node)))
     result
   }
 
@@ -80,7 +90,7 @@ final class CommandQueueBuilder[NodeT] {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         val result = EClassSymbol.virtual()
-        commands += AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add))))
+        append(AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add)))))
         result
 
       case MixedTree.Atom(call) =>
@@ -133,7 +143,7 @@ final class CommandQueueBuilder[NodeT] {
 
     val result = EClassSymbol.virtual()
     val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, args)
-    commands += AddManyCommand(Seq(result -> candidateNode))
+    append(AddManyCommand(Seq(result -> candidateNode)))
     result
   }
 
@@ -154,7 +164,7 @@ final class CommandQueueBuilder[NodeT] {
    * @param b Second class symbol.
    */
   def union(a: EClassSymbol, b: EClassSymbol): Unit = {
-    commands += UnionManyCommand(Seq((a, b)))
+    append(UnionManyCommand(Seq((a, b))))
   }
 
   /**
@@ -175,10 +185,10 @@ final class CommandQueueBuilder[NodeT] {
     (a, b) match {
       case (callA: EClassCall, callB: EClassCall) =>
         if (egraph.canonicalize(callA) != egraph.canonicalize(callB)) {
-          commands += UnionManyCommand(Seq((a, b)))
+          append(UnionManyCommand(Seq((a, b))))
         }
       case _ =>
-        commands += UnionManyCommand(Seq((a, b)))
+        append(UnionManyCommand(Seq((a, b))))
     }
   }
 }

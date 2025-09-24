@@ -203,12 +203,14 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
  */
 object CommandQueue {
 
+  private val emptyQueue: CommandQueue[_] = CommandQueue(Seq.empty)
+
   /**
    * Creates an empty queue.
    *
    * @tparam NodeT Node type for expressions represented by the e-graph.
    */
-  def empty[NodeT]: CommandQueue[NodeT] = CommandQueue(Seq.empty)
+  def empty[NodeT]: CommandQueue[NodeT] = emptyQueue.asInstanceOf[CommandQueue[NodeT]]
 
   /** Applies union-merge and add-batching passes to a flat list of commands. */
   private def optimizeCommands[NodeT](commands: Seq[Command[NodeT]]): Seq[Command[NodeT]] = {
