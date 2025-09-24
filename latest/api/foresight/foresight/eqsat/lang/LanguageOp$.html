@@ -39,18 +39,12 @@
 node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
 node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
 node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
-node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Product</span></span>", class="trait vertex"];
-node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Mirror</span></span>", class="trait vertex"];
 
 
  node0 -> node1;
 node1 -> node2;
 node1 -> node3;
 node3 -> node2;
-node0 -> node4;
-node4 -> node1;
-node4 -> node5;
-node5 -> node1;
 
 }
 </script>
@@ -61,12 +55,6 @@ node5 -> node1;
    </dt>
    <dd class="body-medium">
     <div class="mono-small-block supertypes">
-     <div>
-      trait <span data-unresolved-link="" t="n">Product</span>
-     </div>
-     <div>
-      trait <span data-unresolved-link="" t="n">Mirror</span>
-     </div>
      <div>
       class <span data-unresolved-link="" t="n">Object</span>
      </div>
@@ -100,23 +88,23 @@ node5 -> node1;
  <div class="membersList expand">
   <div class="tabs">
    <div class="contents">
-    <section id="Type-members">
-     <div data-togglable="Type members" class="tab expand">
+    <section id="Value-members">
+     <div data-togglable="Value members" class="tab expand">
       <div class="member-group-header">
-       <h3 data-togglable="Type members" class="h400">Type members</h3>
+       <h3 data-togglable="Value members" class="h400">Value members</h3>
       </div>
-      <section id="Inherited-and-Abstract-types">
+      <section id="Concrete-methods">
        <div class="documentableList expand">
         <div class="documentableList-expander">
          <button class="icon-button show-content expand"></button>
-         <h4 class="groupHeader h200">Inherited and Abstract types</h4>
+         <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
-        <div class="documentableElement" id="MirroredElemLabels-0" data-f-inherited="Mirror">
+        <div class="documentableElement" id="apply-fffff7cc">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="LanguageOp$.html#MirroredElemLabels-0" t="n" class="documentableName ">MirroredElemLabels</a><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">Tuple</span>
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="LanguageOp$.html#apply-fffff7cc" t="n" class="documentableName ">apply</a>[<span t="k"></span><span data-unresolved-link="" t="t">E</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">ord</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">schema</span>: <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">Byte</span>], <span t="k"></span><span data-unresolved-link="" t="n">payload</span>: <span data-unresolved-link="" t="t">Seq</span>[<span data-unresolved-link="" t="t">Any</span>]): <a href="LanguageOp.html" t="t">LanguageOp</a>[<span data-unresolved-link="" t="t">E</span>]
            </div>
           </div>
          </div>
@@ -126,54 +114,50 @@ node5 -> node1;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>The names of the product elements</p>
+             <p>Constructs a new <code>LanguageOp</code>.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>The names of the product elements</p>
+              <p>Constructs a new <code>LanguageOp</code>.</p>
+              <p>This is primarily intended for use by <code>Language</code> implementations.</p>
              </div>
-             <h2 class="h200">Attributes</h2>
+             <h2 class="h200">Type parameters</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
-               Inherited from:
+               E
               </dt>
               <dd class="body-medium">
-               <span data-unresolved-link="">Mirror</span>
+               <p>The surface language this node belongs to.</p>
               </dd>
              </dl>
-            </div>
-           </div>
-          </div>
-         </div>
-        </div>
-        <div class="documentableElement" id="MirroredLabel-0" data-f-inherited="Mirror">
-         <div class="documentableElement-expander">
-          <button class="icon-button ar show-content"></button>
-          <div class="header monospace mono-medium">
-           <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="LanguageOp$.html#MirroredLabel-0" t="n" class="documentableName ">MirroredLabel</a><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">String</span>
-           </div>
-          </div>
-         </div>
-         <div class="docs">
-          <span class="modifiers"></span>
-          <div>
-           <div class="originInfo"></div>
-           <div class="memberDocumentation">
-            <div class="documentableBrief doc">
-             <p>The name of the type</p>
-            </div>
-            <div class="cover">
-             <div class="doc">
-              <p>The name of the type</p>
-             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               ord
+              </dt>
+              <dd class="body-medium">
+               <p>The unique ordinal of the operation within its language.</p>
+              </dd>
+              <dt class="body-small">
+               payload
+              </dt>
+              <dd class="body-medium">
+               <p>The actual data of the operation.</p>
+              </dd>
+              <dt class="body-small">
+               schema
+              </dt>
+              <dd class="body-medium">
+               <p>The schema bytes describing the structure of the payload.</p>
+              </dd>
+             </dl>
              <h2 class="h200">Attributes</h2>
              <dl class="attributes attributes-small">
               <dt class="body-small">
-               Inherited from:
+               Returns
               </dt>
               <dd class="body-medium">
-               <span data-unresolved-link="">Mirror</span>
+               <p>A new <code>LanguageOp</code> instance.</p>
               </dd>
              </dl>
             </div>
@@ -241,4 +225,4 @@ node5 -> node1;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Inherited-and-Abstract-types">Inherited and Abstract types</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

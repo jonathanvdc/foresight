@@ -181,6 +181,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"foresight","t":"foresight","d"
 {"l":"foresight/eqsat/lang/LanguageExtractor.html#apply-fffffe08","e":false,"i":"","n":"apply","t":"apply(tree: E, egraph: Repr)(using enc: AtomEncoder[E, EClassCall]): E","d":"foresight.eqsat.lang.LanguageExtractor","k":"def","x":""},
 {"l":"foresight/eqsat/lang/LanguageOp.html#","e":false,"i":"","n":"LanguageOp","t":"LanguageOp[E]","d":"foresight.eqsat.lang","k":"class","x":""},
 {"l":"foresight/eqsat/lang/LanguageOp$.html#","e":false,"i":"","n":"LanguageOp","t":"LanguageOp","d":"foresight.eqsat.lang","k":"object","x":""},
+{"l":"foresight/eqsat/lang/LanguageOp$.html#apply-fffff7cc","e":false,"i":"","n":"apply","t":"apply[E](ord: Int, schema: Seq[Byte], payload: Seq[Any]): LanguageOp[E]","d":"foresight.eqsat.lang.LanguageOp","k":"def","x":""},
 {"l":"foresight/eqsat/lang/LanguageOp$.html#opOrderingFor-b0c","e":false,"i":"","n":"opOrderingFor","t":"opOrderingFor[E](using L: Language[E]): Ordering[LanguageOp[E]]","d":"foresight.eqsat.lang.LanguageOp","k":"given","x":""},
 {"l":"foresight/eqsat/lang/LowPriorityAtomDecoder.html#","e":false,"i":"","n":"LowPriorityAtomDecoder","t":"LowPriorityAtomDecoder","d":"foresight.eqsat.lang","k":"trait","x":""},
 {"l":"foresight/eqsat/lang/LowPriorityAtomDecoder.html#derived-8df","e":false,"i":"","n":"derived","t":"derived[E, A](using s: SumOf[E]): AtomDecoder[E, A]","d":"foresight.eqsat.lang.LowPriorityAtomDecoder","k":"given","x":""},
