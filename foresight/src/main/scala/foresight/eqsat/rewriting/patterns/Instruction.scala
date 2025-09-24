@@ -118,12 +118,14 @@ object Instruction {
     }
 
     private def findInEClass(graph: EGraphT, call: EClassCall, machine: MutableMachineState[NodeT]): Seq[ENode[NodeT]] = {
-      graph.nodes(call).toSeq.filter { node =>
-        node.nodeType == nodeType &&
-          node.args.size == argCount &&
-          allSlotsMatch(machine, definitions, node.definitions) &&
-          allSlotsMatch(machine, uses, node.uses)
-      }
+      graph.nodes(call)
+        .filter { node =>
+          node.nodeType == nodeType &&
+            node.args.size == argCount &&
+            allSlotsMatch(machine, definitions, node.definitions) &&
+            allSlotsMatch(machine, uses, node.uses)
+        }
+        .toSeq
     }
 
     override def execute(graph: EGraphT, machine: MutableMachineState[NodeT]): Either[Seq[MutableMachineState[NodeT]], MachineError[NodeT]] = {
