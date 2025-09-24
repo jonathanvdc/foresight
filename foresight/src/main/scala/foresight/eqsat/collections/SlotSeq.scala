@@ -71,7 +71,7 @@ object SlotSeq {
    * @return A new `SlotSeq` instance.
    */
   def apply(slots: Slot*): SlotSeq = {
-    unsafeWrapArray(slots.toArray)
+    from(slots)
   }
 
   /**
