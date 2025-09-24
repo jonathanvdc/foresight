@@ -160,7 +160,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
     })
   }
 
-  final override def nodes(call: EClassCall): Set[ENode[NodeT]] = {
+  final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
     val data = dataForClass(canonicalApp.ref)
 
@@ -178,7 +178,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[Nod
       }
     } else {
       // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      data.nodes.keySet
+      data.nodes.keys
     }
   }
 

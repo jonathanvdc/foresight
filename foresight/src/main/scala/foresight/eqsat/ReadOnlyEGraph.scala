@@ -43,7 +43,7 @@ trait ReadOnlyEGraph[NodeT] {
    * @param call The (possibly non-canonical) e-class application to inspect.
    * @return All e-nodes stored in the canonical e-class targeted by `call`.
    */
-  def nodes(call: EClassCall): Set[ENode[NodeT]]
+  def nodes(call: EClassCall): Iterable[ENode[NodeT]]
 
   /**
    * Returns the set of e-nodes that refer to (use) the given e-class.
