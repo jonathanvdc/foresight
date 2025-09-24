@@ -3,7 +3,7 @@ package foresight.eqsat.rewriting.patterns
 import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat.*
+import scala.collection.compat._
 
 /**
  * A compiled pattern.
