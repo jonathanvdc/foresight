@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.parallel.ParallelMap
 import org.junit.Test
 

@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import org.junit.Test
 
 /**

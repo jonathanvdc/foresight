@@ -5,7 +5,7 @@ import foresight.eqsat.rewriting.patterns._
 import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A heterogeneous term tree that interleaves node-typed interiors with leaf atoms.
@@ -127,7 +127,7 @@ object MixedTree {
    * @return         A new `MixedTree` with empty `definitions` and `uses`.
    */
   def unslotted[NodeT, AtomT](nodeType: NodeT, children: Seq[MixedTree[NodeT, AtomT]]): MixedTree[NodeT, AtomT] = {
-    MixedTree.Node(nodeType, immutable.ArraySeq.empty[Slot], immutable.ArraySeq.empty[Slot], UnsafeSeqFromArray(children))
+    MixedTree.Node(nodeType, SlotSeq.empty, SlotSeq.empty, UnsafeSeqFromArray(children))
   }
 
   /**
@@ -142,7 +142,7 @@ object MixedTree {
   final case class Node[NodeT, AtomT](nodeType: NodeT,
                                       definitions: SlotSeq,
                                       uses: SlotSeq,
-                                      args: immutable.ArraySeq[MixedTree[NodeT, AtomT]])
+                                      args: ArraySeq[MixedTree[NodeT, AtomT]])
     extends MixedTree[NodeT, AtomT] with foresight.eqsat.Node[NodeT, MixedTree[NodeT, AtomT]]
 
   /**

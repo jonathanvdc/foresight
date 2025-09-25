@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.ReadOnlyEGraph
 
 /**
  * An [[Applier]] that can be **reversed** into a [[Searcher]] producing the same kind of matches.

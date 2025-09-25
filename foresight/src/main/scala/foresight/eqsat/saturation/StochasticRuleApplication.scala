@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.priorities.{MatchPriorities, PrioritizedMatch}
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.util.random.{Random, Sample}
 
 /**

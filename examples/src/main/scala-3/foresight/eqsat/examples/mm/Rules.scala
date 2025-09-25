@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.mm
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch

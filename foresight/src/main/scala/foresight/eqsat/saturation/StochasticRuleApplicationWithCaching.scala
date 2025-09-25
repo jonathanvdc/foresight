@@ -2,7 +2,7 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.saturation.priorities.MatchPriorities
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.util.random.Random
 
 /**

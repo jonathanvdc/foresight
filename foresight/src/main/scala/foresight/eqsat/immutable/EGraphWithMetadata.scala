@@ -1,7 +1,8 @@
-package foresight.eqsat.metadata
+package foresight.eqsat.immutable
 
-import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
+import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**

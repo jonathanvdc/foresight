@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{ReadOnlyEGraph, Slot}
 
 /**
  * A trait representing a searcher-like object that can be extended with continuation *builders*.

@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.rewriting.patterns.Pattern
 import org.junit.Test
 

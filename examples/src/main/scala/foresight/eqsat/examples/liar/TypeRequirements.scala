@@ -1,12 +1,12 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.commands.Command
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.SearcherContinuation.Continuation
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 import foresight.eqsat.rewriting.{Applier, ReversibleApplier, ReversibleSearcher, Searcher, SearcherContinuation}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
+import foresight.eqsat.MixedTree
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
 object TypeRequirements {
   private def tryMatchVariableToTypePattern[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](variable: Pattern.Var,

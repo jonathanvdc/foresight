@@ -2,9 +2,9 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.examples.arith._
 import foresight.eqsat.extraction.{CostAnalysis, CostFunction, ExtractionAnalysis}
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.saturation.MaximalRuleApplication
-import foresight.eqsat.{EGraph, MixedTree}
+import foresight.eqsat.MixedTree
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import org.junit.Test
 
 class IncrementalSaturationTest {

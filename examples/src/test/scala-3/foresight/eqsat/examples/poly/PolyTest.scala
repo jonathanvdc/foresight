@@ -2,7 +2,8 @@ package foresight.eqsat.examples.poly
 
 import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 import scala.language.implicitConversions

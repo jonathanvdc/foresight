@@ -2,12 +2,12 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EGraph, Slot}
+import foresight.eqsat.Slot
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import org.junit.Test
 
 class CoreRuleTest {

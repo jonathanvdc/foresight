@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.util.random.DiscreteDistribution
 
 /**

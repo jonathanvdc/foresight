@@ -2,9 +2,9 @@ package foresight.eqsat.examples.sdql
 
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
+import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
 import foresight.eqsat._
 
 object ApplierOps {

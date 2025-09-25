@@ -1,10 +1,10 @@
 package foresight.eqsat.examples.arithWithLang
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, MixedTree, Slot}
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.lang.Language
-import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.PatternMatch
 

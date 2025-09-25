@@ -2,7 +2,7 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 import scala.collection.mutable
 import scala.util.Random

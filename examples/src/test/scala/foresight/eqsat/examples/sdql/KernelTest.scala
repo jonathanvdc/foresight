@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.sdql
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.examples.sdql.SdqlRules.SdqlRule
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}

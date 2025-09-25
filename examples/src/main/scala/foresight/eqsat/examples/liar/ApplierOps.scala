@@ -3,7 +3,7 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat._

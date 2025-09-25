@@ -1,6 +1,7 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.{EGraph, ENode, Slot, Tree}
+import foresight.eqsat.{ENode, Slot, Tree}
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 class SmallestAstExtractionTest {

@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A match prioritization strategy that adjusts the output of an existing [[MatchPriorities]] instance.

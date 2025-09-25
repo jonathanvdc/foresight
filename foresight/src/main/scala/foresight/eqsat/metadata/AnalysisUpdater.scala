@@ -1,6 +1,6 @@
 package foresight.eqsat.metadata
 
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, ENode}
+import foresight.eqsat.{EClassCall, EClassRef, ENode, ReadOnlyEGraph}
 
 import scala.collection.mutable
 
@@ -13,7 +13,7 @@ import scala.collection.mutable
  * @tparam A The type of the analysis results.
  */
 private[metadata] class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT, A],
-                                                  egraph: EGraph[NodeT],
+                                                  egraph: ReadOnlyEGraph[NodeT],
                                                   var results: Map[EClassRef, A]) {
 
   private val worklist = mutable.Set.empty[ENode[NodeT]]

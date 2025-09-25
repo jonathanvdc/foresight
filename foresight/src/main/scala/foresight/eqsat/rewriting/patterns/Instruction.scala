@@ -1,10 +1,10 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, ENode, MixedTree, ReadOnlyEGraph, Slot}
 import foresight.eqsat.collections.SlotSeq
 
 import java.util
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -37,7 +37,7 @@ object Instruction {
    */
   final case class Effects(
     createdRegisters: Int,
-    boundVars: immutable.ArraySeq[Pattern.Var],
+    boundVars: ArraySeq[Pattern.Var],
     boundSlots: SlotSeq,
     boundNodes: Int
   ) {
@@ -57,7 +57,7 @@ object Instruction {
   /** A companion object for [[Effects]]. */
   object Effects {
     /** An effect summary for an instruction that does nothing. */
-    val none: Effects = Effects(0, immutable.ArraySeq.empty, SlotSeq.empty, 0)
+    val none: Effects = Effects(0, ArraySeq.empty, SlotSeq.empty, 0)
 
     /**
      * Aggregate a collection of effect summaries into a single summary.
@@ -128,7 +128,7 @@ object Instruction {
     // Mutable fields intentionally use null-sentinels for cross-version compatibility and low overhead.
     private var _graph: EGraphT = null.asInstanceOf[EGraphT]
     private var _machine: MutableMachineState[NodeT] = null
-    private var _instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]] = null
+    private var _instructions: ArraySeq[Instruction[NodeT, EGraphT]] = null
     private var _onSuccess: MutableMachineState[NodeT] => Boolean = null
     private var _onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean = null
     private var _ip: Int = 0
@@ -138,7 +138,7 @@ object Instruction {
     /** Initialize this execution context for a fresh run. */
     def init(graph: EGraphT,
              machine: MutableMachineState[NodeT],
-             instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+             instructions: ArraySeq[Instruction[NodeT, EGraphT]],
              onSuccess: MutableMachineState[NodeT] => Boolean,
              onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean): Unit = {
       _graph = graph
@@ -268,7 +268,7 @@ object Instruction {
       def run(
                graph: EGraphT,
                machine: MutableMachineState[NodeT],
-               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               instructions: ArraySeq[Instruction[NodeT, EGraphT]],
                onSuccess: MutableMachineState[NodeT] => Boolean,
                onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean
              ): Boolean = {
@@ -293,7 +293,7 @@ object Instruction {
       def run(
                graph: EGraphT,
                machine: MutableMachineState[NodeT],
-               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               instructions: ArraySeq[Instruction[NodeT, EGraphT]],
                onSuccess: MutableMachineState[NodeT] => Boolean
              ): Boolean = {
         run(graph, machine, instructions, onSuccess, null)
@@ -320,7 +320,7 @@ object Instruction {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = argCount,
-      boundVars = immutable.ArraySeq.empty[Pattern.Var],
+      boundVars = ArraySeq.empty[Pattern.Var],
       boundSlots = definitions ++ uses,
       boundNodes = 1
     )
@@ -393,7 +393,7 @@ object Instruction {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = immutable.ArraySeq(variable),
+      boundVars = ArraySeq(variable),
       boundSlots = SlotSeq.empty,
       boundNodes = 0
     )

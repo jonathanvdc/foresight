@@ -7,8 +7,9 @@ ThisBuild / scalaVersion := devScala
 ThisBuild / crossScalaVersions := {
   if (sys.props.get("IDEA_IMPORT").contains("1"))
     Seq(devScala)
-  else
+  else {
     Seq(devScala, "2.11.12", "2.12.20", "2.13.14")
+  }
 }
 
 ThisBuild / organization := "com.github.jonathanvdc"

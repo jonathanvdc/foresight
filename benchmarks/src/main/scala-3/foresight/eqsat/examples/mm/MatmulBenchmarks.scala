@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.mm
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.examples.mm
 import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap

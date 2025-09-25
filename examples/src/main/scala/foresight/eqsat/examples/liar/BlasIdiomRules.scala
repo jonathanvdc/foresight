@@ -2,10 +2,10 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar.ApplierOps.PatternApplierOps
 import foresight.eqsat.examples.liar.SearcherOps.SearcherOfMetadataPatternMatchOps
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.rewriting.{Applier, Rule}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
 
 final case class BlasIdiomRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EGraph[ArrayIR]]() {
   type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]

@@ -3,9 +3,9 @@ package foresight.eqsat.examples.arithWithLang
 import scala.language.implicitConversions
 import ApplierOps._
 import foresight.eqsat.lang.{Language, LanguageOp}
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, Slot}
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
+import foresight.eqsat.Slot
 import foresight.eqsat.rewriting.patterns.PatternMatch
 
 /**

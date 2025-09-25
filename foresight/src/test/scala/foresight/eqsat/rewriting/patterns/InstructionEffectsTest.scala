@@ -1,8 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
+import foresight.eqsat.{ReadOnlyEGraph, Slot}
 import org.junit.Test
 import org.junit.Assert._
-import foresight.eqsat._
 import foresight.eqsat.collections.SlotSeq
 import foresight.util.collections.UnsafeSeqFromArray
 

@@ -1,9 +1,9 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree, ReadOnlyEGraph, Slot}
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable
 
 /**
@@ -199,7 +199,7 @@ final class CommandQueueBuilder[NodeT] {
 }
 
 private[eqsat] object CommandQueueBuilder {
-  def symbolArrayFrom[A](values: immutable.ArraySeq[A], valueToSymbol: A => EClassSymbol): Array[EClassSymbol] = {
+  def symbolArrayFrom[A](values: ArraySeq[A], valueToSymbol: A => EClassSymbol): Array[EClassSymbol] = {
     // Try to avoid allocating an array of EClassSymbol if all entries are EClassCall.
     // The common case is that all children are already in the e-graph, and we will
     // want to construct an ENode with an Array[EClassCall].

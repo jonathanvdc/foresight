@@ -2,8 +2,8 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
-import foresight.eqsat.saturation.EGraphWithRoot
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * Represents a rewrite rule as the composition of a [[Searcher]] and an [[Applier]].
@@ -71,9 +71,9 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * val next = maybeNewEGraph.getOrElse(egraph) // fallback to original if no changes
  * }}}
  */
-final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](name: String,
-                                                                                               searcher: Searcher[NodeT, MatchT, EGraphT],
-                                                                                               applier: Applier[NodeT, MatchT, EGraphT]) {
+final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: String,
+                                                                       searcher: Searcher[NodeT, MatchT, EGraphT],
+                                                                       applier: Applier[NodeT, MatchT, EGraphT]) {
   /**
    * Search the e-graph for matches and apply them immediately, if any.
    *
@@ -82,11 +82,16 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    *
    * This is useful in saturation loops that want to detect quiescence without rebuilding when nothing changed.
    *
-   * @param egraph       Target e-graph.
-   * @param parallelize  Parallel strategy used for both search and apply.
-   * @return             `Some(updatedEGraph)` if any change occurred, `None` if the rule was a no-op.
+   * @param egraph      Target e-graph.
+   * @param parallelize Parallel strategy used for both search and apply.
+   * @return `Some(updatedEGraph)` if any change occurred, `None` if the rule was a no-op.
    */
-  def tryApply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Option[EGraphT] = {
+  def tryApply[
+    MutEGraphT <: EGraphT with EGraph[NodeT] with EGraphLike[NodeT, MutEGraphT]
+  ](
+    egraph: MutEGraphT,
+    parallelize: ParallelMap = ParallelMap.default
+   ): Option[MutEGraphT] = {
     delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
   }
 
@@ -96,11 +101,16 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with 
    * If the rule makes no changes, the original `egraph` is returned unchanged.
    * For change-detection, prefer [[tryApply]].
    *
-   * @param egraph       Target e-graph.
-   * @param parallelize  Parallel strategy used for both search and apply.
-   * @return             The updated e-graph if changes occurred; otherwise the original `egraph`.
+   * @param egraph      Target e-graph.
+   * @param parallelize Parallel strategy used for both search and apply.
+   * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
    */
-  def apply(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): EGraphT = {
+  def apply[
+    MutEGraphT <: EGraphT with EGraph[NodeT] with EGraphLike[NodeT, MutEGraphT]
+  ](
+     egraph: MutEGraphT,
+     parallelize: ParallelMap = ParallelMap.default
+   ): MutEGraphT = {
     tryApply(egraph, parallelize).getOrElse(egraph)
   }
 
@@ -209,8 +219,8 @@ object Rule {
    * @tparam MatchT  Match type.
    * @tparam EGraphT E-graph type.
    */
-  final case class ApplicationException[NodeT, MatchT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
-                                                                                                                 egraph: EGraphT,
-                                                                                                                 cause: Throwable)
+  final case class ApplicationException[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
+                                                                                         egraph: EGraphT,
+                                                                                         cause: Throwable)
     extends RuntimeException(s"Error applying rule ${rule.name} to e-graph", cause)
 }

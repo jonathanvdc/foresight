@@ -1,7 +1,7 @@
-package foresight.eqsat
+package foresight.eqsat.immutable
 
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat._
 
 /**
  * An e-graph is a data structure for representing and maintaining equivalence classes of expressions.

@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A builder for creating a strategy that repeatedly applies a given `body` strategy until it reaches a stable state,

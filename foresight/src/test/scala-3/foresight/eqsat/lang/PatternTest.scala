@@ -2,7 +2,8 @@ package foresight.eqsat.lang
 
 import scala.language.implicitConversions
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EClassCall, EGraph, Slot}
+import foresight.eqsat.{EClassCall, Slot}
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import org.junit.Test

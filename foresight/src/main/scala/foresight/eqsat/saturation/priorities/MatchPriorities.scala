@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * Defines a strategy for prioritizing rule matches during stochastic rule application.

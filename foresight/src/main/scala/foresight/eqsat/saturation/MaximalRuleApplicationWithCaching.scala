@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 
 /**
  * A saturation strategy that exhaustively applies all rule matches **once**, with match caching to prevent reapplication.

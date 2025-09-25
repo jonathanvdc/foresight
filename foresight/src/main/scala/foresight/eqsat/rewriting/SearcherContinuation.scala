@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.ReadOnlyEGraph
 
 /**
  * Defines common continuations for searchers.

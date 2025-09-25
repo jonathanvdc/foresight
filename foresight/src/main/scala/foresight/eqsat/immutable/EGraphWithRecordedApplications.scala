@@ -1,8 +1,8 @@
-package foresight.eqsat.saturation
+package foresight.eqsat.immutable
 
+import foresight.eqsat._
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat._
 
 /**
  * An e-graph that records the set of matches that have been applied to it.

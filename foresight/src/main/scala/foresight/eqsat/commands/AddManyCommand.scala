@@ -2,6 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
+import foresight.eqsat.immutable._
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
@@ -90,7 +91,7 @@ final case class AddManyCommand[NodeT](
    *   - An updated partial reification containing all newly resolved outputs.
    */
   override def simplify(
-                         egraph: EGraph[NodeT],
+                         egraph: ReadOnlyEGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
 

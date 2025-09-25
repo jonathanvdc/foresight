@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
 
 /**
  * A searcher that searches for matches within individual e-classes.

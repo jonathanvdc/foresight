@@ -91,7 +91,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) extends EClassSymbol 
    * @param egraph The e-graph in which to check.
    * @return True if well-formed, false otherwise.
    */
-  def isWellFormed(egraph: EGraph[_]): Boolean = {
+  def isWellFormed(egraph: ReadOnlyEGraph[_]): Boolean = {
     val slots = egraph.canonicalize(ref).args.valueSet
     slots.subsetOf(args.keySet)
   }

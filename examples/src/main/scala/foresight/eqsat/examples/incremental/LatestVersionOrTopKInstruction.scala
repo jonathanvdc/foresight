@@ -1,9 +1,10 @@
 package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.extraction.CostAnalysis
-import foresight.eqsat.metadata.{AnalysisMetadata, EGraphWithMetadata}
+import foresight.eqsat.metadata.AnalysisMetadata
 import foresight.eqsat.rewriting.patterns.{Instruction, MachineError, MachineState, MutableMachineState}
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ENode}
+import foresight.eqsat.{EClassCall, ENode}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
 final case class LatestVersionOrTopKInstruction[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], C]
 (

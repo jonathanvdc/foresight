@@ -31,7 +31,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @param egraph The e-graph to canonicalize within.
    * @return The analysis result for `call`.
    */
-  def apply(call: EClassCall, egraph: EGraph[NodeT]): A = applyPrecanonicalized(egraph.canonicalize(call))
+  def apply(call: EClassCall, egraph: ReadOnlyEGraph[NodeT]): A = applyPrecanonicalized(egraph.canonicalize(call))
 
   /**
    * Evaluate a mixed tree whose leaves are either e-class applications or concrete nodes.
@@ -45,7 +45,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @return The analysis result for the whole tree.
    */
   def apply(tree: MixedTree[NodeT, EClassCall],
-            egraph: EGraph[NodeT]): A = {
+            egraph: ReadOnlyEGraph[NodeT]): A = {
     tree match {
       case MixedTree.Atom(call: EClassCall) => apply(call, egraph)
 
@@ -87,7 +87,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @return A new [[AnalysisMetadata]] reflecting the added nodes.
    */
   override def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
-                         after: EGraph[NodeT],
+                         after: ReadOnlyEGraph[NodeT],
                          parallelize: ParallelMap): Metadata[NodeT, AnalysisMetadata[NodeT, A]] = {
 
     val resultsPerNode = parallelize[(ENode[NodeT], EClassCall), (EClassRef, A)](added, {
@@ -118,7 +118,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @param after        The post-union e-graph.
    * @return A new [[AnalysisMetadata]] consistent with the unified state.
    */
-  def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
+  def onUnionMany(equivalences: Set[Set[EClassCall]], after: ReadOnlyEGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
     val updater = new AnalysisUpdater(analysis, after, results)
 
     // First, merge class-level results within each equivalence group.

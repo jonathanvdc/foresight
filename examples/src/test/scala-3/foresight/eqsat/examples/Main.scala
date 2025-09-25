@@ -5,7 +5,8 @@ import foresight.eqsat.examples.poly._
 import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
-import foresight.eqsat.{EClassCall, EGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.immutable.EGraph
 
 object Main {
 

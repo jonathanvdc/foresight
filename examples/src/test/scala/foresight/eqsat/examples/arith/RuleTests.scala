@@ -4,7 +4,8 @@ import foresight.eqsat.examples.arith._
 import foresight.eqsat.examples.arith.Rules.ArithRule
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, MixedTree, Slot}
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 class RuleTests {

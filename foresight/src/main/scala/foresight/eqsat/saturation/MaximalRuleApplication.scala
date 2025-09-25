@@ -2,7 +2,7 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A strategy that performs a single maximal rewrite pass over a set of rules.

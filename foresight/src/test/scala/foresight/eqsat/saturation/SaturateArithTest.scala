@@ -1,6 +1,7 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.{EClassCall, EGraph, ENode, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
+import foresight.eqsat.immutable.{EGraph, EGraphWithRecordedApplications}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat.saturation.priorities.UniformPriorities

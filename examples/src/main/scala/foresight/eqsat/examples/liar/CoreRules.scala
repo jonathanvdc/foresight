@@ -2,10 +2,10 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar.ApplierOps._
 import foresight.eqsat.examples.liar.SearcherOps._
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.{EGraphWithMetadata, EGraphLike, EGraph}
 
 final case class CoreRules[BaseEGraph <: EGraphLike[ArrayIR, BaseEGraph] with EGraph[ArrayIR]]() {
   type MetadataEGraph = EGraphWithMetadata[ArrayIR, BaseEGraph]

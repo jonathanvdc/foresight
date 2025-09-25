@@ -1,6 +1,7 @@
 package foresight.eqsat.metadata
 
-import foresight.eqsat.{EGraph, ENode, Slot}
+import foresight.eqsat.{ENode, ReadOnlyEGraph, Slot}
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import foresight.eqsat.collections.SlotMap
 
 /**
@@ -99,7 +100,7 @@ trait Analysis[NodeT, A] {
    * @param egraph The e-graph to analyze.
    * @return [[AnalysisMetadata]] capturing the per-class results for this analysis.
    */
-  final def apply(egraph: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
+  final def apply(egraph: ReadOnlyEGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
     val updater = new AnalysisUpdater(this, egraph, Map.empty)
 
     // Seed: nodes with no arguments.

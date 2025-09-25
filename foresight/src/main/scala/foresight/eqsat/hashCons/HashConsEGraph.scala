@@ -2,6 +2,7 @@ package foresight.eqsat.hashCons
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
+import foresight.eqsat.immutable._
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.

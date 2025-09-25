@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A strategy that repeatedly applies a body strategy until it produces no new e-graph,

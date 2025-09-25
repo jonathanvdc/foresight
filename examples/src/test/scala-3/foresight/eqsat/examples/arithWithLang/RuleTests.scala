@@ -4,7 +4,8 @@ import foresight.eqsat.examples.arithWithLang.{*, given}
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph, Slot}
+import foresight.eqsat.{EClassCall, Slot}
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 import scala.language.implicitConversions

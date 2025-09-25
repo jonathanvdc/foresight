@@ -1,6 +1,7 @@
-package foresight.eqsat
+package foresight.eqsat.immutable
 
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.EClassCall
 
 /**
  * A lightweight wrapper around an e-graph that defers the application of union operations.

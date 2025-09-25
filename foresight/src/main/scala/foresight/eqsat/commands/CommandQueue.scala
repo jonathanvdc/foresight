@@ -1,7 +1,8 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, EGraph, EGraphLike, MixedTree}
+import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 import scala.collection.mutable
 
@@ -184,7 +185,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }}}
    */
   override def simplify(
-                         egraph: EGraph[NodeT],
+                         egraph: ReadOnlyEGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
     val newQueue = Seq.newBuilder[Command[NodeT]]

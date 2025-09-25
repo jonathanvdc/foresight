@@ -1,10 +1,10 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
+import foresight.eqsat.{EClassCall, Tree}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata, EGraphWithRecordedApplications, EGraphWithRoot}
 
 /**
  * A compound strategy that transforms an e-graph and optionally rebases it by extracting and reinserting a tree.

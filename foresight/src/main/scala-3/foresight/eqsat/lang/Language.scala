@@ -1,10 +1,10 @@
 package foresight.eqsat.lang
 
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat._
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 import foresight.util.ordering.SeqOrdering
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}

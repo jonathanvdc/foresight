@@ -1,10 +1,10 @@
 package foresight.eqsat.examples.sdql
 
 import foresight.eqsat.examples.sdql.ApplierOps._
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.{EGraphWithMetadata, EGraphLike, EGraph}
 
 /**
  * This object contains a collection of rewrite rules for the SDQL language.

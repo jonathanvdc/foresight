@@ -1,11 +1,11 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation._
-import foresight.eqsat.{EGraph, Tree}
+import foresight.eqsat.Tree
+import foresight.eqsat.immutable.{EGraphWithMetadata, EGraphWithRecordedApplications, EGraphWithRoot, EGraph}
 
 import scala.concurrent.duration.Duration
 

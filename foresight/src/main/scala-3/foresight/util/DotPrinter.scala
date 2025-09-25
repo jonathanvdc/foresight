@@ -1,7 +1,7 @@
 package foresight.util
 
 import foresight.eqsat.lang.{AtomDecoder, Language, LanguageOp}
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, MixedTree}
+import foresight.eqsat.{EClassCall, EClassRef, ReadOnlyEGraph, MixedTree}
 
 import java.nio.file.{Files, Paths}
 
@@ -13,7 +13,7 @@ import java.nio.file.{Files, Paths}
  */
 final case class DotPrinter[E]()(using L: Language[E]) {
 
-  private def print(egraph: EGraph[LanguageOp[E]])(using dec: AtomDecoder[E, EClassCall]): String = {
+  private def print(egraph: ReadOnlyEGraph[LanguageOp[E]])(using dec: AtomDecoder[E, EClassCall]): String = {
     val sb = new StringBuilder
     sb.append("digraph EGraph {\n")
     sb.append("  compound=true\n")
@@ -64,7 +64,7 @@ final case class DotPrinter[E]()(using L: Language[E]) {
     sb.toString()
   }
 
-  def apply(egraph: EGraph[LanguageOp[E]], filename: String)(using dec: AtomDecoder[E, EClassCall]): Unit = {
+  def apply(egraph: ReadOnlyEGraph[LanguageOp[E]], filename: String)(using dec: AtomDecoder[E, EClassCall]): Unit = {
     val dotRepr = print(egraph)
     Files.writeString(Paths.get(filename), dotRepr)
   }
