@@ -226,9 +226,9 @@ private[eqsat] object CommandQueueBuilder {
   }
 
   def resolveAllOrNull(args: Array[EClassSymbol]): Array[EClassCall] = {
-    args match {
-      case calls: Array[EClassCall] => calls
-      case _ => null
-    }
+    if (args.isInstanceOf[Array[EClassCall]])
+      args.asInstanceOf[Array[EClassCall]]
+    else
+      null
   }
 }
