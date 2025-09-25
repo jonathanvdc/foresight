@@ -337,7 +337,7 @@ object Instruction {
           case _ => false
         }
       }
-      def allSlotsMatch(expected: Seq[Slot], actual: Seq[Slot]): Boolean = {
+      def allSlotsMatch(expected: SlotSeq, actual: SlotSeq): Boolean = {
         if (expected.length != actual.length) return false
         var i = 0
         while (i < expected.length) {
@@ -346,39 +346,36 @@ object Instruction {
         }
         true
       }
-      def findInEClass(): Seq[ENode[NodeT]] = {
-        ctx.graph.nodes(call, nodeType)
-          .filter { node =>
-            node.args.size == argCount &&
+
+      // Stream over candidates without allocating intermediate collections.
+      // If we have one match, bind it and continue; if we have multiple matches,
+      // fork the machine for each additional match and continue each one.
+      // If we have no matches, report an error.
+      val it = ctx.graph.nodes(call, nodeType).iterator
+      var firstMatch: ENode[NodeT] = null
+      var continueSearch = true
+      while (continueSearch && it.hasNext) {
+        val node = it.next()
+        if (node.args.size == argCount &&
             allSlotsMatch(definitions, node.definitions) &&
-            allSlotsMatch(uses, node.uses)
+            allSlotsMatch(uses, node.uses)) {
+          if (firstMatch eq null) {
+            firstMatch = node
+          } else {
+            val forked = machine.fork()
+            forked.bindNode(node)
+            continueSearch = ctx.continueWith(forked)
           }
-          .toSeq
+        }
       }
 
-      val nodes = findInEClass()
-      nodes.size match {
-        case 0 =>
-          ctx.error(MachineError.NoMatchingNode(this, call))
-        case 1 =>
-          machine.bindNode(nodes.head)
-          ctx.continue()
-        case _ =>
-          // Try forks first, then continue with the original machine last.
-          var continueSearch = true
-          var i = 1
-          while (continueSearch && i < nodes.size) {
-            val forked = machine.fork()
-            forked.bindNode(nodes(i))
-            continueSearch = ctx.continueWith(forked)
-            i += 1
-          }
-          if (continueSearch) {
-            machine.bindNode(nodes.head)
-            ctx.continue()
-          } else {
-            continueSearch
-          }
+      if (!continueSearch) {
+        continueSearch
+      } else if (firstMatch eq null) {
+        ctx.error(MachineError.NoMatchingNode(this, call))
+      } else {
+        machine.bindNode(firstMatch)
+        ctx.continue()
       }
     }
   }
