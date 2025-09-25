@@ -1,7 +1,9 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat._
+import foresight.util.collections.UnsafeSeqFromArray
 
+import scala.collection.compat._
 import scala.collection.mutable
 
 /**
@@ -112,7 +114,7 @@ final class CommandQueueBuilder[NodeT] {
   def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val argSymbols = args.map(addSimplified(_, egraph))
+        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, addSimplified(_, egraph))
         addSimplifiedNode(t, defs, uses, argSymbols, egraph)
 
       case MixedTree.Atom(call) => call
@@ -122,7 +124,7 @@ final class CommandQueueBuilder[NodeT] {
   private[eqsat] def addSimplifiedNode(nodeType: NodeT,
                                        definitions: Seq[Slot],
                                        uses: Seq[Slot],
-                                       args: Seq[EClassSymbol],
+                                       args: Array[EClassSymbol],
                                        egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
 
     // Check if all children are already in the graph
@@ -142,7 +144,7 @@ final class CommandQueueBuilder[NodeT] {
     }
 
     val result = EClassSymbol.virtual()
-    val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, args)
+    val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, UnsafeSeqFromArray(args))
     append(AddManyCommand(Seq(result -> candidateNode)))
     result
   }
@@ -150,7 +152,7 @@ final class CommandQueueBuilder[NodeT] {
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val argSymbols = args.map(addSimplifiedReal(_, egraph))
+        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, addSimplifiedReal(_, egraph))
         addSimplifiedNode(t, defs, uses, argSymbols, egraph)
 
       case MixedTree.Atom(call) => EClassSymbol.real(call)
@@ -193,21 +195,40 @@ final class CommandQueueBuilder[NodeT] {
   }
 }
 
-private object CommandQueueBuilder {
-  def resolveAllOrNull(args: Seq[EClassSymbol]): Array[EClassCall] = {
-    if (args.forall(_.isReal)) {
-      val arr = new Array[EClassCall](args.length)
-      var i = 0
-      while (i < args.length) {
-        args(i) match {
-          case call: EClassCall => arr(i) = call
-          case _ => throw new IllegalStateException("Unreachable")
-        }
-        i += 1
+private[eqsat] object CommandQueueBuilder {
+  def symbolArrayFrom[A](values: immutable.ArraySeq[A], valueToSymbol: A => EClassSymbol): Array[EClassSymbol] = {
+    // Try to avoid allocating an array of EClassSymbol if all entries are EClassCall.
+    // The common case is that all children are already in the e-graph, and we will
+    // want to construct an ENode with an Array[EClassCall].
+    // If we find any entry that is not an EClassCall, we fall back to allocating
+    // an Array[EClassSymbol] and copying the prefix of calls.
+    val n = values.length
+    val calls = new Array[EClassCall](n)
+    var i = 0
+    while (i < n) {
+      valueToSymbol(values(i)) match {
+        case c: EClassCall =>
+          calls(i) = c
+        case other =>
+          // Fallback: allocate symbols array, copy the prefix of calls, and finish filling
+          val syms = new Array[EClassSymbol](n)
+          var j = 0
+          while (j < i) { syms(j) = calls(j); j += 1 }
+          syms(i) = other
+          j = i + 1
+          while (j < n) { syms(j) = valueToSymbol(values(j)); j += 1 }
+          return syms
       }
-      arr
-    } else {
-      null
+      i += 1
+    }
+    // All entries were EClassCall. Perform a safe upcast to Array[EClassSymbol]
+    calls.asInstanceOf[Array[EClassSymbol]]
+  }
+
+  def resolveAllOrNull(args: Array[EClassSymbol]): Array[EClassCall] = {
+    args match {
+      case calls: Array[EClassCall] => calls
+      case _ => null
     }
   }
 }
