@@ -114,7 +114,9 @@ final class CommandQueueBuilder[NodeT] {
   def addSimplified(tree: MixedTree[NodeT, EClassSymbol], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, addSimplified(_, egraph))
+        val argSymbols = CommandQueueBuilder.symbolArrayFrom(
+          args,
+          (tree: MixedTree[NodeT, EClassSymbol]) => addSimplified(tree, egraph))
         addSimplifiedNode(t, defs, uses, argSymbols, egraph)
 
       case MixedTree.Atom(call) => call
@@ -152,7 +154,8 @@ final class CommandQueueBuilder[NodeT] {
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: ReadOnlyEGraph[NodeT]): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
-        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, addSimplifiedReal(_, egraph))
+        val argSymbols = CommandQueueBuilder.symbolArrayFrom(
+          args, (tree: MixedTree[NodeT, EClassCall]) => addSimplifiedReal(tree, egraph))
         addSimplifiedNode(t, defs, uses, argSymbols, egraph)
 
       case MixedTree.Atom(call) => EClassSymbol.real(call)
