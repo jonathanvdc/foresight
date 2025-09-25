@@ -1,8 +1,11 @@
 package foresight.eqsat.rewriting.patterns
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.commands.{Command, CommandQueueBuilder}
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
 import foresight.eqsat.{EClassSymbol, MixedTree, ReadOnlyEGraph, Slot}
+
+import scala.collection.compat._
 
 /**
  * An applier that applies a pattern match to an e-graph.
@@ -72,9 +75,7 @@ final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern
       case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
       case MixedTree.Node(t, defs@Seq(), uses, args) =>
         // No definitions, so we can reuse the PatternMatch and its original slot mapping
-        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, instantiateAsSimplifiedAddCommand(_, m, egraph, builder))
-        val useSymbols = uses.map(m.apply: Slot => Slot)
-        builder.addSimplifiedNode(t, defs, useSymbols, argSymbols, egraph)
+        addSimplifiedNode(m, t, defs, uses, args, egraph, builder)
 
       case MixedTree.Node(t, defs, uses, args) =>
         val defSlots = defs.map { (s: Slot) =>
@@ -84,8 +85,20 @@ final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern
           }
         }
         val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-        val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, instantiateAsSimplifiedAddCommand(_, newMatch, egraph, builder))
-        builder.addSimplifiedNode(t, defSlots, uses.map(newMatch.apply: Slot => Slot), argSymbols, egraph)
+        addSimplifiedNode(newMatch, t, defSlots, uses, args, egraph, builder)
     }
+  }
+
+  private def addSimplifiedNode(m: PatternMatch[NodeT],
+                                nodeType: NodeT,
+                                definitions: SlotSeq,
+                                uses: SlotSeq,
+                                args: immutable.ArraySeq[MixedTree[NodeT, Pattern.Var]],
+                                egraph: EGraphT,
+                                builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
+    val argSymbols = CommandQueueBuilder.symbolArrayFrom(
+      args, (mt: MixedTree[NodeT, Pattern.Var]) => instantiateAsSimplifiedAddCommand(mt, m, egraph, builder))
+    val useSymbols = uses.map(m.apply: Slot => Slot)
+    builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, egraph)
   }
 }
