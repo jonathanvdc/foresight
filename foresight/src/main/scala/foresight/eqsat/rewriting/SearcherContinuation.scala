@@ -12,7 +12,7 @@ object SearcherContinuation {
    * This type alias represents a function that takes a match of type `Match`
    * and returns a `Boolean` indicating whether to continue processing further matches.
    */
-  type Continuation[Node, -Match, EGraphT <: ReadOnlyEGraph[Node]] = (Match, EGraphT) => Boolean
+  type Continuation[Node, -Match, -EGraphT <: ReadOnlyEGraph[Node]] = (Match, EGraphT) => Boolean
 
   /**
    * A continuation builder function that takes a downstream continuation and returns a new continuation.
