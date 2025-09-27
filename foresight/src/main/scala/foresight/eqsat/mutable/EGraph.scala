@@ -1,7 +1,7 @@
 package foresight.eqsat.mutable
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{AddNodeResult, EClassCall, ReadOnlyEGraph}
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, ReadOnlyEGraph, Tree}
 
 /**
  * A mutable e-graph that supports adding e-nodes and merging e-classes.
@@ -9,6 +9,8 @@ import foresight.eqsat.{AddNodeResult, EClassCall, ReadOnlyEGraph}
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
+  // Core API:
+
   /**
    * Adds many e-nodes in one pass.
    *
@@ -22,7 +24,7 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
    * @param parallelize  Strategy used for any parallel work within the addition.
    * @return Per-node results in input order.
    */
-  def tryAddMany(nodes: Seq[NodeT], parallelize: ParallelMap): Seq[AddNodeResult]
+  def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): Seq[AddNodeResult]
 
   /**
    * Unions (merges) pairs of e-classes.
@@ -46,4 +48,66 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
    * @return An empty e-graph with the same configuration. Does not mutate the current e-graph.
    */
   def emptied: EGraph[NodeT]
+
+  // Helper methods:
+
+  /**
+   * Adds a single e-node.
+   *
+   * If the e-node already exists, returns its e-class; otherwise inserts it into a fresh e-class.
+   * Updates the current e-graph in place.
+   *
+   * @param node The e-node to add.
+   * @return E-class of `node`.
+   */
+  final def add(node: ENode[NodeT]): EClassCall = {
+    tryAddMany(Seq(node), ParallelMap.sequential) match {
+      case Seq(AddNodeResult.Added(call)) => call
+      case Seq(AddNodeResult.AlreadyThere(call)) => call
+      case _ => throw new IllegalStateException("Unexpected result from tryAddMany")
+    }
+  }
+
+  /**
+   * Adds a mixed tree to the e-graph.
+   *
+   * Child calls (if any) are added/resolved first; then the root e-node is added or found.
+   * Updates the current e-graph in place.
+   *
+   * @param tree The mixed tree to add.
+   * @return E-class of the root.
+   */
+  final def add(tree: MixedTree[NodeT, EClassCall]): EClassCall = {
+    tree match {
+      case MixedTree.Node(t, defs, uses, args) =>
+        val newArgs = args.map(add)
+        add(ENode(t, defs, uses, newArgs))
+
+      case MixedTree.Atom(call) => call
+    }
+  }
+
+  /**
+   * Adds a pure tree to the e-graph.
+   *
+   * Child subtrees are added/resolved first; then the root e-node is added or found.
+   * Updates the current e-graph in place.
+   *
+   * @param tree The pure tree to add.
+   * @return E-class of the root.
+   */
+  final def add(tree: Tree[NodeT]): EClassCall = {
+    add(MixedTree.fromTree(tree))
+  }
+
+  /**
+   * Unions (merges) pairs of e-classes using the default parallel strategy.
+   * Updates the current e-graph in place.
+   *
+   * @param pairs Pairs of e-class applications to union.
+   * @return Sets of newly equivalent classes.
+   */
+  final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
+    unionMany(pairs, ParallelMap.default)
+  }
 }
