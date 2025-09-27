@@ -1,6 +1,7 @@
 package foresight.eqsat.mutable
 
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.immutable
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, ReadOnlyEGraph, Tree}
 
 /**
@@ -109,5 +110,27 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
    */
   final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     unionMany(pairs, ParallelMap.default)
+  }
+}
+
+/**
+ * A companion object for the [[EGraph]] trait that provides a convenient way to create a
+ * [[FreezableEGraph]] from an existing immutable e-graph.
+ */
+object EGraph {
+  /**
+   * Wraps an existing immutable e-graph in a mutable interface that supports in-place updates.
+   *
+   * @param egraph The immutable e-graph to wrap.
+   * @tparam NodeT  The type of the nodes in the e-graph.
+   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both
+   *                 [[immutable.EGraphLike]] and [[immutable.EGraph]].
+   * @return A [[FreezableEGraph]] that wraps the provided immutable e-graph.
+   */
+  def apply[
+    NodeT,
+    EGraphT <: immutable.EGraphLike[NodeT, EGraphT] with immutable.EGraph[NodeT]
+  ](egraph: EGraphT): FreezableEGraph[NodeT, EGraphT] = {
+    new UpdatingImmutableEGraph(egraph)
   }
 }

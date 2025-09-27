@@ -3,19 +3,12 @@ package foresight.eqsat.mutable
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, immutable}
 
-/**
- * A mutable wrapper around an immutable e-graph that updates the internal reference on mutations.
- *
- * @param _egraph The underlying immutable e-graph.
- * @tparam NodeT   The type of the nodes in the e-graph.
- * @tparam EGraphT The concrete type of the underlying immutable e-graph.
- */
-final class UpdatingImmutableEGraph[
+private final class UpdatingImmutableEGraph[
   NodeT,
   EGraphT <: immutable.EGraph[NodeT] with immutable.EGraphLike[NodeT, EGraphT]
-](private var _egraph: EGraphT) extends EGraph[NodeT] {
+](private var _egraph: EGraphT) extends FreezableEGraph[NodeT, EGraphT] {
   /** The current underlying immutable e-graph. */
-  def egraph: EGraphT = _egraph
+  override def freeze(): EGraphT = _egraph
 
   private def update[A](tuple: (A, EGraphT)): A = {
     val (result, newEgraph) = tuple
