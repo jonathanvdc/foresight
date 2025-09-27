@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation
 
+import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
@@ -14,7 +15,7 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam EGraphT The type of the e-graph.
  * @tparam MatchT The type of the matches produced by the rules.
  */
-trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT] {
+trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
   /**
    * Searches for matches of the given rules in the e-graph.
    *

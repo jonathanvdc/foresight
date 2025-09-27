@@ -1,5 +1,6 @@
 package foresight.eqsat.saturation
 
+import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
@@ -34,12 +35,12 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  *
  * @tparam NodeT   The type of nodes in the e-graph.
  * @tparam RuleT   The type of rules used.
- * @tparam EGraphT The e-graph implementation (must be both [[EGraphLike]] and [[EGraph]]).
+ * @tparam EGraphT The e-graph implementation.
  * @tparam MatchT  The type of matches returned by rule search.
  */
 final case class MaximalRuleApplication[NodeT,
                                         RuleT <: Rule[NodeT, MatchT, _],
-                                        EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                                        EGraphT <: ReadOnlyEGraph[NodeT],
                                         MatchT](
   rules: Seq[RuleT],
   searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
