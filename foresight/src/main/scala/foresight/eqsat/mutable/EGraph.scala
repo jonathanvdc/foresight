@@ -114,23 +114,13 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
 }
 
 /**
- * A companion object for the [[EGraph]] trait that provides a convenient way to create a
- * [[FreezableEGraph]] from an existing immutable e-graph.
+ * A companion object for the [[EGraph]] trait.
  */
 object EGraph {
   /**
-   * Wraps an existing immutable e-graph in a mutable interface that supports in-place updates.
-   *
-   * @param egraph The immutable e-graph to wrap.
-   * @tparam NodeT  The type of the nodes in the e-graph.
-   * @tparam EGraphT The type of the e-graph that the strategy operates on, which must be a subtype of both
-   *                 [[immutable.EGraphLike]] and [[immutable.EGraph]].
-   * @return A [[FreezableEGraph]] that wraps the provided immutable e-graph.
+   * Creates a new mutable e-graph.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @return An empty mutable e-graph.
    */
-  def apply[
-    NodeT,
-    EGraphT <: immutable.EGraphLike[NodeT, EGraphT] with immutable.EGraph[NodeT]
-  ](egraph: EGraphT): FreezableEGraph[NodeT, EGraphT] = {
-    new UpdatingImmutableEGraph(egraph)
-  }
+  def empty[NodeT]: EGraph[NodeT] = UpdatingImmutableEGraph(immutable.EGraph.empty[NodeT])
 }
