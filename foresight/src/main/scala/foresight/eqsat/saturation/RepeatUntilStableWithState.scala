@@ -16,7 +16,7 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  */
 private final case class RepeatUntilStableWithState[
   NodeT,
-  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+  EGraphT,
   DataT,
   BetweenItersDataT]
   (

@@ -56,7 +56,7 @@ import scala.concurrent.duration.Duration
  * @tparam EGraphT The type of the e-graph being transformed (e.g., plain, rooted, or metadata-enriched).
  * @tparam Data The type of state carried by the strategy across iterations.
  */
-trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data] {
+trait Strategy[NodeT, EGraphT, Data] {
   /**
    * The initial data for the strategy's first iteration.
    */
@@ -269,24 +269,6 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
                          parallelize: ParallelMap): (Option[EGraphT], (Data, Data2)) = {
         val (newEGraph, newData) = Strategy.this(egraph, data._1, parallelize)
         (newEGraph, (newData, data._2))
-      }
-    }
-  }
-
-  /**
-   * Lifts this strategy to operate on an e-graph with a root. The root is typically used to extract trees from the
-   * e-graph.
-   * @return A new strategy that operates on an [[EGraphWithRoot]].
-   */
-  final def withRoot: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
-    new Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] {
-      override def initialData: Data = Strategy.this.initialData
-
-      override def apply(egraph: EGraphWithRoot[NodeT, EGraphT],
-                         data: Data,
-                         parallelize: ParallelMap): (Option[EGraphWithRoot[NodeT, EGraphT]], Data) = {
-        val (newEGraph, newData) = Strategy.this(egraph.egraph, data, parallelize)
-        (newEGraph.map(egraph.migrateTo), newData)
       }
     }
   }
