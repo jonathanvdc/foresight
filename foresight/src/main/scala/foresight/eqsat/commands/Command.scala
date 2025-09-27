@@ -2,14 +2,15 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree, ReadOnlyEGraph}
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.immutable
+import foresight.eqsat.mutable
 
 /**
  * A [[Command]] encapsulates a single, replayable edit to an e-graph.
  *
  * Commands are pure values that describe what to do; they don’t perform any mutation until applied.
  * This design allows callers to build, simplify, batch, or reorder edits before committing them to
- * an [[EGraph]].
+ * an e-graph.
  *
  * @tparam NodeT Node type for expressions represented by the e-graph.
  */
@@ -38,6 +39,25 @@ trait Command[NodeT] {
    * Executes the command against an e-graph.
    *
    * @param egraph
+   *   Destination e-graph that will be mutated in place.
+   * @param reification
+   *   Mapping from virtual symbols to concrete calls available before this command runs. This is used
+   *   to ground virtual references present in [[uses]].
+   * @param parallelize
+   *   Parallelization strategy to label and distribute any internal work.
+   * @return
+   *   A pair `(updated, outMap)` where:
+   *     - `updated` is `true` if any change occurred, or `false` for a no-op.
+   *     - `outMap` binds every symbol in [[definitions]] to its realized [[EClassCall]].
+   */
+  def apply(egraph: mutable.EGraph[NodeT],
+            reification: Map[EClassSymbol.Virtual, EClassCall],
+            parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall])
+
+  /**
+   * Executes the command against an e-graph.
+   *
+   * @param egraph
    *   Destination e-graph. Implementations may either return it unchanged or produce a new immutable
    *   e-graph snapshot.
    * @param reification
@@ -46,15 +66,25 @@ trait Command[NodeT] {
    * @param parallelize
    *   Parallelization strategy to label and distribute any internal work.
    * @return
-   *   A pair `(maybeNewGraph, outMap)` where:
+   A pair `(maybeNewGraph, outMap)` where:
    *     - `maybeNewGraph` is `Some(newGraph)` if any change occurred, or `None` for a no-op.
    *     - `outMap` binds every symbol in [[definitions]] to its realized [[EClassCall]].
    */
-  def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
-                                                                 egraph: Repr,
-                                                                 reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                 parallelize: ParallelMap
-                                                               ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall])
+  final def applyImmutable[
+    Repr <: immutable.EGraphLike[NodeT, Repr] with immutable.EGraph[NodeT]
+  ](
+     egraph: Repr,
+     reification: Map[EClassSymbol.Virtual, EClassCall],
+     parallelize: ParallelMap
+   ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+    val mutableEGraph = mutable.FreezableEGraph[NodeT, Repr](egraph)
+    val (updated, outMap) = apply(mutableEGraph, reification, parallelize)
+    if (updated) {
+      (Some(mutableEGraph.freeze()), outMap)
+    } else {
+      (None, outMap)
+    }
+  }
 
   /**
    * Returns a semantically equivalent command that is cheaper to execute on the given e-graph.
@@ -166,7 +196,7 @@ object Command {
   def equivalenceSimplified[NodeT](
                                     symbol: EClassSymbol,
                                     tree: MixedTree[NodeT, EClassSymbol],
-                                    egraph: EGraph[NodeT]
+                                    egraph: ReadOnlyEGraph[NodeT]
                                   ): Command[NodeT] = {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.addSimplified(tree, egraph)

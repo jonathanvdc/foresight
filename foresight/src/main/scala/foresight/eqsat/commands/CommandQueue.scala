@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree, ReadOnlyEGraph}
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.mutable.EGraph
 
 import scala.collection.mutable
 
@@ -21,7 +21,7 @@ import scala.collection.mutable
  * val (x, q1) = q0.add(myTree)                  // add a tree, get its symbol
  * val (y, q2) = q1.add(ENodeSymbol(op, Nil, Nil, Seq(x)))
  * val q3 = q2.union(x, y).optimized             // merge unions, batch adds
- * val (maybeGraph, refs) = q3(g, Map.empty, parallel)
+ * val (updated, refs) = q3(g, Map.empty, parallel)
  * }}}
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
@@ -35,14 +35,13 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
   /**
    * Applies each command in order, threading the latest graph and reification.
    *
-   * For each step, the current graph (updated only if the previous command returned `Some(newGraph)`)
-   * and the accumulated virtual-to-real bindings are passed to the next command.
+   * For each step, the current graph and the accumulated virtual-to-real bindings are passed to the next command.
    *
    * @param egraph Initial graph snapshot.
    * @param reification Initial virtual-to-concrete bindings available to the first command.
    * @param parallelize Strategy for distributing work across commands that can parallelize internally.
    * @return
-   *   - `Some(newGraph)` if at least one command changed the graph, otherwise `None`.
+   *   - `true` if at least one command changed the graph, otherwise `false`.
    *   - The final reification map, containing the union of all bindings produced by the sub-commands.
    *
    * @example
@@ -53,20 +52,17 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }
    * }}}
    */
-  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
-                                                                          egraph: Repr,
-                                                                          reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                          parallelize: ParallelMap
-                                                                        ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
-    var newEGraph: Option[Repr] = None
+  override def apply(egraph: EGraph[NodeT],
+                     reification: Map[EClassSymbol.Virtual, EClassCall],
+                     parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+    var anyChanges: Boolean = false
     var newReification = reification
     for (command <- commands) {
-      val (newEGraphOpt, newReificationPart) =
-        command.apply(newEGraph.getOrElse(egraph), newReification, parallelize)
-      newEGraph = newEGraphOpt.orElse(newEGraph)
+      val (changed, newReificationPart) = command.apply(egraph, newReification, parallelize)
+      anyChanges ||= changed
       newReification ++= newReificationPart
     }
-    (newEGraph, newReification)
+    (anyChanges, newReification)
   }
 
   /**

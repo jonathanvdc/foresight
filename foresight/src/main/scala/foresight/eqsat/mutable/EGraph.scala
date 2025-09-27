@@ -122,5 +122,5 @@ object EGraph {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @return An empty mutable e-graph.
    */
-  def empty[NodeT]: EGraph[NodeT] = UpdatingImmutableEGraph(immutable.EGraph.empty[NodeT])
+  def empty[NodeT]: EGraph[NodeT] = FreezableEGraph(immutable.EGraph.empty[NodeT])
 }

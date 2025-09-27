@@ -3,7 +3,8 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
 import foresight.eqsat.ReadOnlyEGraph
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.mutable
+import foresight.eqsat.immutable
 
 /**
  * Represents a rewrite rule as the composition of a [[Searcher]] and an [[Applier]].
@@ -87,12 +88,18 @@ final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: Str
    * @return `Some(updatedEGraph)` if any change occurred, `None` if the rule was a no-op.
    */
   def tryApply[
-    MutEGraphT <: EGraphT with EGraph[NodeT] with EGraphLike[NodeT, MutEGraphT]
+    MutEGraphT <: EGraphT with immutable.EGraph[NodeT] with immutable.EGraphLike[NodeT, MutEGraphT]
   ](
     egraph: MutEGraphT,
     parallelize: ParallelMap = ParallelMap.default
    ): Option[MutEGraphT] = {
-    delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
+    val mutGraph = mutable.FreezableEGraph[NodeT, MutEGraphT](egraph)
+    val anyChanges = delayed(egraph, parallelize)(mutGraph, Map(), parallelize)._1
+    if (anyChanges) {
+      Some(mutGraph.freeze())
+    } else {
+      None
+    }
   }
 
   /**
@@ -105,13 +112,32 @@ final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: Str
    * @param parallelize Parallel strategy used for both search and apply.
    * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
    */
+  def applyImmutable[
+    Repr <: EGraphT with immutable.EGraphLike[NodeT, Repr] with immutable.EGraph[NodeT]
+  ](
+     egraph: Repr,
+     parallelize: ParallelMap = ParallelMap.default
+   ): Repr = {
+    tryApply(egraph, parallelize).getOrElse(egraph)
+  }
+
+  /**
+   * Search and apply all matches immediately.
+   *
+   * If the rule makes any changes, `true` is returned without mutating the e-graph.
+   * If no changes occur, `false` is returned.
+   *
+   * @param egraph      Target e-graph.
+   * @param parallelize Parallel strategy used for both search and apply.
+   * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
+   */
   def apply[
-    MutEGraphT <: EGraphT with EGraph[NodeT] with EGraphLike[NodeT, MutEGraphT]
+    MutEGraphT <: EGraphT with mutable.EGraph[NodeT]
   ](
      egraph: MutEGraphT,
      parallelize: ParallelMap = ParallelMap.default
-   ): MutEGraphT = {
-    tryApply(egraph, parallelize).getOrElse(egraph)
+   ): Boolean = {
+    delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
   }
 
   /**

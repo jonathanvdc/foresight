@@ -5,6 +5,7 @@ import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
+import foresight.eqsat.mutable.FreezableEGraph
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
@@ -86,12 +87,13 @@ object SearchAndApply {
       }
 
       private def performUpdates(updates: Seq[Command[NodeT]], egraph: EGraphT, parallelize: ParallelMap): Option[EGraphT] = {
-        // Construct a command that applies the new matches to the e-graph.
+        // Construct an optimized command that applies all the updates to the e-graph.
         val update = CommandQueue(updates).optimized
 
-        // Apply the new matches to the e-graph.
-        val (newEGraph, _) = update(egraph, Map.empty, parallelize)
-        newEGraph
+        // Apply the updates to the e-graph.
+        val mutEGraph = FreezableEGraph[NodeT, EGraphT](egraph)
+        val (anyChanges, _) = update(mutEGraph, Map.empty, parallelize)
+        if (anyChanges) Some(mutEGraph.freeze()) else None
       }
 
       override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
@@ -163,8 +165,9 @@ object SearchAndApply {
 
         // Apply the new matches to the e-graph.
         val recorded = matches.mapValuesStrict(_.toSet)
-        val (newEGraph, _) = update(egraph.record(recorded), Map.empty, parallelize)
-        newEGraph
+        val mutEGraph = FreezableEGraph[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]](egraph.record(recorded))
+        val (anyChanges, _) = update(mutEGraph, Map.empty, parallelize)
+        if (anyChanges) Some(mutEGraph.freeze()) else None
       }
     }
   }
