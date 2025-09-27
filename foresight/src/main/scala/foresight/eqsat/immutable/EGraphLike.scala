@@ -81,7 +81,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] ext
   def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): (Seq[AddNodeResult], This)
 
   /**
-   * Unions (merges) multiple pairs of e-classes.
+   * Unions (merges) pairs of e-classes.
    *
    * Merging combines the member e-nodes of each pair, possibly triggering upward merging and
    * additional equivalences. The operation returns the updated e-graph and a partition of all
