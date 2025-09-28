@@ -1,8 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{PortableMatch, Rule}
+import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 
 /**
@@ -51,9 +49,9 @@ object MaximalRuleApplicationWithCaching {
   def apply[NodeT,
             EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
             MatchT <: PortableMatch[NodeT, MatchT]](
-      rules: Seq[Rule[NodeT, MatchT, EGraphT]]
+      rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
     ): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
-    MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT](
+    MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT](
       rules, SearchAndApply.immutableWithCaching[NodeT, EGraphT, MatchT])
   }
 }
