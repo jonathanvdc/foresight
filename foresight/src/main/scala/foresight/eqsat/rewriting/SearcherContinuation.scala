@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Defines common continuations for searchers.
@@ -12,7 +12,7 @@ object SearcherContinuation {
    * This type alias represents a function that takes a match of type `Match`
    * and returns a `Boolean` indicating whether to continue processing further matches.
    */
-  type Continuation[Node, -Match, -EGraphT <: ReadOnlyEGraph[Node]] = (Match, EGraphT) => Boolean
+  type Continuation[Node, -Match, -EGraphT <: EGraph[Node]] = (Match, EGraphT) => Boolean
 
   /**
    * A continuation builder function that takes a downstream continuation and returns a new continuation.
@@ -21,7 +21,7 @@ object SearcherContinuation {
    * and returns a new `Continuation`, allowing for the construction of complex
    * continuations by chaining simpler ones together.
    */
-  trait ContinuationBuilder[Node, Match, EGraphT <: ReadOnlyEGraph[Node]] {
+  trait ContinuationBuilder[Node, Match, EGraphT <: EGraph[Node]] {
     /**
      * Given a downstream continuation, returns a new continuation that incorporates
      * additional processing logic.
@@ -49,7 +49,7 @@ object SearcherContinuation {
    *
    * This continuation effectively does nothing and allows all matches to be processed.
    */
-  def ignore[Node, Match, EGraphT <: ReadOnlyEGraph[Node]]: Continuation[Node, Match, EGraphT] =
+  def ignore[Node, Match, EGraphT <: EGraph[Node]]: Continuation[Node, Match, EGraphT] =
     (_: Match, _: EGraphT) => true
 
   /**
@@ -60,7 +60,7 @@ object SearcherContinuation {
    * @tparam Match The type of matches processed by the continuation.
    * @return A continuation builder that acts as the identity function.
    */
-  def identityBuilder[Node, Match, EGraphT <: ReadOnlyEGraph[Node]]: ContinuationBuilder[Node, Match, EGraphT] =
+  def identityBuilder[Node, Match, EGraphT <: EGraph[Node]]: ContinuationBuilder[Node, Match, EGraphT] =
     new ContinuationBuilder[Node, Match, EGraphT] {
       override def apply(downstream: Continuation[Node, Match, EGraphT]): Continuation[Node, Match, EGraphT] = downstream
 
@@ -72,7 +72,7 @@ object SearcherContinuation {
   private final case class FilterContinuationBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](p: (Match, EGraphT) => Boolean)
     extends ContinuationBuilder[Node, Match, EGraphT] {
 
@@ -100,7 +100,7 @@ object SearcherContinuation {
   def filterBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](p: (Match, EGraphT) => Boolean): ContinuationBuilder[Node, Match, EGraphT] = {
     FilterContinuationBuilder(p)
   }
@@ -108,7 +108,7 @@ object SearcherContinuation {
   private final case class MapContinuationBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](f: (Match, EGraphT) => Match)
     extends ContinuationBuilder[Node, Match, EGraphT] {
 
@@ -130,7 +130,7 @@ object SearcherContinuation {
   def mapBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](f: (Match, EGraphT) => Match): ContinuationBuilder[Node, Match, EGraphT] = {
     MapContinuationBuilder(f)
   }
@@ -138,7 +138,7 @@ object SearcherContinuation {
   private final case class FlatMapContinuationBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](f: (Match, EGraphT) => Iterable[Match])
     extends ContinuationBuilder[Node, Match, EGraphT] {
 
@@ -169,7 +169,7 @@ object SearcherContinuation {
   def flatMapBuilder[
     Node,
     Match,
-    EGraphT <: ReadOnlyEGraph[Node]
+    EGraphT <: EGraph[Node]
   ](f: (Match, EGraphT) => Iterable[Match]): ContinuationBuilder[Node, Match, EGraphT] = {
     FlatMapContinuationBuilder(f)
   }

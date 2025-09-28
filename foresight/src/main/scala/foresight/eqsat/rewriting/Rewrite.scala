@@ -4,7 +4,7 @@ import foresight.eqsat.commands.Command
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A rewrite rule encapsulates a search-and-replace operation on an e-graph.
@@ -12,7 +12,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * A rule is parameterized by:
  *  - `NodeT`: The node type for expressions represented by the e-graph.
  *  - `MatchT`: The type of matches produced by this rule's search phase.
- *  - `EGraphT`: The type of e-graph this rule can be applied to. This must be a subtype of [[ReadOnlyEGraph]].
+ *  - `EGraphT`: The type of e-graph this rule can be applied to. This must be a subtype of [[EGraph]].
  *
  * Rules support three main operations:
  *  - [[search]]: Find all matches of this rule in a given e-graph.
@@ -26,9 +26,9 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam NodeT   Node type for expressions represented by the e-graph.
  * @tparam MatchT  Type of matches produced by this rule's search phase.
  * @tparam EGraphT Type of e-graph this rule can be applied to. Must be a subtype of
- *                 [[ReadOnlyEGraph]].
+ *                 [[EGraph]].
  */
-trait Rewrite[NodeT, MatchT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
   /**
    * The name of this rewrite. Rewrite names must be unique within a saturation pipeline.
    */

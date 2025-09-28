@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
@@ -25,7 +25,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
  * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
  */
-trait Applier[NodeT, -MatchT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+trait Applier[NodeT, -MatchT, -EGraphT <: EGraph[NodeT]] {
 
   /**
    * Build a command that applies the effects implied by `m` within `egraph`.
@@ -52,7 +52,7 @@ object Applier {
    * Useful as a placeholder in reversible pipelines or for rules that are search-only.
    * Reversal returns [[Searcher.empty]] so the pair remains structurally reversible.
    */
-  def ignore[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]: Applier[NodeT, MatchT, EGraphT] =
+  def ignore[NodeT, MatchT, EGraphT <: EGraph[NodeT]]: Applier[NodeT, MatchT, EGraphT] =
     new ReversibleApplier[NodeT, MatchT, EGraphT] {
       override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = CommandQueue.empty
 
@@ -69,7 +69,7 @@ object Applier {
   final case class Simplify[
     NodeT,
     MatchT,
-    EGraphT <: ReadOnlyEGraph[NodeT]
+    EGraphT <: EGraph[NodeT]
   ](applier: Applier[NodeT, MatchT, EGraphT]) extends Applier[NodeT, MatchT, EGraphT] {
     override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = {
       val command = applier.apply(m, egraph)
@@ -92,7 +92,7 @@ object Applier {
    */
   final case class Filter[
     NodeT, MatchT,
-    EGraphT <: ReadOnlyEGraph[NodeT]
+    EGraphT <: EGraph[NodeT]
   ](applier: Applier[NodeT, MatchT, EGraphT],
     filter: (MatchT, EGraphT) => Boolean)
     extends ReversibleApplier[NodeT, MatchT, EGraphT] {
@@ -123,7 +123,7 @@ object Applier {
    */
   final case class Map[
     NodeT, MatchT1, MatchT2,
-    EGraphT <: ReadOnlyEGraph[NodeT]
+    EGraphT <: EGraph[NodeT]
   ](applier: Applier[NodeT, MatchT2, EGraphT],
     f: (MatchT1, EGraphT) => MatchT2)
     extends Applier[NodeT, MatchT1, EGraphT] {
@@ -144,7 +144,7 @@ object Applier {
    */
   final case class FlatMap[
     NodeT, MatchT1, MatchT2,
-    EGraphT <: ReadOnlyEGraph[NodeT]
+    EGraphT <: EGraph[NodeT]
   ](applier: Applier[NodeT, MatchT2, EGraphT],
     f: (MatchT1, EGraphT) => Iterable[MatchT2])
     extends Applier[NodeT, MatchT1, EGraphT] {
@@ -169,7 +169,7 @@ object Applier {
    */
   implicit class ApplierOps[
     NodeT, MatchT,
-    EGraphT <: ReadOnlyEGraph[NodeT]
+    EGraphT <: EGraph[NodeT]
   ](private val applier: Applier[NodeT, MatchT, EGraphT]) extends AnyVal {
 
     /**

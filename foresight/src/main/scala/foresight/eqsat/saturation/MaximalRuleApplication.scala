@@ -4,7 +4,7 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.eqsat.mutable.{EGraph => MutableEGraph}
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly
 
 /**
  * A strategy that performs a single maximal rewrite pass over a set of rules.
@@ -40,7 +40,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  */
 final case class MaximalRuleApplication[NodeT,
                                         RuleT <: Rewrite[NodeT, MatchT, _],
-                                        EGraphT <: ReadOnlyEGraph[NodeT],
+                                        EGraphT <: readonly.EGraph[NodeT],
                                         MatchT](
   rules: Seq[RuleT],
   searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]

@@ -2,8 +2,8 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassSymbol}
-import foresight.eqsat.mutable.EGraph
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.mutable
+import foresight.eqsat.readonly
 
 /**
  * A [[Command]] that unions multiple pairs of e-classes in a single batch.
@@ -49,7 +49,7 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    * }}}
    */
   override def apply(
-                      egraph: EGraph[NodeT],
+                      egraph: mutable.EGraph[NodeT],
                       reification: Map[EClassSymbol.Virtual, EClassCall],
                       parallelize: ParallelMap
                     ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
@@ -87,7 +87,7 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    * }}}
    */
   override def simplify(
-                         egraph: ReadOnlyEGraph[NodeT],
+                         egraph: readonly.EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
     val builder = Seq.newBuilder[(EClassSymbol, EClassSymbol)]

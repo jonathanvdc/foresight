@@ -10,7 +10,7 @@ import foresight.eqsat.metadata.Metadata
  * @tparam NodeT The type of nodes in the e-graph.
  * @tparam Repr  The concrete type of the underlying e-graph representation.
  */
-trait EGraphWithMetadata[NodeT, +Repr <: ReadOnlyEGraph[NodeT]] extends EGraphDecorator[NodeT, Repr] {
+trait EGraphWithMetadata[NodeT, +Repr <: EGraph[NodeT]] extends EGraphDecorator[NodeT, Repr] {
   /**
    * Retrieve a registered metadata manager by name.
    *

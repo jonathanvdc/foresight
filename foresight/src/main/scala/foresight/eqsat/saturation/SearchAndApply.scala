@@ -5,7 +5,7 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
@@ -16,7 +16,7 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam EGraphT The type of the e-graph.
  * @tparam MatchT The type of the matches produced by the rules.
  */
-trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
+trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: readonly.EGraph[NodeT], MatchT] {
   /**
    * Searches for matches of the given rule in the e-graph.
    *
@@ -242,7 +242,7 @@ object SearchAndApply {
 
   private abstract class NoMatchCaching[
     NodeT,
-    EGraphT <: ReadOnlyEGraph[NodeT],
+    EGraphT <: readonly.EGraph[NodeT],
     MatchT
   ] extends SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
     final override def search(rule: Rewrite[NodeT, MatchT, EGraphT],

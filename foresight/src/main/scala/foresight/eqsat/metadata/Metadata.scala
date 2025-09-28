@@ -1,7 +1,7 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.{EClassCall, ENode}
 
 /**
@@ -53,7 +53,7 @@ trait Metadata[NodeT, MetadataT] {
    *   A metadata instance consistent with `after` and all `added` nodes.
    */
   def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
-                after: ReadOnlyEGraph[NodeT],
+                after: EGraph[NodeT],
                 parallelize: ParallelMap): Metadata[NodeT, MetadataT]
 
   /**
@@ -77,7 +77,7 @@ trait Metadata[NodeT, MetadataT] {
    * @return
    *   A metadata instance consistent with the unified state of `after`.
    */
-  def onUnionMany(equivalences: Set[Set[EClassCall]], after: ReadOnlyEGraph[NodeT]): Metadata[NodeT, MetadataT]
+  def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): Metadata[NodeT, MetadataT]
 
   /**
    * Produce a fresh, empty metadata instance suitable for an empty e-graph.

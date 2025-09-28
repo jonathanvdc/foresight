@@ -2,7 +2,7 @@ package foresight.eqsat.immutable
 
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly
 
 /**
  * An e-graph is a data structure for representing and maintaining equivalence classes of expressions.
@@ -63,7 +63,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * val allClasses: Iterable[EClassRef] = g3.classes
  * }}}
  */
-trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] extends ReadOnlyEGraph[NodeT] {
+trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] extends readonly.EGraph[NodeT] {
   // Core API:
 
   /**

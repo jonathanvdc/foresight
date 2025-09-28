@@ -2,7 +2,7 @@ package foresight.eqsat.hashCons
 
 import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall, Slot}
 import foresight.eqsat.collections.SlotMap
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.util.Debug
 
 /**
@@ -14,7 +14,7 @@ import foresight.util.Debug
  *
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
+private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
    * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so

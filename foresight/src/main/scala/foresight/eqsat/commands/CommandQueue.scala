@@ -2,15 +2,15 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree}
-import foresight.eqsat.mutable.EGraph
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.mutable.{EGraph => MutableEGraph}
+import foresight.eqsat.readonly
 
 import scala.collection.mutable
 
 /**
  * A composable batch of [[Command]]s that itself behaves as a single [[Command]].
  *
- * Queues enable staging, simplification, and reordering of edits before applying them to an [[EGraph]].
+ * Queues enable staging, simplification, and reordering of edits before applying them to a [[MutableEGraph]].
  * When applied, commands run in sequence, threading the evolving reification map through each step.
  *
  * @tparam NodeT Node type for expressions represented by the e-graph.
@@ -53,7 +53,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }
    * }}}
    */
-  override def apply(egraph: EGraph[NodeT],
+  override def apply(egraph: MutableEGraph[NodeT],
                      reification: Map[EClassSymbol.Virtual, EClassCall],
                      parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
     var anyChanges: Boolean = false
@@ -182,7 +182,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * }}}
    */
   override def simplify(
-                         egraph: ReadOnlyEGraph[NodeT],
+                         egraph: readonly.EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
     val newQueue = Seq.newBuilder[Command[NodeT]]

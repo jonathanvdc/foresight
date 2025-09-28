@@ -6,7 +6,7 @@ import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat._
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.util.ordering.SeqOrdering
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
@@ -159,7 +159,7 @@ trait Language[E]:
    */
   def extractor[
     C,
-    Repr <: ReadOnlyEGraph[Op]
+    Repr <: EGraph[Op]
   ](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]] = {
     val innerExtractor = analysis.extractor[Repr]
     new LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]](using this) {
@@ -342,8 +342,8 @@ trait Language[E]:
    * @param e        Surface-side pattern.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toSearcher[EGraphT <: ReadOnlyEGraph[Op]](e: E)
-                                               (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
+  def toSearcher[EGraphT <: EGraph[Op]](e: E)
+                                       (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
 
   /**
@@ -354,8 +354,8 @@ trait Language[E]:
    * @param e        Surface-side template for rewriting.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toApplier[EGraphT <: ReadOnlyEGraph[Op]](e: E)
-                                              (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
+  def toApplier[EGraphT <: EGraph[Op]](e: E)
+                                      (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
 
   /**
@@ -373,7 +373,7 @@ trait Language[E]:
    *   Lang.rule("comm-add", Add(x, y), Add(y, x))
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
   : Rule[Op, PatternMatch[Op], EGraphT] =
@@ -409,7 +409,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: E => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -442,7 +442,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -470,7 +470,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -499,7 +499,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -528,7 +528,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: ReadOnlyEGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],

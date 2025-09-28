@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.PortableMatch
 import foresight.eqsat.{EClassCall, MixedTree, Slot}
 import foresight.util.collections.ArrayMap
@@ -72,7 +72,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
     tryMerge(other).getOrElse(throw new IllegalArgumentException("Cannot merge incompatible matches"))
   }
 
-  override def port(egraph: ReadOnlyEGraph[NodeT]): PatternMatch[NodeT] = {
+  override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
     val newVarMapping = varMapping.mapValuesStrict(_.mapAtoms(egraph.canonicalize))
     val newSlotMapping = slotMapping

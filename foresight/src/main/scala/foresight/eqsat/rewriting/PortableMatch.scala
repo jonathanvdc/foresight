@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A match value that can be **re-targeted** to a later e-graph snapshot derived from the one
@@ -69,5 +69,5 @@ trait PortableMatch[NodeT, This <: PortableMatch[NodeT, This]] {
    * @param egraph A later snapshot derived from the original e-graph where this match was found.
    * @return A match equivalent to this one but valid on `egraph`.
    */
-  def port(egraph: ReadOnlyEGraph[NodeT]): This
+  def port(egraph: EGraph[NodeT]): This
 }

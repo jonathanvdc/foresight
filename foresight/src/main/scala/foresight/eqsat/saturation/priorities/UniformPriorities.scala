@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.Rewrite
 
 /**
@@ -21,7 +21,7 @@ import foresight.eqsat.rewriting.Rewrite
  * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by each rule.
  */
-final case class UniformPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: ReadOnlyEGraph[NodeT], MatchT](maxBatchSize: Int)
+final case class UniformPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: EGraph[NodeT], MatchT](maxBatchSize: Int)
     extends MatchPriorities[NodeT, RuleT, EGraphT, MatchT] {
 
   override def prioritize(rules: Seq[RuleT], matches: Map[String, Seq[MatchT]], egraph: EGraphT): Map[String, Seq[PrioritizedMatch[MatchT]]] = {

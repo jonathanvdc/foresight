@@ -4,7 +4,7 @@ import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
 import foresight.eqsat.mutable
 import foresight.eqsat.immutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Represents a rewrite rule as the composition of a [[Searcher]] and an [[Applier]].
@@ -70,9 +70,9 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * val next = maybeNewEGraph.getOrElse(egraph) // fallback to original if no changes
  * }}}
  */
-final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](override val name: String,
-                                                                       searcher: Searcher[NodeT, MatchT, EGraphT],
-                                                                       applier: Applier[NodeT, MatchT, EGraphT])
+final case class Rule[NodeT, MatchT, EGraphT <: EGraph[NodeT]](override val name: String,
+                                                               searcher: Searcher[NodeT, MatchT, EGraphT],
+                                                               applier: Applier[NodeT, MatchT, EGraphT])
   extends Rewrite[NodeT, MatchT, EGraphT] {
 
   /**
@@ -180,8 +180,8 @@ object Rule {
    * @tparam MatchT  Match type.
    * @tparam EGraphT E-graph type.
    */
-  final case class ApplicationException[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
-                                                                                         egraph: EGraphT,
-                                                                                         cause: Throwable)
+  final case class ApplicationException[NodeT, MatchT, EGraphT <: EGraph[NodeT]](rule: Rule[NodeT, MatchT, EGraphT],
+                                                                                 egraph: EGraphT,
+                                                                                 cause: Throwable)
     extends RuntimeException(s"Error applying rule ${rule.name} to e-graph", cause)
 }

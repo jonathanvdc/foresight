@@ -4,7 +4,7 @@ import foresight.eqsat.Slot
 import org.junit.Test
 import org.junit.Assert._
 import foresight.eqsat.collections.SlotSeq
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat._
@@ -69,10 +69,10 @@ class InstructionEffectsTest {
   def aggregateFromInstructionsMapsThenAggregates(): Unit = {
     // Dummy instruction that only supplies a pre-baked effects summary; execute is never used here.
     final case class DummyInstr(e: Instruction.Effects)
-      extends Instruction[Any, ReadOnlyEGraph[Any]] {
+      extends Instruction[Any, EGraph[Any]] {
       override def effects: Instruction.Effects = e
 
-      override def execute(ctx: Instruction.Execution[Any, ReadOnlyEGraph[Any]]): Boolean = {
+      override def execute(ctx: Instruction.Execution[Any, EGraph[Any]]): Boolean = {
         ctx.continue()
       }
     }
@@ -113,7 +113,7 @@ class InstructionEffectsTest {
   @Test
   def bindVarEffects(): Unit = {
     val v = Pattern.Var.fresh()
-    val instr = Instruction.BindVar[Any, ReadOnlyEGraph[Any]](
+    val instr = Instruction.BindVar[Any, EGraph[Any]](
       register = 2,
       variable = v
     )
@@ -126,7 +126,7 @@ class InstructionEffectsTest {
 
   @Test
   def compareEffects(): Unit = {
-    val instr = Instruction.Compare[Any, ReadOnlyEGraph[Any]](register1 = 1, register2 = 4)
+    val instr = Instruction.Compare[Any, EGraph[Any]](register1 = 1, register2 = 4)
     val eff = instr.effects
     assertEquals(0, eff.createdRegisters)
     assertTrue(eff.boundVars.isEmpty)

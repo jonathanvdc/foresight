@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * The result of executing a pattern machine.
@@ -8,7 +8,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph.
  */
-sealed trait MachineResult[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]]
+sealed trait MachineResult[NodeT, EGraphT <: EGraph[NodeT]]
 
 /**
  * A companion object for the `MachineResult` trait.
@@ -20,7 +20,7 @@ object MachineResult {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class Success[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](state: MachineState[NodeT])
+  final case class Success[NodeT, EGraphT <: EGraph[NodeT]](state: MachineState[NodeT])
     extends MachineResult[NodeT, EGraphT]
 
   /**
@@ -32,8 +32,8 @@ object MachineResult {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class Failure[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](state: MachineState[NodeT],
-                                                                    error: MachineError[NodeT],
-                                                                    remainingInstructions: Seq[Instruction[NodeT, EGraphT]])
+  final case class Failure[NodeT, EGraphT <: EGraph[NodeT]](state: MachineState[NodeT],
+                                                            error: MachineError[NodeT],
+                                                            remainingInstructions: Seq[Instruction[NodeT, EGraphT]])
     extends MachineResult[NodeT, EGraphT]
 }

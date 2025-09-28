@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.Rewrite
 import foresight.util.random.DiscreteDistribution
 
@@ -34,7 +34,7 @@ import foresight.util.random.DiscreteDistribution
 final case class CurveFittedPriorities[
   NodeT,
   RuleT <: Rewrite[NodeT, MatchT, _],
-  EGraphT <: ReadOnlyEGraph[NodeT],
+  EGraphT <: EGraph[NodeT],
   MatchT
 ](originalPriorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT],
   distribution: DiscreteDistribution)

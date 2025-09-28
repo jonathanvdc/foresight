@@ -2,7 +2,7 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.patterns.PatternMatch
 
 /**
@@ -30,7 +30,7 @@ import foresight.eqsat.rewriting.patterns.PatternMatch
  * val updated = rule(egraph) // search + apply
  * }}}
  */
-trait Searcher[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]
+trait Searcher[NodeT, MatchT, EGraphT <: EGraph[NodeT]]
   extends SearcherLike[NodeT, MatchT, EGraphT, Searcher[NodeT, MatchT, EGraphT]] {
 
   /**
@@ -173,7 +173,7 @@ object Searcher {
    * @tparam EGraphT E-graph type.
    * @return A [[ReversibleSearcher]] that always returns `Seq.empty`.
    */
-  def empty[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]]: Searcher[NodeT, MatchT, EGraphT] = {
+  def empty[NodeT, MatchT, EGraphT <: EGraph[NodeT]]: Searcher[NodeT, MatchT, EGraphT] = {
     new ReversibleSearcher[NodeT, MatchT, EGraphT] {
       override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {}
       override def tryReverse: Option[Applier[NodeT, MatchT, EGraphT]] = Some(Applier.ignore[NodeT, MatchT, EGraphT])
@@ -190,7 +190,7 @@ object Searcher {
    * @tparam NodeT       Node payload type.
    * @tparam EGraphT     Base e-graph type.
    */
-  implicit class SearcherOfPatternMatchPairsOps[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](val self: Searcher[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]) extends AnyVal {
+  implicit class SearcherOfPatternMatchPairsOps[NodeT, EGraphT <: EGraph[NodeT]](val self: Searcher[NodeT, (PatternMatch[NodeT], PatternMatch[NodeT]), EGraphT]) extends AnyVal {
     type MatchT = (PatternMatch[NodeT], PatternMatch[NodeT])
     type Continuation = self.Continuation
     type ContinuationBuilder = self.ContinuationBuilder

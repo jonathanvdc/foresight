@@ -2,8 +2,8 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.mutable.EGraph
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.mutable
+import foresight.eqsat.readonly
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
@@ -32,7 +32,7 @@ final case class AddManyCommand[NodeT](
 
   /**
    * Reifies all nodes in [[nodes]] using the given map, then inserts them
-   * into the e-graph with [[EGraph.tryAddMany]].
+   * into the e-graph with [[mutable.EGraph.tryAddMany]].
    *
    * Nodes are processed independently, allowing parallel insertion.
    * The returned reification map binds each output symbol from [[nodes]]
@@ -55,7 +55,7 @@ final case class AddManyCommand[NodeT](
    * }}}
    */
   override def apply(
-                      egraph: EGraph[NodeT],
+                      egraph: mutable.EGraph[NodeT],
                       reification: Map[EClassSymbol.Virtual, EClassCall],
                       parallelize: ParallelMap
                     ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
@@ -92,7 +92,7 @@ final case class AddManyCommand[NodeT](
    *   - An updated partial reification containing all newly resolved outputs.
    */
   override def simplify(
-                         egraph: ReadOnlyEGraph[NodeT],
+                         egraph: readonly.EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
 

@@ -4,7 +4,7 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree}
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A [[Command]] encapsulates a single, replayable edit to an e-graph.
@@ -103,7 +103,7 @@ trait Command[NodeT] {
    * @return A pair `(simplifiedCommand, partialBindings)` for this command.
    */
   def simplify(
-                egraph: ReadOnlyEGraph[NodeT],
+                egraph: EGraph[NodeT],
                 partialReification: Map[EClassSymbol.Virtual, EClassCall]
               ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall])
 
@@ -119,7 +119,7 @@ trait Command[NodeT] {
    * @param egraph Target e-graph used as context for optimization.
    * @return A simplified command.
    */
-  final def simplify(egraph: ReadOnlyEGraph[NodeT]): Command[NodeT] =
+  final def simplify(egraph: EGraph[NodeT]): Command[NodeT] =
     simplify(egraph, Map.empty)._1
 }
 
@@ -197,7 +197,7 @@ object Command {
   def equivalenceSimplified[NodeT](
                                     symbol: EClassSymbol,
                                     tree: MixedTree[NodeT, EClassSymbol],
-                                    egraph: ReadOnlyEGraph[NodeT]
+                                    egraph: EGraph[NodeT]
                                   ): Command[NodeT] = {
     val builder = new CommandQueueBuilder[NodeT]
     val c = builder.addSimplified(tree, egraph)

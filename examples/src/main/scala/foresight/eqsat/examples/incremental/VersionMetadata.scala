@@ -1,10 +1,9 @@
 package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
-import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.metadata.Metadata
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Metadata that tracks a global version number for the e-graph and a version number for each e-class.
@@ -43,7 +42,7 @@ final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRe
   }
 
   override def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
-                         after: ReadOnlyEGraph[NodeT],
+                         after: EGraph[NodeT],
                          parallelize: ParallelMap): VersionMetadata[NodeT] = {
     VersionMetadata(
       version,
@@ -51,7 +50,7 @@ final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRe
     )
   }
 
-  override def onUnionMany(equivalences: Set[Set[EClassCall]], after: ReadOnlyEGraph[NodeT]): VersionMetadata[NodeT] = {
+  override def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): VersionMetadata[NodeT] = {
     val updatedData = equivalences.foldLeft(data) { (currentData, eqClassCalls) =>
       // Find the canonical representative of the equivalence class after the unions
       val canonical = after.canonicalize(eqClassCalls.head)

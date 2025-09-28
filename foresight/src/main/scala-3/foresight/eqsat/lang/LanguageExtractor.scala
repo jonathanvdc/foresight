@@ -2,7 +2,7 @@ package foresight.eqsat.lang
 
 import foresight.eqsat.EClassCall
 import foresight.eqsat.immutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * An extractor that converts e-graph references (e-class calls) into surface language expressions.
@@ -14,7 +14,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam E The surface expression type stored in the e-graph and produced in the resulting expression.
  * @tparam Repr  The concrete e-graph type, which must implement both [[EGraphLike]] and [[EGraph]].
  */
-trait LanguageExtractor[E, -Repr <: ReadOnlyEGraph[LanguageOp[E]]](using L: Language[E]) {
+trait LanguageExtractor[E, -Repr <: EGraph[LanguageOp[E]]](using L: Language[E]) {
 
   /**
    * Extracts a concrete expression tree that realizes the given e-class call, according to this

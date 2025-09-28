@@ -2,7 +2,7 @@ package foresight.eqsat.extraction
 
 import foresight.eqsat.{EClassCall, MixedTree, Tree}
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly
 
 /**
  * An extractor that converts e-graph references (e-class calls) into concrete expression trees.
@@ -14,7 +14,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam NodeT The node type stored in the e-graph and produced in the resulting [[Tree]].
  * @tparam Repr  The concrete e-graph type, which must implement both [[EGraphLike]] and [[EGraph]].
  */
-trait Extractor[NodeT, -Repr <: ReadOnlyEGraph[NodeT]] {
+trait Extractor[NodeT, -Repr <: readonly.EGraph[NodeT]] {
 
   /**
    * Extracts a concrete expression tree that realizes the given e-class call, according to this

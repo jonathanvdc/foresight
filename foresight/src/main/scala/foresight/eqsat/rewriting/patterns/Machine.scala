@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import scala.collection.compat._
 
 /**
@@ -22,10 +22,10 @@ object Machine {
    * @tparam NodeT  The type of the nodes in the e-graph.
    * @tparam GraphT The type of the e-graph.
    */
-  def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                  machine: MutableMachineState[NodeT],
-                                                  instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]],
-                                                  continuation: MutableMachineState[NodeT] => Boolean): Unit = {
+  def run[NodeT, GraphT <: EGraph[NodeT]](graph: GraphT,
+                                          machine: MutableMachineState[NodeT],
+                                          instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]],
+                                          continuation: MutableMachineState[NodeT] => Boolean): Unit = {
     Instruction.Execution.pool.run(graph, machine, instructions, continuation)
   }
 
@@ -40,9 +40,9 @@ object Machine {
    * @tparam GraphT The type of the e-graph.
    * @return A list of final machine states that result from successfully applying all instructions to the machine.
    */
-  def run[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                  machine: MutableMachineState[NodeT],
-                                                  instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
+  def run[NodeT, GraphT <: EGraph[NodeT]](graph: GraphT,
+                                          machine: MutableMachineState[NodeT],
+                                          instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]]): Seq[MachineState[NodeT]] = {
     val results = Seq.newBuilder[MachineState[NodeT]]
     run(graph, machine, instructions, (finalMachine: MutableMachineState[NodeT]) => {
         results += finalMachine.freeze()
@@ -65,9 +65,9 @@ object Machine {
    * @return A list of successful and unsuccessful runs of the machine obtained by applying all instructions to the
    *         machine.
    */
-  def tryRun[NodeT, GraphT <: ReadOnlyEGraph[NodeT]](graph: GraphT,
-                                                     machine: MutableMachineState[NodeT],
-                                                     instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
+  def tryRun[NodeT, GraphT <: EGraph[NodeT]](graph: GraphT,
+                                             machine: MutableMachineState[NodeT],
+                                             instructions: immutable.ArraySeq[Instruction[NodeT, GraphT]]): Seq[MachineResult[NodeT, GraphT]] = {
     val results = Seq.newBuilder[MachineResult[NodeT, GraphT]]
     Instruction.Execution.pool.run(graph, machine, instructions,
       onSuccess = (finalMachine: MutableMachineState[NodeT]) => {

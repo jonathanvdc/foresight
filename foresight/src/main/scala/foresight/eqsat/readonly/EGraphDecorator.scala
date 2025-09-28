@@ -11,7 +11,7 @@ import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
  * @tparam NodeT The type of nodes in the e-graph.
  * @tparam Repr  The concrete type of the underlying e-graph representation.
  */
-trait EGraphDecorator[NodeT, +Repr <: ReadOnlyEGraph[NodeT]] extends ReadOnlyEGraph[NodeT] {
+trait EGraphDecorator[NodeT, +Repr <: EGraph[NodeT]] extends EGraph[NodeT] {
   /**
    * The underlying e-graph representation.
    */

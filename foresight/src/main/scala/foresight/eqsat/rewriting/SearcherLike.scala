@@ -2,7 +2,7 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat.Slot
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A trait representing a searcher-like object that can be extended with continuation *builders*.
@@ -14,7 +14,7 @@ import foresight.eqsat.readonly.ReadOnlyEGraph
  * @tparam Match The type of matches produced by the searcher-like object.
  * @tparam This  The concrete type of the searcher-like object, used for fluent method chaining.
  */
-trait SearcherLike[Node, Match, EGraphT <: ReadOnlyEGraph[Node], +This <: SearcherLike[Node, Match, EGraphT, This]] {
+trait SearcherLike[Node, Match, EGraphT <: EGraph[Node], +This <: SearcherLike[Node, Match, EGraphT, This]] {
   /**
    * A continuation function that processes matches found by a searcher.
    *
@@ -116,7 +116,7 @@ object SearcherLike {
    */
   implicit class SearcherLikeOfPatternMatch[
     Node,
-    EGraphT <: ReadOnlyEGraph[Node],
+    EGraphT <: EGraph[Node],
     +This <: SearcherLike[Node, PatternMatch[Node], EGraphT, This]
   ](private val self: SearcherLike[Node, PatternMatch[Node], EGraphT, This]) extends AnyVal {
 

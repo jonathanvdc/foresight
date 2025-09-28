@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.{Rewrite, Rule}
 
 /**
@@ -19,7 +19,7 @@ import foresight.eqsat.rewriting.{Rewrite, Rule}
  * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by applying a rule.
  */
-trait MatchPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
+trait MatchPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: EGraph[NodeT], MatchT] {
   /**
    * Assigns a priority score to each match, indicating its relative importance or desirability.
    *

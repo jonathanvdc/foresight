@@ -2,7 +2,7 @@ package foresight.eqsat.mutable
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.immutable
-import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.readonly
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
 
 /**
@@ -10,7 +10,7 @@ import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
  *
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
+trait EGraph[NodeT] extends readonly.EGraph[NodeT] {
   // Core API:
 
   /**
