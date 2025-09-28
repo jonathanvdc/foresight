@@ -111,6 +111,18 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
   final def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     unionMany(pairs, ParallelMap.default)
   }
+
+  /**
+   * Wraps this e-graph with metadata support.
+   *
+   * The returned wrapper delegates all core operations to this e-graph, while managing
+   * metadata instances that can track additional information about the e-graph.
+   *
+   * @return A new e-graph wrapper with metadata support.
+   */
+  final def withMetadata: EGraphWithMetadata[NodeT, this.type] = {
+    EGraphWithMetadata(this)
+  }
 }
 
 /**
