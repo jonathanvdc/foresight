@@ -4,6 +4,7 @@ import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 
 /**
  * A strategy that performs a single maximal rewrite pass over a set of rules.
@@ -67,8 +68,8 @@ final case class MaximalRuleApplication[NodeT,
  */
 object MaximalRuleApplication {
   /**
-   * Creates a [[MaximalRuleApplication]] strategy that applies **all matches** of all rules
-   * in a single iteration, without caching.
+   * Creates a [[MaximalRuleApplication]] strategy that applies all matches of all rules
+   * in a single iteration, without caching, for immutable e-graphs.
    *
    * This variant does not perform saturation to a fixpoint on its own.
    * To run to convergence, wrap it with [[Strategy.repeatUntilStable]].
@@ -83,12 +84,42 @@ object MaximalRuleApplication {
    * }}}
    * @param rules The rules to apply.
    */
-  def apply[NodeT,
-            EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-            MatchT](
+  def apply[
+    NodeT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT
+  ](
     rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
   ): MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
 
     new MaximalRuleApplication(rules, SearchAndApply.immutable)
+  }
+
+  /**
+   * Creates a [[MaximalRuleApplication]] strategy that applies all matches of all rules
+   * in a single iteration, without caching, for mutable e-graphs.
+   *
+   * This variant does not perform saturation to a fixpoint on its own.
+   * To run to convergence, wrap it with [[Strategy.repeatUntilStable]].
+   *
+   * @example
+   * {{{
+   * val strategy =
+   *   MaximalRuleApplication.mutable(rules)
+   *     .repeatUntilStable
+   *
+   * val finalGraph = strategy.run(initialMutableEGraph)
+   * }}}
+   * @param rules The rules to apply.
+   */
+  def mutable[
+    NodeT,
+    EGraphT <: MutableEGraph[NodeT],
+    MatchT
+  ](
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
+  ): MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+
+    new MaximalRuleApplication(rules, SearchAndApply.mutable)
   }
 }
