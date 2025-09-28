@@ -45,7 +45,7 @@ final case class MaximalRuleApplication[NodeT,
                                         MatchT](
   rules: Seq[RuleT],
   searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
-) extends Strategy[NodeT, EGraphT, Unit] {
+) extends Strategy[EGraphT, Unit] {
 
   override def initialData: Unit = ()
 

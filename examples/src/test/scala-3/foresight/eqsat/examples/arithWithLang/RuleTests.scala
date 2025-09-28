@@ -15,7 +15,7 @@ class RuleTests {
   val R: Rules = Rules()(using L)
   type ArithRule = R.ArithRule
 
-  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[EGraph[ArithIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
@@ -24,7 +24,7 @@ class RuleTests {
       .closeMetadata
       .dropData
 
-  private def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] =
+  private def strategies: Seq[Strategy[EGraph[ArithIR], Unit]] =
     Seq(strategy(12))
 
   /**

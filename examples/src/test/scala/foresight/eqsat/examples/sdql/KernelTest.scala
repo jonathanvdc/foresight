@@ -22,7 +22,7 @@ class KernelTest {
   }
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[SdqlRule] = SdqlRules.allNew): Strategy[SdqlIR, EGraph[SdqlIR], Unit] =
+                       rules: Seq[SdqlRule] = SdqlRules.allNew): Strategy[EGraph[SdqlIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable

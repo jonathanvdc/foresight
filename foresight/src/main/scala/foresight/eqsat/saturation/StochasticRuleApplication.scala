@@ -46,7 +46,7 @@ final case class StochasticRuleApplication[
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
           priorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT],
-          random: Random) extends Strategy[NodeT, EGraphT, Random] {
+          random: Random) extends Strategy[EGraphT, Random] {
 
   /**
    * A lookup table from rule names to rule instances, used during match annotation and application.

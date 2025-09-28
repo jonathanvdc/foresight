@@ -63,7 +63,7 @@ class MatmulBenchmarks extends BenchmarksWithParallelMap {
 
 
   def nmmBenchMutable(n: Int, map: ParallelMap): LinalgExpr = {
-    val simpleStrategy: Strategy[LinalgIR, mutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication.mutable(R.all)
+    val simpleStrategy: Strategy[mutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication.mutable(R.all)
       .repeatUntilStable
 
     val expr = createNmm(n)
@@ -75,7 +75,7 @@ class MatmulBenchmarks extends BenchmarksWithParallelMap {
   }
 
   def nmmBenchImmutable(n: Int, map: ParallelMap): LinalgExpr = {
-    val simpleStrategy: Strategy[LinalgIR, immutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
+    val simpleStrategy: Strategy[immutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
     val expr = createNmm(n)

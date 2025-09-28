@@ -23,7 +23,7 @@ class LiarBenchmarks extends BenchmarksWithParallelMap {
   private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[ArrayIR, BaseEGraph, Unit] = {
+                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     Strategies.naive(iterationLimit = Some(iterationLimit), rules = rules)
   }
 

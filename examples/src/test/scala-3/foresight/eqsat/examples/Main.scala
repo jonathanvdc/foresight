@@ -60,7 +60,7 @@ object Main {
     type LinalgRule = R.LinalgRule
 
 
-    val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
+    val simpleStrategy: Strategy[EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
     val expr = nmm(n)
@@ -105,7 +105,7 @@ object Main {
     val R: poly.Rules = poly.Rules()(using L)
     type ArithRule = R.ArithRule
 
-    val simpleStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all)
+    val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
     // polynomial of degree 5: ax^5 + bx^4 + cx^3 + dx^2 + ex + f

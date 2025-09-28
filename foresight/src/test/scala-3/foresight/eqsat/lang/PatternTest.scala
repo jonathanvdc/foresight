@@ -40,7 +40,7 @@ class PatternTest {
     Lang.rule("assoc", x + y, y + x)
   }
 
-  def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] = {
+  def strategies: Seq[Strategy[EGraph[ArithIR], Unit]] = {
     Seq(
       MaximalRuleApplication(Seq(associativityRule))
         .withIterationLimit(12)

@@ -27,7 +27,7 @@ class IncrementalSaturationTest {
 
     val k = 2
     val rules = IncrementalSaturation.makeIncremental(Rules.all, k, metadataName, costAnalysis)
-    val strategy: Strategy[ArithIR, EGraphWithMetadata[ArithIR, EGraph[ArithIR]], Unit] = MaximalRuleApplication(rules)
+    val strategy: Strategy[EGraphWithMetadata[ArithIR, EGraph[ArithIR]], Unit] = MaximalRuleApplication(rules)
       .withIterationLimit(5)
       .repeatUntilStable
 

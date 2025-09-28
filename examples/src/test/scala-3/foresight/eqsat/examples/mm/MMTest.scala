@@ -15,8 +15,8 @@ class MMTest {
   val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
   val R: Rules = Rules()(using L)
 
-  val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
-  val mutableStrategy: Strategy[LinalgIR, mutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication.mutable(R.all).repeatUntilStable
+  val simpleStrategy: Strategy[EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+  val mutableStrategy: Strategy[mutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication.mutable(R.all).repeatUntilStable
 
   final case class DimAndCost(nrows: Int, ncols: Int, cost: Int)
   given Ordering[DimAndCost] = Ordering.by(_.cost)
@@ -197,7 +197,7 @@ class MMTest {
     val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
     val R: Rules = Rules()(using L)
 
-    val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+    val simpleStrategy: Strategy[EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
 
     val costFunction: LanguageCostFunction[LinalgExpr, DimAndCost] = new LanguageCostFunction[LinalgExpr, DimAndCost]() {
       override def apply(expr: LinalgExpr): DimAndCost = {

@@ -9,7 +9,7 @@ import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 class RuleTests {
-  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = Rules.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = Rules.all): Strategy[EGraph[ArithIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
@@ -18,7 +18,7 @@ class RuleTests {
       .closeMetadata
       .dropData
 
-  private def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] =
+  private def strategies: Seq[Strategy[EGraph[ArithIR], Unit]] =
     Seq(strategy(12))
 
   /**

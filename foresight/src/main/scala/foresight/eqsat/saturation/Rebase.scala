@@ -22,7 +22,7 @@ final case class Rebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph
                                                                                          getRoot: EGraphT => EClassCall,
                                                                                          setRoot: (EGraphT, EClassCall) => EGraphT,
                                                                                          areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean)
-  extends Strategy[NodeT, EGraphT, Option[Tree[NodeT]]] {
+  extends Strategy[EGraphT, Option[Tree[NodeT]]] {
   
   override def initialData: Option[Tree[NodeT]] = None
 

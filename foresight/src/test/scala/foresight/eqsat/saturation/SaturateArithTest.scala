@@ -45,28 +45,28 @@ class SaturateArithTest {
     type ArithRule = Rule[Arith, PatternMatch[Arith], EGraph[Arith]]
     type ArithRewrite = Rewrite[Arith, PatternMatch[Arith], EGraph[Arith]]
 
-    def simpleStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
-    def cachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
-    def uniformStochasticStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
+    def simpleStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplication(all).repeatUntilStable
+    def cachingStrategy: Strategy[EGraph[Arith], Unit] = MaximalRuleApplicationWithCaching(all).repeatUntilStable.closeRecording
+    def uniformStochasticStrategy: Strategy[EGraph[Arith], Unit] = {
       val prioritizer = UniformPriorities[Arith, ArithRewrite, EGraph[Arith], PatternMatch[Arith]](30)
       StochasticRuleApplication(all, prioritizer).repeatUntilStable
     }
-    def uniformStochasticCachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
+    def uniformStochasticCachingStrategy: Strategy[EGraph[Arith], Unit] = {
       val prioritizer = UniformPriorities[Arith, ArithRewrite, EGraphWithRecordedApplications[Arith, EGraph[Arith], PatternMatch[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 
-    def deterministicStrategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
+    def deterministicStrategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(
       simpleStrategy,
       cachingStrategy
     )
 
-    def stochasticStrategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] = Seq(
+    def stochasticStrategies: Seq[Strategy[EGraph[Arith], Unit]] = Seq(
       uniformStochasticStrategy,
       uniformStochasticCachingStrategy
     )
 
-    def strategies: Seq[Strategy[Arith, EGraph[Arith], Unit]] =
+    def strategies: Seq[Strategy[EGraph[Arith], Unit]] =
       deterministicStrategies ++ stochasticStrategies
 
     val addCommutativity: Rule[Arith, PatternMatch[Arith], EGraph[Arith]] = {

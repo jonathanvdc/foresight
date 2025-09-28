@@ -9,7 +9,7 @@ class BetweenIterationsTest {
   type EGraphT = EGraph[NodeT]
 
 
-  private object CountApplications extends Strategy[NodeT, EGraphT, Int] {
+  private object CountApplications extends Strategy[EGraphT, Int] {
     override def initialData: Int = 0
 
     override def apply(egraph: EGraphT, data: Int, parallelize: ParallelMap): (Option[EGraphT], Int) = {
