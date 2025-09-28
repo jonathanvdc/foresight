@@ -279,8 +279,8 @@ trait Language[E]:
    * @param e        Surface-side pattern.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
-                                                                    (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
+  def toSearcher[EGraphT <: ReadOnlyEGraph[Op]](e: E)
+                                               (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
 
   /**
@@ -291,8 +291,8 @@ trait Language[E]:
    * @param e        Surface-side template for rewriting.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
-                                                                   (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
+  def toApplier[EGraphT <: ReadOnlyEGraph[Op]](e: E)
+                                              (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
 
   /**
@@ -310,7 +310,7 @@ trait Language[E]:
    *   Lang.rule("comm-add", Add(x, y), Add(y, x))
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
   : Rule[Op, PatternMatch[Op], EGraphT] =
@@ -346,7 +346,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String)
   (f: E => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -379,7 +379,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String)
   (f: (E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -407,7 +407,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String)
   (f: (E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -436,7 +436,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String)
   (f: (E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -465,7 +465,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: ReadOnlyEGraph[Op]]
   (name: String)
   (f: (E, E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
