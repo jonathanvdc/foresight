@@ -1,6 +1,7 @@
 package foresight.eqsat.examples.mm
 
-import foresight.eqsat.immutable.EGraph
+import foresight.eqsat.immutable
+import foresight.eqsat.mutable
 import foresight.eqsat.examples.mm
 import foresight.eqsat.lang._
 import foresight.eqsat.parallel.ParallelMap
@@ -17,9 +18,13 @@ class MatmulBenchmarks extends BenchmarksWithParallelMap {
   @Param(Array("20", "40", "80"))
   var size: Int = _
 
+  @Param(Array("true", "false"))
+  var mutableEGraph: Boolean = _
+
   @Benchmark
   def nmm(): LinalgExpr = {
-    nmmBench(size, parallelMap)
+    if (mutableEGraph) nmmBenchMutable(size, parallelMap)
+    else nmmBenchImmutable(size, parallelMap)
   }
 
   final case class DimAndCost(nrows: Int, ncols: Int, cost: Int)
@@ -52,13 +57,25 @@ class MatmulBenchmarks extends BenchmarksWithParallelMap {
     }
   }
 
-  def nmmBench(n: Int, map: ParallelMap): LinalgExpr = {
-    val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
-    val R: mm.Rules = mm.Rules()(using L)
-    type LinalgRule = R.LinalgRule
+  val L: Language[LinalgExpr] = summon[Language[LinalgExpr]]
+  val R: mm.Rules = mm.Rules()(using L)
+  type LinalgRule = R.LinalgRule
 
 
-    val simpleStrategy: Strategy[LinalgIR, EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
+  def nmmBenchMutable(n: Int, map: ParallelMap): LinalgExpr = {
+    val simpleStrategy: Strategy[LinalgIR, mutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication.mutable(R.all)
+      .repeatUntilStable
+
+    val expr = createNmm(n)
+
+    val (root, egraph) = L.toMutableEGraph(expr)
+    val egraph2 = simpleStrategy(egraph, map).get
+
+    L.extract(root, egraph2, linalgCostFunction)
+  }
+
+  def nmmBenchImmutable(n: Int, map: ParallelMap): LinalgExpr = {
+    val simpleStrategy: Strategy[LinalgIR, immutable.EGraph[LinalgIR], Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
     val expr = createNmm(n)
@@ -66,6 +83,6 @@ class MatmulBenchmarks extends BenchmarksWithParallelMap {
     val (root, egraph) = L.toEGraph(expr)
     val egraph2 = simpleStrategy(egraph, map).get
 
-    egraph2.extract(root, linalgCostFunction)
+    L.extract(root, egraph2, linalgCostFunction)
   }
 }
