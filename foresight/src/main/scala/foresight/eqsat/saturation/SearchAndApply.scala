@@ -18,6 +18,18 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  */
 trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
   /**
+   * Searches for matches of the given rule in the e-graph.
+   *
+   * @param rule The rule to search for matches.
+   * @param egraph The e-graph to search in.
+   * @param parallelize A parallelization strategy for searching.
+   * @return A sequence of matches found for the rule.
+   */
+  def search(rule: RuleT,
+             egraph: EGraphT,
+             parallelize: ParallelMap): Seq[MatchT]
+
+  /**
    * Searches for matches of the given rules in the e-graph.
    *
    * @param rules The rules to search for matches.
@@ -27,7 +39,14 @@ trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: ReadOnly
    */
   def search(rules: Seq[RuleT],
              egraph: EGraphT,
-             parallelize: ParallelMap): Map[String, Seq[MatchT]]
+             parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
+    val ruleMatchingParallelize = parallelize.child("rule matching")
+    ruleMatchingParallelize(
+      rules, (rule: RuleT) => {
+        rule.name -> search(rule, egraph, ruleMatchingParallelize)
+      }
+    ).toMap
+  }
 
   /**
    * Applies the matches found for the given rules to the e-graph.
@@ -75,15 +94,10 @@ object SearchAndApply {
                      EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                      MatchT]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
-      override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+      override def search(rule: Rule[NodeT, MatchT, EGraphT],
                           egraph: EGraphT,
-                          parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
-        val ruleMatchingParallelize = parallelize.child("rule matching")
-        ruleMatchingParallelize(
-          rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
-            rule.name -> rule.search(egraph, ruleMatchingParallelize)
-          }
-        ).toMap
+                          parallelize: ParallelMap): Seq[MatchT] = {
+        rule.search(egraph, parallelize)
       }
 
       private def performUpdates(updates: Seq[Command[NodeT]], egraph: EGraphT, parallelize: ParallelMap): Option[EGraphT] = {
@@ -136,18 +150,12 @@ object SearchAndApply {
                   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                   MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
-      override def search(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+      override def search(rule: Rule[NodeT, MatchT, EGraphT],
                           egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
-                          parallelize: ParallelMap): Map[String, Seq[MatchT]] = {
-        val ruleMatchingParallelize = parallelize.child("rule matching")
-        ruleMatchingParallelize(
-          rules, (rule: Rule[NodeT, MatchT, EGraphT]) => {
-            val matches = rule.search(egraph.egraph, ruleMatchingParallelize)
-            val oldMatches = egraph.applications(rule.name)
-            val newMatches = matches.filterNot(oldMatches.contains)
-            rule.name -> newMatches
-          }
-        ).toMap
+                          parallelize: ParallelMap): Seq[MatchT] = {
+        val matches = rule.search(egraph.egraph, parallelize)
+        val oldMatches = egraph.applications(rule.name)
+        matches.filterNot(oldMatches.contains)
       }
 
       override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
