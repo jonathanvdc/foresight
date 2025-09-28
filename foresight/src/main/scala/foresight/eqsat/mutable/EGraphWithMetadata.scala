@@ -109,8 +109,30 @@ final class EGraphWithMetadata[
     equivalences
   }
 
-  override def emptied: this.type = EGraphWithMetadata(
+  override def emptied: this.type = new EGraphWithMetadata(
     egraph.emptied,
-    mutable.Map(metadata.toSeq.map { case (k, v) => k -> v.emptied }:_*)
+    mutable.Map[String, Metadata[NodeT, _]](metadata.toSeq.map { case (k, v) => k -> v.emptied }:_*)
   ).asInstanceOf[this.type]
+}
+
+/**
+ * A companion object for the [[EGraphWithMetadata]] class.
+ */
+object EGraphWithMetadata {
+  /**
+   * Creates a new mutable e-graph with metadata support.
+   *
+   * @param egraph   The underlying e-graph representation.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam Repr  The concrete type of the underlying e-graph representation.
+   * @return A new mutable e-graph with metadata support.
+   */
+  def apply[
+    NodeT,
+    Repr <: EGraph[NodeT]
+  ](
+    egraph: Repr
+   ): EGraphWithMetadata[NodeT, Repr] = {
+    new EGraphWithMetadata(egraph, mutable.Map.empty[String, Metadata[NodeT, _]])
+  }
 }
