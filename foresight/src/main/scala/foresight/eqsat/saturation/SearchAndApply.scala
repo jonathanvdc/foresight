@@ -3,7 +3,7 @@ package foresight.eqsat.saturation
 import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{PortableMatch, Rule}
+import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
 import foresight.util.collections.StrictMapOps.toStrictMapOps
@@ -16,7 +16,7 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam EGraphT The type of the e-graph.
  * @tparam MatchT The type of the matches produced by the rules.
  */
-trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
+trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
   /**
    * Searches for matches of the given rule in the e-graph.
    *
@@ -165,7 +165,7 @@ object SearchAndApply {
     NodeT,
     EGraphT <: MutableEGraph[NodeT],
     MatchT
-  ]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+  ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
       override def update(command: Command[NodeT],
                           matches: Map[String, Seq[MatchT]],
@@ -188,7 +188,7 @@ object SearchAndApply {
     NodeT,
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT
-  ]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+  ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
       override def update(command: Command[NodeT],
                           matches: Map[String, Seq[MatchT]],
@@ -211,9 +211,9 @@ object SearchAndApply {
     NodeT,
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT <: PortableMatch[NodeT, MatchT]
-  ]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
-    new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
-      override def search(rule: Rule[NodeT, MatchT, EGraphT],
+  ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+    new SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
+      override def search(rule: Rewrite[NodeT, MatchT, EGraphT],
                           egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                           parallelize: ParallelMap): Seq[MatchT] = {
         val matches = rule.search(egraph.egraph, parallelize)
@@ -221,7 +221,7 @@ object SearchAndApply {
         matches.filterNot(oldMatches.contains)
       }
 
-      override def delayed(rule: Rule[NodeT, MatchT, EGraphT],
+      override def delayed(rule: Rewrite[NodeT, MatchT, EGraphT],
                            matches: Seq[MatchT],
                            egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                            parallelize: ParallelMap): Command[NodeT] = {
@@ -244,27 +244,27 @@ object SearchAndApply {
     NodeT,
     EGraphT <: ReadOnlyEGraph[NodeT],
     MatchT
-  ] extends SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
-    final override def search(rule: Rule[NodeT, MatchT, EGraphT],
+  ] extends SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
+    final override def search(rule: Rewrite[NodeT, MatchT, EGraphT],
                               egraph: EGraphT,
                               parallelize: ParallelMap): Seq[MatchT] = {
       rule.search(egraph, parallelize)
     }
 
-    final override def delayed(rule: Rule[NodeT, MatchT, EGraphT],
+    final override def delayed(rule: Rewrite[NodeT, MatchT, EGraphT],
                                matches: Seq[MatchT],
                                egraph: EGraphT,
                                parallelize: ParallelMap): Command[NodeT] = {
       rule.delayed(matches, egraph, parallelize)
     }
 
-    final override def apply(rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+    final override def apply(rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
                              egraph: EGraphT,
                              parallelize: ParallelMap): Option[EGraphT] = {
       val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
       val updates = ruleMatchingAndApplicationParallelize(
         rules,
-        (rule: Rule[NodeT, MatchT, EGraphT]) => {
+        (rule: Rewrite[NodeT, MatchT, EGraphT]) => {
           rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
         }
       ).toSeq
