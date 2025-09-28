@@ -5,8 +5,7 @@ import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rule}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
-import foresight.eqsat.mutable.{EGraph => MutableEGraph}
-import foresight.eqsat.mutable.FreezableEGraph
+import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
