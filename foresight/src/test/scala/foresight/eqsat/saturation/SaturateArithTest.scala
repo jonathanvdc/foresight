@@ -52,7 +52,7 @@ class SaturateArithTest {
       StochasticRuleApplication(all, prioritizer).repeatUntilStable
     }
     def uniformStochasticCachingStrategy: Strategy[Arith, EGraph[Arith], Unit] = {
-      val prioritizer = UniformPriorities[Arith, ArithRule, EGraphWithRecordedApplications[Arith, EGraph[Arith], PatternMatch[Arith]], PatternMatch[Arith]](30)
+      val prioritizer = UniformPriorities[Arith, ArithRewrite, EGraphWithRecordedApplications[Arith, EGraph[Arith], PatternMatch[Arith]], PatternMatch[Arith]](30)
       StochasticRuleApplicationWithCaching(all, prioritizer).repeatUntilStable.closeRecording
     }
 
