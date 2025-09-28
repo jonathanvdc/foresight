@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.immutable.EGraph
+import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
@@ -12,7 +12,7 @@ import scala.language.implicitConversions
  */
 final case class Rules()(using L: Language[ArithExpr]) {
   type Op = LanguageOp[ArithExpr]
-  type ArithEGraph = EGraph[ArithIR]
+  type ArithEGraph = ReadOnlyEGraph[ArithIR]
   type ArithRule = Rule[ArithIR, PatternMatch[ArithIR], ArithEGraph]
 
   import L.rule

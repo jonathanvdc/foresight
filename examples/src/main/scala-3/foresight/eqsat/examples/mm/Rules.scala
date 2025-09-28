@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.mm
 
-import foresight.eqsat.immutable.EGraph
+import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
@@ -12,7 +12,7 @@ import scala.language.implicitConversions
  */
 final case class Rules()(using L: Language[LinalgExpr]) {
   type Op = LanguageOp[LinalgExpr]
-  type LinalgEGraph = EGraph[LinalgIR]
+  type LinalgEGraph = ReadOnlyEGraph[LinalgIR]
   type LinalgRule = Rule[LinalgIR, PatternMatch[LinalgIR], LinalgEGraph]
 
   import L.rule
