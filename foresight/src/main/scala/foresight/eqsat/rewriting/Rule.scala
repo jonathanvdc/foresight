@@ -74,71 +74,8 @@ import foresight.eqsat.immutable
  */
 final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: String,
                                                                        searcher: Searcher[NodeT, MatchT, EGraphT],
-                                                                       applier: Applier[NodeT, MatchT, EGraphT]) {
-  /**
-   * Search the e-graph for matches and apply them immediately, if any.
-   *
-   * Executes the same staged command produced by [[delayed(EGraphT, ParallelMap)]], but runs it right away.
-   * Returns `Some(updatedEGraph)` iff at least one application produced an effective change; otherwise `None`.
-   *
-   * This is useful in saturation loops that want to detect quiescence without rebuilding when nothing changed.
-   *
-   * @param egraph      Target e-graph.
-   * @param parallelize Parallel strategy used for both search and apply.
-   * @return `Some(updatedEGraph)` if any change occurred, `None` if the rule was a no-op.
-   */
-  def tryApply[
-    MutEGraphT <: EGraphT with immutable.EGraph[NodeT] with immutable.EGraphLike[NodeT, MutEGraphT]
-  ](
-    egraph: MutEGraphT,
-    parallelize: ParallelMap = ParallelMap.default
-   ): Option[MutEGraphT] = {
-    val mutGraph = mutable.FreezableEGraph[NodeT, MutEGraphT](egraph)
-    val anyChanges = delayed(egraph, parallelize)(mutGraph, Map(), parallelize)._1
-    if (anyChanges) {
-      Some(mutGraph.freeze())
-    } else {
-      None
-    }
-  }
-
-  /**
-   * Search and apply all matches immediately, returning the resulting e-graph.
-   *
-   * If the rule makes no changes, the original `egraph` is returned unchanged.
-   * For change-detection, prefer [[tryApply]].
-   *
-   * @param egraph      Target e-graph.
-   * @param parallelize Parallel strategy used for both search and apply.
-   * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
-   */
-  def applyImmutable[
-    Repr <: EGraphT with immutable.EGraphLike[NodeT, Repr] with immutable.EGraph[NodeT]
-  ](
-     egraph: Repr,
-     parallelize: ParallelMap = ParallelMap.default
-   ): Repr = {
-    tryApply(egraph, parallelize).getOrElse(egraph)
-  }
-
-  /**
-   * Search and apply all matches immediately.
-   *
-   * If the rule makes any changes, `true` is returned without mutating the e-graph.
-   * If no changes occur, `false` is returned.
-   *
-   * @param egraph      Target e-graph.
-   * @param parallelize Parallel strategy used for both search and apply.
-   * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
-   */
-  def apply[
-    MutEGraphT <: EGraphT with mutable.EGraph[NodeT]
-  ](
-     egraph: MutEGraphT,
-     parallelize: ParallelMap = ParallelMap.default
-   ): Boolean = {
-    delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
-  }
+                                                                       applier: Applier[NodeT, MatchT, EGraphT])
+  extends Rewrite[NodeT, MatchT, EGraphT] {
 
   /**
    * Find all matches of this rule in the given e-graph.
@@ -147,7 +84,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: Str
    * @param parallelize Parallel strategy (used to label/structure match work).
    * @return Sequence of matches (possibly empty).
    */
-  def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
+  override def search(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Seq[MatchT] = {
     searcher.searchAndCollect(egraph, parallelize.child(s"match $name"))
   }
 
@@ -163,7 +100,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: Str
    * @param parallelize Parallel strategy for both search and later application.
    * @return A single, optimized [[Command]] that applies all current matches of this rule.
    */
-  def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
+  override def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
     val pipeline = searcher.andApply(applier)
     aggregateCommands(
       pipeline.searchAndCollect(egraph, parallelize.child(s"match+apply $name")),
@@ -183,7 +120,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: Str
    * @throws Rule.ApplicationException
    * if constructing the per-match commands fails.
    */
-  def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
+  override def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
     aggregateCommands(
       parallelize.child(s"apply $name")[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq,
       egraph)
