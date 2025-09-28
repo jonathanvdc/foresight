@@ -240,7 +240,7 @@ trait Language[E]:
                 (using ord: Ordering[C]): E = {
     val analysis = extractionAnalysis("extraction", costFunction)
     val withMetadata = egraph.withMetadata.addAnalysis(analysis)
-    extractor(analysis)(call, withMetadata)
+    extractor[C, immutable.EGraph[LanguageOp[E]]](analysis)(call, withMetadata)
   }
 
   /**

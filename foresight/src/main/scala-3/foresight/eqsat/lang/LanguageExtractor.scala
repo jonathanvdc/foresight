@@ -1,7 +1,7 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.EClassCall
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
+import foresight.eqsat.immutable
 
 /**
  * An extractor that converts e-graph references (e-class calls) into surface language expressions.
@@ -13,7 +13,7 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  * @tparam E The surface expression type stored in the e-graph and produced in the resulting expression.
  * @tparam Repr  The concrete e-graph type, which must implement both [[EGraphLike]] and [[EGraph]].
  */
-trait LanguageExtractor[E, Repr <: EGraphLike[LanguageOp[E], Repr] with EGraph[LanguageOp[E]]](using L: Language[E]) {
+trait LanguageExtractor[E, -Repr <: ReadOnlyEGraph[LanguageOp[E]]](using L: Language[E]) {
 
   /**
    * Extracts a concrete expression tree that realizes the given e-class call, according to this
@@ -48,7 +48,9 @@ trait LanguageExtractor[E, Repr <: EGraphLike[LanguageOp[E], Repr] with EGraph[L
    *   val result: E = extractor(mixedTree, egraph) // `egraph` is unchanged
    *   }}}
    */
-  final def apply(tree: E, egraph: Repr)(using enc: AtomEncoder[E, EClassCall]): E = {
+  final def apply[
+    EGraphT <: Repr with immutable.EGraph[LanguageOp[E]] with immutable.EGraphLike[LanguageOp[E], EGraphT]
+  ](tree: E, egraph: EGraphT)(using enc: AtomEncoder[E, EClassCall]): E = {
     val (call, newGraph) = egraph.add(tree)
     apply(call, newGraph)
   }
