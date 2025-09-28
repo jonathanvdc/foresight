@@ -1,11 +1,12 @@
 package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.extraction.CostAnalysis
-import foresight.eqsat.metadata.{AnalysisMetadata, EGraphWithMetadata}
+import foresight.eqsat.metadata.AnalysisMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{EClassSearcher, ReversibleSearcher, Rule, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, EGraphLike, ENode}
+import foresight.eqsat.{EClassCall, EClassRef, ENode}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
 import scala.collection.mutable.ArrayBuffer
 

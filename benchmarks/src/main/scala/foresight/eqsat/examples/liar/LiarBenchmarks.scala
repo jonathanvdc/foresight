@@ -1,10 +1,10 @@
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.{EGraph, Slot}
-import foresight.eqsat.saturation.{EGraphWithRoot, Strategy}
+import foresight.eqsat.Slot
+import foresight.eqsat.saturation.Strategy
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata, EGraphWithRoot}
 import foresight.util.BenchmarksWithParallelMap
 import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Mode, OutputTimeUnit, Scope, State}
 
@@ -23,7 +23,7 @@ class LiarBenchmarks extends BenchmarksWithParallelMap {
   private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[ArrayIR, BaseEGraph, Unit] = {
+                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     Strategies.naive(iterationLimit = Some(iterationLimit), rules = rules)
   }
 

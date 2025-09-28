@@ -2,7 +2,7 @@ package foresight.eqsat.rewriting.patterns
 
 import org.junit.Test
 import org.junit.Assert._
-import foresight.eqsat._
+import foresight.eqsat.{Slot, EClassCall, ENode, MixedTree}
 import foresight.eqsat.collections.SlotSeq
 import foresight.util.collections.UnsafeSeqFromArray
 

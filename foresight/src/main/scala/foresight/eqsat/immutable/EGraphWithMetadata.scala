@@ -1,7 +1,9 @@
-package foresight.eqsat.metadata
+package foresight.eqsat.immutable
 
-import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat._
+import foresight.eqsat.readonly
+import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**
@@ -37,10 +39,13 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam Repr
  *   Concrete representation type of the underlying e-graph.
  */
-final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]] private(
-                                                                                                         egraph: Repr,
-                                                                                                         private val metadata: Map[String, Metadata[NodeT, _]]
-                                                                                                       ) extends EGraphLike[NodeT, EGraphWithMetadata[NodeT, Repr]] with EGraph[NodeT] {
+final case class EGraphWithMetadata[
+  NodeT,
+  +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]
+] private(override val egraph: Repr,
+          private val metadata: Map[String, Metadata[NodeT, _]])
+extends readonly.EGraphWithMetadata[NodeT, Repr]
+  with EGraphLike[NodeT, EGraphWithMetadata[NodeT, Repr]] with EGraph[NodeT] {
 
   /**
    * Re-wrap the same set of metadata around a different e-graph representation.
@@ -107,16 +112,6 @@ final case class EGraphWithMetadata[NodeT, +Repr <: EGraphLike[NodeT, Repr] with
   def getMetadata[MetadataManagerT <: Metadata[NodeT, _]](name: String): MetadataManagerT = {
     metadata(name).asInstanceOf[MetadataManagerT]
   }
-
-  // === EGraph/EGraphLike delegation ===
-  override def canonicalizeOrNull(ref: EClassRef): EClassCall = egraph.canonicalizeOrNull(ref)
-  override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = egraph.canonicalize(node)
-  override def classes: Iterable[EClassRef] = egraph.classes
-  override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = egraph.nodes(call)
-  override def nodes(call: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = egraph.nodes(call, nodeType)
-  override def users(ref: EClassRef): Set[ENode[NodeT]] = egraph.users(ref)
-  override def findOrNull(node: ENode[NodeT]): EClassCall = egraph.findOrNull(node)
-  override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
   /**
    * Batch add nodes to the e-graph and update all registered metadata.

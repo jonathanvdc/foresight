@@ -4,7 +4,8 @@ import foresight.eqsat.examples.arithWithLang.{*, given}
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph, Slot}
+import foresight.eqsat.{EClassCall, Slot}
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -14,7 +15,7 @@ class RuleTests {
   val R: Rules = Rules()(using L)
   type ArithRule = R.ArithRule
 
-  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = R.all): Strategy[EGraph[ArithIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
@@ -23,7 +24,7 @@ class RuleTests {
       .closeMetadata
       .dropData
 
-  private def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] =
+  private def strategies: Seq[Strategy[EGraph[ArithIR], Unit]] =
     Seq(strategy(12))
 
   /**

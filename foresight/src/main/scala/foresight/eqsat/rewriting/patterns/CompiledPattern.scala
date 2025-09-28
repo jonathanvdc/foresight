@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.{EClassCall, MixedTree}
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat._
@@ -12,8 +13,8 @@ import scala.collection.compat._
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
  */
-final case class CompiledPattern[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
-                                                                          instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]]) {
+final case class CompiledPattern[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
+                                                                  instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]]) {
 
   private val effects = Instruction.Effects.from(instructions)
 
@@ -96,8 +97,8 @@ object CompiledPattern {
    * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
    * @return The compiled pattern.
    */
-  def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
-                                                     instructions: Seq[Instruction[NodeT, EGraphT]]): CompiledPattern[NodeT, EGraphT] = {
+  def apply[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var],
+                                             instructions: Seq[Instruction[NodeT, EGraphT]]): CompiledPattern[NodeT, EGraphT] = {
     new CompiledPattern(pattern, UnsafeSeqFromArray(instructions))
   }
 
@@ -108,7 +109,7 @@ object CompiledPattern {
    * @tparam EGraphT The type of the e-graph that the pattern is compiled for.
    * @return The compiled pattern.
    */
-  def apply[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): CompiledPattern[NodeT, EGraphT] = {
+  def apply[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): CompiledPattern[NodeT, EGraphT] = {
     CompiledPattern(pattern, PatternCompiler.compile[NodeT, EGraphT](pattern))
   }
 }

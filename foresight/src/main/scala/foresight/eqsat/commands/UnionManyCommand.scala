@@ -1,7 +1,9 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, EGraph, EGraphLike, EGraphWithPendingUnions}
+import foresight.eqsat.{EClassCall, EClassSymbol}
+import foresight.eqsat.mutable
+import foresight.eqsat.readonly
 
 /**
  * A [[Command]] that unions multiple pairs of e-classes in a single batch.
@@ -34,8 +36,8 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    *                    used to resolve the left/right sides before unioning.
    * @param parallelize Strategy for distributing the rebuild, if needed.
    * @return
-   *   - `Some(newGraph)` if at least one union required changes (triggering a rebuild),
-   *     otherwise `None`.
+   *   - `true` if at least one union required changes (triggering a rebuild),
+   *     otherwise `false`.
    *   - An empty reification map (unions do not define outputs).
    *
    * @example
@@ -43,23 +45,24 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    * val a: EClassSymbol = EClassSymbol.real(callA)
    * val b: EClassSymbol = EClassSymbol.real(callB)
    * val cmd = UnionManyCommand(Seq(a -> b))
-   * val (maybeGraph, _) = cmd.apply(egraph, Map.empty, parallel)
+   * val (updated, _) = cmd.apply(egraph, Map.empty, parallel)
    * }}}
    */
-  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
-                                                                          egraph: Repr,
-                                                                          reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                          parallelize: ParallelMap
-                                                                        ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val withUnions = pairs.foldLeft(EGraphWithPendingUnions[NodeT, Repr](egraph)) { (acc, pair) =>
-      val reifiedPair = (pair._1.reify(reification), pair._2.reify(reification))
-      acc.union(reifiedPair._1, reifiedPair._2)
-    }
+  override def apply(
+                      egraph: mutable.EGraph[NodeT],
+                      reification: Map[EClassSymbol.Virtual, EClassCall],
+                      parallelize: ParallelMap
+                    ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+    val reifiedPairs = pairs
+      .map { case (l, r) => (l.reify(reification), r.reify(reification)) }
+      .filter { case (l, r) => !egraph.areSame(l, r) }
 
-    if (withUnions.requiresRebuild) {
-      (Some(withUnions.rebuild(parallelize)), Map.empty)
-    } else {
-      (None, Map.empty)
+    if (reifiedPairs.isEmpty) {
+      (false, Map.empty)
+    }
+    else {
+      egraph.unionMany(reifiedPairs, parallelize)
+      (true, Map.empty)
     }
   }
 
@@ -84,7 +87,7 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    * }}}
    */
   override def simplify(
-                         egraph: EGraph[NodeT],
+                         egraph: readonly.EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
     val builder = Seq.newBuilder[(EClassSymbol, EClassSymbol)]

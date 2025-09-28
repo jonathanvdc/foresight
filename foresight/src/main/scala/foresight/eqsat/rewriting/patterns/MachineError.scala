@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.readonly.EGraph
 
 /**
  * An error that occurs during the execution of a pattern machine.
@@ -21,8 +22,8 @@ object MachineError {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class NoMatchingNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](instruction: Instruction.BindNode[NodeT, EGraphT],
-                                                                           call: EClassCall)
+  final case class NoMatchingNode[NodeT, EGraphT <: EGraph[NodeT]](instruction: Instruction.BindNode[NodeT, EGraphT],
+                                                                   call: EClassCall)
     extends MachineError[NodeT]
 
   /**
@@ -33,8 +34,8 @@ object MachineError {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class InconsistentVars[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](instruction: Instruction.Compare[NodeT, EGraphT],
-                                                                             first: EClassCall,
-                                                                             second: EClassCall)
+  final case class InconsistentVars[NodeT, EGraphT <: EGraph[NodeT]](instruction: Instruction.Compare[NodeT, EGraphT],
+                                                                     first: EClassCall,
+                                                                     second: EClassCall)
     extends MachineError[NodeT]
 }

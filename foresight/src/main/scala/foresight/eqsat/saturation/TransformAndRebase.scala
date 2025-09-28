@@ -1,10 +1,10 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
+import foresight.eqsat.{EClassCall, Tree}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata, EGraphWithRecordedApplications, EGraphWithRoot}
 
 /**
  * A compound strategy that transforms an e-graph and optionally rebases it by extracting and reinserting a tree.
@@ -33,11 +33,11 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
  *                 [[foresight.eqsat.metadata.EGraphWithMetadata]].
  * @tparam Data The internal state type carried by the transformation strategy.
  */
-final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphT, Data],
+final case class TransformAndRebase[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphT, Data],
                                                                                                            extractor: Extractor[NodeT, EGraphT],
                                                                                                            getRoot: EGraphT => EClassCall,
                                                                                                            setRoot: (EGraphT, EClassCall) => EGraphT,
-                                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean) extends Strategy[NodeT, EGraphT, (Data, Option[Tree[NodeT]])] {
+                                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean) extends Strategy[EGraphT, (Data, Option[Tree[NodeT]])] {
   override def initialData: (Data, Option[Tree[NodeT]]) = (transform.initialData, None)
 
   override def apply(egraph: EGraphT, data: (Data, Option[Tree[NodeT]]), parallelize: ParallelMap): (Option[EGraphT], (Data, Option[Tree[NodeT]])) = {
@@ -92,7 +92,7 @@ object TransformAndRebase {
    * @param extractor A tree extractor operating on the inner [[foresight.eqsat.EGraph]].
    * @param areEquivalent Optional function for tree equivalence. Defaults to `==`.
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data],
+  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
                                                                                    extractor: Extractor[NodeT, EGraphT],
                                                                                    areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
     new TransformAndRebase(
@@ -114,7 +114,7 @@ object TransformAndRebase {
    * @param transform A strategy operating on [[EGraphWithRoot]].
    * @param extractor A tree extractor operating on the inner [[foresight.eqsat.EGraph]].
    */
-  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data],
+  def apply[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithRoot[NodeT, EGraphT], Data],
                                                                                    extractor: Extractor[NodeT, EGraphT]): TransformAndRebase[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
     apply(transform, extractor, (x: Tree[NodeT], y: Tree[NodeT]) => x == y)
   }
@@ -129,7 +129,7 @@ object TransformAndRebase {
    * @param extractor Tree extractor operating on the same enriched graph.
    * @param areEquivalent Optional function for tree equivalence. Defaults to `==`.
    */
-  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                                                                                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data] = {
       new TransformAndRebase(
@@ -150,7 +150,7 @@ object TransformAndRebase {
    * @param transform Strategy operating on metadata-enriched rooted e-graphs.
    * @param extractor Tree extractor operating on the same enriched graph.
    */
-  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
+  def withMetadata[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data](transform: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data],
                                                                                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]]): TransformAndRebase[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data] = {
     withMetadata(transform, extractor, (x: Tree[NodeT], y: Tree[NodeT]) => x == y)
   }
@@ -168,7 +168,7 @@ object TransformAndRebase {
   def withRecording[NodeT,
                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                     Match <: PortableMatch[NodeT, Match],
-                    Data](transform: Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data],
+                    Data](transform: Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data],
                           extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
                           areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean): TransformAndRebase[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data] = {
     new TransformAndRebase(

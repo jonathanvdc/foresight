@@ -1,4 +1,6 @@
-package foresight.eqsat
+package foresight.eqsat.readonly
+
+import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree, ShapeCall, Tree}
 
 /**
  * A read-only interface to an e-graph, supporting queries about e-classes and e-nodes.
@@ -7,7 +9,7 @@ package foresight.eqsat
  *
  * @tparam NodeT The type of the e-nodes stored in the e-graph.
  */
-trait ReadOnlyEGraph[NodeT] {
+trait EGraph[NodeT] {
   // Core API:
 
   /**

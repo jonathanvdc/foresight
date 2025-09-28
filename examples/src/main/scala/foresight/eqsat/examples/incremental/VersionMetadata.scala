@@ -1,8 +1,9 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
 import foresight.eqsat.metadata.Metadata
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Metadata that tracks a global version number for the e-graph and a version number for each e-class.

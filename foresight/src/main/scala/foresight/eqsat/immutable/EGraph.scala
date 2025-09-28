@@ -1,6 +1,7 @@
-package foresight.eqsat
+package foresight.eqsat.immutable
 
 import foresight.eqsat.hashCons.HashConsEGraph
+import foresight.eqsat.{EClassCall, MixedTree}
 
 /**
  * An e-graph compactly represents many equivalent expressions at once by grouping structurally

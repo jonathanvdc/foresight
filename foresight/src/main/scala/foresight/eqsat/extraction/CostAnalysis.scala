@@ -2,7 +2,7 @@ package foresight.eqsat.extraction
 
 import foresight.eqsat._
 import foresight.eqsat.collections.SlotMap
-import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
+import foresight.eqsat.metadata.Analysis
 
 /**
  * An analysis that derives the cost of a minimal-cost extraction results for each e-class.

@@ -1,8 +1,9 @@
 package foresight.eqsat.metadata
 
+import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
 import foresight.eqsat.collections.SlotMap
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat._
+import foresight.eqsat.readonly.EGraph
 
 /**
  * Incremental, queryable results of running an [[Analysis]] over an e-graph.

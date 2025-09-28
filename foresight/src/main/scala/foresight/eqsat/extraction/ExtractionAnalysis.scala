@@ -1,8 +1,9 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, Slot, Tree, readonly}
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.collections.SlotMap
+import foresight.eqsat.readonly.EGraph
 import foresight.util.Debug
 
 /**
@@ -50,9 +51,9 @@ final case class ExtractionAnalysis[NodeT, C](name: String,
    * val tree: Tree[Op] = ext(call, egm)  // materializes the chosen minimal tree
    * }}}
    */
-  def extractor[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]]: Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] = {
-    new Extractor[NodeT, EGraphWithMetadata[NodeT, Repr]] {
-      override def apply(call: EClassCall, egraph: EGraphWithMetadata[NodeT, Repr]): Tree[NodeT] = {
+  def extractor[Repr <: EGraph[NodeT]]: Extractor[NodeT, readonly.EGraphWithMetadata[NodeT, Repr]] = {
+    new Extractor[NodeT, readonly.EGraphWithMetadata[NodeT, Repr]] {
+      override def apply(call: EClassCall, egraph: readonly.EGraphWithMetadata[NodeT, Repr]): Tree[NodeT] = {
         val extractionTree = get(egraph)(call, egraph)
         extractionTree.applied.toTree
       }

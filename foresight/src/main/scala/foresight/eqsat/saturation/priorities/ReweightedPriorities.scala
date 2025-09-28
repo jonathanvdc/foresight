@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.rewriting.Rewrite
 
 /**
  * A match prioritization strategy that adjusts the output of an existing [[MatchPriorities]] instance.
@@ -21,7 +21,7 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches found for each rule.
  */
-trait ReweightedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT]
+trait ReweightedPriorities[NodeT, RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: EGraph[NodeT], MatchT]
   extends MatchPriorities[NodeT, RuleT, EGraphT, MatchT] {
 
   /**
@@ -38,14 +38,22 @@ trait ReweightedPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EG
    * @param matches A sequence of prioritized matches.
    * @return A sequence of the same matches with updated priority scores.
    */
-  def reweight(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Seq[PrioritizedMatch[RuleT, MatchT]]
+  def reweight(rule: RuleT, matches: Seq[PrioritizedMatch[MatchT]]): Seq[PrioritizedMatch[MatchT]]
 
-  override def prioritize(matches: Seq[(RuleT, MatchT)], egraph: EGraphT): Seq[PrioritizedMatch[RuleT, MatchT]] = {
-    val prioritized = originalPriorities.prioritize(matches, egraph)
-    reweight(prioritized)
+  override def prioritize(rules: Seq[RuleT],
+                          matches: Map[String, Seq[MatchT]],
+                          egraph: EGraphT): Map[String, Seq[PrioritizedMatch[MatchT]]] = {
+
+    val prioritized = originalPriorities.prioritize(rules, matches, egraph)
+    prioritized.map { case (ruleName, pmatches) =>
+      val rule = rules.find(_.name == ruleName).getOrElse(
+        throw new IllegalArgumentException(s"Rule with name $ruleName not found in provided rules.")
+      )
+      ruleName -> reweight(rule, pmatches)
+    }
   }
 
-  override def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]], egraph: EGraphT): Int = {
-    originalPriorities.batchSize(matches, egraph)
+  override def batchSize(rules: Seq[RuleT], matches: Map[String, Seq[PrioritizedMatch[MatchT]]], egraph: EGraphT): Int = {
+    originalPriorities.batchSize(rules, matches, egraph)
   }
 }

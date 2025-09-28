@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.sdql
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.examples.sdql.SdqlRules.SdqlRule
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
@@ -22,7 +22,7 @@ class KernelTest {
   }
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[SdqlRule] = SdqlRules.allNew): Strategy[SdqlIR, EGraph[SdqlIR], Unit] =
+                       rules: Seq[SdqlRule] = SdqlRules.allNew): Strategy[EGraph[SdqlIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable

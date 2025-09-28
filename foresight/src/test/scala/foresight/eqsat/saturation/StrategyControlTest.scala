@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import org.junit.Test
 
 /**
@@ -13,7 +13,7 @@ class StrategyControlTest {
    * @tparam EGraphT The type of the e-graph.
    */
   private final class ApplicationCountingStrategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT]]
-    extends Strategy[NodeT, EGraphT, Unit] {
+    extends Strategy[EGraphT, Unit] {
 
     var applicationCount: Int = 0
 

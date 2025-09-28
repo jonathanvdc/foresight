@@ -1,7 +1,8 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A searcher that searches for matches within individual e-classes.
@@ -13,7 +14,7 @@ import foresight.eqsat.{EClassCall, EGraph, EGraphLike, ReadOnlyEGraph}
 trait EClassSearcher[
   NodeT,
   MatchT,
-  EGraphT <: ReadOnlyEGraph[NodeT]
+  EGraphT <: EGraph[NodeT]
 ] extends Searcher[NodeT, MatchT, EGraphT]
   with SearcherLike[NodeT, MatchT, EGraphT, EClassSearcher[NodeT, MatchT, EGraphT]] {
 

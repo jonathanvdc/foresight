@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
+import foresight.eqsat.readonly.EGraph
 
 /**
  * An [[Applier]] that can be **reversed** into a [[Searcher]] producing the same kind of matches.
@@ -39,7 +39,7 @@ import foresight.eqsat.{EGraph, EGraphLike, ReadOnlyEGraph}
 trait ReversibleApplier[
   NodeT,
   MatchT,
-  EGraphT <: ReadOnlyEGraph[NodeT]
+  EGraphT <: EGraph[NodeT]
 ] extends Applier[NodeT, MatchT, EGraphT] {
 
   /**

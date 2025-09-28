@@ -4,7 +4,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A node in a slotted e-graph.
@@ -49,7 +49,7 @@ final class ENode[+NodeT] private (
    *
    * @return Sequence of child e-class calls.
    */
-  def args: immutable.ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
+  def args: ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -325,7 +325,7 @@ object ENode {
 
   private def arrayFromSlotSeq(s: Seq[Slot]): Array[Slot] = s match {
     case slotSeq: SlotSeq => slotSeq.unsafeArray
-    case as: immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
+    case as: ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
       as.unsafeArray.asInstanceOf[Array[Slot]]
     case _ if s.isEmpty =>
       emptySlotArray
@@ -334,7 +334,7 @@ object ENode {
   }
 
   private def arrayFromCallSeq(s: Seq[EClassCall]): Array[EClassCall] = s match {
-    case as: immutable.ArraySeq[EClassCall] if as.unsafeArray.isInstanceOf[Array[EClassCall]] =>
+    case as: ArraySeq[EClassCall] if as.unsafeArray.isInstanceOf[Array[EClassCall]] =>
       as.unsafeArray.asInstanceOf[Array[EClassCall]]
     case _ if s.isEmpty =>
       emptyCallArray

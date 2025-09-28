@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A builder for creating a strategy that repeatedly applies a given `body` strategy until it reaches a stable state,
@@ -12,20 +12,18 @@ import foresight.eqsat.{EGraph, EGraphLike}
  *
  * @param body The main strategy to be applied repeatedly.
  * @param betweenIterations The strategy to be applied between iterations of `body`.
- * @tparam NodeT The type of nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the strategies operate on, which must be a subtype of both [[EGraphLike]] and [[EGraph]].
  * @tparam DataT The type of data produced by the `body` strategy.
  * @tparam BetweenItersDataT The type of data produced by the `betweenIterations` strategy.
  */
 final case class RepeatUntilStableBuilder[
-  NodeT,
-  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+  EGraphT,
   DataT,
   BetweenItersDataT
 ]
   (
-    body: Strategy[NodeT, EGraphT, DataT],
-    betweenIterations: Strategy[NodeT, EGraphT, BetweenItersDataT]
+    body: Strategy[EGraphT, DataT],
+    betweenIterations: Strategy[EGraphT, BetweenItersDataT]
   ) {
 
   /**
@@ -38,7 +36,7 @@ final case class RepeatUntilStableBuilder[
    *
    * @return A strategy that applies `body` repeatedly until stable, with state carried between iterations.
    */
-  def repeatUntilStableWithState: Strategy[NodeT, EGraphT, (DataT, BetweenItersDataT)] =
+  def repeatUntilStableWithState: Strategy[EGraphT, (DataT, BetweenItersDataT)] =
     RepeatUntilStableWithState(body, betweenIterations)
 
   /**
@@ -51,6 +49,6 @@ final case class RepeatUntilStableBuilder[
    *
    * @return A strategy that applies `body` repeatedly until stable.
    */
-  def repeatUntilStable: Strategy[NodeT, EGraphT, Unit] =
+  def repeatUntilStable: Strategy[EGraphT, Unit] =
     repeatUntilStableWithState.dropData
 }

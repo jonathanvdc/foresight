@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.EGraph
+import foresight.eqsat.readonly.EGraph
 
 /**
  * A match value that can be **re-targeted** to a later e-graph snapshot derived from the one
@@ -24,8 +24,8 @@ import foresight.eqsat.EGraph
  *   is valuable because the caching and recording infrastructure requires all matches to be portable:
  *     - [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] records applied matches per rule
  *      and re-ports them after unions.
- *     - [[foresight.eqsat.saturation.SearchAndApply$.withCaching]] filters out already-applied matches; portability
- *      keeps equality and hashing consistent as the graph evolves.
+ *     - [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]] filters out already-applied matches; portability
+ *       keeps equality and hashing consistent as the graph evolves.
  *
  * # What counts as a "derived" e-graph?
  * A derived e-graph is one obtained by applying commands to (or otherwise evolving from) the original
@@ -56,7 +56,7 @@ import foresight.eqsat.EGraph
  * }}}
  * @see [[foresight.eqsat.saturation.EGraphWithRecordedApplications]]
  *      for how applied matches are recorded and re-ported after unions; and
- *      [[foresight.eqsat.saturation.SearchAndApply$.withCaching]]
+ *      [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]]
  *      for how cached applications are filtered using `PortableMatch`.
  */
 trait PortableMatch[NodeT, This <: PortableMatch[NodeT, This]] {

@@ -1,11 +1,11 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar.TypeRequirements.RequirementsSearcherContinuationBuilder
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree}
+import foresight.eqsat.MixedTree
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
 object SearcherOps {
   implicit class SearcherOfMetadataPatternMatchOps[

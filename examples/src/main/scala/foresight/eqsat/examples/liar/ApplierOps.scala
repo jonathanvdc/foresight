@@ -3,7 +3,7 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat._
@@ -26,7 +26,7 @@ object ApplierOps {
 
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
-          val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor(m(source), egraph)
+          val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor[EGraphT](m(source), egraph)
 
           def typeOf(tree: MixedTree[ArrayIR, EClassCall]): MixedTree[Type, EClassCall] = {
             TypeInferenceAnalysis.get(egraph)(tree, egraph)

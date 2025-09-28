@@ -1,8 +1,10 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.rewriting.Rewrite
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.mutable.{EGraph => MutableEGraph}
+import foresight.eqsat.readonly
 
 /**
  * A strategy that performs a single maximal rewrite pass over a set of rules.
@@ -31,19 +33,18 @@ import foresight.eqsat.{EGraph, EGraphLike}
  *
  * @param rules The rules to apply.
  * @param searchAndApply A strategy for rule search and application (may or may not cache matches).
- *
  * @tparam NodeT   The type of nodes in the e-graph.
  * @tparam RuleT   The type of rules used.
- * @tparam EGraphT The e-graph implementation (must be both [[EGraphLike]] and [[EGraph]]).
+ * @tparam EGraphT The e-graph implementation.
  * @tparam MatchT  The type of matches returned by rule search.
  */
 final case class MaximalRuleApplication[NodeT,
-                                        RuleT <: Rule[NodeT, MatchT, _],
-                                        EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+                                        RuleT <: Rewrite[NodeT, MatchT, _],
+                                        EGraphT <: readonly.EGraph[NodeT],
                                         MatchT](
   rules: Seq[RuleT],
   searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
-) extends Strategy[NodeT, EGraphT, Unit] {
+) extends Strategy[EGraphT, Unit] {
 
   override def initialData: Unit = ()
 
@@ -66,8 +67,8 @@ final case class MaximalRuleApplication[NodeT,
  */
 object MaximalRuleApplication {
   /**
-   * Creates a [[MaximalRuleApplication]] strategy that applies **all matches** of all rules
-   * in a single iteration, without caching.
+   * Creates a [[MaximalRuleApplication]] strategy that applies all matches of all rules
+   * in a single iteration, without caching, for immutable e-graphs.
    *
    * This variant does not perform saturation to a fixpoint on its own.
    * To run to convergence, wrap it with [[Strategy.repeatUntilStable]].
@@ -82,12 +83,42 @@ object MaximalRuleApplication {
    * }}}
    * @param rules The rules to apply.
    */
-  def apply[NodeT,
-            EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-            MatchT](
-    rules: Seq[Rule[NodeT, MatchT, EGraphT]]
-  ): MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+  def apply[
+    NodeT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT
+  ](
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
+  ): MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
 
-    new MaximalRuleApplication(rules, SearchAndApply.withoutCaching)
+    new MaximalRuleApplication(rules, SearchAndApply.immutable)
+  }
+
+  /**
+   * Creates a [[MaximalRuleApplication]] strategy that applies all matches of all rules
+   * in a single iteration, without caching, for mutable e-graphs.
+   *
+   * This variant does not perform saturation to a fixpoint on its own.
+   * To run to convergence, wrap it with [[Strategy.repeatUntilStable]].
+   *
+   * @example
+   * {{{
+   * val strategy =
+   *   MaximalRuleApplication.mutable(rules)
+   *     .repeatUntilStable
+   *
+   * val finalGraph = strategy.run(initialMutableEGraph)
+   * }}}
+   * @param rules The rules to apply.
+   */
+  def mutable[
+    NodeT,
+    EGraphT <: MutableEGraph[NodeT],
+    MatchT
+  ](
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
+  ): MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+
+    new MaximalRuleApplication(rules, SearchAndApply.mutable)
   }
 }

@@ -1,6 +1,7 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 import scala.util.NotGiven
 

@@ -2,7 +2,8 @@ package foresight.eqsat.examples.poly
 
 import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -12,11 +13,11 @@ class PolyTest {
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
   val R: Rules = Rules()(using L)
 
-  val simpleStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+  val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
 
-  val cachingStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplicationWithCaching(R.all).repeatUntilStable.closeRecording
+  val cachingStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplicationWithCaching(R.all).repeatUntilStable.closeRecording
 
-  val strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] = Seq(simpleStrategy, cachingStrategy)
+  val strategies: Seq[Strategy[EGraph[ArithIR], Unit]] = Seq(simpleStrategy, cachingStrategy)
 
   val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
     override def apply(expr: ArithExpr): Int = {
@@ -154,7 +155,7 @@ class PolyTest {
     type ArithRule = R.ArithRule
     val L: Language[ArithExpr] = summon[Language[ArithExpr]]
     val R: Rules = Rules()(using L)
-    val simpleStrategy: Strategy[ArithIR, EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+    val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
     val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
       override def apply(expr: ArithExpr): Int = {
         expr match {

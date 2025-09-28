@@ -1,10 +1,11 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.extraction.Extractor
-import foresight.eqsat.metadata.{Analysis, EGraphWithMetadata}
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.{CancellationToken, OperationCanceledException, ParallelMap}
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.{EClassCall, EGraph, EGraphLike, Tree}
+import foresight.eqsat.{EClassCall, Tree}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata, EGraphWithRecordedApplications, EGraphWithRoot}
 
 import scala.concurrent.duration.Duration
 
@@ -51,11 +52,10 @@ import scala.concurrent.duration.Duration
  *
  * These allow higher-level behavior without modifying the core strategy.
  *
- * @tparam NodeT The type of nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph being transformed (e.g., plain, rooted, or metadata-enriched).
  * @tparam Data The type of state carried by the strategy across iterations.
  */
-trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], Data] {
+trait Strategy[EGraphT, Data] {
   /**
    * The initial data for the strategy's first iteration.
    */
@@ -88,8 +88,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * @tparam Data2 The type of the data carried by the other strategy.
    * @return A new strategy that applies this strategy followed by the other strategy.
    */
-  final def thenApply[Data2](other: Strategy[NodeT, EGraphT, Data2]): Strategy[NodeT, EGraphT, (Data, Data2)] = {
-    new Strategy[NodeT, EGraphT, (Data, Data2)] {
+  final def thenApply[Data2](other: Strategy[EGraphT, Data2]): Strategy[EGraphT, (Data, Data2)] = {
+    new Strategy[EGraphT, (Data, Data2)] {
       override def initialData: (Data, Data2) = (Strategy.this.initialData, other.initialData)
       override def apply(egraph: EGraphT, data: (Data, Data2), parallelize: ParallelMap): (Option[EGraphT], (Data, Data2)) = {
         val (newEgraph, newData) = Strategy.this(egraph, data._1, parallelize)
@@ -105,8 +105,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * the next.
    * @return A new strategy that applies this strategy until a fixpoint is reached.
    */
-  final def repeatUntilStableWithState: Strategy[NodeT, EGraphT, Data] = {
-    new Strategy[NodeT, EGraphT, Data] {
+  final def repeatUntilStableWithState: Strategy[EGraphT, Data] = {
+    new Strategy[EGraphT, Data] {
       override def initialData: Data = Strategy.this.initialData
       override def apply(egraph: EGraphT, data: Data, parallelize: ParallelMap): (Option[EGraphT], Data) = {
         var currentEgraph: Option[EGraphT] = None
@@ -129,7 +129,7 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * dropped at the end of the repetition.
    * @return A new strategy that applies this strategy until a fixpoint is reached.
    */
-  final def repeatUntilStable: Strategy[NodeT, EGraphT, Unit] = repeatUntilStableWithState.dropData
+  final def repeatUntilStable: Strategy[EGraphT, Unit] = repeatUntilStableWithState.dropData
 
   /**
    * Registers a strategy to be executed between each iteration of this strategy when using
@@ -139,7 +139,7 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * @return A builder for creating a strategy that applies this strategy until a fixpoint is reached, with the
    *         `betweenIterations` strategy executed between each iteration.
    */
-  final def betweenIterations[BetweenItersDataT](betweenIterations: Strategy[NodeT, EGraphT, BetweenItersDataT]): RepeatUntilStableBuilder[NodeT, EGraphT, Data, BetweenItersDataT] =
+  final def betweenIterations[BetweenItersDataT](betweenIterations: Strategy[EGraphT, BetweenItersDataT]): RepeatUntilStableBuilder[EGraphT, Data, BetweenItersDataT] =
     RepeatUntilStableBuilder(this, betweenIterations)
 
   /**
@@ -150,8 +150,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    *              change the e-graph.
    * @return A new strategy that applies this strategy with a limit on the number of iterations.
    */
-  final def withIterationLimit(limit: Int): Strategy[NodeT, EGraphT, (Data, Int)] = {
-    new Strategy[NodeT, EGraphT, (Data, Int)] {
+  final def withIterationLimit(limit: Int): Strategy[EGraphT, (Data, Int)] = {
+    new Strategy[EGraphT, (Data, Int)] {
       override def initialData: (Data, Int) = (Strategy.this.initialData, limit)
       override def apply(egraph: EGraphT,
                          data: (Data, Int),
@@ -176,7 +176,7 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    *              the specified limit. If the limit is not defined, the strategy will run without a limit.
    * @return A new strategy that applies this strategy with an optional limit on the number of iterations.
    */
-  final def withIterationLimit(limit: Option[Int]): Strategy[NodeT, EGraphT, (Data, Int)] = {
+  final def withIterationLimit(limit: Option[Int]): Strategy[EGraphT, (Data, Int)] = {
     limit match {
       case Some(l) => withIterationLimit(l)
       case None => extendData(0)
@@ -189,8 +189,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    *                The timeout is a time budget that is shared across all iterations of the strategy.
    * @return A new strategy that applies this strategy with a timeout.
    */
-  final def withTimeout(timeout: Duration): Strategy[NodeT, EGraphT, (Data, Duration)] = {
-    new Strategy[NodeT, EGraphT, (Data, Duration)] {
+  final def withTimeout(timeout: Duration): Strategy[EGraphT, (Data, Duration)] = {
+    new Strategy[EGraphT, (Data, Duration)] {
       override def initialData: (Data, Duration) = (Strategy.this.initialData, timeout)
       override def apply(egraph: EGraphT,
                          data: (Data, Duration),
@@ -232,7 +232,7 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    *                timeout. If the timeout is not defined, the strategy will run without a timeout.
    * @return A new strategy that applies this strategy with an optional timeout.
    */
-  final def withTimeout(timeout: Option[Duration]): Strategy[NodeT, EGraphT, (Data, Duration)] = {
+  final def withTimeout(timeout: Option[Duration]): Strategy[EGraphT, (Data, Duration)] = {
     timeout match {
       case Some(t) => withTimeout(t)
       case None => extendData(Duration.Zero)
@@ -243,8 +243,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * Creates a strategy that drops the data carried by this strategy, running each iteration with the initial data.
    * @return A new strategy that applies this strategy without carrying any data.
    */
-  final def dropData: Strategy[NodeT, EGraphT, Unit] = {
-    new Strategy[NodeT, EGraphT, Unit] {
+  final def dropData: Strategy[EGraphT, Unit] = {
+    new Strategy[EGraphT, Unit] {
       override def initialData: Unit = ()
       override def apply(egraph: EGraphT, data: Unit, parallelize: ParallelMap): (Option[EGraphT], Unit) = {
         val (newEGraph, _) = Strategy.this(egraph, Strategy.this.initialData, parallelize)
@@ -259,8 +259,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * @tparam Data2 The type of the additional data.
    * @return A new strategy that extends the data carried by this strategy with the additional data.
    */
-  private final def extendData[Data2](data2: Data2): Strategy[NodeT, EGraphT, (Data, Data2)] = {
-    new Strategy[NodeT, EGraphT, (Data, Data2)] {
+  private final def extendData[Data2](data2: Data2): Strategy[EGraphT, (Data, Data2)] = {
+    new Strategy[EGraphT, (Data, Data2)] {
       override def initialData: (Data, Data2) = (Strategy.this.initialData, data2)
 
       override def apply(egraph: EGraphT,
@@ -268,24 +268,6 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
                          parallelize: ParallelMap): (Option[EGraphT], (Data, Data2)) = {
         val (newEGraph, newData) = Strategy.this(egraph, data._1, parallelize)
         (newEGraph, (newData, data._2))
-      }
-    }
-  }
-
-  /**
-   * Lifts this strategy to operate on an e-graph with a root. The root is typically used to extract trees from the
-   * e-graph.
-   * @return A new strategy that operates on an [[EGraphWithRoot]].
-   */
-  final def withRoot: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] = {
-    new Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data] {
-      override def initialData: Data = Strategy.this.initialData
-
-      override def apply(egraph: EGraphWithRoot[NodeT, EGraphT],
-                         data: Data,
-                         parallelize: ParallelMap): (Option[EGraphWithRoot[NodeT, EGraphT]], Data) = {
-        val (newEGraph, newData) = Strategy.this(egraph.egraph, data, parallelize)
-        (newEGraph.map(egraph.migrateTo), newData)
       }
     }
   }
@@ -300,8 +282,8 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
    * @param logChange A function that takes the previous and updated e-graphs and performs logging or inspection.
    * @return A new strategy that behaves identically to this one, but logs changes whenever they occur.
    */
-  final def withChangeLogger(logChange: (EGraphT, EGraphT) => Unit): Strategy[NodeT, EGraphT, Data] = {
-    new Strategy[NodeT, EGraphT, Data] {
+  final def withChangeLogger(logChange: (EGraphT, EGraphT) => Unit): Strategy[EGraphT, Data] = {
+    new Strategy[EGraphT, Data] {
       override def initialData: Data = Strategy.this.initialData
 
       override def apply(egraph: EGraphT,
@@ -323,7 +305,7 @@ trait Strategy[NodeT, EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], 
 object Strategy {
   implicit class WithMetadata[NodeT,
                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                              Data](private val strategy: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
+                              Data](private val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphT], Data]) extends AnyVal {
 
     /**
      * Adds analyses to the e-graph within each iteration of the strategy. Analyses are added to the e-graph during the
@@ -332,8 +314,8 @@ object Strategy {
      *                 e-class.
      * @return A new strategy that enhances the e-graph with analyses.
      */
-    def addAnalyses(analyses: Analysis[NodeT, _]*): Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
-      new Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] {
+    def addAnalyses(analyses: Analysis[NodeT, _]*): Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] = {
+      new Strategy[EGraphWithMetadata[NodeT, EGraphT], (Data, Boolean)] {
         override def initialData: (Data, Boolean) = (strategy.initialData, false)
 
         override def apply(egraph: EGraphWithMetadata[NodeT, EGraphT],
@@ -354,8 +336,8 @@ object Strategy {
      * escape individual iterations of this strategy.
      * @return A new strategy that enhances the e-graph with metadata.
      */
-    def closeMetadata: Strategy[NodeT, EGraphT, Data] = {
-      new Strategy[NodeT, EGraphT, Data] {
+    def closeMetadata: Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
         override def initialData: Data = strategy.initialData
 
         override def apply(egraph: EGraphT,
@@ -371,15 +353,15 @@ object Strategy {
   implicit class WithRecordedApplications[NodeT,
                                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                           Match <: PortableMatch[NodeT, Match],
-                                          Data](private val strategy: Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
+                                          Data](private val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphT, Match], Data]) extends AnyVal {
 
     /**
      * Creates a strategy that records applied matches within each iteration of the strategy. Recorded match
      * applications do not escape individual iterations of this strategy.
      * @return A new strategy that records applied matches.
      */
-    def closeRecording: Strategy[NodeT, EGraphT, Data] = {
-      new Strategy[NodeT, EGraphT, Data] {
+    def closeRecording: Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
         override def initialData: Data = strategy.initialData
 
         override def apply(egraph: EGraphT,
@@ -401,7 +383,7 @@ object Strategy {
    */
   implicit class WithRoot[NodeT,
                           EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                          Data](private val strategy: Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], Data]) extends AnyVal {
+                          Data](private val strategy: Strategy[EGraphWithRoot[NodeT, EGraphT], Data]) extends AnyVal {
 
     /**
      * Creates a strategy that operates on an e-graph with a root. The root is typically used to extract trees from the
@@ -409,8 +391,8 @@ object Strategy {
      * @param findRoot A function that finds the root of the e-graph.
      * @return A new strategy that operates on an [[EGraphWithRoot]].
      */
-    def closeRoot(findRoot: EGraphT => EClassCall): Strategy[NodeT, EGraphT, Data] = {
-      new Strategy[NodeT, EGraphT, Data] {
+    def closeRoot(findRoot: EGraphT => EClassCall): Strategy[EGraphT, Data] = {
+      new Strategy[EGraphT, Data] {
         override def initialData: Data = strategy.initialData
 
         override def apply(egraph: EGraphT,
@@ -444,7 +426,7 @@ object Strategy {
      * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphT],
-                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRoot[NodeT, EGraphT], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase(strategy, extractor, areEquivalent)
     }
 
@@ -465,7 +447,7 @@ object Strategy {
      *         executed between each iteration.
      */
     def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphT],
-                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithRoot[NodeT, EGraphT], Data, Option[Tree[NodeT]]] = {
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[EGraphWithRoot[NodeT, EGraphT], Data, Option[Tree[NodeT]]] = {
       strategy.betweenIterations(Rebase(extractor, areEquivalent))
     }
   }
@@ -480,7 +462,7 @@ object Strategy {
    */
   implicit class WithMetadataAndRoot[NodeT,
                                      EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                                     Data](private val strategy: Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data]) extends AnyVal {
+                                     Data](private val strategy: Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data]) extends AnyVal {
 
     /**
      * Chains a rebasing operation to this strategy.
@@ -504,7 +486,7 @@ object Strategy {
      * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
-                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase.withMetadata(strategy, extractor, areEquivalent)
     }
 
@@ -525,7 +507,7 @@ object Strategy {
      *         executed between each iteration.
      */
     def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
-                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data, Option[Tree[NodeT]]] = {
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Data, Option[Tree[NodeT]]] = {
       strategy.betweenIterations(Rebase.withMetadata(extractor, areEquivalent))
     }
   }
@@ -542,7 +524,7 @@ object Strategy {
   implicit class WithRecordingMetadataAndRoot[NodeT,
                                               EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                               Match <: PortableMatch[NodeT, Match],
-                                              Data](private val strategy: Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data]) extends AnyVal {
+                                              Data](private val strategy: Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data]) extends AnyVal {
 
     /**
      * Chains a rebasing operation to this strategy.
@@ -566,7 +548,7 @@ object Strategy {
      * @return A new strategy that performs rebasing after each transformation when the result tree changes.
      */
     def thenRebase(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
-                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], (Data, Option[Tree[NodeT]])] = {
+                   areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): Strategy[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], (Data, Option[Tree[NodeT]])] = {
       TransformAndRebase.withRecording(strategy, extractor, areEquivalent)
     }
 
@@ -587,7 +569,7 @@ object Strategy {
      *         executed between each iteration.
      */
     def rebaseBetweenIterations(extractor: Extractor[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]]],
-                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[NodeT, EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data, Option[Tree[NodeT]]] = {
+                                areEquivalent: (Tree[NodeT], Tree[NodeT]) => Boolean = (x: Tree[NodeT], y: Tree[NodeT]) => x == y): RepeatUntilStableBuilder[EGraphWithRecordedApplications[NodeT, EGraphWithMetadata[NodeT, EGraphWithRoot[NodeT, EGraphT]], Match], Data, Option[Tree[NodeT]]] = {
       strategy.betweenIterations(Rebase.withRecording(extractor, areEquivalent))
     }
   }

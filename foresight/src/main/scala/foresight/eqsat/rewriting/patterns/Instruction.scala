@@ -1,10 +1,11 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 import foresight.eqsat.collections.SlotSeq
+import foresight.eqsat.readonly.EGraph
 
 import java.util
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * An instruction for the pattern-matching virtual machine.
@@ -12,7 +13,7 @@ import scala.collection.compat._
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph.
  */
-trait Instruction[NodeT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
+trait Instruction[NodeT, -EGraphT <: EGraph[NodeT]] {
   /** A compact summary of what this instruction will create and bind. */
   def effects: Instruction.Effects
 
@@ -37,7 +38,7 @@ object Instruction {
    */
   final case class Effects(
     createdRegisters: Int,
-    boundVars: immutable.ArraySeq[Pattern.Var],
+    boundVars: ArraySeq[Pattern.Var],
     boundSlots: SlotSeq,
     boundNodes: Int
   ) {
@@ -57,7 +58,7 @@ object Instruction {
   /** A companion object for [[Effects]]. */
   object Effects {
     /** An effect summary for an instruction that does nothing. */
-    val none: Effects = Effects(0, immutable.ArraySeq.empty, SlotSeq.empty, 0)
+    val none: Effects = Effects(0, ArraySeq.empty, SlotSeq.empty, 0)
 
     /**
      * Aggregate a collection of effect summaries into a single summary.
@@ -81,7 +82,7 @@ object Instruction {
    * Reused via a user-creatable pool. Each instruction advances execution by calling `continue()`
    * or reports errors via `error(...)`.
    */
-  sealed trait Execution[NodeT, +EGraphT <: ReadOnlyEGraph[NodeT]] {
+  sealed trait Execution[NodeT, +EGraphT <: EGraph[NodeT]] {
     /** The current e-graph. */
     def graph: EGraphT
 
@@ -123,12 +124,12 @@ object Instruction {
    * Reused via a user-creatable pool. Each instruction advances execution by calling `continue()`
    * or reports errors via `error(...)`.
    */
-  private final class ExecutionImpl[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](private val pool: Execution.Pool[NodeT, EGraphT])
+  private final class ExecutionImpl[NodeT, EGraphT <: EGraph[NodeT]](private val pool: Execution.Pool[NodeT, EGraphT])
     extends Execution[NodeT, EGraphT] {
     // Mutable fields intentionally use null-sentinels for cross-version compatibility and low overhead.
     private var _graph: EGraphT = null.asInstanceOf[EGraphT]
     private var _machine: MutableMachineState[NodeT] = null
-    private var _instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]] = null
+    private var _instructions: ArraySeq[Instruction[NodeT, EGraphT]] = null
     private var _onSuccess: MutableMachineState[NodeT] => Boolean = null
     private var _onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean = null
     private var _ip: Int = 0
@@ -138,7 +139,7 @@ object Instruction {
     /** Initialize this execution context for a fresh run. */
     def init(graph: EGraphT,
              machine: MutableMachineState[NodeT],
-             instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+             instructions: ArraySeq[Instruction[NodeT, EGraphT]],
              onSuccess: MutableMachineState[NodeT] => Boolean,
              onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean): Unit = {
       _graph = graph
@@ -224,19 +225,19 @@ object Instruction {
   }
 
   object Execution {
-    private val threadLocalPool: ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] = new ThreadLocal[Pool[_, _ <: ReadOnlyEGraph[_]]] {
-      override def initialValue(): Pool[_, _ <: ReadOnlyEGraph[_]] = {
+    private val threadLocalPool: ThreadLocal[Pool[_, _ <: EGraph[_]]] = new ThreadLocal[Pool[_, _ <: EGraph[_]]] {
+      override def initialValue(): Pool[_, _ <: EGraph[_]] = {
         new Pool()
       }
     }
 
     /** Get the thread-local pool of execution contexts. */
-    def pool[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]]: Pool[NodeT, EGraphT] = {
+    def pool[NodeT, EGraphT <: EGraph[NodeT]]: Pool[NodeT, EGraphT] = {
       threadLocalPool.get().asInstanceOf[Pool[NodeT, EGraphT]]
     }
 
     /** Pool for reusing `Execution` contexts to avoid allocations. */
-    final class Pool[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](initialCapacity: Int = 0) {
+    final class Pool[NodeT, EGraphT <: EGraph[NodeT]](initialCapacity: Int = 0) {
       private val stack = new util.ArrayDeque[ExecutionImpl[NodeT, EGraphT]](math.max(1, initialCapacity))
 
       /** Borrow an execution context from the pool. */
@@ -268,7 +269,7 @@ object Instruction {
       def run(
                graph: EGraphT,
                machine: MutableMachineState[NodeT],
-               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               instructions: ArraySeq[Instruction[NodeT, EGraphT]],
                onSuccess: MutableMachineState[NodeT] => Boolean,
                onFailure: (Execution[NodeT, EGraphT], MachineError[NodeT]) => Boolean
              ): Boolean = {
@@ -293,7 +294,7 @@ object Instruction {
       def run(
                graph: EGraphT,
                machine: MutableMachineState[NodeT],
-               instructions: immutable.ArraySeq[Instruction[NodeT, EGraphT]],
+               instructions: ArraySeq[Instruction[NodeT, EGraphT]],
                onSuccess: MutableMachineState[NodeT] => Boolean
              ): Boolean = {
         run(graph, machine, instructions, onSuccess, null)
@@ -311,16 +312,16 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class BindNode[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
-                                                                     nodeType: NodeT,
-                                                                     definitions: SlotSeq,
-                                                                     uses: SlotSeq,
-                                                                     argCount: Int)
+  final case class BindNode[NodeT, EGraphT <: EGraph[NodeT]](register: Int,
+                                                             nodeType: NodeT,
+                                                             definitions: SlotSeq,
+                                                             uses: SlotSeq,
+                                                             argCount: Int)
     extends Instruction[NodeT, EGraphT] {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = argCount,
-      boundVars = immutable.ArraySeq.empty[Pattern.Var],
+      boundVars = ArraySeq.empty[Pattern.Var],
       boundSlots = definitions ++ uses,
       boundNodes = 1
     )
@@ -387,13 +388,13 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class BindVar[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register: Int,
-                                                                    variable: Pattern.Var)
+  final case class BindVar[NodeT, EGraphT <: EGraph[NodeT]](register: Int,
+                                                            variable: Pattern.Var)
     extends Instruction[NodeT, EGraphT] {
 
     override val effects: Instruction.Effects = Instruction.Effects(
       createdRegisters = 0,
-      boundVars = immutable.ArraySeq(variable),
+      boundVars = ArraySeq(variable),
       boundSlots = SlotSeq.empty,
       boundNodes = 0
     )
@@ -412,7 +413,7 @@ object Instruction {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    */
-  final case class Compare[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](register1: Int, register2: Int)
+  final case class Compare[NodeT, EGraphT <: EGraph[NodeT]](register1: Int, register2: Int)
     extends Instruction[NodeT, EGraphT] {
 
     override def effects: Instruction.Effects = Instruction.Effects.none

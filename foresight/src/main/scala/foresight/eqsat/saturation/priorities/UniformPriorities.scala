@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.rewriting.Rewrite
 
 /**
  * A simple prioritization strategy that assigns equal weight to all rule matches.
@@ -21,14 +21,16 @@ import foresight.eqsat.{EGraph, EGraphLike}
  * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by each rule.
  */
-final case class UniformPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT](maxBatchSize: Int)
+final case class UniformPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: EGraph[NodeT], MatchT](maxBatchSize: Int)
     extends MatchPriorities[NodeT, RuleT, EGraphT, MatchT] {
 
-  override def prioritize(matches: Seq[(RuleT, MatchT)], egraph: EGraphT): Seq[PrioritizedMatch[RuleT, MatchT]] = {
-    matches.map { case (rule, match_) => PrioritizedMatch(rule, match_, 1.0) }
+  override def prioritize(rules: Seq[RuleT], matches: Map[String, Seq[MatchT]], egraph: EGraphT): Map[String, Seq[PrioritizedMatch[MatchT]]] = {
+    matches.map { case (ruleName, ms) =>
+      ruleName -> ms.map(m => PrioritizedMatch(m, 1.0))
+    }
   }
 
-  override def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]], egraph: EGraphT): Int = {
-    math.min(maxBatchSize, matches.size)
+  override def batchSize(rules: Seq[RuleT], matches: Map[String, Seq[PrioritizedMatch[MatchT]]], egraph: EGraphT): Int = {
+    math.min(maxBatchSize, matches.values.map(_.size).sum)
   }
 }

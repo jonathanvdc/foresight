@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.EGraph
 import foresight.eqsat.rewriting.patterns.Pattern
 import org.junit.Test
 
@@ -63,7 +64,7 @@ class RewriteArithTest {
     assert(c.args.size == 1)
     assert(!egraph2.areSame(c, egraph2.find(x).get))
 
-    val egraph3 = Rules.xPlusZeroEqualsX(egraph2)
+    val egraph3 = Rules.xPlusZeroEqualsX.applyImmutable(egraph2)
 
     assert(egraph3.classes.size == 2)
     assert(egraph3.areSame(c, egraph3.find(x).get))
@@ -82,7 +83,7 @@ class RewriteArithTest {
     assert(c.args.size == 1)
 
     for (rule <- Seq(Rules.xMinusXEqualsZero, Rules.xMinusXEqualsZeroWithPatternVars)) {
-      val egraph3 = rule(egraph2)
+      val egraph3 = rule.applyImmutable(egraph2)
 
       assert(egraph3.classes.size == 2)
       assert(egraph3.areSame(c, egraph3.find(zero).get))
@@ -104,7 +105,7 @@ class RewriteArithTest {
     assert(c.args.size == 2)
 
     for (rule <- Seq(Rules.xMinusXEqualsZero, Rules.xMinusXEqualsZeroWithPatternVars)) {
-      val egraph4 = rule(egraph3)
+      val egraph4 = rule.applyImmutable(egraph3)
 
       assert(egraph4.classes.size == 3)
       assert(!egraph4.areSame(c, z))

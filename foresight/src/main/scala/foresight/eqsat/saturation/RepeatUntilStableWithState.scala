@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EGraph, EGraphLike}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
  * A strategy that repeatedly applies a body strategy until it produces no new e-graph,
@@ -9,20 +9,18 @@ import foresight.eqsat.{EGraph, EGraphLike}
  *
  * @param body The main strategy to apply repeatedly.
  * @param betweenIterations A strategy to apply between iterations of the body.
- * @tparam NodeT The type of nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph, which must implement both [[EGraphLike]] and [[EGraph]].
  * @tparam DataT The type of data maintained by the body strategy.
  * @tparam BetweenItersDataT The type of data maintained by the between-iterations strategy.
  */
 private final case class RepeatUntilStableWithState[
-  NodeT,
-  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+  EGraphT,
   DataT,
   BetweenItersDataT]
   (
-    body: Strategy[NodeT, EGraphT, DataT],
-    betweenIterations: Strategy[NodeT, EGraphT, BetweenItersDataT]
-  ) extends Strategy[NodeT, EGraphT, (DataT, BetweenItersDataT)] {
+    body: Strategy[EGraphT, DataT],
+    betweenIterations: Strategy[EGraphT, BetweenItersDataT]
+  ) extends Strategy[EGraphT, (DataT, BetweenItersDataT)] {
 
   override def initialData: (DataT, BetweenItersDataT) = (body.initialData, betweenIterations.initialData)
 

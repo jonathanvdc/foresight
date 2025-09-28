@@ -1,7 +1,9 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat._
+import foresight.eqsat.mutable
+import foresight.eqsat.readonly
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
@@ -30,7 +32,7 @@ final case class AddManyCommand[NodeT](
 
   /**
    * Reifies all nodes in [[nodes]] using the given map, then inserts them
-   * into the e-graph with [[EGraph.tryAddMany]].
+   * into the e-graph with [[mutable.EGraph.tryAddMany]].
    *
    * Nodes are processed independently, allowing parallel insertion.
    * The returned reification map binds each output symbol from [[nodes]]
@@ -41,7 +43,7 @@ final case class AddManyCommand[NodeT](
    *                    used to resolve each node’s arguments before insertion.
    * @param parallelize Strategy for distributing the work.
    * @return
-   *   - `Some(newGraph)` if at least one node was newly added, or `None` if all were already present.
+   *   - `true` if at least one node was newly added, or `false` if all were already present.
    *   - A reification map binding each node’s output symbol to its resulting e-class.
    *
    * @example
@@ -49,16 +51,16 @@ final case class AddManyCommand[NodeT](
    * val v = EClassSymbol.virtual()
    * val n = ENodeSymbol(nodeType, defs, uses, args = Seq(v))
    * val cmd = AddManyCommand(Seq(v -> n))
-   * val (maybeNewGraph, newRefs) = cmd(egraph, Map(v -> existingCall), parallel)
+   * val (updated, newRefs) = cmd(egraph, Map(v -> existingCall), parallel)
    * }}}
    */
-  override def apply[Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](
-                                                                          egraph: Repr,
-                                                                          reification: Map[EClassSymbol.Virtual, EClassCall],
-                                                                          parallelize: ParallelMap
-                                                                        ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
+  override def apply(
+                      egraph: mutable.EGraph[NodeT],
+                      reification: Map[EClassSymbol.Virtual, EClassCall],
+                      parallelize: ParallelMap
+                    ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
     val reifiedNodes = nodes.map(_._2.reify(reification))
-    val (addResults, newEGraph) = egraph.tryAddMany(reifiedNodes, parallelize)
+    val addResults = egraph.tryAddMany(reifiedNodes, parallelize)
 
     val newReification = nodes.zip(addResults).map {
       case ((symbol, _), result) => (symbol, result.call)
@@ -69,7 +71,7 @@ final case class AddManyCommand[NodeT](
       case AddNodeResult.AlreadyThere(_) => false
     }
 
-    (if (anyChanges) Some(newEGraph) else None, newReification)
+    (anyChanges, newReification)
   }
 
   /**
@@ -90,7 +92,7 @@ final case class AddManyCommand[NodeT](
    *   - An updated partial reification containing all newly resolved outputs.
    */
   override def simplify(
-                         egraph: EGraph[NodeT],
+                         egraph: readonly.EGraph[NodeT],
                          partialReification: Map[EClassSymbol.Virtual, EClassCall]
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
 

@@ -1,7 +1,8 @@
 package foresight.util
 
 import foresight.eqsat.lang.{AtomDecoder, Language, LanguageOp}
-import foresight.eqsat.{EClassCall, EClassRef, EGraph, MixedTree}
+import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.{EClassCall, EClassRef, MixedTree}
 
 import java.nio.file.{Files, Paths}
 

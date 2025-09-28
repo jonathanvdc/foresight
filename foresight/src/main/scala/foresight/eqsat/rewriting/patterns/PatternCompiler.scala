@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EGraph, EGraphLike, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.MixedTree
+import foresight.eqsat.readonly.EGraph
 
 import scala.collection.mutable
 
@@ -13,7 +14,7 @@ object PatternCompiler {
    * @param pattern The pattern to compile.
    * @return The list of instructions.
    */
-  def compile[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): List[Instruction[NodeT, EGraphT]] = {
+  def compile[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var]): List[Instruction[NodeT, EGraphT]] = {
     val compiler = new PatternCompiler[NodeT, EGraphT]()
     compiler.compile(pattern, 0)
   }
@@ -23,7 +24,7 @@ object PatternCompiler {
 /**
  * A compiler that compiles patterns into a list of instructions for the pattern-matching virtual machine.
  */
-private final class PatternCompiler[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]] {
+private final class PatternCompiler[NodeT, EGraphT <: EGraph[NodeT]] {
   /**
    * A mapping from expression variable IDs to registers.
    */

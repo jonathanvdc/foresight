@@ -4,11 +4,12 @@ import foresight.eqsat.examples.arith._
 import foresight.eqsat.examples.arith.Rules.ArithRule
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EClassCall, EGraph, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, MixedTree, Slot}
+import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
 class RuleTests {
-  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = Rules.all): Strategy[ArithIR, EGraph[ArithIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[ArithRule] = Rules.all): Strategy[EGraph[ArithIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
@@ -17,7 +18,7 @@ class RuleTests {
       .closeMetadata
       .dropData
 
-  private def strategies: Seq[Strategy[ArithIR, EGraph[ArithIR], Unit]] =
+  private def strategies: Seq[Strategy[EGraph[ArithIR], Unit]] =
     Seq(strategy(12))
 
   /**

@@ -1,10 +1,10 @@
 package foresight.eqsat.examples.arith
 
 import foresight.eqsat.examples.arith.ApplierOps._
-import foresight.eqsat.metadata.EGraphWithMetadata
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.{MixedTree, Slot}
 
 /**
  * This object contains a collection of rules for rewriting arithmetic expressions.

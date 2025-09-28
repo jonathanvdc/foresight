@@ -1,10 +1,12 @@
 package foresight.eqsat.lang
 
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat._
+import foresight.eqsat.immutable
+import foresight.eqsat.mutable
+import foresight.eqsat.readonly.EGraph
 import foresight.util.ordering.SeqOrdering
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
@@ -88,15 +90,27 @@ trait Language[E]:
   def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
 
   /**
-   * Encode a surface AST `e: E` into an e-graph, returning the root e-class call
+   * Encode a surface AST `e: E` into an immutable e-graph, returning the root e-class call
    * and the new e-graph containing `e`.
    * @param e The surface AST expression to encode.
    * @return A tuple containing:
    *         - The `EClassCall` representing the root of the encoded expression.
-   *         - The new e-graph with `e` added.
+   *         - The new immutable e-graph with `e` added.
    */
-  def toEGraph(e: E): (EClassCall, EGraph[Op]) = {
-    EGraph.from(toTree(e)(using AtomEncoder.noEncoding))
+  def toEGraph(e: E): (EClassCall, immutable.EGraph[Op]) = {
+    immutable.EGraph.from(toTree(e)(using AtomEncoder.noEncoding))
+  }
+
+  /**
+   * Encode a surface AST `e: E` into a mutable e-graph, returning the root e-class call
+   * and the new e-graph containing `e`.
+   * @param e The surface AST expression to encode.
+   * @return A tuple containing:
+   *         - The `EClassCall` representing the root of the encoded expression.
+   *         - The new mutable e-graph with `e` added.
+   */
+  def toMutableEGraph(e: E): (EClassCall, mutable.EGraph[Op]) = {
+    mutable.EGraph.from(toTree(e)(using AtomEncoder.noEncoding))
   }
 
   /**
@@ -143,10 +157,13 @@ trait Language[E]:
    * val program: E = extr(root, g)   // decodes to surface AST E
    * }}}
    */
-  def extractor[C, Repr <: EGraphLike[Op, Repr] with EGraph[Op]](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, EGraphWithMetadata[Op, Repr]] = {
+  def extractor[
+    C,
+    Repr <: EGraph[Op]
+  ](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]] = {
     val innerExtractor = analysis.extractor[Repr]
-    new LanguageExtractor[E, EGraphWithMetadata[Op, Repr]](using this) {
-      def apply(call: EClassCall, egraph: EGraphWithMetadata[Op, Repr]): E =
+    new LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]](using this) {
+      def apply(call: EClassCall, egraph: readonly.EGraphWithMetadata[Op, Repr]): E =
         fromTree[Nothing](innerExtractor(call, egraph))(using AtomDecoder.noDecoding)
     }
   }
@@ -196,7 +213,7 @@ trait Language[E]:
    * metadata-enriched wrapper and extracts from that.
    *
    * If multiple extraction rounds are needed, consider building a
-   * [[foresight.eqsat.metadata.EGraphWithMetadata]]
+   * [[foresight.eqsat.immutable.EGraphWithMetadata]]
    * configured with an extraction analysis obtained through [[extractionAnalysis]].
    * Concrete expressions can be extracted from that enriched e-graph
    * using the [[extractor]] method.
@@ -220,11 +237,57 @@ trait Language[E]:
    *   val program: Expr = lang.extract(rootCall, g, cf)
    * }}}
    */
-  def extract[C](call: EClassCall, egraph: EGraph[LanguageOp[E]], costFunction: LanguageCostFunction[E, C])
+  def extract[C](call: EClassCall, egraph: mutable.EGraph[LanguageOp[E]], costFunction: LanguageCostFunction[E, C])
+                (using ord: Ordering[C]): E = {
+    val analysis = extractionAnalysis("extraction", costFunction)
+    val withMetadata = mutable.EGraphWithMetadata[LanguageOp[E], mutable.EGraph[LanguageOp[E]]](egraph)
+    withMetadata.addAnalysis(analysis)
+    extractor[C, mutable.EGraph[LanguageOp[E]]](analysis)(call, withMetadata)
+  }
+
+  /**
+   * Extract a surface expression from an e-graph given a cost function.
+   *
+   * This method performs a one-off version of the standard cost-based extraction process:
+   *
+   *   - Wrap the provided cost function in an [[ExtractionAnalysis]]
+   *   - Enrich the input e-graph with that analysis
+   *   - Run [[extractor]] to reconstruct the minimal-cost expression
+   *     of type `E` rooted at the given [[EClassCall]]
+   *
+   * This does not mutate the input e-graph; instead it builds a
+   * metadata-enriched wrapper and extracts from that.
+   *
+   * If multiple extraction rounds are needed, consider building a
+   * [[foresight.eqsat.mutable.EGraphWithMetadata]]
+   * configured with an extraction analysis obtained through [[extractionAnalysis]].
+   * Concrete expressions can be extracted from that enriched e-graph
+   * using the [[extractor]] method.
+   *
+   * @tparam C
+   * The cost type used to rank candidate extractions.
+   * @param call
+   * The root e-class to extract from.
+   * @param egraph
+   * The e-graph containing equivalences and metadata.
+   * @param costFunction
+   * Function assigning costs to surface ASTs.
+   * @param ord
+   * (using) Ordering on costs.
+   * @return
+   * The extracted surface AST `E` of minimal cost according to the
+   * supplied cost function.
+   * @example
+   * {{{
+   *   val cf: LanguageCostFunction[Expr, Int] = ...
+   *   val program: Expr = lang.extract(rootCall, g, cf)
+   * }}}
+   */
+  def extract[C](call: EClassCall, egraph: immutable.EGraph[LanguageOp[E]], costFunction: LanguageCostFunction[E, C])
                 (using ord: Ordering[C]): E = {
     val analysis = extractionAnalysis("extraction", costFunction)
     val withMetadata = egraph.withMetadata.addAnalysis(analysis)
-    extractor(analysis)(call, withMetadata)
+    extractor[C, immutable.EGraph[LanguageOp[E]]](analysis)(call, withMetadata)
   }
 
   /**
@@ -262,7 +325,7 @@ trait Language[E]:
    *   val program: Expr = lang.extract(myExpr, g, cf)
    *   }}}
    */
-  def extract[C](exprWithCalls: E, egraph: EGraph[Op], costFunction: LanguageCostFunction[E, C])
+  def extract[C](exprWithCalls: E, egraph: immutable.EGraph[Op], costFunction: LanguageCostFunction[E, C])
                 (using enc: AtomEncoder[E, EClassCall],
                  ord: Ordering[C],
                  ev: NotGiven[E =:= EClassCall]): E = {
@@ -279,8 +342,8 @@ trait Language[E]:
    * @param e        Surface-side pattern.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toSearcher[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
-                                                                    (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
+  def toSearcher[EGraphT <: EGraph[Op]](e: E)
+                                       (using enc: AtomEncoder[E, Pattern.Var]): ReversibleSearcher[Op, PatternMatch[Op], EGraphT] =
     toTree(e).toSearcher
 
   /**
@@ -291,8 +354,8 @@ trait Language[E]:
    * @param e        Surface-side template for rewriting.
    * @tparam EGraphT An e-graph type that supports this language.
    */
-  def toApplier[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]](e: E)
-                                                                   (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
+  def toApplier[EGraphT <: EGraph[Op]](e: E)
+                                      (using enc: AtomEncoder[E, Pattern.Var]): PatternApplier[Op, EGraphT] =
     toTree(e).toApplier
 
   /**
@@ -310,7 +373,7 @@ trait Language[E]:
    *   Lang.rule("comm-add", Add(x, y), Add(y, x))
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String, lhs: E, rhs: E)
   (using enc: AtomEncoder[E, Pattern.Var])
   : Rule[Op, PatternMatch[Op], EGraphT] =
@@ -346,7 +409,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: E => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -379,7 +442,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -407,7 +470,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -436,7 +499,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],
@@ -465,7 +528,7 @@ trait Language[E]:
    *   }
    * }}}
    */
-  def rule[EGraphT <: EGraphLike[Op, EGraphT] with EGraph[Op]]
+  def rule[EGraphT <: EGraph[Op]]
   (name: String)
   (f: (E, E, E, E, E) => (E, E))
   (using enc: AtomEncoder[E, Pattern.Var],

@@ -1,11 +1,11 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar._
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.saturation.{EGraphWithRoot, Strategy}
-import foresight.eqsat.{EGraph, MixedTree, Slot}
+import foresight.eqsat.saturation.Strategy
+import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata, EGraphWithRoot}
 import org.junit.{Ignore, Test}
 
 class BlasIdiomRuleTest {
@@ -18,7 +18,7 @@ class BlasIdiomRuleTest {
   private def blasIdiomRules: BlasIdiomRules[BaseEGraph] = BlasIdiomRules[BaseEGraph]()
 
   private def strategy(iterationLimit: Int,
-                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[ArrayIR, BaseEGraph, Unit] = {
+                       rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all): Strategy[BaseEGraph, Unit] = {
     Strategies.naive(iterationLimit = Some(iterationLimit), rules = rules)
   }
 

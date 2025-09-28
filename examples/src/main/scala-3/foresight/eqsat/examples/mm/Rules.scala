@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.mm
 
-import foresight.eqsat.EGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 

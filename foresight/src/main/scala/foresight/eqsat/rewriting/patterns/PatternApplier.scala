@@ -2,8 +2,9 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.commands.{Command, CommandQueueBuilder}
+import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
-import foresight.eqsat.{EClassSymbol, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassSymbol, MixedTree, Slot}
 
 import scala.collection.compat._
 
@@ -14,7 +15,7 @@ import scala.collection.compat._
  * @tparam NodeT The type of the nodes in the e-graph.
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
-final case class PatternApplier[NodeT, EGraphT <: ReadOnlyEGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
+final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
   override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {

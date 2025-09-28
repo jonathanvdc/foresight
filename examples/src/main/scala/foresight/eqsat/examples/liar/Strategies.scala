@@ -1,11 +1,11 @@
 package foresight.eqsat.examples.liar
 
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation._
-import foresight.eqsat.{EGraph, Tree}
+import foresight.eqsat.Tree
+import foresight.eqsat.immutable.{EGraphWithMetadata, EGraphWithRecordedApplications, EGraphWithRoot, EGraph}
 
 import scala.concurrent.duration.Duration
 
@@ -54,7 +54,7 @@ object Strategies {
   def naive(iterationLimit: Option[Int] = None,
             timeout: Option[Duration] = None,
             rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
-            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
     MaximalRuleApplicationWithCaching(rules)
       .withChangeLogger(onChange)
       .withIterationLimit(iterationLimit)
@@ -90,7 +90,7 @@ object Strategies {
              expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
              simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
              idiomRules: Seq[LiarRule] = blasIdiomRules.all,
-             onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
+             onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
 
     def phase(rules: Seq[LiarRule]) = {
       MaximalRuleApplicationWithCaching(rules)
@@ -135,7 +135,7 @@ object Strategies {
                      expansionRules: Seq[LiarRule] = coreRules.introduceConstArray +: arithRules.introductionRules,
                      simplificationRules: Seq[LiarRule] = coreRules.eliminationRules ++ arithRules.simplificationRules,
                      idiomRules: Seq[LiarRule] = blasIdiomRules.all,
-                     onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
+                     onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
 
     def phase(rules: Seq[LiarRule]) = {
       MaximalRuleApplicationWithCaching(rules)
@@ -175,7 +175,7 @@ object Strategies {
             timeout: Option[Duration] = None,
             cycles: Int = 2,
             rules: Seq[LiarRule] = coreRules.allWithConstArray ++ arithRules.all ++ blasIdiomRules.all,
-            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[ArrayIR, BaseEGraph, Unit] = {
+            onChange: (RecordedEGraph, RecordedEGraph) => Unit = (_, _) => ()): Strategy[BaseEGraph, Unit] = {
 
     val ruleApplicationLimit = 2500
     val ruleBanLength = 5
@@ -184,7 +184,7 @@ object Strategies {
       rules,
       ruleApplicationLimit,
       ruleBanLength,
-      SearchAndApply.withCaching[ArrayIR, MetadataEGraph, Match])
+      SearchAndApply.immutableWithCaching[ArrayIR, MetadataEGraph, Match])
 
     baseStrategy
       .withChangeLogger(onChange)

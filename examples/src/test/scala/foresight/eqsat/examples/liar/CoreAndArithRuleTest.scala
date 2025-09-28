@@ -2,11 +2,11 @@ package foresight.eqsat.examples.liar
 
 import foresight.eqsat.examples.liar._
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.metadata.EGraphWithMetadata
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 import foresight.eqsat.saturation.{MaximalRuleApplicationWithCaching, Strategy}
-import foresight.eqsat.{EGraph, Slot}
+import foresight.eqsat.Slot
+import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import org.junit.Test
 
 class CoreAndArithRuleTest {
@@ -17,7 +17,7 @@ class CoreAndArithRuleTest {
   private def coreRules: CoreRules[BaseEGraph] = CoreRules[BaseEGraph]()
   private def arithRules: ArithRules[BaseEGraph] = ArithRules[BaseEGraph]()
 
-  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all ++ arithRules.all): Strategy[ArrayIR, EGraph[ArrayIR], Unit] =
+  private def strategy(iterationLimit: Int, rules: Seq[LiarRule] = coreRules.all ++ arithRules.all): Strategy[EGraph[ArrayIR], Unit] =
     MaximalRuleApplicationWithCaching(rules)
       .withIterationLimit(iterationLimit)
       .repeatUntilStable
