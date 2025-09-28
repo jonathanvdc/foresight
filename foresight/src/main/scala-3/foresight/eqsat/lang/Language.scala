@@ -158,11 +158,11 @@ trait Language[E]:
    */
   def extractor[
     C,
-    Repr <: immutable.EGraphLike[Op, Repr] with immutable.EGraph[Op]
-  ](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, immutable.EGraphWithMetadata[Op, Repr]] = {
+    Repr <: ReadOnlyEGraph[Op]
+  ](analysis: ExtractionAnalysis[LanguageOp[E], C]): LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]] = {
     val innerExtractor = analysis.extractor[Repr]
-    new LanguageExtractor[E, immutable.EGraphWithMetadata[Op, Repr]](using this) {
-      def apply(call: EClassCall, egraph: immutable.EGraphWithMetadata[Op, Repr]): E =
+    new LanguageExtractor[E, readonly.EGraphWithMetadata[Op, Repr]](using this) {
+      def apply(call: EClassCall, egraph: readonly.EGraphWithMetadata[Op, Repr]): E =
         fromTree[Nothing](innerExtractor(call, egraph))(using AtomDecoder.noDecoding)
     }
   }
@@ -212,7 +212,7 @@ trait Language[E]:
    * metadata-enriched wrapper and extracts from that.
    *
    * If multiple extraction rounds are needed, consider building a
-   * [[foresight.eqsat.metadata.EGraphWithMetadata]]
+   * [[foresight.eqsat.immutable.EGraphWithMetadata]]
    * configured with an extraction analysis obtained through [[extractionAnalysis]].
    * Concrete expressions can be extracted from that enriched e-graph
    * using the [[extractor]] method.
@@ -230,6 +230,52 @@ trait Language[E]:
    * @return
    *   The extracted surface AST `E` of minimal cost according to the
    *   supplied cost function.
+   * @example
+   * {{{
+   *   val cf: LanguageCostFunction[Expr, Int] = ...
+   *   val program: Expr = lang.extract(rootCall, g, cf)
+   * }}}
+   */
+  def extract[C](call: EClassCall, egraph: mutable.EGraph[LanguageOp[E]], costFunction: LanguageCostFunction[E, C])
+                (using ord: Ordering[C]): E = {
+    val analysis = extractionAnalysis("extraction", costFunction)
+    val withMetadata = mutable.EGraphWithMetadata[LanguageOp[E], mutable.EGraph[LanguageOp[E]]](egraph)
+    withMetadata.addAnalysis(analysis)
+    extractor[C, mutable.EGraph[LanguageOp[E]]](analysis)(call, withMetadata)
+  }
+
+  /**
+   * Extract a surface expression from an e-graph given a cost function.
+   *
+   * This method performs a one-off version of the standard cost-based extraction process:
+   *
+   *   - Wrap the provided cost function in an [[ExtractionAnalysis]]
+   *   - Enrich the input e-graph with that analysis
+   *   - Run [[extractor]] to reconstruct the minimal-cost expression
+   *     of type `E` rooted at the given [[EClassCall]]
+   *
+   * This does not mutate the input e-graph; instead it builds a
+   * metadata-enriched wrapper and extracts from that.
+   *
+   * If multiple extraction rounds are needed, consider building a
+   * [[foresight.eqsat.mutable.EGraphWithMetadata]]
+   * configured with an extraction analysis obtained through [[extractionAnalysis]].
+   * Concrete expressions can be extracted from that enriched e-graph
+   * using the [[extractor]] method.
+   *
+   * @tparam C
+   * The cost type used to rank candidate extractions.
+   * @param call
+   * The root e-class to extract from.
+   * @param egraph
+   * The e-graph containing equivalences and metadata.
+   * @param costFunction
+   * Function assigning costs to surface ASTs.
+   * @param ord
+   * (using) Ordering on costs.
+   * @return
+   * The extracted surface AST `E` of minimal cost according to the
+   * supplied cost function.
    * @example
    * {{{
    *   val cf: LanguageCostFunction[Expr, Int] = ...

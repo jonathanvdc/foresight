@@ -25,7 +25,7 @@ object ApplierOps {
 
       new Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] {
         override def apply(m: PatternMatch[ArithIR], egraph: EGraphWithMetadata[ArithIR, EGraphT]): Command[ArithIR] = {
-          val extracted = ExtractionAnalysis.smallest[ArithIR].extractor(m(source), egraph)
+          val extracted = ExtractionAnalysis.smallest[ArithIR].extractor[EGraphT](m(source), egraph)
 
           def subst(tree: Tree[ArithIR]): MixedTree[ArithIR, EClassCall] = {
             tree match {

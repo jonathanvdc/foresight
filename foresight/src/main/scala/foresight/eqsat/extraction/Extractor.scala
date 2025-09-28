@@ -13,7 +13,7 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  * @tparam NodeT The node type stored in the e-graph and produced in the resulting [[Tree]].
  * @tparam Repr  The concrete e-graph type, which must implement both [[EGraphLike]] and [[EGraph]].
  */
-trait Extractor[NodeT, Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]] {
+trait Extractor[NodeT, -Repr <: ReadOnlyEGraph[NodeT]] {
 
   /**
    * Extracts a concrete expression tree that realizes the given e-class call, according to this
@@ -47,7 +47,9 @@ trait Extractor[NodeT, Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]] {
    *   val result: Tree[NodeT] = extractor(mixedTree, egraph) // `egraph` is unchanged
    *   }}}
    */
-  final def apply(tree: MixedTree[NodeT, EClassCall], egraph: Repr): Tree[NodeT] = {
+  final def apply[
+    EGraphT <: Repr with EGraph[NodeT] with EGraphLike[NodeT, EGraphT]
+  ](tree: MixedTree[NodeT, EClassCall], egraph: EGraphT): Tree[NodeT] = {
     val (call, newGraph) = egraph.add(tree)
     apply(call, newGraph)
   }

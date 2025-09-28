@@ -25,7 +25,7 @@ object ApplierOps {
 
       new Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] {
         override def apply(m: PatternMatch[SdqlIR], egraph: EGraphWithMetadata[SdqlIR, EGraphT]): Command[SdqlIR] = {
-          val extracted = ExtractionAnalysis.smallest[SdqlIR].extractor(m(source), egraph)
+          val extracted = ExtractionAnalysis.smallest[SdqlIR].extractor[EGraphT](m(source), egraph)
 
           def subst(tree: Tree[SdqlIR]): MixedTree[SdqlIR, EClassCall] = {
             tree match {

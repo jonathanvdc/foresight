@@ -1,7 +1,8 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.{ENode, ReadOnlyEGraph, Slot}
-import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
+import foresight.eqsat.immutable.EGraph
+import foresight.eqsat.readonly.EGraphWithMetadata
 import foresight.eqsat.collections.SlotMap
 
 /**
