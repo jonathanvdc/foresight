@@ -33,7 +33,7 @@ object StochasticRuleApplicationWithCaching {
    ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     StochasticRuleApplication(
       rules,
-      SearchAndApply.withCaching[NodeT, EGraphT, MatchT],
+      SearchAndApply.immutableWithCaching[NodeT, EGraphT, MatchT],
       priorities,
       random)
   }

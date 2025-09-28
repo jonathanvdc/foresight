@@ -150,7 +150,7 @@ object StochasticRuleApplication {
      priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT],
      random: Random
   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT], priorities)
+    apply(rules, SearchAndApply.immutable[NodeT, EGraphT, MatchT], priorities)
   }
 
   /**

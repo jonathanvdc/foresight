@@ -54,6 +54,6 @@ object MaximalRuleApplicationWithCaching {
       rules: Seq[Rule[NodeT, MatchT, EGraphT]]
     ): Strategy[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], Unit] = {
     MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT](
-      rules, SearchAndApply.withCaching[NodeT, EGraphT, MatchT])
+      rules, SearchAndApply.immutableWithCaching[NodeT, EGraphT, MatchT])
   }
 }

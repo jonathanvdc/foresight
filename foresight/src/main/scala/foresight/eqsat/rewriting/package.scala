@@ -28,7 +28,7 @@ package foresight.eqsat
  * remain meaningful across multiple e-graph snapshots, enabling caching and
  * reapplication through
  * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
- * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]].
+ * [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]].
  *
  * ## Typical workflow
  *
@@ -42,7 +42,7 @@ package foresight.eqsat
  * with others.
  *
  * When portability is required, caching can be introduced via
- * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]], which ensures that
+ * [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]], which ensures that
  * matches are recognized and skipped if they have already been applied to the
  * current e-graph state.
  *
@@ -75,7 +75,7 @@ package foresight.eqsat
  * treat `port` as a no-op, while ID-bearing matches perform translations such as
  * canonicalization. Recording and replaying matches is supported by
  * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]], and caching is
- * provided by [[foresight.eqsat.saturation.SearchAndApply$.withCaching]].
+ * provided by [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]].
  *
  * ## Design contracts
  *
@@ -92,7 +92,7 @@ package foresight.eqsat
  * [[Applier]] and [[ReversibleApplier]]; for composition: [[Rule]]; for matches
  * across snapshots: [[PortableMatch]]; and for caching and recording:
  * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
- * [[foresight.eqsat.saturation.SearchAndApply$.withCaching]]. Strategies for
+ * [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]]. Strategies for
  * high-level orchestration include
  * [[foresight.eqsat.saturation.Strategy]],
  * [[foresight.eqsat.saturation.MaximalRuleApplication]],

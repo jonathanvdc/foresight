@@ -89,6 +89,6 @@ object MaximalRuleApplication {
     rules: Seq[Rule[NodeT, MatchT, EGraphT]]
   ): MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
 
-    new MaximalRuleApplication(rules, SearchAndApply.withoutCaching)
+    new MaximalRuleApplication(rules, SearchAndApply.immutable)
   }
 }

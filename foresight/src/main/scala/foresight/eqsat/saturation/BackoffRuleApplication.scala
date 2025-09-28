@@ -186,7 +186,7 @@ object BackoffRuleApplication {
    *
    * This overload is a further simplification of the other `apply`: all rules are
    * wrapped in [[BackoffRule]]s with the same initial match limit and ban length,
-   * and [[SearchAndApply.withoutCaching]] is used for rule application.
+   * and [[SearchAndApply.immutable]] is used for rule application.
    *
    * @param rules The sequence of rewrite rules to schedule with backoff.
    * @param ruleApplicationLimit The initial number of matches each rule may apply before being banned.
@@ -203,6 +203,6 @@ object BackoffRuleApplication {
              ruleApplicationLimit: Int,
              ruleBanLength: Int
            ): BackoffRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, ruleApplicationLimit, ruleBanLength, SearchAndApply.withoutCaching[NodeT, EGraphT, MatchT])
+    apply(rules, ruleApplicationLimit, ruleBanLength, SearchAndApply.immutable[NodeT, EGraphT, MatchT])
   }
 }

@@ -155,15 +155,17 @@ trait SearchAndApply[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: ReadOnly
  */
 object SearchAndApply {
   /**
-   * Creates a [[SearchAndApply]] instance that does not cache matches.
+   * Creates a [[SearchAndApply]] instance that operates on immutable e-graphs.
    * @tparam NodeT The type of the nodes in the e-graph.
    * @tparam EGraphT The type of the e-graph.
    * @tparam MatchT The type of the matches produced by the rules.
-   * @return A [[SearchAndApply]] instance that does not cache matches.
+   * @return A [[SearchAndApply]] instance that operates on immutable e-graphs.
    */
-  def withoutCaching[NodeT,
-                     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                     MatchT]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+  def immutable[
+    NodeT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT
+  ]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
       override def search(rule: Rule[NodeT, MatchT, EGraphT],
                           egraph: EGraphT,
@@ -210,9 +212,11 @@ object SearchAndApply {
    * @tparam MatchT The type of the matches produced by the rules.
    * @return A [[SearchAndApply]] instance that caches matches.
    */
-  def withCaching[NodeT,
-                  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-                  MatchT <: PortableMatch[NodeT, MatchT]]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+  def immutableWithCaching[
+    NodeT,
+    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    MatchT <: PortableMatch[NodeT, MatchT]
+  ]: SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     new SearchAndApply[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] {
       override def search(rule: Rule[NodeT, MatchT, EGraphT],
                           egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],

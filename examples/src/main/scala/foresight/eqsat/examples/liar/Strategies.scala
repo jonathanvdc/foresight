@@ -184,7 +184,7 @@ object Strategies {
       rules,
       ruleApplicationLimit,
       ruleBanLength,
-      SearchAndApply.withCaching[ArrayIR, MetadataEGraph, Match])
+      SearchAndApply.immutableWithCaching[ArrayIR, MetadataEGraph, Match])
 
     baseStrategy
       .withChangeLogger(onChange)
