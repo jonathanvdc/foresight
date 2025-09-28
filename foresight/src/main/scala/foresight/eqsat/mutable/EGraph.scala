@@ -123,4 +123,26 @@ object EGraph {
    * @return An empty mutable e-graph.
    */
   def empty[NodeT]: EGraph[NodeT] = FreezableEGraph(immutable.EGraph.empty[NodeT])
+
+  /**
+   * Builds a new e-graph from a single tree, returning the e-class of its root.
+   *
+   * This is equivalent to:
+   * {{{
+   * val g = EGraph.empty[NodeT]
+   * g.add(tree)
+   * }}}
+   *
+   * The input is a `MixedTree[NodeT, Nothing]`, i.e., a tree that does not contain pre-existing
+   * `EClassCall`s. All children are inserted (or found) first, then the root e-node is inserted (or
+   * found), yielding the root e-class.
+   *
+   * @param tree The tree to insert into a fresh e-graph.
+   * @tparam NodeT The node type of the tree and resulting e-graph.
+   * @return (Root e-class of `tree`, new e-graph containing exactly the nodes added by `tree`.)
+   */
+  def from[NodeT](tree: MixedTree[NodeT, Nothing]): (EClassCall, EGraph[NodeT]) = {
+    val egraph = empty[NodeT]
+    (egraph.add(tree), egraph)
+  }
 }
