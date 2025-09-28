@@ -24,7 +24,7 @@ private final class UpdatingImmutableEGraph[
     _egraph.unionMany(pairs, parallelize)
   }
 
-  override def emptied: EGraph[NodeT] = new UpdatingImmutableEGraph(_egraph.emptied)
+  override def emptied: this.type = new UpdatingImmutableEGraph(_egraph.emptied).asInstanceOf[this.type]
 
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = _egraph.canonicalizeOrNull(ref)
   override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = _egraph.canonicalize(node)

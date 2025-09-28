@@ -31,7 +31,7 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
    * Unions (merges) pairs of e-classes.
    *
    * Merging combines the member e-nodes of each pair, possibly triggering upward merging and
-   * additional equivalences. The operation returns the updated e-graph and a partition of all
+   * additional equivalences. The operation returns a partition of all
    * e-classes that became newly equivalent because of the unions.
    *
    * This method mutates the e-graph in place.
@@ -48,7 +48,7 @@ trait EGraph[NodeT] extends ReadOnlyEGraph[NodeT] {
    *
    * @return An empty e-graph with the same configuration. Does not mutate the current e-graph.
    */
-  def emptied: EGraph[NodeT]
+  def emptied: this.type
 
   // Helper methods:
 
