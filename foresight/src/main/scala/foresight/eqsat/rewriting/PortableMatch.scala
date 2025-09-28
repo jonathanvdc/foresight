@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A match value that can be **re-targeted** to a later e-graph snapshot derived from the one

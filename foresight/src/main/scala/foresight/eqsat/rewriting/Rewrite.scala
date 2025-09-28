@@ -1,10 +1,10 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.commands.Command
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A rewrite rule encapsulates a search-and-replace operation on an e-graph.

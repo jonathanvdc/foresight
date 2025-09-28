@@ -1,7 +1,8 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat._
+import foresight.eqsat.{EClassCall, MixedTree, Tree}
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * An extractor that converts e-graph references (e-class calls) into concrete expression trees.

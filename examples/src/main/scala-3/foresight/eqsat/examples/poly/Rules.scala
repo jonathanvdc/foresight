@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.poly
 
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.lang.{Language, LanguageOp}
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.PatternMatch
 

@@ -1,9 +1,9 @@
 package foresight.eqsat.extraction
 
+import foresight.eqsat.{EClassCall, Slot, Tree, readonly}
 import foresight.eqsat.metadata.Analysis
-import foresight.eqsat._
-import foresight.eqsat.immutable._
 import foresight.eqsat.collections.SlotMap
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.util.Debug
 
 /**

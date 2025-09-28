@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A [[Searcher]] whose results can be **reversed** into an [[Applier]].

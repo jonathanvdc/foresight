@@ -1,7 +1,8 @@
 package foresight.eqsat.lang
 
-import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
+import foresight.eqsat.EClassCall
 import foresight.eqsat.immutable
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * An extractor that converts e-graph references (e-class calls) into surface language expressions.

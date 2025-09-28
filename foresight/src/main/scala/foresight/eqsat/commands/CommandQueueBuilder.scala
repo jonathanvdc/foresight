@@ -1,6 +1,7 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree, Slot}
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat.immutable.ArraySeq

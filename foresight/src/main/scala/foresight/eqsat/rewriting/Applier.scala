@@ -1,7 +1,7 @@
 package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.

@@ -1,7 +1,7 @@
 package foresight.eqsat
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.commands.Command
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * Represents the application of an [[EClassRef]] to a set of argument slots.

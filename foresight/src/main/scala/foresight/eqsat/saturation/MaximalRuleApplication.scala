@@ -1,10 +1,10 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.eqsat.mutable.{EGraph => MutableEGraph}
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A strategy that performs a single maximal rewrite pass over a set of rules.
@@ -33,7 +33,6 @@ import foresight.eqsat.mutable.{EGraph => MutableEGraph}
  *
  * @param rules The rules to apply.
  * @param searchAndApply A strategy for rule search and application (may or may not cache matches).
- *
  * @tparam NodeT   The type of nodes in the e-graph.
  * @tparam RuleT   The type of rules used.
  * @tparam EGraphT The e-graph implementation.

@@ -1,8 +1,9 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, EClassSymbol}
 import foresight.eqsat.mutable.EGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A [[Command]] that unions multiple pairs of e-classes in a single batch.

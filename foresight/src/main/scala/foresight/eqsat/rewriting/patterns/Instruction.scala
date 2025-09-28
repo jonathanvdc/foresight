@@ -1,7 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 import foresight.eqsat.collections.SlotSeq
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 import java.util
 import scala.collection.compat.immutable.ArraySeq

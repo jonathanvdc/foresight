@@ -1,6 +1,7 @@
 package foresight.eqsat.metadata
 
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ReadOnlyEGraph}
+import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.{EClassCall, EClassRef, ENode}
 
 import scala.collection.mutable
 

@@ -2,8 +2,8 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.patterns.PatternMatch
-import foresight.eqsat.ReadOnlyEGraph
 
 /**
  * Describes how to find things in an e-graph.

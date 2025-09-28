@@ -1,9 +1,10 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree}
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A [[Command]] encapsulates a single, replayable edit to an e-graph.

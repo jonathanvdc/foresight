@@ -1,9 +1,10 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{ReadOnlyEGraph, Slot}
+import foresight.eqsat.Slot
 import org.junit.Test
 import org.junit.Assert._
 import foresight.eqsat.collections.SlotSeq
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat._

@@ -1,11 +1,11 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 /**

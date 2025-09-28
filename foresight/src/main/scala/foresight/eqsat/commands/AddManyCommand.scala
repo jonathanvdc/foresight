@@ -1,8 +1,9 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode, ReadOnlyEGraph}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.mutable.EGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.

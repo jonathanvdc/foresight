@@ -1,7 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.rewriting.{Applier, EClassSearcher, ReversibleSearcher, SearcherContinuation}
-import foresight.eqsat.{EClassCall, ReadOnlyEGraph}
+import foresight.eqsat.EClassCall
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * A phase of a searcher that searches for matches of a pattern machine in an e-graph.

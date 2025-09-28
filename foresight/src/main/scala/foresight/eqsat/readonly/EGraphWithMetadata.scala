@@ -1,6 +1,5 @@
 package foresight.eqsat.readonly
 
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.metadata.Metadata
 
 /**

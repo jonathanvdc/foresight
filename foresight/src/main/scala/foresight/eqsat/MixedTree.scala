@@ -1,6 +1,7 @@
 package foresight.eqsat
 
 import foresight.eqsat.collections.SlotSeq
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.patterns._
 import foresight.util.collections.UnsafeSeqFromArray
 import foresight.util.ordering.SeqOrdering

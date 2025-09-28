@@ -1,7 +1,8 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, ReadOnlyEGraph, ENode}
+import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.{EClassCall, ENode}
 
 /**
  * Metadata that is kept in sync with an [[EGraph]].

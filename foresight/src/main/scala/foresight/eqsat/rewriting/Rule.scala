@@ -2,9 +2,9 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
-import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.mutable
 import foresight.eqsat.immutable
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * Represents a rewrite rule as the composition of a [[Searcher]] and an [[Applier]].
@@ -49,7 +49,6 @@ import foresight.eqsat.immutable
  * @param name      Human-readable rule name (used in logs/diagnostics).
  * @param searcher  Component responsible for finding matches (see [[Searcher.search]]).
  * @param applier   Component that turns a match into a [[Command]] acting on the e-graph.
- *
  * @example Defining and running a rule immediately
  * {{{
  * val constantFold: Rule[MyNode, MyMatch, MyEGraph] =
@@ -58,7 +57,6 @@ import foresight.eqsat.immutable
  * // Runs search + apply now; returns updated e-graph (or the same instance if no changes).
  * val updated = constantFold(egraph)
  * }}}
- *
  * @example Staging a rule and applying later (batching with other rules)
  * {{{
  * val r1Cmd = r1.delayed(egraph) // stage first rule

@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.{Rewrite, Rule}
 
 /**

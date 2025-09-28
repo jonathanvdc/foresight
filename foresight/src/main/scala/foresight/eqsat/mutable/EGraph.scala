@@ -2,7 +2,8 @@ package foresight.eqsat.mutable
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.immutable
-import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, ReadOnlyEGraph, Tree}
+import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
 
 /**
  * A mutable e-graph that supports adding e-nodes and merging e-classes.

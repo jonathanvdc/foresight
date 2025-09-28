@@ -6,6 +6,7 @@ import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
 import foresight.eqsat._
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.util.ordering.SeqOrdering
 
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}

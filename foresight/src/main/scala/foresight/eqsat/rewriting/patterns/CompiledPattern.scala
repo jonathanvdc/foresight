@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.readonly.ReadOnlyEGraph
+import foresight.eqsat.{EClassCall, MixedTree}
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat._

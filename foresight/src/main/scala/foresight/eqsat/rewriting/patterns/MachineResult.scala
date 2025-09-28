@@ -1,6 +1,6 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 /**
  * The result of executing a pattern machine.

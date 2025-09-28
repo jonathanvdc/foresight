@@ -2,8 +2,9 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.commands.{Command, CommandQueueBuilder}
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
-import foresight.eqsat.{EClassSymbol, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassSymbol, MixedTree, Slot}
 
 import scala.collection.compat._
 

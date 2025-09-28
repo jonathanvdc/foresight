@@ -1,6 +1,6 @@
 package foresight.eqsat.readonly
 
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ReadOnlyEGraph, ShapeCall}
+import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
 
 /**
  * A decorator for e-graphs that forwards all calls to an underlying e-graph representation.

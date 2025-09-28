@@ -1,6 +1,7 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{MixedTree, ReadOnlyEGraph}
+import foresight.eqsat.MixedTree
+import foresight.eqsat.readonly.ReadOnlyEGraph
 
 import scala.collection.mutable
 

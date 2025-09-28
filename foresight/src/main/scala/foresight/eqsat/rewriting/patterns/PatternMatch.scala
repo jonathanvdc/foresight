@@ -1,7 +1,8 @@
 package foresight.eqsat.rewriting.patterns
 
+import foresight.eqsat.readonly.ReadOnlyEGraph
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.{EClassCall, MixedTree, ReadOnlyEGraph, Slot}
+import foresight.eqsat.{EClassCall, MixedTree, Slot}
 import foresight.util.collections.ArrayMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
