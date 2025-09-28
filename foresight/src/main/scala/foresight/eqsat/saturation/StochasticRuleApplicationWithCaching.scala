@@ -1,6 +1,6 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.rewriting.{PortableMatch, Rule}
+import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
 import foresight.eqsat.saturation.priorities.MatchPriorities
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.util.random.Random
@@ -27,10 +27,10 @@ object StochasticRuleApplicationWithCaching {
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT <: PortableMatch[NodeT, MatchT]
   ](
-     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT],
+     rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
+     priorities: MatchPriorities[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT],
      random: Random
-   ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+   ): StochasticRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     StochasticRuleApplication(
       rules,
       SearchAndApply.immutableWithCaching[NodeT, EGraphT, MatchT],
@@ -54,9 +54,9 @@ object StochasticRuleApplicationWithCaching {
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT <: PortableMatch[NodeT, MatchT]
   ](
-    rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-    priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT]
-  ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
+    priorities: MatchPriorities[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT]
+  ): StochasticRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphWithRecordedApplications[NodeT, EGraphT, MatchT], MatchT] = {
     apply(rules, priorities, Random(0))
   }
 }
