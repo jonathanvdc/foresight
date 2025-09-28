@@ -30,6 +30,11 @@ import foresight.eqsat.mutable
  */
 trait Rewrite[NodeT, MatchT, -EGraphT <: ReadOnlyEGraph[NodeT]] {
   /**
+   * The name of this rewrite. Rewrite names must be unique within a saturation pipeline.
+   */
+  def name: String
+
+  /**
    * Find all matches of this rule in the given e-graph.
    *
    * @param egraph      E-graph to search.

@@ -72,7 +72,7 @@ import foresight.eqsat.immutable
  * val next = maybeNewEGraph.getOrElse(egraph) // fallback to original if no changes
  * }}}
  */
-final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](name: String,
+final case class Rule[NodeT, MatchT, EGraphT <: ReadOnlyEGraph[NodeT]](override val name: String,
                                                                        searcher: Searcher[NodeT, MatchT, EGraphT],
                                                                        applier: Applier[NodeT, MatchT, EGraphT])
   extends Rewrite[NodeT, MatchT, EGraphT] {
