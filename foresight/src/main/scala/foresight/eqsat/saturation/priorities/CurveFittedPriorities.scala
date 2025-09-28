@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.rewriting.Rewrite
 import foresight.util.random.DiscreteDistribution
 
 /**
@@ -33,8 +33,8 @@ import foresight.util.random.DiscreteDistribution
  */
 final case class CurveFittedPriorities[
   NodeT,
-  RuleT <: Rule[NodeT, MatchT, _],
-  EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+  RuleT <: Rewrite[NodeT, MatchT, _],
+  EGraphT <: ReadOnlyEGraph[NodeT],
   MatchT
 ](originalPriorities: MatchPriorities[NodeT, RuleT, EGraphT, MatchT],
   distribution: DiscreteDistribution)
@@ -47,10 +47,11 @@ final case class CurveFittedPriorities[
    * to the priority values (e.g., higher-ranked matches may receive lower weights
    * depending on the shape of the distribution).
    *
+   * @param rule The rule associated with the matches being reweighted.
    * @param matches A sequence of matches with initial priority scores.
    * @return The same matches, reweighted using the provided distribution.
    */
-  override def reweight(matches: Seq[PrioritizedMatch[RuleT, MatchT]]): Seq[PrioritizedMatch[RuleT, MatchT]] = {
+  override def reweight(rule: RuleT, matches: Seq[PrioritizedMatch[MatchT]]): Seq[PrioritizedMatch[MatchT]] = {
     distribution.prioritiesToProbabilities(matches.map(m => m -> m.priority))
       .map { case (matchInfo, weight) => matchInfo.copy(priority = weight) }
   }

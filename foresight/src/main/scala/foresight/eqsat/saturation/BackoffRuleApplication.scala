@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 import scala.collection.mutable
@@ -19,7 +19,7 @@ import scala.util.Random
  * @param initialBanLength The number of iterations the rule is banned after hitting its match limit.
  */
 final case class BackoffRule[NodeT,
-                             RuleT <: Rule[NodeT, MatchT, _],
+                             RuleT <: Rewrite[NodeT, MatchT, _],
                              MatchT](rule: RuleT, initialMatchLimit: Int, initialBanLength: Int)
 
 /**
@@ -35,7 +35,7 @@ final case class BackoffRule[NodeT,
  * @param remainingMatches The number of matches this rule can still apply before triggering a ban.
  */
 final case class RuleStats[NodeT,
-                           RuleT <: Rule[NodeT, MatchT, _],
+                           RuleT <: Rewrite[NodeT, MatchT, _],
                            MatchT](rule: RuleT, matchLimit: Int, banLength: Int, bannedUntil: Option[Int],
                                    remainingMatches: Int)
 
@@ -50,7 +50,7 @@ final case class RuleStats[NodeT,
  * @param random Random number generator used to shuffle matches.
  */
 final case class BackoffRuleStats[NodeT,
-                                  RuleT <: Rule[NodeT, MatchT, _],
+                                  RuleT <: Rewrite[NodeT, MatchT, _],
                                   MatchT](iteration: Int,
                                           stats: Map[String, RuleStats[NodeT, RuleT, MatchT]],
                                           random: Random)
@@ -74,7 +74,7 @@ final case class BackoffRuleStats[NodeT,
  * @tparam MatchT The type of rule match.
  */
 final case class BackoffRuleApplication[NodeT,
-                                        RuleT <: Rule[NodeT, MatchT, _],
+                                        RuleT <: Rewrite[NodeT, MatchT, _],
                                         EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
                                         MatchT](
   rules: Seq[BackoffRule[NodeT, RuleT, MatchT]],
@@ -165,15 +165,17 @@ object BackoffRuleApplication {
    * @tparam MatchT The type of rule match.
    * @return A new [[BackoffRuleApplication]] instance configured with the given rules and parameters.
    */
-  def apply[NodeT,
-    RuleT <: Rule[NodeT, MatchT, _],
+  def apply[
+    NodeT,
+    RuleT <: Rewrite[NodeT, MatchT, _],
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
-    MatchT](
-             rules: Seq[RuleT],
-             ruleApplicationLimit: Int,
-             ruleBanLength: Int,
-             searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
-           ): BackoffRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
+    MatchT
+  ](
+     rules: Seq[RuleT],
+     ruleApplicationLimit: Int,
+     ruleBanLength: Int,
+     searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT]
+   ): BackoffRuleApplication[NodeT, RuleT, EGraphT, MatchT] = {
     BackoffRuleApplication(
       rules.map(rule =>
         BackoffRule[NodeT, RuleT, MatchT](
@@ -199,10 +201,10 @@ object BackoffRuleApplication {
   def apply[NodeT,
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT](
-             rules: Seq[Rule[NodeT, MatchT, EGraphT]],
+             rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
              ruleApplicationLimit: Int,
              ruleBanLength: Int
-           ): BackoffRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+           ): BackoffRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     apply(rules, ruleApplicationLimit, ruleBanLength, SearchAndApply.immutable[NodeT, EGraphT, MatchT])
   }
 }

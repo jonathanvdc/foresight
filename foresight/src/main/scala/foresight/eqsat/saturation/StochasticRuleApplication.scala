@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.saturation.priorities.{MatchPriorities, PrioritizedMatch}
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.util.random.{Random, Sample}
@@ -41,7 +41,7 @@ import foresight.util.random.{Random, Sample}
  */
 final case class StochasticRuleApplication[
   NodeT,
-  RuleT <: Rule[NodeT, MatchT, _],
+  RuleT <: Rewrite[NodeT, MatchT, _],
   EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
   MatchT](rules: Seq[RuleT],
           searchAndApply: SearchAndApply[NodeT, RuleT, EGraphT, MatchT],
@@ -56,16 +56,17 @@ final case class StochasticRuleApplication[
   override def initialData: Random = random
 
   override def apply(egraph: EGraphT, data: Random, parallelize: ParallelMap): (Option[EGraphT], Random) = {
-    val matches = searchAndApply.search(rules, egraph, parallelize).toSeq.flatMap {
-      case (ruleName, matches) =>
+    val matches = searchAndApply.search(rules, egraph, parallelize)
+
+    val prioritizedMatches = priorities.prioritize(rules, matches, egraph)
+    val batchSize = priorities.batchSize(rules, prioritizedMatches, egraph)
+
+    val (selectedMatches, newRng) = selectMatches(
+      prioritizedMatches.toSeq.flatMap { case (ruleName, pms) =>
         val rule = rulesByName(ruleName)
-        matches.map(m => (rule, m))
-    }
-
-    val prioritizedMatches = priorities.prioritize(matches, egraph)
-    val batchSize = priorities.batchSize(prioritizedMatches, egraph)
-
-    val (selectedMatches, newRng) = selectMatches(prioritizedMatches, batchSize)
+        pms.map(pm => (rule, pm))
+      },
+      batchSize)
     val selectedByRule = selectedMatches.groupBy { case (r, _) => r.name }
     val groupedSelectedMatches = rules.map { rule =>
       rule.name -> selectedByRule.getOrElse(rule.name, Seq.empty).map(_._2)
@@ -88,11 +89,11 @@ final case class StochasticRuleApplication[
    * @return A tuple of selected (rule, match) pairs and the updated RNG state.
    */
   private def selectMatches(
-    prioritizedMatches: Seq[PrioritizedMatch[RuleT, MatchT]],
+    prioritizedMatches: Seq[(RuleT, PrioritizedMatch[MatchT])],
     batchSize: Int
   ): (Seq[(RuleT, MatchT)], Random) = {
     Sample.withoutReplacement(
-      prioritizedMatches.map { case PrioritizedMatch(rule, matchT, priority) => ((rule, matchT), priority) },
+      prioritizedMatches.map { case (rule, PrioritizedMatch(matchT, priority)) => ((rule, matchT), priority) },
       batchSize,
       random)
   }
@@ -119,7 +120,7 @@ object StochasticRuleApplication {
    */
   def apply[
     NodeT,
-    RuleT <: Rule[NodeT, MatchT, _],
+    RuleT <: Rewrite[NodeT, MatchT, _],
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT
   ](
@@ -146,10 +147,10 @@ object StochasticRuleApplication {
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT
   ](
-     rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-     priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT],
+     rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
+     priorities: MatchPriorities[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT],
      random: Random
-  ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+  ): StochasticRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     apply(rules, SearchAndApply.immutable[NodeT, EGraphT, MatchT], priorities)
   }
 
@@ -168,9 +169,9 @@ object StochasticRuleApplication {
     EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
     MatchT
   ](
-    rules: Seq[Rule[NodeT, MatchT, EGraphT]],
-    priorities: MatchPriorities[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT]
-  ): StochasticRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
+    priorities: MatchPriorities[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT]
+  ): StochasticRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     apply(rules, priorities, Random(0))
   }
 }

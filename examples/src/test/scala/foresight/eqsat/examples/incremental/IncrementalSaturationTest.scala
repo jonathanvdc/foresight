@@ -2,7 +2,7 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.examples.arith._
 import foresight.eqsat.extraction.{CostAnalysis, CostFunction, ExtractionAnalysis}
-import foresight.eqsat.saturation.MaximalRuleApplication
+import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.eqsat.MixedTree
 import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
 import org.junit.Test
@@ -27,7 +27,7 @@ class IncrementalSaturationTest {
 
     val k = 2
     val rules = IncrementalSaturation.makeIncremental(Rules.all, k, metadataName, costAnalysis)
-    val strategy = MaximalRuleApplication(rules)
+    val strategy: Strategy[ArithIR, EGraphWithMetadata[ArithIR, EGraph[ArithIR]], Unit] = MaximalRuleApplication(rules)
       .withIterationLimit(5)
       .repeatUntilStable
 

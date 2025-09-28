@@ -2,7 +2,7 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.ReadOnlyEGraph
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.Rule
+import foresight.eqsat.rewriting.Rewrite
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 
 /**
@@ -39,7 +39,7 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  * @tparam MatchT  The type of matches returned by rule search.
  */
 final case class MaximalRuleApplication[NodeT,
-                                        RuleT <: Rule[NodeT, MatchT, _],
+                                        RuleT <: Rewrite[NodeT, MatchT, _],
                                         EGraphT <: ReadOnlyEGraph[NodeT],
                                         MatchT](
   rules: Seq[RuleT],
@@ -86,8 +86,8 @@ object MaximalRuleApplication {
   def apply[NodeT,
             EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
             MatchT](
-    rules: Seq[Rule[NodeT, MatchT, EGraphT]]
-  ): MaximalRuleApplication[NodeT, Rule[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
+    rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
+  ): MaximalRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
 
     new MaximalRuleApplication(rules, SearchAndApply.immutable)
   }

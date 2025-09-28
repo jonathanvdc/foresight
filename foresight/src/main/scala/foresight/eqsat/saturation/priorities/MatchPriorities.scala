@@ -1,7 +1,7 @@
 package foresight.eqsat.saturation.priorities
 
-import foresight.eqsat.rewriting.Rule
-import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.ReadOnlyEGraph
+import foresight.eqsat.rewriting.{Rewrite, Rule}
 
 /**
  * Defines a strategy for prioritizing rule matches during stochastic rule application.
@@ -19,15 +19,21 @@ import foresight.eqsat.immutable.{EGraph, EGraphLike}
  * @tparam EGraphT The type of e-graph to operate on.
  * @tparam MatchT The type of matches returned by applying a rule.
  */
-trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT], MatchT] {
+trait MatchPriorities[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], -EGraphT <: ReadOnlyEGraph[NodeT], MatchT] {
   /**
    * Assigns a priority score to each match, indicating its relative importance or desirability.
    *
-   * @param matches A sequence of (rule, match) pairs found during rule search.
+   * The priority score is a non-negative `Double`, where higher values indicate more preferred matches.
+   * These scores are used for weighted random sampling when selecting which matches to apply.
+   * The specific method of prioritization is left to the implementation, which may consider
+   * factors such as rule characteristics, match properties, or e-graph context.
+   *
+   * @param rules A sequence of rules for which matches were found.
+   * @param matches A mapping from rule names to their corresponding matches.
    * @param egraph The e-graph in which the matches were found, used for context or additional information.
    * @return A sequence of [[PrioritizedMatch]] instances containing each rule, match, and its computed priority.
    */
-  def prioritize(matches: Seq[(RuleT, MatchT)], egraph: EGraphT): Seq[PrioritizedMatch[RuleT, MatchT]]
+  def prioritize(rules: Seq[RuleT], matches: Map[String, Seq[MatchT]], egraph: EGraphT): Map[String, Seq[PrioritizedMatch[MatchT]]]
 
   /**
    * Determines how many of the prioritized matches to apply in this iteration.
@@ -35,9 +41,10 @@ trait MatchPriorities[NodeT, RuleT <: Rule[NodeT, MatchT, _], EGraphT <: EGraphL
    * This can be constant or depend on the distribution of priorities, the total number of matches,
    * or other criteria such as heuristics or exploration/exploitation trade-offs.
    *
+   * @param rules A sequence of rules for which matches were found.
    * @param matches The prioritized matches.
    * @param egraph The e-graph in which the matches were found, used for context or additional information.
    * @return The number of matches to apply.
    */
-  def batchSize(matches: Seq[PrioritizedMatch[RuleT, MatchT]], egraph: EGraphT): Int
+  def batchSize(rules: Seq[RuleT], matches: Map[String, Seq[PrioritizedMatch[MatchT]]], egraph: EGraphT): Int
 }
