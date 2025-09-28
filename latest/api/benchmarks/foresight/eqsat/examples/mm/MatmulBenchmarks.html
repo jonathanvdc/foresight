@@ -132,6 +132,23 @@ node4 -> node3;
         </div>
        </div>
       </section>
+      <section id="Types">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Types</h4>
+        </div>
+        <div class="documentableElement" id="LinalgRule-0">
+         <div class="documentableElement-expander">
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">type </span></span><a href="MatmulBenchmarks.html#LinalgRule-0" t="n" class="documentableName ">LinalgRule</a> = R.<span data-unresolved-link="" t="t">LinalgRule</span>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
      </div>
     </section>
     <section id="Value-members">
@@ -163,11 +180,20 @@ node4 -> node3;
           </div>
          </div>
         </div>
-        <div class="documentableElement" id="nmmBench-c40">
+        <div class="documentableElement" id="nmmBenchImmutable-c40">
          <div class="documentableElement-expander">
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatmulBenchmarks.html#nmmBench-c40" t="n" class="documentableName ">nmmBench</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">n</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">map</span>: <span data-unresolved-link="" t="t">ParallelMap</span>): <span data-unresolved-link="" t="t">LinalgExpr</span>
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatmulBenchmarks.html#nmmBenchImmutable-c40" t="n" class="documentableName ">nmmBenchImmutable</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">n</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">map</span>: <span data-unresolved-link="" t="t">ParallelMap</span>): <span data-unresolved-link="" t="t">LinalgExpr</span>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="nmmBenchMutable-c40">
+         <div class="documentableElement-expander">
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="MatmulBenchmarks.html#nmmBenchMutable-c40" t="n" class="documentableName ">nmmBenchMutable</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">n</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">map</span>: <span data-unresolved-link="" t="t">ParallelMap</span>): <span data-unresolved-link="" t="t">LinalgExpr</span>
            </div>
           </div>
          </div>
@@ -229,11 +255,38 @@ node4 -> node3;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete fields</h4>
         </div>
+        <div class="documentableElement" id="L-0">
+         <div class="documentableElement-expander">
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="MatmulBenchmarks.html#L-0" t="n" class="documentableName ">L</a>: <span data-unresolved-link="" t="t">Language</span>[<span data-unresolved-link="" t="t">LinalgExpr</span>]
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="R-0">
+         <div class="documentableElement-expander">
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="MatmulBenchmarks.html#R-0" t="n" class="documentableName ">R</a>: <span data-unresolved-link="" t="t">Rules</span>
+           </div>
+          </div>
+         </div>
+        </div>
         <div class="documentableElement" id="linalgCostFunction-0">
          <div class="documentableElement-expander">
           <div class="header monospace mono-medium">
            <div class="signature">
             <span class="modifiers"></span><span class="kind"><span t="k">val </span></span><a href="MatmulBenchmarks.html#linalgCostFunction-0" t="n" class="documentableName ">linalgCostFunction</a>: <span data-unresolved-link="" t="t">LanguageCostFunction</span>[<span data-unresolved-link="" t="t">LinalgExpr</span>, <a href="MatmulBenchmarks$DimAndCost.html" t="t">DimAndCost</a>]
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="mutableEGraph-0">
+         <div class="documentableElement-expander">
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">var </span></span><a href="MatmulBenchmarks.html#mutableEGraph-0" t="n" class="documentableName ">mutableEGraph</a>: <span data-unresolved-link="" t="t">Boolean</span>
            </div>
           </div>
          </div>
@@ -322,4 +375,4 @@ node4 -> node3;
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li><li><a href="#Inherited-fields">Inherited fields</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Classlikes">Classlikes</a></li><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li><li><a href="#Inherited-fields">Inherited fields</a></li></ul></li><li><a href="#Givens">Givens</a><ul><li><a href="#Givens">Givens</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
