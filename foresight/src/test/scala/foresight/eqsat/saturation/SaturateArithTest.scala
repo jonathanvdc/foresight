@@ -4,7 +4,7 @@ import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
 import foresight.eqsat.immutable.{EGraph, EGraphWithRecordedApplications}
 import foresight.eqsat.rewriting.{Rewrite, Rule}
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.saturation.priorities.{MatchPriorities, UniformPriorities}
+import foresight.eqsat.saturation.priorities.UniformPriorities
 import org.junit.Test
 
 import scala.language.implicitConversions
