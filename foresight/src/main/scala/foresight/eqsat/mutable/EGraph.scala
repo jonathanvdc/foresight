@@ -1,9 +1,9 @@
 package foresight.eqsat.mutable
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.immutable
 import foresight.eqsat.readonly
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
+import foresight.eqsat.hashCons.mutable.HashConsEGraph
 
 /**
  * A mutable e-graph that supports adding e-nodes and merging e-classes.
@@ -135,7 +135,7 @@ object EGraph {
    * @tparam NodeT The type of the nodes in the e-graph.
    * @return An empty mutable e-graph.
    */
-  def empty[NodeT]: EGraph[NodeT] = FreezableEGraph(immutable.EGraph.empty[NodeT])
+  def empty[NodeT]: EGraph[NodeT] = HashConsEGraph.empty[NodeT]
 
   /**
    * Builds a new e-graph from a single tree, returning the e-class of its root.
