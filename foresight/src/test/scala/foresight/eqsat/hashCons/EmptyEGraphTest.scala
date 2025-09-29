@@ -1,6 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.EClassRef
+import foresight.eqsat.hashCons.immutable.HashConsEGraph
 import org.junit.Test
 
 /**

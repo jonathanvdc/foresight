@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons
 
+import foresight.eqsat.hashCons.immutable.HashConsEGraph
 import foresight.eqsat.{ENode, Slot, Tree}
 import org.junit.Test
 
