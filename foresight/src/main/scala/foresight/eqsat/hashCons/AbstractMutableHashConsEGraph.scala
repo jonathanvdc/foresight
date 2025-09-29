@@ -35,6 +35,27 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   protected def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit
 
   /**
+   * Updates the slots and permutations of an e-class.
+   * @param ref The e-class reference.
+   * @param slots The new slots for the e-class.
+   * @param permutations The new permutations for the e-class.
+   */
+  protected def updateClassSlotsAndPermutations(ref: EClassRef, slots: SlotSet, permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = dataForClass(ref)
+    updateDataForClass(ref, data.copy(slots = slots, permutations = permutations))
+  }
+
+  /**
+   * Updates the permutations of an e-class.
+   * @param ref The e-class reference.
+   * @param permutations The new permutations for the e-class.
+   */
+  protected def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = dataForClass(ref)
+    updateDataForClass(ref, data.copy(permutations = permutations))
+  }
+
+  /**
    * Creates an empty e-class with the given slots. The e-class is added to the union-find and the class data map.
    * @param slots The slots of the e-class.
    * @return The reference to the new e-class.
@@ -200,7 +221,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
 
     data.permutations.tryAddSet(nonRedundantPermutations) match {
       case Some(newPerms) =>
-        updateDataForClass(ref, data.copy(permutations = newPerms))
+        updateClassPermutations(ref, newPerms)
         true
 
       case None =>
@@ -255,8 +276,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       val identity = SlotMap.identity(finalSlots)
 
       // We update the e-class data with the new slots and permutations.
-      val newData = data.copy(slots = finalSlots, permutations = PermutationGroup(identity, generators))
-      updateDataForClass(ref, newData)
+      updateClassSlotsAndPermutations(ref, finalSlots, PermutationGroup(identity, generators))
 
       // We update the union-find with the new slots. Since the e-class is a root in the union-find, its set of slots in
       // the AppliedRef can simply be set to an identity bijection of the new slots. unionFind.add will take care of
@@ -308,7 +328,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       domData.permutations.tryAddSet(subPermutations) match {
         case Some(newPermutations) =>
           // If the new permutations are not already in the set of permutations, we update the e-class data.
-          updateDataForClass(domRoot.ref, domData.copy(permutations = newPermutations))
+          updateClassPermutations(domRoot.ref, newPermutations)
           touchedClass(domRoot.ref)
 
         case None =>
@@ -355,8 +375,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
         }
 
         // We add the new permutation to the e-class data.
-        val newData = data.copy(permutations = group.add(perm))
-        updateDataForClass(ref, newData)
+        updateClassPermutations(ref, group.add(perm))
 
         // We add the e-class's nodes and users to the repair worklist, as the e-class now has a new permutation.
         touchedClass(ref)
