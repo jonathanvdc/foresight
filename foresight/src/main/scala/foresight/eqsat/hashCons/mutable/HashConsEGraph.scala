@@ -7,7 +7,7 @@ import foresight.util.Debug
 
 import scala.collection.mutable
 
-private[hashCons] final class HashConsEGraph[NodeT] extends AbstractMutableHashConsEGraph[NodeT] {
+private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashConsEGraph[NodeT] {
   protected override val unionFind: SlottedUnionFind = new SlottedUnionFind()
   private val hashCons: mutable.HashMap[ENode[NodeT], EClassRef] = mutable.HashMap.empty
   private val classData: mutable.HashMap[EClassRef, EClassData[NodeT]] = mutable.HashMap.empty
@@ -82,6 +82,6 @@ private[hashCons] final class HashConsEGraph[NodeT] extends AbstractMutableHashC
   }
 }
 
-private[hashCons] object HashConsEGraph {
+private[eqsat] object HashConsEGraph {
   def empty[NodeT]: HashConsEGraph[NodeT] = new HashConsEGraph[NodeT]()
 }
