@@ -1,4 +1,4 @@
-package foresight.eqsat.hashCons
+package foresight.eqsat.hashCons.immutable
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.{EClassCall, EClassRef}

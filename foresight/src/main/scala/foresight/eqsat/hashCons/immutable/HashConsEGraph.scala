@@ -1,8 +1,9 @@
-package foresight.eqsat.hashCons
+package foresight.eqsat.hashCons.immutable
 
+import foresight.eqsat.hashCons.{EClassData, ReadOnlyHashConsEGraph}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat._
-import foresight.eqsat.immutable._
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.

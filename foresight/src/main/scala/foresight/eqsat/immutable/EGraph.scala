@@ -1,6 +1,6 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat.hashCons.HashConsEGraph
+import foresight.eqsat.hashCons.immutable.HashConsEGraph
 import foresight.eqsat.{EClassCall, MixedTree}
 
 /**

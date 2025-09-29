@@ -1,7 +1,8 @@
-package foresight.eqsat.hashCons
+package foresight.eqsat.hashCons.immutable
 
-import foresight.eqsat._
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, Slot}
 import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.hashCons.{EClassData, PermutationGroup, ReadOnlyHashConsEGraph}
 import foresight.util.Debug
 
 private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
