@@ -84,7 +84,7 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
         return bench.split(".")[-2] + "." + bench.split(".")[-1] if "." in bench else bench
 
     lines: List[str] = []
-    geomean_logs: Dict[str, List[float]] = {}
+    geomean_logs: Dict[Tuple[str, str], List[float]] = {}
     lines.append(f"### {title}")
     lines.append("")
     lines.append("| Benchmark | Params | Baseline | PR | Δ (PR/Base) | Unit |")
@@ -111,34 +111,42 @@ def compare_to_markdown(base: Dict[Key, Entry], cur: Dict[Key, Entry], *, title:
             delta_s = "n/a"
             unit = cunit or bunit or ""
 
-        # Accumulate ratios for geometric mean per threadCount
+        # Accumulate ratios for geometric mean per (threadCount, mutableEGraph)
         if bscore is not None and cscore is not None and bscore != 0:
             ratio = cscore / bscore
-            # Extract threadCount param value (as string) if present
             params_dict = dict(params)
             tval = params_dict.get("threadCount")
             if tval is not None:
                 tkey = str(tval)
-                geomean_logs.setdefault(tkey, []).append(math.log(ratio))
+                # JMH params are typically strings; default mutableEGraph to "false" when unspecified
+                mval = params_dict.get("mutableEGraph", "false")
+                mkey = str(mval).lower() if mval is not None else "false"
+                if mkey not in ("true", "false"):
+                    mkey = "false"
+                geomean_logs.setdefault((tkey, mkey), []).append(math.log(ratio))
 
         pstr = ", ".join(f"{k}={v}" for k, v in params) if params else EM_DASH
         lines.append(f"| `{short_name(bench)}` | {pstr} | {bscore_s} | {cscore_s} | {delta_s} | {unit} |")
 
-    # Append geometric mean rows per threadCount (computed over ratios PR/Base)
+    # Append geometric mean rows per (threadCount, mutableEGraph) (computed over ratios PR/Base)
     if geomean_logs:
-        # Sort threadCount keys numerically when possible
-        def _thread_sort_key(s: str) -> Tuple[int, str]:
+        # Sort primarily by numeric threadCount when possible, then by mutableEGraph (false before true)
+        def _pair_sort_key(k: Tuple[str, str]) -> Tuple[int, float | str, int]:
+            t, m = k
             try:
-                return (0, f"{float(s):g}")
+                t_sort = (0, float(t))
             except Exception:
-                return (1, s)
-        for tkey in sorted(geomean_logs.keys(), key=_thread_sort_key):
-            logs = geomean_logs[tkey]
+                t_sort = (1, t)
+            m_sort = 0 if m == "false" else (1 if m == "true" else 2)
+            return (t_sort[0], t_sort[1], m_sort)
+
+        for tkey, mkey in sorted(geomean_logs.keys(), key=_pair_sort_key):
+            logs = geomean_logs[(tkey, mkey)]
             if not logs:
                 continue
             gm = math.exp(sum(logs) / len(logs))
             gm_s = f"{gm:.3f}× ({(gm - 1.0) * 100:+.1f}%)"
-            lines.append(f"| **Geomean** | threadCount={tkey} | {EM_DASH} | {EM_DASH} | {gm_s} |  |")
+            lines.append(f"| **Geomean** | threadCount={tkey}, mutableEGraph={mkey} | {EM_DASH} | {EM_DASH} | {gm_s} |  |")
         lines.append("")
 
     lines.append("")
