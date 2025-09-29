@@ -28,8 +28,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   //      in the e-class. That is, classData(ref).parents contains parent if and only if there exists an e-node in
   //      classData(ref) such that parent is in the e-node's arguments.
 
-  private def toMutable: MutableHashConsEGraph[NodeT] = {
-    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind.parents), hashCons, classData)
+  private def toBuilder: HashConsEGraphBuilder[NodeT] = {
+    new HashConsEGraphBuilder(new SlottedUnionFindBuilder(unionFind.parents), hashCons, classData)
   }
 
   override def classes: Iterable[EClassRef] = classData.keys
@@ -62,7 +62,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
     val p = parallelize.child("add nodes")
 
-    val mutable = toMutable
+    val mutable = toBuilder
     val canonicalized = p(nodes, canonicalize)
     val results = p.run {
       canonicalized.map { node =>
@@ -79,7 +79,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
       "All e-class applications must be well-formed.")
 
     parallelize.child("union").run {
-      val mutable = toMutable
+      val mutable = toBuilder
       val equivalences = mutable.unionMany(pairs)
       (equivalences, mutable.toImmutable)
     }

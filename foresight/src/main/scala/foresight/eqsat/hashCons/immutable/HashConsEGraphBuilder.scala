@@ -5,7 +5,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.hashCons.{EClassData, PermutationGroup, ReadOnlyHashConsEGraph}
 import foresight.util.Debug
 
-private final class MutableHashConsEGraph[NodeT](private val unionFind: MutableSlottedUnionFind,
+private final class HashConsEGraphBuilder[NodeT](private val unionFind: SlottedUnionFindBuilder,
                                                  private var hashCons: Map[ENode[NodeT], EClassRef],
                                                  private var classData: Map[EClassRef, EClassData[NodeT]])
   extends ReadOnlyHashConsEGraph[NodeT] {
