@@ -3,7 +3,7 @@ package foresight.eqsat.hashCons
 import foresight.eqsat.{Permutation, Slot}
 
 import scala.annotation.tailrec
-import scala.collection.mutable
+import scala.collection.mutable.{Set => MutableSet, Map => MutableMap}
 
 /**
  * A group of permutations.
@@ -92,7 +92,7 @@ private object PermutationGroup {
   def identity[P <: Permutation[P]](identity: P): PermutationGroup[P] = PermutationGroup(identity, None)
 
   private[hashCons] def buildOt[P <: Permutation[P]](stab: Slot, identity: P, generators: Set[P]): Map[Slot, P] = {
-    val ot = mutable.Map(stab -> identity)
+    val ot = MutableMap(stab -> identity)
     var len = 0
     while (len != ot.size) {
       len = ot.size
@@ -111,7 +111,7 @@ private object PermutationGroup {
   }
 
   private[hashCons] def schreiersLemma[P <: Permutation[P]](stab: Slot, ot: Map[Slot, P], generators: Set[P]): Set[P] = {
-    val out = mutable.Set[P]()
+    val out = MutableSet[P]()
     for {
       (_, r) <- ot
       s <- generators

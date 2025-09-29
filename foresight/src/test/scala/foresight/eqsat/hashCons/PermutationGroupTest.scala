@@ -4,7 +4,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.Slot
 import org.junit.Test
 
-import scala.collection.mutable
+import scala.collection.mutable.{Set => MutableSet}
 
 class PermutationGroupTest {
   @Test
@@ -104,7 +104,7 @@ class PermutationGroupTest {
   }
 
   private def enrich(perms: Set[SlotMap]): Set[SlotMap] = {
-    val permsMutable = mutable.Set(perms.toSeq: _*)
+    val permsMutable = MutableSet(perms.toSeq: _*)
     assert(permsMutable.nonEmpty)
 
     var changed = true
