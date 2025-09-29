@@ -16,6 +16,8 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
 
   override def classes: Iterable[EClassRef] = classData.keys
 
+  protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
+
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
     unionFind.findAndCompressOrNull(ref)
   }
@@ -32,15 +34,7 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
     classData(ref)
   }
 
-  protected override def nodeToClassOrNull(node: ENode[NodeT]): EClassRef = {
-    hashCons.getOrElse(node, null)
-  }
-
-  protected override def getClassData(ref: EClassRef): EClassData[NodeT] = {
-    classData(ref)
-  }
-
-  protected override def setClassData(ref: EClassRef, data: EClassData[NodeT]): Unit = {
+  protected override def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit = {
     classData = classData + (ref -> data)
   }
 
@@ -93,5 +87,12 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
 
   protected override def unlinkEmptyClasses(): Unit = {
     classData = classData.filterNot(_._2.nodes.isEmpty)
+  }
+
+  override def emptied: this.type = {
+    new HashConsEGraphBuilder[NodeT](
+      new SlottedUnionFindBuilder(Map.empty),
+      Map.empty,
+      Map.empty).asInstanceOf[this.type]
   }
 }

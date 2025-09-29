@@ -34,6 +34,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   override def classes: Iterable[EClassRef] = classData.keys
 
+  protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
+
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
     unionFind.findOrNull(ref)
   }
@@ -74,54 +76,9 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
                          parallelize: ParallelMap): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
-    require(
-      pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
-      "All e-class applications must be well-formed.")
-
-    parallelize.child("union").run {
-      val mutable = toBuilder
-      val equivalences = mutable.unionMany(pairs)
-      (equivalences, mutable.result())
-    }
-  }
-
-  /**
-   * Checks that the invariants of the hash-consed e-graph are satisfied.
-   */
-  def checkInvariants(): Unit = {
-    // Check that hashCons is canonicalized.
-    for ((node, ref) <- hashCons) {
-      assert(canonicalize(node).shape == node)
-      assert(canonicalize(ref).ref == ref)
-    }
-
-    // Check that classData is canonicalized.
-    for ((ref, data) <- classData) {
-      assert(canonicalize(ref).ref == ref)
-      for ((node, _) <- data.nodes) {
-        assert(node.isShape)
-        assert(canonicalize(node).shape == node)
-      }
-      for (user <- data.users) {
-        assert(canonicalize(user).shape == user)
-      }
-    }
-
-    // Check that the hash-cons map is in sync with the class data.
-    for ((node, ref) <- hashCons) {
-      assert(classData(ref).nodes.contains(node))
-    }
-
-    // Check that the users set of each e-class is in sync with the e-class arguments of the e-nodes in the e-class.
-    for ((ref, data) <- classData) {
-      for (user <- data.users) {
-        assert(user.isShape)
-
-        val userClass = hashCons(user)
-        val userClassData = classData(userClass)
-        assert(userClassData.nodes.keys.exists(_.args.map(_.ref).contains(ref)))
-      }
-    }
+    val mutable = toBuilder
+    val equivalences = mutable.unionMany(pairs, parallelize)
+    (equivalences, mutable.result())
   }
 }
 

@@ -35,6 +35,12 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   def isCanonical(ref: EClassRef): Boolean
 
   /**
+   * Gets all node shapes in the hashcons.
+   * @return An iterable of all node shapes in the e-graph.
+   */
+  protected def shapes: Iterable[ENode[NodeT]]
+
+  /**
    * Retrieves the e-class reference for a given e-node. Assumes that the e-node is canonical.
    * @param value The canonical e-node to look up.
    * @return The e-class reference corresponding to the e-node.
@@ -233,6 +239,48 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       }
     } else {
       false
+    }
+  }
+
+  /**
+   * Checks that the invariants of the hash-consed e-graph are satisfied.
+   */
+  final def checkInvariants(): Unit = {
+    val hashCons = shapes.map(shape => shape -> nodeToRef(shape)).toMap
+    val classData = classes.map(ref => ref -> dataForClass(ref)).toMap
+
+    // Check that hashCons is canonicalized.
+    for ((node, ref) <- hashCons) {
+      assert(canonicalize(node).shape == node)
+      assert(canonicalize(ref).ref == ref)
+    }
+
+    // Check that classData is canonicalized.
+    for ((ref, data) <- classData) {
+      assert(canonicalize(ref).ref == ref)
+      for ((node, _) <- data.nodes) {
+        assert(node.isShape)
+        assert(canonicalize(node).shape == node)
+      }
+      for (user <- data.users) {
+        assert(canonicalize(user).shape == user)
+      }
+    }
+
+    // Check that the hash-cons map is in sync with the class data.
+    for ((node, ref) <- hashCons) {
+      assert(classData(ref).nodes.contains(node))
+    }
+
+    // Check that the users set of each e-class is in sync with the e-class arguments of the e-nodes in the e-class.
+    for ((ref, data) <- classData) {
+      for (user <- data.users) {
+        assert(user.isShape)
+
+        val userClass = hashCons(user)
+        val userClassData = classData(userClass)
+        assert(userClassData.nodes.keys.exists(_.args.map(_.ref).contains(ref)))
+      }
     }
   }
 }

@@ -2,6 +2,8 @@ package foresight.eqsat.hashCons
 
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, Slot}
 import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.mutable.EGraph
+import foresight.eqsat.parallel.ParallelMap
 import foresight.util.Debug
 
 import scala.collection.mutable
@@ -17,32 +19,20 @@ import scala.collection.mutable
  *
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends ReadOnlyHashConsEGraph[NodeT] {
+private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
+  extends ReadOnlyHashConsEGraph[NodeT] with EGraph[NodeT] {
+
   /**
    * The underlying mutable union-find data structure used to manage e-class representatives.
    */
   protected val unionFind: AbstractMutableSlottedUnionFind
 
   /**
-   * Query the hash cons for the given node. Returns null if the node is not in the hash cons.
-   * @param node The node to query.
-   * @return The e-class reference of the node, or null if the node is not in the hash cons.
-   */
-  protected def nodeToClassOrNull(node: ENode[NodeT]): EClassRef
-
-  /**
-   * Gets the class data for the given e-class reference.
-   * @param ref The e-class reference.
-   * @return The class data for the e-class.
-   */
-  protected def getClassData(ref: EClassRef): EClassData[NodeT]
-
-  /**
    * Sets the class data for the given e-class reference.
    * @param ref The e-class reference.
    * @param data The new class data for the e-class.
    */
-  protected def setClassData(ref: EClassRef, data: EClassData[NodeT]): Unit
+  protected def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit
 
   /**
    * Creates an empty e-class with the given slots. The e-class is added to the union-find and the class data map.
@@ -71,7 +61,53 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
    */
   protected def unlinkEmptyClasses(): Unit
 
-  private def slots(ref: EClassRef): SlotSet = getClassData(ref).slots
+  override def tryAddMany(nodes: Seq[ENode[NodeT]],
+                          parallelize: ParallelMap): Seq[AddNodeResult] = {
+    // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
+    // is canonicalizing them and looking them up in the e-graph. Canonicalization can be parallelized since adding a
+    // node will never change the canonical form of other nodes - only union operations can do that.
+    //
+    // Node lookups are partially parallelizable, but this is not worth the overhead of separating them into groups
+    // of nodes that can safely be looked up in parallel. Instead, we just parallelize the canonicalization step and
+    // then perform the lookups and additions sequentially.
+
+    val p = parallelize.child("add nodes")
+
+    val canonicalized = p(nodes, canonicalize)
+    val results = p.run {
+      canonicalized.map { node =>
+        tryAddUnsafe(node)
+      }
+    }
+    results.toSeq
+  }
+
+  override def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): Set[Set[EClassCall]] = {
+    if (pairs.isEmpty) {
+      Set.empty
+    } else {
+      require(
+        pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
+        "All e-class applications must be well-formed.")
+
+      val unionParallelize = parallelize.child("union")
+      unionParallelize.run {
+        unionManyImpl(pairs)
+      }
+    }
+  }
+
+  /**
+   * Query the hash cons for the given node. Returns null if the node is not in the hash cons.
+   *
+   * @param node The node to query.
+   * @return The e-class reference of the node, or null if the node is not in the hash cons.
+   */
+  private def nodeToClassOrNull(node: ENode[NodeT]): EClassRef = {
+    nodeToRefOrElse(node, null)
+  }
+
+  private def slots(ref: EClassRef): SlotSet = dataForClass(ref).slots
 
   /**
    * Adds a new node to the e-graph. Assumes that the node is not already in the e-graph.
@@ -155,7 +191,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
     }
 
     // Drop redundant slots from the permutations.
-    val data = getClassData(ref)
+    val data = dataForClass(ref)
     val nonRedundantPermutations = permutations.map { p =>
       val nonRedundant = p.filterKeys(data.slots)
       if (Debug.isEnabled) assert(nonRedundant.isPermutation)
@@ -164,7 +200,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
 
     data.permutations.tryAddSet(nonRedundantPermutations) match {
       case Some(newPerms) =>
-        setClassData(ref, data.copy(permutations = newPerms))
+        updateDataForClass(ref, data.copy(permutations = newPerms))
         true
 
       case None =>
@@ -187,7 +223,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
     slots.subsetOf(call.args.keySet)
   }
 
-  def unionMany(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
+  private def unionManyImpl(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     // The pairs of e-classes that were unified.
     var unifiedPairs = List.empty[(EClassCall, EClassCall)]
 
@@ -200,11 +236,11 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
     var nodesRepairWorklist = Set.empty[ENode[NodeT]]
 
     def touchedClass(ref: EClassRef): Unit = {
-      nodesRepairWorklist = nodesRepairWorklist ++ getClassData(ref).users
+      nodesRepairWorklist = nodesRepairWorklist ++ dataForClass(ref).users
     }
 
     def shrinkSlots(ref: EClassRef, slots: SlotSet): Unit = {
-      val data = getClassData(ref)
+      val data = dataForClass(ref)
 
       // We first determine the set of slots that are redundant in the e-class. These are the slots that are not in the
       // new set of slots. Additionally, if a slot is redundant, all slots that are in the same orbit as the redundant
@@ -220,7 +256,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
 
       // We update the e-class data with the new slots and permutations.
       val newData = data.copy(slots = finalSlots, permutations = PermutationGroup(identity, generators))
-      setClassData(ref, newData)
+      updateDataForClass(ref, newData)
 
       // We update the union-find with the new slots. Since the e-class is a root in the union-find, its set of slots in
       // the AppliedRef can simply be set to an identity bijection of the new slots. unionFind.add will take care of
@@ -257,7 +293,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
       // Translate the subordinate class' nodes to the dominant class' slots. We use composeFresh to cover potential
       // redundant slots in the subordinate class' nodes.
       val invMap = map.inverse
-      val subData = getClassData(subRoot.ref)
+      val subData = dataForClass(subRoot.ref)
       for ((node, bijection) <- subData.nodes) {
         removeNodeFromClass(subRoot.ref, node)
         addNodeToClass(domRoot.ref, ShapeCall(node, bijection.composeFresh(invMap)))
@@ -268,11 +304,11 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
       val subToDom = subRoot.args.compose(domRoot.args.inverse)
       val subPermutations = subData.permutations.generators.map(_.rename(subToDom))
 
-      val domData = getClassData(domRoot.ref)
+      val domData = dataForClass(domRoot.ref)
       domData.permutations.tryAddSet(subPermutations) match {
         case Some(newPermutations) =>
           // If the new permutations are not already in the set of permutations, we update the e-class data.
-          setClassData(domRoot.ref, domData.copy(permutations = newPermutations))
+          updateDataForClass(domRoot.ref, domData.copy(permutations = newPermutations))
           touchedClass(domRoot.ref)
 
         case None =>
@@ -280,7 +316,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
 
       if (Debug.isEnabled) {
         // Check that all nodes have been removed from the subordinate class.
-        assert(getClassData(subRoot.ref).nodes.isEmpty)
+        assert(dataForClass(subRoot.ref).nodes.isEmpty)
       }
 
       // Queue all users of the subordinate class for repair.
@@ -309,7 +345,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
       } else if (leftRoot.ref == rightRoot.ref) {
         // If the two e-classes are the same but their arguments are different, we update the permutation groups.
         val ref = leftRoot.ref
-        val data = getClassData(ref)
+        val data = dataForClass(ref)
 
         // We first construct the new permutation and make sure it is not already in the set of permutations.
         val perm = leftRoot.args.compose(rightRoot.args.inverse)
@@ -320,11 +356,11 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
 
         // We add the new permutation to the e-class data.
         val newData = data.copy(permutations = group.add(perm))
-        setClassData(ref, newData)
+        updateDataForClass(ref, newData)
 
         // We add the e-class's nodes and users to the repair worklist, as the e-class now has a new permutation.
         touchedClass(ref)
-      } else if (getClassData(leftRoot.ref).nodes.size > getClassData(rightRoot.ref).nodes.size) {
+      } else if (dataForClass(leftRoot.ref).nodes.size > dataForClass(rightRoot.ref).nodes.size) {
         mergeInto(rightRoot, leftRoot)
       } else {
         mergeInto(leftRoot, rightRoot)
@@ -345,7 +381,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
         assert(ref != null, "The node to repair must be in the hash-cons.")
       }
 
-      val data = getClassData(ref)
+      val data = dataForClass(ref)
       val canonicalNode = canonicalize(node)
 
       // oldRenaming : old node slot -> old e-class slot.
@@ -388,7 +424,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT] extends Re
 
           case other =>
             // canonicalNodeRenaming : canonical node slot -> canonical e-class slot.
-            val canonicalNodeRenaming = getClassData(other).nodes(canonicalNode.shape)
+            val canonicalNodeRenaming = dataForClass(other).nodes(canonicalNode.shape)
 
             // Union the original node with the canonicalized node in the class data. Remove the old node from the
             // hash-cons.
