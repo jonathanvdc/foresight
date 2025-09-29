@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.{ENode, ShapeCall, Slot}
+import foresight.eqsat.{ENode, ShapeCall}
 
 /**
  * The data of an e-class in a hash-consed e-graph.
