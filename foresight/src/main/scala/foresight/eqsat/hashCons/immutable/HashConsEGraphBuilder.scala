@@ -10,7 +10,7 @@ private final class HashConsEGraphBuilder[NodeT](private val unionFind: SlottedU
                                                  private var classData: Map[EClassRef, EClassData[NodeT]])
   extends ReadOnlyHashConsEGraph[NodeT] {
 
-  def toImmutable: HashConsEGraph[NodeT] = {
+  def result(): HashConsEGraph[NodeT] = {
     new HashConsEGraph(unionFind.toImmutable, hashCons, classData)
   }
 
@@ -445,7 +445,7 @@ private final class HashConsEGraphBuilder[NodeT](private val unionFind: SlottedU
     // Check that all nodes in the class data map are canonicalized.
     if (Debug.isEnabled) {
       assert(classData.keys.forall(k => canonicalize(k).ref == k), "All e-class references must be canonicalized.")
-      assert(toImmutable.nodeCount >= toImmutable.classCount,
+      assert(nodeCount >= classCount,
         "The number of nodes in the class data must be greater than or equal to the number of e-classes.")
     }
 

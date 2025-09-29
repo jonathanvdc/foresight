@@ -69,7 +69,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
         mutable.tryAddUnsafe(node)
       }
     }
-    (results.toSeq, mutable.toImmutable)
+    (results.toSeq, mutable.result())
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
@@ -81,7 +81,7 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
     parallelize.child("union").run {
       val mutable = toBuilder
       val equivalences = mutable.unionMany(pairs)
-      (equivalences, mutable.toImmutable)
+      (equivalences, mutable.result())
     }
   }
 
