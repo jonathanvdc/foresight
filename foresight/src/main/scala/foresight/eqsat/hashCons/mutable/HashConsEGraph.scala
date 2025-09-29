@@ -12,7 +12,17 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
   private val hashCons: mutable.HashMap[ENode[NodeT], EClassRef] = mutable.HashMap.empty
   private val classData: mutable.HashMap[EClassRef, EClassData[NodeT]] = mutable.HashMap.empty
 
-  protected override def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit = classData.update(ref, data)
+  protected override def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = classData(ref)
+    classData.update(ref, data.copy(permutations = permutations))
+  }
+
+  protected override def updateClassSlotsAndPermutations(ref: EClassRef,
+                                                         slots: SlotSet,
+                                                         permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = classData(ref)
+    classData.update(ref, data.copy(slots = slots, permutations = permutations))
+  }
 
   override def dataForClass(ref: EClassRef): EClassData[NodeT] = classData(ref)
   override def isCanonical(ref: EClassRef): Boolean = unionFind.isCanonical(ref)

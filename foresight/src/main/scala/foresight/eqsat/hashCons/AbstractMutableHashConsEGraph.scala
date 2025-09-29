@@ -28,32 +28,19 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   protected val unionFind: AbstractMutableSlottedUnionFind
 
   /**
-   * Sets the class data for the given e-class reference.
-   * @param ref The e-class reference.
-   * @param data The new class data for the e-class.
-   */
-  protected def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit
-
-  /**
    * Updates the slots and permutations of an e-class.
    * @param ref The e-class reference.
    * @param slots The new slots for the e-class.
    * @param permutations The new permutations for the e-class.
    */
-  protected def updateClassSlotsAndPermutations(ref: EClassRef, slots: SlotSet, permutations: PermutationGroup[SlotMap]): Unit = {
-    val data = dataForClass(ref)
-    updateDataForClass(ref, data.copy(slots = slots, permutations = permutations))
-  }
+  protected def updateClassSlotsAndPermutations(ref: EClassRef, slots: SlotSet, permutations: PermutationGroup[SlotMap]): Unit
 
   /**
    * Updates the permutations of an e-class.
    * @param ref The e-class reference.
    * @param permutations The new permutations for the e-class.
    */
-  protected def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
-    val data = dataForClass(ref)
-    updateDataForClass(ref, data.copy(permutations = permutations))
-  }
+  protected def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit
 
   /**
    * Creates an empty e-class with the given slots. The e-class is added to the union-find and the class data map.

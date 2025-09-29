@@ -34,8 +34,16 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
     classData(ref)
   }
 
-  protected override def updateDataForClass(ref: EClassRef, data: EClassData[NodeT]): Unit = {
-    classData = classData + (ref -> data)
+  protected override def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = classData(ref)
+    classData = classData + (ref -> data.copy(permutations = permutations))
+  }
+
+  protected override def updateClassSlotsAndPermutations(ref: EClassRef,
+                                                         slots: SlotSet,
+                                                         permutations: PermutationGroup[SlotMap]): Unit = {
+    val data = classData(ref)
+    classData = classData + (ref -> data.copy(slots = slots, permutations = permutations))
   }
 
   /**
