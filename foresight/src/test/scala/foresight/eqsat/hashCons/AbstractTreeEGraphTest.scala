@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.{ENode, Slot, Tree}
-import foresight.eqsat.mutable
+import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import org.junit.Test
 
 /**
@@ -9,7 +9,7 @@ import org.junit.Test
  * Subclasses only need to provide `empty[A]` returning a concrete `mutable.EGraph[A]`.
  */
 abstract class AbstractTreeEGraphTest {
-  type EGraphT[A] <: mutable.EGraph[A]
+  type EGraphT[A] <: MutableEGraph[A]
 
   /** Create an empty mutable e-graph. */
   def empty[A]: EGraphT[A]

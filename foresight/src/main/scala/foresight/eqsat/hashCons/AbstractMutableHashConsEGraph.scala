@@ -6,7 +6,7 @@ import foresight.eqsat.mutable.EGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.Debug
 
-import scala.collection.mutable
+import scala.collection.mutable.HashMap
 
 /**
  * A mutable hash-consed e-graph. This class provides methods for adding nodes, unifying e-classes, and maintaining
@@ -228,7 +228,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     var unifiedPairs = List.empty[(EClassCall, EClassCall)]
 
     // A map from e-class references to their old slots before unification. This is used to construct the return value.
-    val oldSlots = mutable.HashMap.empty[EClassRef, SlotSet]
+    val oldSlots = HashMap.empty[EClassRef, SlotSet]
 
     // The nodes repair set contains all e-nodes that may no longer be canonical.
     // The invariant maintained throughout the unification algorithm is that the elements of the node repair set

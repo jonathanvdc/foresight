@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.{ENode, Slot, Tree}
-import foresight.eqsat.mutable
+import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import org.junit.Test
 
 /**
@@ -9,7 +9,7 @@ import org.junit.Test
  * Subclasses provide an empty graph and an invariant checker.
  */
 abstract class AbstractUnionEGraphTest {
-  type EGraphT[A] <: mutable.EGraph[A]
+  type EGraphT[A] <: MutableEGraph[A]
   def empty[A]: EGraphT[A]
   def checkInvariants[A](g: EGraphT[A]): Unit
 
