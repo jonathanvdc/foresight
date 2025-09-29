@@ -4,7 +4,7 @@ import foresight.eqsat.{EClassCall, EClassRef}
 import foresight.eqsat.collections.{SlotMap, SlotSet}
 
 /**
- * A mutable union-find data structure that supports path compression and union by rank. The keys are e-class references
+ * A mutable union-find data structure that supports path compression. The keys are e-class references
  * and the values are e-class calls, which include the renaming of the slots.
  */
 private[hashCons] abstract class AbstractMutableSlottedUnionFind extends AbstractSlottedUnionFind {

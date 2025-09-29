@@ -3,6 +3,10 @@ package foresight.eqsat.hashCons
 import foresight.eqsat.{EClassCall, EClassRef}
 import foresight.eqsat.collections.{SlotMap, SlotSet}
 
+/**
+ * A union-find data structure that supports path compression. The keys are e-class references and
+ * the values are e-class calls, which include the renaming of the slots.
+ */
 private[hashCons] abstract class AbstractSlottedUnionFind {
   /**
    * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
