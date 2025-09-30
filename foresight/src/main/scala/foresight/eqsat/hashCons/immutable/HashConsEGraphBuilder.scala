@@ -11,6 +11,7 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
   extends AbstractMutableHashConsEGraph[NodeT] {
 
   type ClassData = EClassData[NodeT]
+  type UnionFind = SlottedUnionFindBuilder
 
   def result(): HashConsEGraph[NodeT] = {
     new HashConsEGraph(unionFind.toImmutable, hashCons, classData)
@@ -19,14 +20,6 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
   override def classes: Iterable[EClassRef] = classData.keys
 
   protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
-
-  override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
-    unionFind.findAndCompressOrNull(ref)
-  }
-
-  override def isCanonical(ref: EClassRef): Boolean = {
-    unionFind.isCanonical(ref)
-  }
 
   override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
     hashCons.getOrElse(node, default)

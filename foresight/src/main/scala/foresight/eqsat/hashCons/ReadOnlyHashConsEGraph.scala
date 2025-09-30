@@ -21,9 +21,14 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   type ClassData <: AbstractEClassData[NodeT]
 
   /**
-   * Retrieves or constructs an e-class call with no slots for a given e-class reference.
+   * The type of the union-find structure used to manage e-class equivalences.
    */
-  protected def callWithoutSlots(ref: EClassRef): EClassCall
+  type UnionFind <: AbstractSlottedUnionFind
+
+  /**
+   * The union-find structure used to manage e-class equivalences.
+   */
+  protected val unionFind: UnionFind
 
   /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
@@ -42,13 +47,18 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
    */
   def dataForClass(ref: EClassRef): ClassData
 
-  def isCanonical(ref: EClassRef): Boolean
-
   /**
    * Gets all node shapes in the hashcons.
    * @return An iterable of all node shapes in the e-graph.
    */
   protected def shapes: Iterable[ENode[NodeT]]
+
+  final def isCanonical(ref: EClassRef): Boolean = unionFind.isCanonical(ref)
+
+  /**
+   * Retrieves or constructs an e-class call with no slots for a given e-class reference.
+   */
+  protected final def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
 
   /**
    * Retrieves the e-class reference for a given e-node. Assumes that the e-node is canonical.

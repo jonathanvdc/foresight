@@ -13,12 +13,13 @@ import foresight.eqsat.parallel.ParallelMap
  * @param classData The data of each e-class in the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private val unionFind: SlottedUnionFind,
+private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](protected val unionFind: SlottedUnionFind,
                                                                         private val hashCons: Map[ENode[NodeT], EClassRef],
                                                                         private val classData: Map[EClassRef, EClassData[NodeT]])
   extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] with ReadOnlyHashConsEGraph[NodeT] {
 
   type ClassData = EClassData[NodeT]
+  type UnionFind = SlottedUnionFind
 
   override def emptied: HashConsEGraph[NodeT] = HashConsEGraph.empty
 
@@ -38,18 +39,12 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
 
-  protected override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
-
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
     unionFind.findOrNull(ref)
   }
 
   override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
     hashCons.getOrElse(node, default)
-  }
-
-  override def isCanonical(ref: EClassRef): Boolean = {
-    unionFind.isCanonical(ref)
   }
 
   override def dataForClass(ref: EClassRef): EClassData[NodeT] = {

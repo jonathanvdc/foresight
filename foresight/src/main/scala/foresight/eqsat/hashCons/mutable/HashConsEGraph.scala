@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons.mutable
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
+import foresight.eqsat.{EClassRef, ENode, ShapeCall}
 import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, PermutationGroup}
 import foresight.util.Debug
 
@@ -9,6 +9,7 @@ import scala.collection.mutable
 
 private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashConsEGraph[NodeT] {
   type ClassData = MutableEClassData[NodeT]
+  type UnionFind = SlottedUnionFind
 
   protected override val unionFind: SlottedUnionFind = new SlottedUnionFind()
   private val hashCons: mutable.HashMap[ENode[NodeT], EClassRef] = mutable.HashMap.empty
@@ -28,8 +29,6 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
   }
 
   override def dataForClass(ref: EClassRef): MutableEClassData[NodeT] = classData(ref)
-  override def isCanonical(ref: EClassRef): Boolean = unionFind.isCanonical(ref)
-  override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
   override def classes: Iterable[EClassRef] = classData.keys
   protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
   override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = hashCons.getOrElse(node, default)

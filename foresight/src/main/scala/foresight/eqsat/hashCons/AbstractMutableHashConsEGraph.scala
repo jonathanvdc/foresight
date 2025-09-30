@@ -22,10 +22,7 @@ import scala.collection.mutable.{HashMap, HashSet}
 private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   extends ReadOnlyHashConsEGraph[NodeT] with EGraph[NodeT] {
 
-  /**
-   * The underlying mutable union-find data structure used to manage e-class representatives.
-   */
-  protected val unionFind: AbstractMutableSlottedUnionFind
+  type UnionFind <: AbstractMutableSlottedUnionFind
 
   /**
    * Updates the slots and permutations of an e-class.
@@ -69,10 +66,10 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    */
   protected def unlinkEmptyClasses(): Unit
 
-  protected final override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
+  final override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
 
-  override def tryAddMany(nodes: Seq[ENode[NodeT]],
-                          parallelize: ParallelMap): Seq[AddNodeResult] = {
+  final override def tryAddMany(nodes: Seq[ENode[NodeT]],
+                                parallelize: ParallelMap): Seq[AddNodeResult] = {
     // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
     // is canonicalizing them and looking them up in the e-graph. Canonicalization can be parallelized since adding a
     // node will never change the canonical form of other nodes - only union operations can do that.
@@ -92,7 +89,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     results.toSeq
   }
 
-  override def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): Set[Set[EClassCall]] = {
+  final override def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): Set[Set[EClassCall]] = {
     if (pairs.isEmpty) {
       Set.empty
     } else {
@@ -162,7 +159,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    * @param canonicalNode A pre-canonicalized node to add to the e-graph.
    * @return The e-class reference of the e-node in the e-graph.
    */
-  def tryAddUnsafe(canonicalNode: ShapeCall[NodeT]): AddNodeResult = {
+  final def tryAddUnsafe(canonicalNode: ShapeCall[NodeT]): AddNodeResult = {
     val resultOrNull = findUnsafe(canonicalNode)
     if (resultOrNull == null) {
       val ref = addNewUnsafe(canonicalNode)
