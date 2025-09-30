@@ -1,12 +1,12 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, Slot}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall}
 import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.mutable.EGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.Debug
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
 
 /**
  * A mutable hash-consed e-graph. This class provides methods for adding nodes, unifying e-classes, and maintaining
@@ -235,7 +235,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
 
   private def unionManyImpl(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
     // The pairs of e-classes that were unified.
-    var unifiedPairs = List.empty[(EClassCall, EClassCall)]
+    val unifiedPairs = ArrayBuffer.empty[(EClassCall, EClassCall)]
 
     // A map from e-class references to their old slots before unification. This is used to construct the return value.
     val oldSlots = HashMap.empty[EClassRef, SlotSet]
@@ -243,10 +243,10 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     // The nodes repair set contains all e-nodes that may no longer be canonical.
     // The invariant maintained throughout the unification algorithm is that the elements of the node repair set
     // are in the hash cons.
-    var nodesRepairWorklist = Set.empty[ENode[NodeT]]
+    val nodesRepairWorklist = HashSet.empty[ENode[NodeT]]
 
     def touchedClass(ref: EClassRef): Unit = {
-      nodesRepairWorklist = nodesRepairWorklist ++ dataForClass(ref).users
+      nodesRepairWorklist.addAll(dataForClass(ref).users)
     }
 
     def shrinkSlots(ref: EClassRef, slots: SlotSet): Unit = {
@@ -297,7 +297,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
       oldSlots(subRoot.ref) = slots(subRoot.ref)
       oldSlots(domRoot.ref) = slots(domRoot.ref)
-      unifiedPairs = (subRoot, domRoot) :: unifiedPairs
+      unifiedPairs.append((subRoot, domRoot))
 
       // Translate the subordinate class' nodes to the dominant class' slots. We use composeFresh to cover potential
       // redundant slots in the subordinate class' nodes.
@@ -306,7 +306,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       for ((node, bijection) <- subData.nodes) {
         removeNodeFromClass(subRoot.ref, node)
         addNodeToClass(domRoot.ref, ShapeCall(node, bijection.composeFresh(invMap)))
-        nodesRepairWorklist = nodesRepairWorklist + node
+        nodesRepairWorklist.add(node)
       }
 
       // Merge permutations of subordinate class into dominant class.
@@ -471,7 +471,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     // Repair all nodes in the repair worklist.
     while (nodesRepairWorklist.nonEmpty) {
       val node = nodesRepairWorklist.head
-      nodesRepairWorklist = nodesRepairWorklist - node
+      nodesRepairWorklist.remove(node)
       repairNode(node)
     }
 
