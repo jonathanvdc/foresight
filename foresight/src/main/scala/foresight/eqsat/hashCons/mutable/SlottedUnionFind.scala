@@ -19,7 +19,7 @@ private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUni
   }
 
   override protected def getParentOrNull(ref: EClassRef): EClassCall = {
-    if (ref.id >= parents.size) null
+    if (ref.id >= parents.length) null
     else parents(ref.id)
   }
 
