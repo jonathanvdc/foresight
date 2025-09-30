@@ -1,28 +1,31 @@
 package foresight.eqsat.hashCons
 
-import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.{EClassCall, EClassRef}
+import foresight.eqsat.collections.SlotSet
 
-private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCall]) {
-  def toImmutable: SlottedUnionFind = SlottedUnionFind(parents)
+/**
+ * A mutable union-find data structure that supports path compression. The keys are e-class references
+ * and the values are e-class calls, which include the renaming of the slots.
+ */
+private[hashCons] abstract class AbstractMutableSlottedUnionFind extends AbstractSlottedUnionFind {
+  /**
+   * The number of elements in the union-find.
+   */
+  def size: Int
 
   /**
-   * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.
-   * @param ref The e-class to check.
-   * @return True if the e-class is the canonical representative of its set, false otherwise.
+   * Updates the parent of the given key to the given value.
+   *
+   * @param key   The key to update.
+   * @param value The new parent of the key.
    */
-  def isCanonical(ref: EClassRef): Boolean = {
-    // require(parents.contains(ref), s"EClassRef $ref is not in the union-find.")
-    parents(ref).ref == ref
-  }
+  def update(key: EClassRef, value: EClassCall): Unit
 
-  def add(key: EClassRef, slots: SlotSet): Unit = {
-    update(key, EClassCall(key, SlotMap.identity(slots)))
-  }
-
-  def update(key: EClassRef, value: EClassCall): Unit = {
-    parents = parents + (key -> value)
-  }
+  /**
+   * Adds a new key to the union-find with itself as its own parent and the given slots.
+   * @param slots The slots for the new key.
+   */
+  def add(slots: SlotSet): EClassRef
 
   /**
    * Finds the representative of the given key and compresses the path. If the key is not in the union-find, null is
@@ -32,9 +35,11 @@ private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCa
    * @return The representative of the key, if the key is in the union-find.
    *         Null otherwise.
    */
-  def findAndCompressOrNull(ref: EClassRef): EClassCall = {
-    val parent = parents.getOrElse(ref, return null)
-    if (parent.ref == ref) {
+  final def findAndCompressOrNull(ref: EClassRef): EClassCall = {
+    val parent = getParentOrNull(ref)
+    if (parent == null) {
+      null
+    } else if (parent.ref == ref) {
       parent
     } else {
       val grandparent = findAndCompress(parent)
@@ -50,7 +55,7 @@ private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCa
    * @param ref The key to find.
    * @return The representative of the key and the new union-find.
    */
-  def findAndCompress(ref: EClassRef): EClassCall = {
+  final def findAndCompress(ref: EClassRef): EClassCall = {
     val result = findAndCompressOrNull(ref)
     if (result == null) {
       throw new NoSuchElementException(s"EClassRef $ref is not in the union-find.")
@@ -66,7 +71,7 @@ private final class MutableSlottedUnionFind(var parents: Map[EClassRef, EClassCa
    * @param ref The key to find.
    * @return The representative of the key.
    */
-  def findAndCompress(ref: EClassCall): EClassCall = {
+  final def findAndCompress(ref: EClassCall): EClassCall = {
     val parent = findAndCompress(ref.ref)
     if (parent == null) {
       throw new NoSuchElementException(s"EClassRef ${ref.ref} is not in the union-find.")

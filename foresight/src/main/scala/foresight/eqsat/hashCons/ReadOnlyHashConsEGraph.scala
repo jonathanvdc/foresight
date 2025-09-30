@@ -16,6 +16,21 @@ import foresight.util.Debug
  */
 private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   /**
+   * The type of the class data associated with each e-class in the e-graph.
+   */
+  type ClassData <: AbstractEClassData[NodeT]
+
+  /**
+   * The type of the union-find structure used to manage e-class equivalences.
+   */
+  type UnionFind <: AbstractSlottedUnionFind
+
+  /**
+   * The union-find structure used to manage e-class equivalences.
+   */
+  protected val unionFind: UnionFind
+
+  /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
    * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so
    * and simply performs a hash cons lookup.
@@ -30,9 +45,20 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
    * @param ref The e-class reference whose data is to be retrieved.
    * @return The data associated with the e-class reference.
    */
-  def dataForClass(ref: EClassRef): EClassData[NodeT]
+  def dataForClass(ref: EClassRef): ClassData
 
-  def isCanonical(ref: EClassRef): Boolean
+  /**
+   * Gets all node shapes in the hashcons.
+   * @return An iterable of all node shapes in the e-graph.
+   */
+  protected def shapes: Iterable[ENode[NodeT]]
+
+  final def isCanonical(ref: EClassRef): Boolean = unionFind.isCanonical(ref)
+
+  /**
+   * Retrieves or constructs an e-class call with no slots for a given e-class reference.
+   */
+  protected final def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
 
   /**
    * Retrieves the e-class reference for a given e-node. Assumes that the e-node is canonical.
@@ -124,13 +150,13 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       assert(renamedShape.shape.isShape)
     }
 
-    val ref = nodeToRefOrElse(renamedShape.shape, null)
-    if (ref == null) {
+    val ref = nodeToRefOrElse(renamedShape.shape, EClassRef.Invalid)
+    if (ref.isInvalid) {
       return null
     }
 
     if (!renamedShape.shape.hasSlots) {
-      return ref.callWithoutSlots
+      return callWithoutSlots(ref)
     }
 
     val refData = dataForClass(ref)
@@ -144,12 +170,12 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       assert(!node.hasSlots)
     }
 
-    val ref = nodeToRefOrElse(node, null)
-    if (ref == null) {
+    val ref = nodeToRefOrElse(node, EClassRef.Invalid)
+    if (ref.isInvalid) {
       return null
     }
 
-    ref.callWithoutSlots
+    callWithoutSlots(ref)
   }
 
   final override def users(ref: EClassRef): Set[ENode[NodeT]] = {
@@ -158,53 +184,17 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       val c = nodeToRef(node)
       val mapping = dataForClass(c).nodes(node)
       ShapeCall(node, mapping).asNode
-    })
+    }).toSet
   }
 
   final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
-    val data = dataForClass(canonicalApp.ref)
-
-    assert(canonicalApp.args.size == data.slots.size)
-
-    if (data.hasSlots) {
-      if (canonicalApp.args.isIdentity) {
-        // Common case: the e-class call's arguments are the identity mapping.
-        // We can return a precomputed set of applied nodes with identity renaming.
-        data.appliedNodesWithIdentity
-      } else {
-        // E-class has slots and the e-class call's arguments are not the identity mapping.
-        // We rename all applied nodes by the e-class call's arguments.
-        data.appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
-      }
-    } else {
-      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      data.nodes.keys
-    }
+    dataForClass(canonicalApp.ref).appliedNodes(canonicalApp)
   }
 
   final override def nodes(call: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = {
     val canonicalApp = canonicalize(call)
-    val data = dataForClass(canonicalApp.ref)
-
-    assert(canonicalApp.args.size == data.slots.size)
-
-    if (data.hasSlots) {
-      if (canonicalApp.args.isIdentity) {
-        // Common case: the e-class call's arguments are the identity mapping.
-        // We can return a precomputed set of applied nodes with identity renaming, filtered by node type.
-        data.appliedNodesWithIdentity.filter(_.nodeType == nodeType)
-      } else {
-        // E-class has slots and the e-class call's arguments are not the identity mapping.
-        // We first filter, then rename all applied nodes by the e-class call's arguments.
-        // Filtering first is more efficient than renaming first then filtering as it avoids unnecessary
-        // renaming work and allocations.
-        data.appliedNodes.filter(_.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
-      }
-    } else {
-      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      data.nodes.keys.filter(_.nodeType == nodeType)
-    }
+    dataForClass(canonicalApp.ref).appliedNodes(canonicalApp, nodeType)
   }
 
   /**
@@ -233,6 +223,48 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       }
     } else {
       false
+    }
+  }
+
+  /**
+   * Checks that the invariants of the hash-consed e-graph are satisfied.
+   */
+  final def checkInvariants(): Unit = {
+    val hashCons = shapes.map(shape => shape -> nodeToRef(shape)).toMap
+    val classData = classes.map(ref => ref -> dataForClass(ref)).toMap
+
+    // Check that hashCons is canonicalized.
+    for ((node, ref) <- hashCons) {
+      assert(canonicalize(node).shape == node)
+      assert(canonicalize(ref).ref == ref)
+    }
+
+    // Check that classData is canonicalized.
+    for ((ref, data) <- classData) {
+      assert(canonicalize(ref).ref == ref)
+      for ((node, _) <- data.nodes) {
+        assert(node.isShape)
+        assert(canonicalize(node).shape == node)
+      }
+      for (user <- data.users) {
+        assert(canonicalize(user).shape == user)
+      }
+    }
+
+    // Check that the hash-cons map is in sync with the class data.
+    for ((node, ref) <- hashCons) {
+      assert(classData(ref).nodes.contains(node))
+    }
+
+    // Check that the users set of each e-class is in sync with the e-class arguments of the e-nodes in the e-class.
+    for ((ref, data) <- classData) {
+      for (user <- data.users) {
+        assert(user.isShape)
+
+        val userClass = hashCons(user)
+        val userClassData = classData(userClass)
+        assert(userClassData.nodes.keys.exists(_.args.map(_.ref).contains(ref)))
+      }
     }
   }
 }

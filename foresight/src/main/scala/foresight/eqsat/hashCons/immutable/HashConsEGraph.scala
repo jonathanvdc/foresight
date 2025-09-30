@@ -1,8 +1,9 @@
-package foresight.eqsat.hashCons
+package foresight.eqsat.hashCons.immutable
 
+import foresight.eqsat.hashCons.{EClassData, ReadOnlyHashConsEGraph}
+import foresight.eqsat.immutable.{EGraph, EGraphLike}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat._
-import foresight.eqsat.immutable._
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -12,10 +13,13 @@ import foresight.eqsat.immutable._
  * @param classData The data of each e-class in the e-graph.
  * @tparam NodeT The type of the nodes described by the e-nodes in the e-graph.
  */
-private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private val unionFind: SlottedUnionFind,
+private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](protected val unionFind: SlottedUnionFind,
                                                                         private val hashCons: Map[ENode[NodeT], EClassRef],
                                                                         private val classData: Map[EClassRef, EClassData[NodeT]])
   extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] with ReadOnlyHashConsEGraph[NodeT] {
+
+  type ClassData = EClassData[NodeT]
+  type UnionFind = SlottedUnionFind
 
   override def emptied: HashConsEGraph[NodeT] = HashConsEGraph.empty
 
@@ -27,11 +31,13 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
   //      in the e-class. That is, classData(ref).parents contains parent if and only if there exists an e-node in
   //      classData(ref) such that parent is in the e-node's arguments.
 
-  private def toMutable: MutableHashConsEGraph[NodeT] = {
-    new MutableHashConsEGraph(new MutableSlottedUnionFind(unionFind.parents), hashCons, classData)
+  private def toBuilder: HashConsEGraphBuilder[NodeT] = {
+    new HashConsEGraphBuilder(new SlottedUnionFindBuilder(unionFind.parents), hashCons, classData)
   }
 
   override def classes: Iterable[EClassRef] = classData.keys
+
+  protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
 
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
     unionFind.findOrNull(ref)
@@ -39,10 +45,6 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
     hashCons.getOrElse(node, default)
-  }
-
-  override def isCanonical(ref: EClassRef): Boolean = {
-    unionFind.isCanonical(ref)
   }
 
   override def dataForClass(ref: EClassRef): EClassData[NodeT] = {
@@ -61,66 +63,21 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
     val p = parallelize.child("add nodes")
 
-    val mutable = toMutable
+    val mutable = toBuilder
     val canonicalized = p(nodes, canonicalize)
     val results = p.run {
       canonicalized.map { node =>
         mutable.tryAddUnsafe(node)
       }
     }
-    (results.toSeq, mutable.toImmutable)
+    (results.toSeq, mutable.result())
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],
                          parallelize: ParallelMap): (Set[Set[EClassCall]], HashConsEGraph[NodeT]) = {
-    require(
-      pairs.forall { case (first, second) => first.isWellFormed(this) && second.isWellFormed(this) },
-      "All e-class applications must be well-formed.")
-
-    parallelize.child("union").run {
-      val mutable = toMutable
-      val equivalences = mutable.unionMany(pairs)
-      (equivalences, mutable.toImmutable)
-    }
-  }
-
-  /**
-   * Checks that the invariants of the hash-consed e-graph are satisfied.
-   */
-  def checkInvariants(): Unit = {
-    // Check that hashCons is canonicalized.
-    for ((node, ref) <- hashCons) {
-      assert(canonicalize(node).shape == node)
-      assert(canonicalize(ref).ref == ref)
-    }
-
-    // Check that classData is canonicalized.
-    for ((ref, data) <- classData) {
-      assert(canonicalize(ref).ref == ref)
-      for ((node, _) <- data.nodes) {
-        assert(node.isShape)
-        assert(canonicalize(node).shape == node)
-      }
-      for (user <- data.users) {
-        assert(canonicalize(user).shape == user)
-      }
-    }
-
-    // Check that the hash-cons map is in sync with the class data.
-    for ((node, ref) <- hashCons) {
-      assert(classData(ref).nodes.contains(node))
-    }
-
-    // Check that the users set of each e-class is in sync with the e-class arguments of the e-nodes in the e-class.
-    for ((ref, data) <- classData) {
-      for (user <- data.users) {
-        assert(user.isShape)
-
-        val userClass = hashCons(user)
-        val userClassData = classData(userClass)
-        assert(userClassData.nodes.keys.exists(_.args.map(_.ref).contains(ref)))
-      }
-    }
+    val mutable = toBuilder
+    val equivalences = mutable.unionMany(pairs, parallelize)
+    (equivalences, mutable.result())
   }
 }
 

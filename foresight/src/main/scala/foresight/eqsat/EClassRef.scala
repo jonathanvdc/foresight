@@ -2,6 +2,8 @@ package foresight.eqsat
 
 import foresight.eqsat.collections.SlotMap
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * A stable handle identifying an e-class in an e-graph.
  *
@@ -35,11 +37,37 @@ import foresight.eqsat.collections.SlotMap
  * used as keys in maps or sets, but note that their equivalence meaning may change
  * as the e-graph evolves.
  */
-final class EClassRef {
+final case class EClassRef private[eqsat] (id: Int) extends AnyVal {
+  override def toString: String = s"EClassRef($id)"
+
   /**
-   * A pre-instantiated EClassCall representing this e-class with no argument slots.
+   * An application of this e-class with no argument slots.
+   *
    * This is a common case for non-parameterized e-classes, allowing efficient reuse
    * without needing to repeatedly construct new `EClassCall` instances.
+   *
+   * The implementation caches these no-slot calls in a concurrent map to avoid
+   * redundant allocations.
    */
-  private[eqsat] val callWithoutSlots: EClassCall = EClassCall(this, SlotMap.empty)
+  private[eqsat] def callWithoutSlots: EClassCall = {
+    // Fast path: read-mostly lookup without allocation
+    val cached = EClassRef.noSlotCallCache.get(id)
+    if (cached ne null) return cached
+
+    // Slow path: create and attempt to cache a no-slots call. It's okay
+    // if we construct this more than once; putIfAbsent ensures only
+    // one instance becomes the canonical cached value.
+    val created = EClassCall(this, SlotMap.empty)
+    val prev = EClassRef.noSlotCallCache.putIfAbsent(id, created)
+    if (prev eq null) created else prev
+  }
+
+  private[eqsat] def isValid: Boolean = id >= 0
+  private[eqsat] def isInvalid: Boolean = id < 0
+}
+
+private[eqsat] object EClassRef {
+  private[eqsat] val Invalid: EClassRef = EClassRef(-1)
+
+  private[eqsat] val noSlotCallCache = new ConcurrentHashMap[Int, EClassCall](128, 0.75f, Runtime.getRuntime.availableProcessors())
 }
