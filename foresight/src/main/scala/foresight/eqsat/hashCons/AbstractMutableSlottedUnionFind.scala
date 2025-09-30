@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.{EClassCall, EClassRef}
-import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.collections.SlotSet
 
 /**
  * A mutable union-find data structure that supports path compression. The keys are e-class references
@@ -25,11 +25,7 @@ private[hashCons] abstract class AbstractMutableSlottedUnionFind extends Abstrac
    * Adds a new key to the union-find with itself as its own parent and the given slots.
    * @param slots The slots for the new key.
    */
-  final def add(slots: SlotSet): EClassRef = {
-    val key = new EClassRef(size)
-    update(key, EClassCall(key, SlotMap.identity(slots)))
-    key
-  }
+  def add(slots: SlotSet): EClassRef
 
   /**
    * Finds the representative of the given key and compresses the path. If the key is not in the union-find, null is

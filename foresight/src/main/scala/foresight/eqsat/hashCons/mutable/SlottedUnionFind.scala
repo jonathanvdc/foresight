@@ -1,5 +1,6 @@
 package foresight.eqsat.hashCons.mutable
 
+import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.{EClassCall, EClassRef}
 import foresight.eqsat.hashCons.AbstractMutableSlottedUnionFind
 
@@ -20,4 +21,10 @@ private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUni
   override protected def getParentOrNull(ref: EClassRef): EClassCall = parents.getOrElse(ref, null)
 
   override def size: Int = parents.size
+
+  override def add(slots: SlotSet): EClassRef = {
+    val key = new EClassRef(size)
+    update(key, EClassCall(key, SlotMap.identity(slots)))
+    key
+  }
 }
