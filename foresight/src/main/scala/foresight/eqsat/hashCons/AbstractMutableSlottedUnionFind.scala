@@ -9,6 +9,11 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
  */
 private[hashCons] abstract class AbstractMutableSlottedUnionFind extends AbstractSlottedUnionFind {
   /**
+   * The number of elements in the union-find.
+   */
+  def size: Int
+
+  /**
    * Updates the parent of the given key to the given value.
    *
    * @param key   The key to update.

@@ -1,7 +1,6 @@
 package foresight.eqsat.hashCons
 
 import foresight.eqsat.{EClassCall, EClassRef}
-import foresight.eqsat.collections.{SlotMap, SlotSet}
 
 /**
  * A union-find data structure that supports path compression. The keys are e-class references and
@@ -16,6 +15,13 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
    * @return The representative of the key, if the key is in the union-find. Null otherwise.
    */
   protected def getParentOrNull(ref: EClassRef): EClassCall
+
+  /**
+   * Constructs an e-class call with the given e-class reference and an empty slot map.
+   * @param ref The e-class reference.
+   * @return An e-class call with the given e-class reference and an empty slot map.
+   */
+  def callWithoutSlots(ref: EClassRef): EClassCall = ref.callWithoutSlots
 
   /**
    * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.

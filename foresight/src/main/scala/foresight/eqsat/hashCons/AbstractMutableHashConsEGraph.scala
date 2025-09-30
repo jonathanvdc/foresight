@@ -69,6 +69,8 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    */
   protected def unlinkEmptyClasses(): Unit
 
+  protected override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
+
   override def tryAddMany(nodes: Seq[ENode[NodeT]],
                           parallelize: ParallelMap): Seq[AddNodeResult] = {
     // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
@@ -112,7 +114,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    * @return The e-class reference of the node, or null if the node is not in the hash cons.
    */
   private def nodeToClassOrNull(node: ENode[NodeT]): EClassRef = {
-    nodeToRefOrElse(node, null)
+    nodeToRefOrElse(node, EClassRef.Invalid)
   }
 
   private def slots(ref: EClassRef): SlotSet = dataForClass(ref).slots
@@ -384,7 +386,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       //      for parent set repair.
       val ref = nodeToClassOrNull(node)
       if (Debug.isEnabled) {
-        assert(ref != null, "The node to repair must be in the hash-cons.")
+        assert(ref != EClassRef.Invalid, "The node to repair must be in the hash-cons.")
       }
 
       val data = dataForClass(ref)
@@ -423,7 +425,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
 
       if (canonicalNode.shape != node) {
         nodeToClassOrNull(canonicalNode.shape) match {
-          case null =>
+          case EClassRef.Invalid =>
             // Eliminate the old node from the e-class and add the canonicalized node.
             removeNodeFromClass(ref, node)
             addNodeToClass(ref, canonicalShapeCall)

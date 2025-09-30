@@ -22,13 +22,13 @@ abstract class AbstractEmptyEGraphTest {
   @Test
   def tryCanonicalizeUnknown(): Unit = {
     val g = empty[Int]
-    assert(g.tryCanonicalize(new EClassRef()).isEmpty)
+    assert(g.tryCanonicalize(new EClassRef(42)).isEmpty)
   }
 
   @Test
   def canonicalizeUnknownThrows(): Unit = {
     val g = empty[Int]
-    val ref = new EClassRef()
+    val ref = new EClassRef(42)
     try {
       g.canonicalize(ref)
       assert(false)

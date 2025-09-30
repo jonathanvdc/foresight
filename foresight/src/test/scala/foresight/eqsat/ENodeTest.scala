@@ -62,7 +62,7 @@ class ENodeTest {
     val w = Slot.fresh()
     val v = Slot.fresh()
 
-    val c = new EClassRef()
+    val c = new EClassRef(42)
 
     val node = ENode(0, Seq(x, y), Seq(z), Seq(EClassCall(c, SlotMap.from(w -> v))))
 

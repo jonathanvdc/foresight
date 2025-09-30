@@ -38,6 +38,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
 
   protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
 
+  protected override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
+
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = {
     unionFind.findOrNull(ref)
   }
