@@ -2,31 +2,32 @@ package foresight.eqsat.hashCons.mutable
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
-import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, EClassData, PermutationGroup}
+import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, PermutationGroup}
 import foresight.util.Debug
 
 import scala.collection.mutable
 
 private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashConsEGraph[NodeT] {
-  type ClassData = EClassData[NodeT]
-  
+  type ClassData = MutableEClassData[NodeT]
+
   protected override val unionFind: SlottedUnionFind = new SlottedUnionFind()
   private val hashCons: mutable.HashMap[ENode[NodeT], EClassRef] = mutable.HashMap.empty
-  private val classData: mutable.HashMap[EClassRef, EClassData[NodeT]] = mutable.HashMap.empty
+  private val classData: mutable.HashMap[EClassRef, MutableEClassData[NodeT]] = mutable.HashMap.empty
 
   protected override def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
     val data = classData(ref)
-    classData.update(ref, data.copy(permutations = permutations))
+    data.setPermutations(permutations)
   }
 
   protected override def updateClassSlotsAndPermutations(ref: EClassRef,
                                                          slots: SlotSet,
                                                          permutations: PermutationGroup[SlotMap]): Unit = {
     val data = classData(ref)
-    classData.update(ref, data.copy(slots = slots, permutations = permutations))
+    data.setSlots(slots)
+    data.setPermutations(permutations)
   }
 
-  override def dataForClass(ref: EClassRef): EClassData[NodeT] = classData(ref)
+  override def dataForClass(ref: EClassRef): MutableEClassData[NodeT] = classData(ref)
   override def isCanonical(ref: EClassRef): Boolean = unionFind.isCanonical(ref)
   override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
   override def classes: Iterable[EClassRef] = classData.keys
@@ -37,7 +38,7 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     val ref = new EClassRef()
     unionFind.add(ref, slots)
 
-    val data = EClassData[NodeT](slots, Map.empty, PermutationGroup.identity(SlotMap.identity(slots)), Set.empty)
+    val data = new MutableEClassData[NodeT](slots, PermutationGroup.identity(SlotMap.identity(slots)))
     classData.put(ref, data)
 
     ref
@@ -53,10 +54,10 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
     val data = classData(ref)
     hashCons.put(node.shape, ref)
-    classData.update(ref, data.copy(nodes = data.nodes + (node.shape -> node.renaming)))
-    classData ++= node.shape.args.map(_.ref).distinct.map(c => {
+    data.addNode(node.shape, node.renaming)
+    node.shape.args.map(_.ref).distinct.foreach(c => {
       val argData = classData(c)
-      c -> argData.copy(users = argData.users + node.shape)
+      argData.addUser(node.shape)
     })
   }
 
@@ -74,10 +75,10 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
 
     val data = classData(ref)
     hashCons.remove(shape)
-    classData.update(ref, data.copy(nodes = data.nodes - shape))
-    classData ++= shape.args.map(_.ref).distinct.map(c => {
+    data.removeNode(shape)
+    shape.args.map(_.ref).distinct.foreach(c => {
       val argData = classData(c)
-      c -> argData.copy(users = argData.users - shape)
+      argData.removeUser(shape)
     })
   }
 
