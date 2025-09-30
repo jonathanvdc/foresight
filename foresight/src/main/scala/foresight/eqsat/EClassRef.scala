@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap
  * used as keys in maps or sets, but note that their equivalence meaning may change
  * as the e-graph evolves.
  */
-final case class EClassRef private[eqsat] (private[eqsat] val id: Int) extends AnyVal {
+final case class EClassRef private[eqsat] (id: Int) extends AnyVal {
   override def toString: String = s"EClassRef($id)"
 
   /**
