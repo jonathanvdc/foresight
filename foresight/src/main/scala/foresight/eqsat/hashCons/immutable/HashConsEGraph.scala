@@ -18,6 +18,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](private 
                                                                         private val classData: Map[EClassRef, EClassData[NodeT]])
   extends EGraph[NodeT] with EGraphLike[NodeT, HashConsEGraph[NodeT]] with ReadOnlyHashConsEGraph[NodeT] {
 
+  type ClassData = EClassData[NodeT]
+
   override def emptied: HashConsEGraph[NodeT] = HashConsEGraph.empty
 
   // We guarantee the following invariants:

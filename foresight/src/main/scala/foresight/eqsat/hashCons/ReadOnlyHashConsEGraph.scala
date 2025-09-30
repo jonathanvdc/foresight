@@ -16,6 +16,11 @@ import foresight.util.Debug
  */
 private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   /**
+   * The type of the class data associated with each e-class in the e-graph.
+   */
+  type ClassData <: AbstractEClassData[NodeT]
+
+  /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
    * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so
    * and simply performs a hash cons lookup.
@@ -30,7 +35,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
    * @param ref The e-class reference whose data is to be retrieved.
    * @return The data associated with the e-class reference.
    */
-  def dataForClass(ref: EClassRef): EClassData[NodeT]
+  def dataForClass(ref: EClassRef): ClassData
 
   def isCanonical(ref: EClassRef): Boolean
 
@@ -164,7 +169,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       val c = nodeToRef(node)
       val mapping = dataForClass(c).nodes(node)
       ShapeCall(node, mapping).asNode
-    })
+    }).toSet
   }
 
   final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = {

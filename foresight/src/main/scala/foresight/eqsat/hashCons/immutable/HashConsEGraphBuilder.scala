@@ -10,6 +10,8 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
                                                  private var classData: Map[EClassRef, EClassData[NodeT]])
   extends AbstractMutableHashConsEGraph[NodeT] {
 
+  type ClassData = EClassData[NodeT]
+
   def result(): HashConsEGraph[NodeT] = {
     new HashConsEGraph(unionFind.toImmutable, hashCons, classData)
   }
