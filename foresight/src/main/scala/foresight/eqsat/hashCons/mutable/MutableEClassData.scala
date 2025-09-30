@@ -202,7 +202,7 @@ private[eqsat] final class MutableEClassData[NodeT](
       }
     } else {
       // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      nodes.view.keys.filter(_.nodeType == nodeType)
+      nodes.keys.view.filter(_.nodeType == nodeType)
     }
   }
 }
