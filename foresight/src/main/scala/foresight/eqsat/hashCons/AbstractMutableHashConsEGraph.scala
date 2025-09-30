@@ -6,7 +6,7 @@ import foresight.eqsat.mutable.EGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.Debug
 
-import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
+import scala.collection.mutable.{HashMap, HashSet}
 
 /**
  * A mutable hash-consed e-graph. This class provides methods for adding nodes, unifying e-classes, and maintaining
@@ -234,8 +234,8 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   }
 
   private def unionManyImpl(pairs: Seq[(EClassCall, EClassCall)]): Set[Set[EClassCall]] = {
-    // The pairs of e-classes that were unified.
-    val unifiedPairs = ArrayBuffer.empty[(EClassCall, EClassCall)]
+    // The set of e-classes that were unified.
+    val unified = HashSet.empty[EClassRef]
 
     // A map from e-class references to their old slots before unification. This is used to construct the return value.
     val oldSlots = HashMap.empty[EClassRef, SlotSet]
@@ -297,7 +297,8 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       unionFind.update(subRoot.ref, EClassCall(domRoot.ref, map))
       oldSlots(subRoot.ref) = slots(subRoot.ref)
       oldSlots(domRoot.ref) = slots(domRoot.ref)
-      unifiedPairs.append((subRoot, domRoot))
+      unified.add(subRoot.ref)
+      unified.add(domRoot.ref)
 
       // Translate the subordinate class' nodes to the dominant class' slots. We use composeFresh to cover potential
       // redundant slots in the subordinate class' nodes.
@@ -485,8 +486,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
         "The number of nodes in the class data must be greater than or equal to the number of e-classes.")
     }
 
-    val touched = unifiedPairs.flatMap(p => Seq(p._1, p._2)).map(_.ref).toSet
-    touched.map(c => (canonicalize(c), c)).groupBy(_._1.ref).values.map(_.map {
+    unified.map(c => (canonicalize(c), c)).toSet.groupBy(_._1.ref).values.map(_.map {
       case (canonical, original) =>
         EClassCall(original, SlotMap.identity(oldSlots(original)).composeFresh(canonical.args.inverse))
     }).toSet
