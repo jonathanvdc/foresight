@@ -69,7 +69,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    */
   protected def unlinkEmptyClasses(): Unit
 
-  protected override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
+  protected final override def callWithoutSlots(ref: EClassRef): EClassCall = unionFind.callWithoutSlots(ref)
 
   override def tryAddMany(nodes: Seq[ENode[NodeT]],
                           parallelize: ParallelMap): Seq[AddNodeResult] = {

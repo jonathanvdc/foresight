@@ -21,7 +21,11 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
    * @param ref The e-class reference.
    * @return An e-class call with the given e-class reference and an empty slot map.
    */
-  def callWithoutSlots(ref: EClassRef): EClassCall = ref.callWithoutSlots
+  final def callWithoutSlots(ref: EClassRef): EClassCall = {
+    val call = getParentOrNull(ref)
+    if (call != null && call.ref == ref && call.args.isEmpty) call
+    else ref.callWithoutSlots
+  }
 
   /**
    * Checks if the given e-class is the canonical representative of its set. Assumes that the e-class is in the union-find.

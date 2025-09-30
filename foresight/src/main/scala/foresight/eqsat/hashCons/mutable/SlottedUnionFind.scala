@@ -30,14 +30,4 @@ private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUni
     parents.append(EClassCall(key, SlotMap.identity(slots)))
     key
   }
-
-  override def callWithoutSlots(ref: EClassRef): EClassCall = {
-    if (ref.id < parents.size) {
-      val call = parents(ref.id)
-      if (call.ref == ref && call.args.isEmpty)
-        return call
-    }
-
-    ref.callWithoutSlots
-  }
 }
