@@ -54,8 +54,7 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
    * @return The reference to the new e-class.
    */
   protected override def createEmptyClass(slots: SlotSet): EClassRef = {
-    val ref = new EClassRef(unionFind.size)
-    unionFind.add(ref, slots)
+    val ref = unionFind.add(slots)
 
     val data = EClassData[NodeT](slots, Map.empty, PermutationGroup.identity(SlotMap.identity(slots)), Set.empty)
     classData = classData + (ref -> data)

@@ -35,8 +35,7 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
   override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = hashCons.getOrElse(node, default)
 
   protected override def createEmptyClass(slots: SlotSet): EClassRef = {
-    val ref = new EClassRef(unionFind.size)
-    unionFind.add(ref, slots)
+    val ref = unionFind.add(slots)
 
     val data = new MutableEClassData[NodeT](slots, PermutationGroup.identity(SlotMap.identity(slots)))
     classData.put(ref, data)

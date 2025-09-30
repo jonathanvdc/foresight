@@ -273,7 +273,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       if (Debug.isEnabled) {
         assert(finalSlots.subsetOf(data.slots))
       }
-      unionFind.add(ref, finalSlots)
+      unionFind.update(ref, EClassCall(ref, SlotMap.identity(finalSlots)))
 
       // Reducing the slots of an e-class may decanonicalize the e-class' users. Add the potentially affected nodes to
       // the repair worklist.
