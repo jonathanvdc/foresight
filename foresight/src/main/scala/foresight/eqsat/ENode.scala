@@ -297,9 +297,26 @@ final class ENode[+NodeT] private (
   private lazy val _hash: Int = {
     var h = 1
     h = 31 * h + (if (nodeType == null) 0 else nodeType.hashCode)
-    h = 31 * h + java.util.Arrays.hashCode(_definitions.asInstanceOf[Array[AnyRef]])
-    h = 31 * h + java.util.Arrays.hashCode(_uses.asInstanceOf[Array[AnyRef]])
-    h = 31 * h + java.util.Arrays.hashCode(_args.asInstanceOf[Array[AnyRef]])
+
+    var i = 0
+    while (i < _definitions.length) {
+      h = 31 * h + _definitions(i).hashCode()
+      i += 1
+    }
+
+    i = 0
+    while (i < _uses.length) {
+      h = 31 * h + _uses(i).hashCode()
+      i += 1
+    }
+
+    i = 0
+    while (i < _args.length) {
+      val arg = _args(i)
+      h = 31 * h + arg.ref.id
+      h = 31 * h + arg.args.hashCode()
+      i += 1
+    }
     h
   }
   override def hashCode(): Int = _hash
