@@ -130,7 +130,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     if (!shape.hasSlots) {
       val newRef = createEmptyClass(SlotSet.empty)
       addNodeToClass(newRef, canonicalNode)
-      return newRef.callWithoutSlots
+      return callWithoutSlots(newRef)
     }
 
     // Generate slots for the e-class.

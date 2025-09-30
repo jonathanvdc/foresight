@@ -21,6 +21,11 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   type ClassData <: AbstractEClassData[NodeT]
 
   /**
+   * Retrieves or constructs an e-class call with no slots for a given e-class reference.
+   */
+  protected final def callWithoutSlots(ref: EClassRef): EClassCall = ref.callWithoutSlots
+
+  /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
    * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so
    * and simply performs a hash cons lookup.
@@ -141,7 +146,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     }
 
     if (!renamedShape.shape.hasSlots) {
-      return ref.callWithoutSlots
+      return callWithoutSlots(ref)
     }
 
     val refData = dataForClass(ref)
@@ -160,7 +165,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       return null
     }
 
-    ref.callWithoutSlots
+    callWithoutSlots(ref)
   }
 
   final override def users(ref: EClassRef): Set[ENode[NodeT]] = {
