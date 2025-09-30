@@ -155,54 +155,54 @@ private[eqsat] final class MutableEClassData[NodeT](
     appliedNodesWithIdCache.set(null)
   }
 
-    /**
-     * Get the applied nodes for a given canonical e-class call to this e-class.
-     *
-     * @param canonicalApp The canonical e-class call.
-     * @return The applied nodes for the given e-class call.
-     */
-    override def appliedNodes(canonicalApp: EClassCall): Iterable[ENode[NodeT]] = {
-      assert(canonicalApp.args.size == slots.size)
+  /**
+   * Get the applied nodes for a given canonical e-class call to this e-class.
+   *
+   * @param canonicalApp The canonical e-class call.
+   * @return The applied nodes for the given e-class call.
+   */
+  override def appliedNodes(canonicalApp: EClassCall): Iterable[ENode[NodeT]] = {
+    assert(canonicalApp.args.size == slots.size)
 
-      if (hasSlots) {
-        if (canonicalApp.args.isIdentity) {
-          // Common case: the e-class call's arguments are the identity mapping.
-          // We can return a precomputed set of applied nodes with identity renaming.
-          appliedNodesWithIdentity
-        } else {
-          // E-class has slots and the e-class call's arguments are not the identity mapping.
-          // We rename all applied nodes by the e-class call's arguments.
-          appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
-        }
+    if (hasSlots) {
+      if (canonicalApp.args.isIdentity) {
+        // Common case: the e-class call's arguments are the identity mapping.
+        // We can return a precomputed set of applied nodes with identity renaming.
+        appliedNodesWithIdentity
       } else {
-        // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-        nodes.keys
+        // E-class has slots and the e-class call's arguments are not the identity mapping.
+        // We rename all applied nodes by the e-class call's arguments.
+        appliedNodes.map(_.renamePartial(canonicalApp.args).asNode)
       }
+    } else {
+      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
+      nodes.keys
     }
+  }
 
-    /**
-     * Get the applied nodes for a given canonical e-class call to this e-class, returning nodes of a specific type.
-     *
-     * @param canonicalApp The canonical e-class call.
-     * @param nodeType     The type of nodes to return.
-     * @return The applied nodes of type nodeType for the given e-class call.
-     */
-    override def appliedNodes(canonicalApp: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = {
-      assert(canonicalApp.args.size == slots.size)
+  /**
+   * Get the applied nodes for a given canonical e-class call to this e-class, returning nodes of a specific type.
+   *
+   * @param canonicalApp The canonical e-class call.
+   * @param nodeType     The type of nodes to return.
+   * @return The applied nodes of type nodeType for the given e-class call.
+   */
+  override def appliedNodes(canonicalApp: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = {
+    assert(canonicalApp.args.size == slots.size)
 
-      if (hasSlots) {
-        if (canonicalApp.args.isIdentity) {
-          // Common case: the e-class call's arguments are the identity mapping.
-          // We can return a precomputed set of applied nodes with identity renaming.
-          appliedNodesWithIdentity.filter(_.nodeType == nodeType)
-        } else {
-          // E-class has slots and the e-class call's arguments are not the identity mapping.
-          // We rename all applied nodes by the e-class call's arguments.
-          appliedNodes.filter(_.shape.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
-        }
+    if (hasSlots) {
+      if (canonicalApp.args.isIdentity) {
+        // Common case: the e-class call's arguments are the identity mapping.
+        // We can return a precomputed set of applied nodes with identity renaming.
+        appliedNodesWithIdentity.view.filter(_.nodeType == nodeType)
       } else {
-        // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-        nodes.keys.filter(_.nodeType == nodeType)
+        // E-class has slots and the e-class call's arguments are not the identity mapping.
+        // We rename all applied nodes by the e-class call's arguments.
+        appliedNodes.view.filter(_.shape.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
       }
+    } else {
+      // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
+      nodes.view.keys.filter(_.nodeType == nodeType)
     }
+  }
 }

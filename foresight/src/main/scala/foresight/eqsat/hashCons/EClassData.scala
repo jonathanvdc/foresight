@@ -63,15 +63,15 @@ private[eqsat] final case class EClassData[NodeT](slots: SlotSet,
       if (canonicalApp.args.isIdentity) {
         // Common case: the e-class call's arguments are the identity mapping.
         // We can return a precomputed set of applied nodes with identity renaming.
-        appliedNodesWithIdentity.filter(_.nodeType == nodeType)
+        appliedNodesWithIdentity.view.filter(_.nodeType == nodeType)
       } else {
         // E-class has slots and the e-class call's arguments are not the identity mapping.
         // We rename all applied nodes by the e-class call's arguments.
-        preAppliedNodes.filter(_.shape.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
+        preAppliedNodes.view.filter(_.shape.nodeType == nodeType).map(_.renamePartial(canonicalApp.args).asNode)
       }
     } else {
       // E-class has no slots: all nodes are the same regardless of the e-class call's arguments.
-      nodes.keys.filter(_.nodeType == nodeType)
+      nodes.view.keys.filter(_.nodeType == nodeType)
     }
   }
 }
