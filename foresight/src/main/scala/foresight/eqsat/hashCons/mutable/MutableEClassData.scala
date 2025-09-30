@@ -22,6 +22,9 @@ private[eqsat] final class MutableEClassData[NodeT](
   private val _nodes: mutable.HashMap[ENode[NodeT], SlotMap] = mutable.HashMap.empty
   private val _users: mutable.HashSet[ENode[NodeT]] = mutable.HashSet.empty
 
+  // Counter that remembers how many nodes with slots have been added.
+  private var nodeWithSlotCounter: Int = 0
+
   // These hold the cached, materialized views
   private val appliedNodesCache =
     new AtomicReference[Seq[ShapeCall[NodeT]]](null)
@@ -60,7 +63,7 @@ private[eqsat] final class MutableEClassData[NodeT](
    * @return The nodes of the e-class and their renamings.
    */
   def hasSlots: Boolean = {
-    _nodes.exists { case (_, ren) => !ren.isEmpty }
+    nodeWithSlotCounter > 0
   }
 
   // ----------------- Mutations (always bump version) -----------------
@@ -79,13 +82,27 @@ private[eqsat] final class MutableEClassData[NodeT](
 
   /** Insert a node -> renaming mapping. */
   def addNode(node: ENode[NodeT], renaming: SlotMap): Unit = {
-    _nodes.update(node, renaming)
+    _nodes.put(node, renaming) match {
+      case Some(oldRen) if !oldRen.isEmpty =>
+        // Replacing an existing node with slots: decrement the number of nodes with slots
+        nodeWithSlotCounter -= 1
+      case _ => // do nothing
+    }
+    if (!renaming.isEmpty) {
+      // Adding a node with slots: increment the number of nodes with slots
+      nodeWithSlotCounter += 1
+    }
     bumpVersion()
   }
 
   /** Remove a node. */
   def removeNode(node: ENode[NodeT]): Unit = {
-    if (_nodes.remove(node).isDefined) bumpVersion()
+    _nodes.remove(node) match {
+      case Some(ren) if !ren.isEmpty =>
+        nodeWithSlotCounter -= 1
+        bumpVersion()
+      case _ => // do nothing
+    }
   }
 
   /** Add a user e-node. */
