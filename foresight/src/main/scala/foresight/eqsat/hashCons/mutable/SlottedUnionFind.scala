@@ -13,7 +13,6 @@ import scala.collection.mutable
   */
 private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUnionFind {
   private val parents: mutable.ArrayBuffer[EClassCall] = mutable.ArrayBuffer.empty
-  private val callsWithoutSlots: mutable.ArrayBuffer[EClassCall] = mutable.ArrayBuffer.empty
 
   override def update(key: EClassRef, value: EClassCall): Unit = {
     parents.update(key.id, value)
@@ -27,11 +26,18 @@ private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUni
   override def size: Int = parents.size
 
   override def add(slots: SlotSet): EClassRef = {
-    val key = new EClassRef(size)
+    val key = EClassRef(size)
     parents.append(EClassCall(key, SlotMap.identity(slots)))
-    callsWithoutSlots.append(EClassCall(key, SlotMap.empty))
     key
   }
 
-  override def callWithoutSlots(ref: EClassRef): EClassCall = callsWithoutSlots(ref.id)
+  override def callWithoutSlots(ref: EClassRef): EClassCall = {
+    if (ref.id < parents.size) {
+      val call = parents(ref.id)
+      if (call.ref == ref && call.args.isEmpty)
+        return call
+    }
+
+    ref.callWithoutSlots
+  }
 }
