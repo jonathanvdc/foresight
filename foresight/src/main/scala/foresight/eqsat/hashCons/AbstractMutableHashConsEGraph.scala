@@ -246,7 +246,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     val nodesRepairWorklist = HashSet.empty[ENode[NodeT]]
 
     def touchedClass(ref: EClassRef): Unit = {
-      nodesRepairWorklist.addAll(dataForClass(ref).users)
+      nodesRepairWorklist ++= dataForClass(ref).users
     }
 
     def shrinkSlots(ref: EClassRef, slots: SlotSet): Unit = {
@@ -486,9 +486,13 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
         "The number of nodes in the class data must be greater than or equal to the number of e-classes.")
     }
 
-    unified.map(c => (canonicalize(c), c)).toSet.groupBy(_._1.ref).values.map(_.map {
-      case (canonical, original) =>
-        EClassCall(original, SlotMap.identity(oldSlots(original)).composeFresh(canonical.args.inverse))
-    }).toSet
+    // Construct the return value by grouping all unified e-classes by their canonical representative.
+    val grouped = HashMap.empty[EClassRef, HashSet[EClassCall]]
+    for (c <- unified) {
+      val canonical = canonicalize(c)
+      val set = grouped.getOrElseUpdate(canonical.ref, HashSet.empty)
+      set += EClassCall(c, SlotMap.identity(oldSlots(c)).composeFresh(canonical.args.inverse))
+    }
+    grouped.values.map(_.toSet).toSet
   }
 }
