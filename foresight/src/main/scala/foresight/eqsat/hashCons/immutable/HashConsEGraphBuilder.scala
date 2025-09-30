@@ -100,7 +100,7 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
 
   override def emptied: this.type = {
     new HashConsEGraphBuilder[NodeT](
-      new SlottedUnionFindBuilder(Map.empty),
+      new SlottedUnionFindBuilder(Vector.empty),
       Map.empty,
       Map.empty).asInstanceOf[this.type]
   }

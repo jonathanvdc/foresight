@@ -4,17 +4,18 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.hashCons.AbstractMutableSlottedUnionFind
 import foresight.eqsat.{EClassCall, EClassRef}
 
-private final class SlottedUnionFindBuilder(var parents: Map[EClassRef, EClassCall])
+private final class SlottedUnionFindBuilder(var parents: Vector[EClassCall])
   extends AbstractMutableSlottedUnionFind {
 
   def toImmutable: SlottedUnionFind = SlottedUnionFind(parents)
 
   override def update(key: EClassRef, value: EClassCall): Unit = {
-    parents = parents + (key -> value)
+    parents = parents.updated(key.id, value)
   }
 
   override protected def getParentOrNull(ref: EClassRef): EClassCall = {
-    parents.getOrElse(ref, null)
+    if (ref.id >= parents.size) null
+    else parents(ref.id)
   }
 
   override def size: Int = parents.size
@@ -26,7 +27,7 @@ private final class SlottedUnionFindBuilder(var parents: Map[EClassRef, EClassCa
    */
   override def add(slots: SlotSet): EClassRef = {
     val key = new EClassRef(size)
-    update(key, EClassCall(key, SlotMap.identity(slots)))
+    parents = parents :+ EClassCall(key, SlotMap.identity(slots))
     key
   }
 }
