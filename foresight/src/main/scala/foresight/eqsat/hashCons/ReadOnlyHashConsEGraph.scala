@@ -89,15 +89,16 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   final def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import foresight.util.ordering.SeqOrdering
 
-    if (node.args.forall(isCanonical) && !node.hasSlots) {
-      return ShapeCall(node, SlotMap.empty)
+    val hasSlots = node.hasSlots
+    if (hasSlots) {
+      val nodeWithCanonicalizedArgs = node.mapArgs(canonicalize)
+      groupCompatibleVariants(nodeWithCanonicalizedArgs)
+        .toSeq
+        .map(_.asShapeCall)
+        .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
+    } else {
+      ShapeCall(canonicalizeWithoutSlots(node), SlotMap.empty)
     }
-
-    val nodeWithCanonicalizedArgs = node.mapArgs(canonicalize)
-    groupCompatibleVariants(nodeWithCanonicalizedArgs)
-      .toSeq
-      .map(_.asShapeCall)
-      .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
 
   /**
