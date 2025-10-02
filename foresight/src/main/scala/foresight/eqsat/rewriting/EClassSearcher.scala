@@ -3,6 +3,7 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.EClassCall
 import foresight.eqsat.readonly.EGraph
+import foresight.util.collections.UnsafeSeqFromArray
 
 /**
  * A searcher that searches for matches within individual e-classes.
@@ -66,6 +67,6 @@ trait EClassSearcher[
   }
 
   final override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
-    search(egraph.classes.map(egraph.canonicalize), egraph, parallelize)
+    search(UnsafeSeqFromArray(egraph.classes.view.map(egraph.canonicalize).toArray), egraph, parallelize)
   }
 }
