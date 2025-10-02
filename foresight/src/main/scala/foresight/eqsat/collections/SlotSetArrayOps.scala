@@ -144,7 +144,8 @@ private[collections] object SlotSetArrayOps {
 
   /** a ∩ b -> new sorted unique array. */
   def intersect(a: Array[Slot], b: Array[Slot]): Array[Slot] = {
-    if (a.length == 0 || b.length == 0) return Array.empty[Slot]
+    if (a.length == 0) return a
+    if (b.length == 0) return b
     if (isSubset(a, b)) return a
     if (isSubset(b, a)) return b
 
