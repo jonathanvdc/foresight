@@ -1,34 +1,34 @@
-package foresight.eqsat.examples.vnorm
+package foresight.eqsat.examples.vector
 
 import foresight.eqsat.lang._
 import foresight.eqsat.rewriting.patterns.Pattern
 import foresight.eqsat.{EClassCall, MixedTree}
 
-sealed trait ArithExpr derives Language
+sealed trait VectorArithExpr derives Language
 
 /** Floating-point literal. */
-final case class FloatLiteral(value: Double) extends ArithExpr
+final case class FloatLiteral(value: Double) extends VectorArithExpr
 
 /** A variable. */
-final case class Var(sym: String) extends ArithExpr
+final case class Var(sym: String) extends VectorArithExpr
 
 /** Addition node. */
-final case class Add(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
+final case class Add(lhs: VectorArithExpr, rhs: VectorArithExpr) extends VectorArithExpr
 
 /** Multiplication node. */
-final case class Mul(lhs: ArithExpr, rhs: ArithExpr) extends ArithExpr
+final case class Mul(lhs: VectorArithExpr, rhs: VectorArithExpr) extends VectorArithExpr
 
 /** Division node. */
-final case class Div(numer: ArithExpr, denom: ArithExpr) extends ArithExpr
+final case class Div(numer: VectorArithExpr, denom: VectorArithExpr) extends VectorArithExpr
 
 /** Square root node. */
-final case class Sqrt(arg: ArithExpr) extends ArithExpr
+final case class Sqrt(arg: VectorArithExpr) extends VectorArithExpr
 
 /** Fast inverse square root node. */
-final case class FastInvSqrt(arg: ArithExpr) extends ArithExpr
+final case class FastInvSqrt(arg: VectorArithExpr) extends VectorArithExpr
 
 /** 3D vector node. */
-final case class Vector3(x: ArithExpr, y: ArithExpr, z: ArithExpr) extends ArithExpr
+final case class Vector3(x: VectorArithExpr, y: VectorArithExpr, z: VectorArithExpr) extends VectorArithExpr
 
 /**
  * An explicit reference to an existing e-class in the e-graph.
@@ -37,7 +37,7 @@ final case class Vector3(x: ArithExpr, y: ArithExpr, z: ArithExpr) extends Arith
  * into another expression. Deriving [[Box]] ensures that matcher/applier treat `Ref`
  * as a leaf (no recursive matching into the referenced class).
  */
-final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
+final case class Ref(eClass: EClassCall) extends VectorArithExpr derives Box
 
 /**
  * A pattern variable exposed at the surface AST level.
@@ -46,7 +46,7 @@ final case class Ref(eClass: EClassCall) extends ArithExpr derives Box
  * placeholders into expressions. Because it derives [[Box]], it is also treated as
  * a leaf during matching. Use [[fresh]] to create a uniquely-named variable.
  */
-final case class PatternVar(variable: Pattern.Var) extends ArithExpr derives Box
+final case class PatternVar(variable: Pattern.Var) extends VectorArithExpr derives Box
 
 object PatternVar {
   /**
@@ -66,7 +66,7 @@ object PatternVar {
  * Analyses can produce `Fact[A]` nodes when convenient. For instance, constant-propagation
  * might compute an `Option[BigInt]` and rules can consult/box that information.
  */
-final case class Fact[A](value: A) extends ArithExpr
+final case class Fact[A](value: A) extends VectorArithExpr
 
 /**
  * Companion configures analysis boxing for this surface language.
@@ -75,20 +75,20 @@ final case class Fact[A](value: A) extends ArithExpr
  * as `Fact[A]` nodes inside this AST. This is optional but makes certain examples
  * and rules terser.
  */
-object ArithExpr {
-  given AnalysisBox[ArithExpr] with
+object VectorArithExpr {
+  given AnalysisBox[VectorArithExpr] with
     type Box[A] = Fact[A]
 
     def box[A](a: A): Fact[A] = Fact(a)
 }
 
 /** Infix operators for building trees concisely in rules/tests. */
-extension (lhs: ArithExpr)
+extension (lhs: VectorArithExpr)
   /** {{{ x + y }}} builds an [[Add]] node. */
-  infix def +(rhs: ArithExpr): ArithExpr = Add(lhs, rhs)
+  infix def +(rhs: VectorArithExpr): VectorArithExpr = Add(lhs, rhs)
   /** {{{ x * y }}} builds a [[Mul]] node. */
-  infix def *(rhs: ArithExpr): ArithExpr = Mul(lhs, rhs)
+  infix def *(rhs: VectorArithExpr): VectorArithExpr = Mul(lhs, rhs)
   /** {{{ x / y }}} builds a [[Div]] node. */
-  infix def /(rhs: ArithExpr): ArithExpr = Div(lhs, rhs)
+  infix def /(rhs: VectorArithExpr): VectorArithExpr = Div(lhs, rhs)
 
-type ArithIR = LanguageOp[ArithExpr]
+type ArithIR = LanguageOp[VectorArithExpr]

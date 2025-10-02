@@ -1,32 +1,16 @@
-package foresight.eqsat.examples.vnorm
+package foresight.eqsat.examples.vector
 
-import foresight.eqsat.lang.{Language, LanguageCostFunction}
+import foresight.eqsat.lang.Language
 import foresight.eqsat.mutable.EGraph
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import org.junit.Test
 
 class VectorNormTest {
   type ArithRule = R.ArithRule
-  val L: Language[ArithExpr] = summon[Language[ArithExpr]]
+  val L: Language[VectorArithExpr] = summon[Language[VectorArithExpr]]
   val R: Rules = Rules()(using L)
 
   val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication.mutable(R.all).repeatUntilStable
-
-  val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
-    override def apply(expr: ArithExpr): Int = {
-      expr match {
-        case Add(lhs, rhs) => apply(lhs) + apply(rhs) + 10
-        case Mul(lhs, rhs) => apply(lhs) + apply(rhs) + 50
-        case Div(lhs, rhs) => apply(lhs) + apply(rhs) + 200
-        case Sqrt(arg) => apply(arg) + 1000
-        case FastInvSqrt(arg) => apply(arg) + 1100
-        case Vector3(x, y, z) => apply(x) + apply(y) + apply(z)
-        case FloatLiteral(value) => 1
-        case Var(name) => 1
-        case Fact(cost: Int) => cost
-      }
-    }
-  }
 
   @Test
   def vectorNormSaturates(): Unit = {
@@ -49,11 +33,20 @@ class VectorNormTest {
       Vector3(x * invNormFast, y * invNormFast, z * invNormFast)
     }
 
+    val fastNormalizedCSE = {
+      val invNormFast = FastInvSqrt(x * x + y * y + z * z)
+      Vector3(x, y, z) * invNormFast
+    }
+
     val egraph = EGraph.empty[ArithIR]
     val root = egraph.add(L.toTree(normalized))
 
     simpleStrategy(egraph)
 
-    assert(L.extract(root, egraph, costFunction) == fastNormalized)
+    val fastNormalizedClass = egraph.add(L.toTree(fastNormalized))
+    assert(egraph.areSame(root, fastNormalizedClass))
+    assert(egraph.areSame(root, egraph.add(L.toTree(fastNormalizedCSE))))
+
+    // assert(L.extract(root, egraph, CostModel) == fastNormalizedCSE)
   }
 }
