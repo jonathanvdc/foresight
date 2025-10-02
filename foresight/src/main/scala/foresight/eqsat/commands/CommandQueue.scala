@@ -6,6 +6,7 @@ import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import foresight.eqsat.readonly
 
 import scala.collection.mutable
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A composable batch of [[Command]]s that itself behaves as a single [[Command]].
@@ -59,7 +60,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    */
   def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
     val result = EClassSymbol.virtual()
-    (result, CommandQueue(commands :+ AddManyCommand(Seq(result -> node))))
+    (result, CommandQueue(commands :+ AddManyCommand(ArraySeq(result -> node))))
   }
 
   /**
@@ -242,7 +243,8 @@ object CommandQueue {
     // Our aim is to partition the add commands into batches of independent additions. We do this by tracking the
     // batches in which each node is defined. When we encounter a fresh addition, we add it to batch i + 1 such that
     // i is the highest batch in which any of its dependencies are defined.
-    val batches = mutable.ArrayBuffer.empty[mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
+    type ArraySeqBuilder = mutable.Builder[(EClassSymbol.Virtual, ENodeSymbol[NodeT]), ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
+    val batches = mutable.ArrayBuffer.empty[ArraySeqBuilder]
     val defs = mutable.Map.empty[EClassSymbol, Int]
 
     for (command <- group) {
@@ -252,10 +254,11 @@ object CommandQueue {
 
       val batchIndex = highestDependency + 1
       if (batchIndex == batches.size) {
-        val newBatch = mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])](command.nodes: _*)
+        val newBatch = ArraySeq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+        newBatch.addAll(command.nodes)
         batches += newBatch
       } else {
-        batches(batchIndex).appendAll(command.nodes)
+        batches(batchIndex).addAll(command.nodes)
       }
 
       for (node <- command.nodes) {
@@ -264,7 +267,7 @@ object CommandQueue {
     }
 
     // Merge all the addition commands in each batch.
-    batches.map(_.toSeq).map(AddManyCommand[NodeT]).toSeq
+    batches.map(_.result()).map(AddManyCommand[NodeT]).toSeq
   }
 
   /**
@@ -286,7 +289,7 @@ object CommandQueue {
     val addPairs = addCommands.flatMap(_.nodes)
     addPairs match {
       case Seq()   => remainingCommands
-      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs.toVector)
+      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](ArraySeq(addPairs: _*))
     }
   }
 

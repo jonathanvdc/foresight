@@ -5,6 +5,7 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly
 
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable.{Map => MutableMap}
 
 /**
@@ -23,7 +24,7 @@ import scala.collection.mutable.{Map => MutableMap}
  *              are resolved via the reification map provided to [[apply]].
  */
 final case class AddManyCommand[NodeT](
-                                        nodes: Seq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+                                        nodes: ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
                                       ) extends Command[NodeT] {
 
   /** All argument symbols used by every node in this batch. */
@@ -99,7 +100,7 @@ final case class AddManyCommand[NodeT](
                        ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
 
     val resolvedBuilder = Map.newBuilder[EClassSymbol.Virtual, EClassCall]
-    val unresolvedBuilder = Seq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+    val unresolvedBuilder = ArraySeq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
 
     def resolveAllOrNull(args: Seq[EClassSymbol]): Seq[EClassCall] = {
       val resolvedArgs = Seq.newBuilder[EClassCall]

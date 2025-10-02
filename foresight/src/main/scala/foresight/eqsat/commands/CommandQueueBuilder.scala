@@ -75,7 +75,7 @@ final class CommandQueueBuilder[NodeT] {
    */
   def add(node: ENodeSymbol[NodeT]): EClassSymbol = {
     val result = EClassSymbol.virtual()
-    append(AddManyCommand(Seq(result -> node)))
+    append(AddManyCommand(ArraySeq(result -> node)))
     result
   }
 
@@ -93,7 +93,7 @@ final class CommandQueueBuilder[NodeT] {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         val result = EClassSymbol.virtual()
-        append(AddManyCommand(Seq(result -> ENodeSymbol(t, defs, uses, args.map(add)))))
+        append(AddManyCommand(ArraySeq(result -> ENodeSymbol(t, defs, uses, args.map(add)))))
         result
 
       case MixedTree.Atom(call) =>
@@ -148,7 +148,7 @@ final class CommandQueueBuilder[NodeT] {
 
     val result = EClassSymbol.virtual()
     val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, UnsafeSeqFromArray(args))
-    append(AddManyCommand(Seq(result -> candidateNode)))
+    append(AddManyCommand(ArraySeq(result -> candidateNode)))
     result
   }
 
