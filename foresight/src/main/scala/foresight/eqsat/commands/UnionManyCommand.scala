@@ -5,6 +5,8 @@ import foresight.eqsat.{EClassCall, EClassSymbol}
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly
 
+import scala.collection.mutable.{Map => MutableMap}
+
 /**
  * A [[Command]] that unions multiple pairs of e-classes in a single batch.
  *
@@ -45,24 +47,24 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
    * val a: EClassSymbol = EClassSymbol.real(callA)
    * val b: EClassSymbol = EClassSymbol.real(callB)
    * val cmd = UnionManyCommand(Seq(a -> b))
-   * val (updated, _) = cmd.apply(egraph, Map.empty, parallel)
+   * val updated = cmd.apply(egraph, HashMap.empty, parallel)
    * }}}
    */
   override def apply(
                       egraph: mutable.EGraph[NodeT],
-                      reification: Map[EClassSymbol.Virtual, EClassCall],
+                      reification: MutableMap[EClassSymbol.Virtual, EClassCall],
                       parallelize: ParallelMap
-                    ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+                    ): Boolean = {
     val reifiedPairs = pairs
       .map { case (l, r) => (l.reify(reification), r.reify(reification)) }
       .filter { case (l, r) => !egraph.areSame(l, r) }
 
     if (reifiedPairs.isEmpty) {
-      (false, Map.empty)
+      false
     }
     else {
       egraph.unionMany(reifiedPairs, parallelize)
-      (true, Map.empty)
+      true
     }
   }
 

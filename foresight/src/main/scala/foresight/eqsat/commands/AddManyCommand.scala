@@ -5,6 +5,8 @@ import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly
 
+import scala.collection.mutable.{Map => MutableMap}
+
 /**
  * A [[Command]] that inserts multiple [[ENodeSymbol]]s into an e-graph in one batch.
  *
@@ -39,39 +41,39 @@ final case class AddManyCommand[NodeT](
    * to the [[EClassCall]] of its inserted or matched e-class.
    *
    * @param egraph Target e-graph to update.
-   * @param reification Mapping from virtual e-class symbols to concrete calls,
-   *                    used to resolve each node’s arguments before insertion.
+   * @param reification Mapping from virtual e-class symbols to concrete calls, used to resolve each node’s arguments
+   *                    before insertion. This map is mutated to include new bindings for every symbol in
+   *                    [[definitions]].
    * @param parallelize Strategy for distributing the work.
-   * @return
-   *   - `true` if at least one node was newly added, or `false` if all were already present.
-   *   - A reification map binding each node’s output symbol to its resulting e-class.
+   * @return `true` if at least one node was newly added, or `false` if all were already present.
    *
    * @example
    * {{{
    * val v = EClassSymbol.virtual()
    * val n = ENodeSymbol(nodeType, defs, uses, args = Seq(v))
    * val cmd = AddManyCommand(Seq(v -> n))
-   * val (updated, newRefs) = cmd(egraph, Map(v -> existingCall), parallel)
+   * val updated = cmd(egraph, Map(v -> existingCall), parallel)
    * }}}
    */
   override def apply(
                       egraph: mutable.EGraph[NodeT],
-                      reification: Map[EClassSymbol.Virtual, EClassCall],
+                      reification: MutableMap[EClassSymbol.Virtual, EClassCall],
                       parallelize: ParallelMap
-                    ): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+                    ): Boolean = {
     val reifiedNodes = nodes.map(_._2.reify(reification))
     val addResults = egraph.tryAddMany(reifiedNodes, parallelize)
 
-    val newReification = nodes.zip(addResults).map {
-      case ((symbol, _), result) => (symbol, result.call)
-    }.toMap
+    var anyChanges: Boolean = false
+    for (((symbol, _), result) <- nodes.zip(addResults)) {
+      reification(symbol) = result.call
 
-    val anyChanges = addResults.exists {
-      case AddNodeResult.Added(_) => true
-      case AddNodeResult.AlreadyThere(_) => false
+      result match {
+        case AddNodeResult.Added(_) => anyChanges = true
+        case AddNodeResult.AlreadyThere(_) => // no change
+      }
     }
 
-    (anyChanges, newReification)
+    anyChanges
   }
 
   /**

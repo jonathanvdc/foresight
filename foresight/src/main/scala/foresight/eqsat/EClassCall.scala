@@ -140,7 +140,7 @@ sealed trait EClassSymbol {
    * val realCall = v.reify(Map(v -> call)) // returns call
    * }}}
    */
-  final def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
+  final def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
     case call: EClassCall => call
     case virtual: EClassSymbol.Virtual => reification(virtual)
   }
@@ -155,7 +155,7 @@ sealed trait EClassSymbol {
    * @param reification Mapping from virtual symbols to concrete calls.
    * @return The resolved call, or `None` if unresolved.
    */
-  final def tryReify(reification: Map[EClassSymbol.Virtual, EClassCall]): Option[EClassCall] = this match {
+  final def tryReify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): Option[EClassCall] = this match {
     case call: EClassCall => Some(call)
     case virtual: EClassSymbol.Virtual => reification.get(virtual)
   }
@@ -170,7 +170,7 @@ sealed trait EClassSymbol {
    * @param reification Mapping from virtual symbols to concrete calls.
    * @return A real symbol if resolvable, else the original symbol.
    */
-  final def refine(reification: Map[EClassSymbol.Virtual, EClassCall]): EClassSymbol = this match {
+  final def refine(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): EClassSymbol = this match {
     case call: EClassCall => EClassSymbol.real(call)
     case virtual: EClassSymbol.Virtual => reification.get(virtual) match {
       case Some(call) => EClassSymbol.real(call)

@@ -15,15 +15,6 @@ import scala.collection.mutable
  *
  * @tparam NodeT Node type for expressions represented by the e-graph.
  * @param commands The commands in execution order (prior to [[optimized]]).
- *
- * @example
- * {{{
- * val q0 = CommandQueue.empty[MyNode]
- * val (x, q1) = q0.add(myTree)                  // add a tree, get its symbol
- * val (y, q2) = q1.add(ENodeSymbol(op, Nil, Nil, Seq(x)))
- * val q3 = q2.union(x, y).optimized             // merge unions, batch adds
- * val (updated, refs) = q3(g, Map.empty, parallel)
- * }}}
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
 
@@ -39,31 +30,20 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * For each step, the current graph and the accumulated virtual-to-real bindings are passed to the next command.
    *
    * @param egraph Initial graph snapshot.
-   * @param reification Initial virtual-to-concrete bindings available to the first command.
+   * @param reification Initial virtual-to-concrete bindings available to the first command. This map is
+   *                    mutated in place to include new bindings from each command.
    * @param parallelize Strategy for distributing work across commands that can parallelize internally.
-   * @return
-   *   - `true` if at least one command changed the graph, otherwise `false`.
-   *   - The final reification map, containing the union of all bindings produced by the sub-commands.
-   *
-   * @example
-   * {{{
-   * val (g1, r1) = {
-   *   val (maybeG, out) = queue.apply(g0, Map.empty, parallel)
-   *   (maybeG.getOrElse(g0), out)
-   * }
-   * }}}
+   * @return `true` if at least one command changed the graph, otherwise `false`.
    */
   override def apply(egraph: MutableEGraph[NodeT],
-                     reification: Map[EClassSymbol.Virtual, EClassCall],
-                     parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+                     reification: mutable.Map[EClassSymbol.Virtual, EClassCall],
+                     parallelize: ParallelMap): Boolean = {
     var anyChanges: Boolean = false
-    var newReification = reification
     for (command <- commands) {
-      val (changed, newReificationPart) = command.apply(egraph, newReification, parallelize)
+      val changed = command.apply(egraph, reification, parallelize)
       anyChanges ||= changed
-      newReification ++= newReificationPart
     }
-    (anyChanges, newReification)
+    anyChanges
   }
 
   /**

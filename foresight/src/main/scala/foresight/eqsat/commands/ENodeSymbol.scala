@@ -51,7 +51,7 @@ final case class ENodeSymbol[NodeT](
    * val node: ENode[MyOp] = symbol.reify(Map(v1 -> call1))
    * }}}
    */
-  def reify(reification: Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = {
+  def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = {
     val reifiedArgs = args.map(_.reify(reification))
     ENode(nodeType, definitions, uses, reifiedArgs)
   }

@@ -6,6 +6,8 @@ import foresight.eqsat.immutable
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly.EGraph
 
+import scala.collection.mutable.{Map => MutableMap}
+
 /**
  * A [[Command]] encapsulates a single, replayable edit to an e-graph.
  *
@@ -43,17 +45,15 @@ trait Command[NodeT] {
    *   Destination e-graph that will be mutated in place.
    * @param reification
    *   Mapping from virtual symbols to concrete calls available before this command runs. This is used
-   *   to ground virtual references present in [[uses]].
+   *   to ground virtual references present in [[uses]] and is mutated to include new bindings for every
+   *   symbol in [[definitions]].
    * @param parallelize
    *   Parallelization strategy to label and distribute any internal work.
-   * @return
-   *   A pair `(updated, outMap)` where:
-   *     - `updated` is `true` if any change occurred, or `false` for a no-op.
-   *     - `outMap` binds every symbol in [[definitions]] to its realized [[EClassCall]].
+   * @return `true` if any change occurred, or `false` for a no-op.
    */
   def apply(egraph: mutable.EGraph[NodeT],
-            reification: Map[EClassSymbol.Virtual, EClassCall],
-            parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall])
+            reification: MutableMap[EClassSymbol.Virtual, EClassCall],
+            parallelize: ParallelMap): Boolean
 
   /**
    * Executes the command against an e-graph.
@@ -79,11 +79,12 @@ trait Command[NodeT] {
      parallelize: ParallelMap
    ): (Option[Repr], Map[EClassSymbol.Virtual, EClassCall]) = {
     val mutableEGraph = mutable.FreezableEGraph[NodeT, Repr](egraph)
-    val (updated, outMap) = apply(mutableEGraph, reification, parallelize)
+    val mutableReification = MutableMap(reification.toSeq: _*)
+    val updated = apply(mutableEGraph, mutableReification, parallelize)
     if (updated) {
-      (Some(mutableEGraph.freeze()), outMap)
+      (Some(mutableEGraph.freeze()), mutableReification.toMap)
     } else {
-      (None, outMap)
+      (None, mutableReification.toMap)
     }
   }
 

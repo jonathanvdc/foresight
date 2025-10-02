@@ -8,6 +8,8 @@ import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
 import foresight.eqsat.readonly
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
+import scala.collection.mutable.HashMap
+
 /**
  * A strategy that searches for matches of a set of rules in an e-graph and applies them.
  *
@@ -171,7 +173,7 @@ object SearchAndApply {
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphT,
                           parallelize: ParallelMap): Option[EGraphT] = {
-        val (anyChanges, _) = command(egraph, Map.empty, parallelize)
+        val anyChanges = command(egraph, HashMap.empty, parallelize)
         if (anyChanges) Some(egraph) else None
       }
     }
@@ -234,7 +236,7 @@ object SearchAndApply {
                           parallelize: ParallelMap): Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]] = {
         val recorded = matches.mapValuesStrict(_.toSet)
         val mutEGraph = FreezableEGraph[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]](egraph.record(recorded))
-        val (anyChanges, _) = command(mutEGraph, Map.empty, parallelize)
+        val anyChanges = command(mutEGraph, HashMap.empty, parallelize)
         if (anyChanges) Some(mutEGraph.freeze()) else None
       }
     }
