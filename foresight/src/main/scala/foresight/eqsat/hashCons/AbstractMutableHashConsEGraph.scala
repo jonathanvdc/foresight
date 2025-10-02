@@ -66,6 +66,19 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    */
   protected def unlinkEmptyClasses(): Unit
 
+  /**
+   * Removes all nodes from an e-class. This is used when merging two e-classes.
+   * @param call The e-class call whose nodes are to be removed.
+   */
+  protected def removeAllNodesFromClass(call: EClassCall): Unit = {
+    val ref = call.ref
+    val data = dataForClass(ref)
+    val nodes = data.nodes.keys // Make a copy to avoid concurrent modification issues.
+    for (node <- nodes) {
+      removeNodeFromClass(ref, node)
+    }
+  }
+
   final override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
 
   final override def tryAddMany(nodes: Seq[ENode[NodeT]],
@@ -301,8 +314,10 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       // redundant slots in the subordinate class' nodes.
       val invMap = map.inverse
       val subData = dataForClass(subRoot.ref)
-      for ((node, bijection) <- subData.nodes) {
-        removeNodeFromClass(subRoot.ref, node)
+      val subNodeMap = subData.nodes
+      val allNodes = subData.nodes.toArray // Make a copy to avoid concurrent modification issues.
+      removeAllNodesFromClass(subRoot)
+      for ((node, bijection) <- allNodes) {
         addNodeToClass(domRoot.ref, ShapeCall(node, bijection.composeFresh(invMap)))
         nodesRepairWorklist.add(node)
       }

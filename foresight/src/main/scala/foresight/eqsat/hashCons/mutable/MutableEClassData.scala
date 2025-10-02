@@ -98,11 +98,21 @@ private[eqsat] final class MutableEClassData[NodeT](
   /** Remove a node. */
   def removeNode(node: ENode[NodeT]): Unit = {
     _nodes.remove(node) match {
-      case Some(ren) if !ren.isEmpty =>
-        nodeWithSlotCounter -= 1
+      case Some(ren) =>
+        if (!ren.isEmpty) {
+          nodeWithSlotCounter -= 1
+        }
         bumpVersion()
+
       case _ => // do nothing
     }
+  }
+
+  /** Remove all nodes. */
+  def removeAllNodes(): Unit = {
+    nodeWithSlotCounter = 0
+    bumpVersion()
+    _nodes.clear()
   }
 
   /** Add a user e-node. */
