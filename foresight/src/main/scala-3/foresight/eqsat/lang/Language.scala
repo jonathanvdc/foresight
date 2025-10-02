@@ -540,6 +540,37 @@ trait Language[E]:
     rule[EGraphT](name, lhs, rhs)
 
   /**
+   * Create a rewrite rule by supplying a lambda that receives six fresh pattern variables.
+   *
+   * This highest-arity overload avoids manual variable pluming in complex rules.
+   * If you need more than five variables, consider building helper tuples or
+   * switching to the explicit `(name, lhs, rhs)` overload.
+   *
+   * @param name Human-readable rule name.
+   * @param f    A function of five fresh variables that returns `(lhs, rhs)`.
+   * @param enc  Encoder for `Pattern.Var` leaves.
+   * @param dec  Decoder from `Pattern.Var` atoms back to surface `E`.
+   * @tparam EGraphT An e-graph type that supports this language.
+   * @example
+   * {{{
+   * val fancy =
+   *   Lang.rule("six-var-demo") { (a, b, c, d, e, f) =>
+   *     (F(a, b, c, d, e, f), F(f, e, d, c, b, a))
+   *   }
+   * }}}
+   */
+  def rule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, PatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(
+      freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar
+    )
+    rule[EGraphT](name, lhs, rhs)
+
+  /**
    * Reconstruct a surface expression `E` from an *analysis-view* of a single node.
    *
    * This helper wraps argument analysis results `args: Seq[A]` in [[AnalysisFact]] atoms and
