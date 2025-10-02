@@ -53,10 +53,14 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     val data = classData(ref)
     hashCons.put(node.shape, ref)
     data.addNode(node.shape, node.renaming)
-    node.shape.args.map(_.ref).distinct.foreach(c => {
-      val argData = classData(c)
+
+    var i = 0
+    while (i < node.shape.args.length) {
+      val arg = node.shape.args(i)
+      val argData = classData(arg.ref)
       argData.addUser(node.shape)
-    })
+      i += 1
+    }
   }
 
   /**
@@ -74,10 +78,14 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     val data = classData(ref)
     hashCons.remove(shape)
     data.removeNode(shape)
-    shape.args.map(_.ref).distinct.foreach(c => {
-      val argData = classData(c)
+
+    var i = 0
+    while (i < shape.args.length) {
+      val arg = shape.args(i)
+      val argData = classData(arg.ref)
       argData.removeUser(shape)
-    })
+      i += 1
+    }
   }
 
   /**
