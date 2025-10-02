@@ -4,6 +4,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
+import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.compat.immutable.ArraySeq
 
 /**
@@ -50,6 +51,9 @@ final class ENode[+NodeT] private (
    * @return Sequence of child e-class calls.
    */
   def args: ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
+
+  // Cached hash code to make hashing and equality fast
+  private val _hash: AtomicInteger = new AtomicInteger(0)
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -294,7 +298,7 @@ final class ENode[+NodeT] private (
     case _ => false
   }
 
-  private lazy val _hash: Int = {
+  private def computeHash(): Int = {
     var h = 1
     h = 31 * h + (if (nodeType == null) 0 else nodeType.hashCode)
 
@@ -319,7 +323,16 @@ final class ENode[+NodeT] private (
     }
     h
   }
-  override def hashCode(): Int = _hash
+
+  override def hashCode(): Int = {
+    val cached = _hash.get()
+    if (cached != 0) return cached
+
+    val h = computeHash()
+    val result = if (h == 0) 1 else h
+    _hash.compareAndSet(0, result)
+    result
+  }
 }
 
 /**
