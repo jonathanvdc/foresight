@@ -4,6 +4,7 @@ import foresight.eqsat.lang.Language
 import foresight.eqsat.mutable.EGraph as MutableEGraph
 import foresight.eqsat.immutable.EGraph as ImmutableEGraph
 import foresight.eqsat.saturation.MaximalRuleApplication
+import foresight.util.BenchmarksWithParallelMap
 import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Mode, OutputTimeUnit, Param, Scope, State}
 
 import java.util.concurrent.TimeUnit
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-class VectorBenchmarks {
+class VectorBenchmarks extends BenchmarksWithParallelMap {
   @Param(Array("true", "false"))
   var mutableEGraph: Boolean = _
 
@@ -39,11 +40,11 @@ class VectorBenchmarks {
     if (mutableEGraph) {
       val egraph = MutableEGraph.empty[ArithIR]
       val root = egraph.add(Lang.toTree(expr))
-      MaximalRuleApplication.mutable(R.all).repeatUntilStable(egraph)
+      MaximalRuleApplication.mutable(R.all).repeatUntilStable(egraph, parallelMap)
       Lang.extract(root, egraph, CostModel)
     } else {
       val (root, egraph) = Lang.toEGraph(expr)
-      val Some(saturated) = MaximalRuleApplication(R.all).repeatUntilStable(egraph)
+      val Some(saturated) = MaximalRuleApplication(R.all).repeatUntilStable(egraph, parallelMap)
       Lang.extract(root, saturated, CostModel)
     }
   }
@@ -73,6 +74,13 @@ class VectorBenchmarks {
       Vector3(x * factor, y * factor, z * factor)
     }
 
+    /**
+     * Reflection vector computation.
+     * This benchmark computes the reflection of an incident vector across a surface normal, a core operation in
+     * graphics and physics-based simulation. It combines normalization, a dot product, and vector scaling/subtraction
+     * in a compact yet algebraically rich form. Reflection vectors are used in ray tracing, environment mapping, and
+     * geometric optics.
+     */
     def reflection: VectorArithExpr = {
       val I = Var("I", Type.Vector3Type(Type.FloatType))
       val N = Var("N", Type.Vector3Type(Type.FloatType))
@@ -91,6 +99,14 @@ class VectorBenchmarks {
       Rn
     }
 
+    /**
+     * Gram–Schmidt (Orthonormalization).
+     * Gram–Schmidt is a standard linear algebra routine underlying QR decomposition and appears in scientific
+     * computing, simulation, and geometry processing.
+     * This benchmark constructs an orthonormal basis from three input vectors using the classical Gram–Schmidt
+     * procedure. It involves multiple dot products, vector projections, and repeated normalizations, stressing
+     * algebraic simplification and common-subexpression elimination.
+     */
     def gramSchmidt: VectorArithExpr = {
       val v1 = Var("v1", Type.Vector3Type(Type.FloatType))
       val v2 = Var("v2", Type.Vector3Type(Type.FloatType))
@@ -118,6 +134,16 @@ class VectorBenchmarks {
       Vector3(u1, u2, u3)
     }
 
+    /**
+     * Blinn–Phong shading model.
+     * The Blinn–Phong reflection model is a modification of the Phong reflection model that is widely used in
+     * computer graphics for its simplicity and efficiency. It approximates the way light reflects off surfaces,
+     * particularly shiny surfaces, to create realistic highlights and shading effects.
+     *
+     * This benchmark implements the Blinn–Phong shading model using vector arithmetic operations, including
+     * normalization, dot products, and scalar multiplications. It involves multiple steps to compute the final
+     * color based on surface normals, light direction, view direction, and material properties.
+     */
     def blinnPhong: VectorArithExpr = {
       val N = Var("N", Type.Vector3Type(Type.FloatType)) // surface normal
       val L = Var("L", Type.Vector3Type(Type.FloatType)) // light direction
