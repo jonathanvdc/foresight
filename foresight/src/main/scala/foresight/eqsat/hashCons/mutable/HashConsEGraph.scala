@@ -42,23 +42,17 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     ref
   }
 
-  /**
-   * Adds a node to an e-class. The node is added to the hash cons, the class data, and the argument e-classes' users.
-   *
-   * @param ref  The reference to the e-class.
-   * @param node The node to add.
-   */
-  protected override def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit = {
+  protected override def addNodeToClass(ref: EClassRef, shape: ENode[NodeT], renaming: SlotMap): Unit = {
     // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
     val data = classData(ref)
-    hashCons.put(node.shape, ref)
-    data.addNode(node.shape, node.renaming)
+    hashCons.put(shape, ref)
+    data.addNode(shape, renaming)
 
     var i = 0
-    while (i < node.shape.args.length) {
-      val arg = node.shape.args(i)
+    while (i < shape.args.length) {
+      val arg = shape.args(i)
       val argData = classData(arg.ref)
-      argData.addUser(node.shape)
+      argData.addUser(shape)
       i += 1
     }
   }

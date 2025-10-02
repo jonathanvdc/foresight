@@ -59,10 +59,10 @@ private[eqsat] final class MutableEClassData[NodeT](
   def users: collection.Set[ENode[NodeT]] = _users
 
   /**
-   * Get the nodes of the e-class, along with their renamings.
-   * @return The nodes of the e-class and their renamings.
+   * Check if the e-class has any slots, including in its nodes.
+   * @return True if the e-class has slots, false otherwise.
    */
-  def hasSlots: Boolean = {
+  private def hasSlots: Boolean = {
     nodeWithSlotCounter > 0
   }
 

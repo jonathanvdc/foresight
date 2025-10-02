@@ -87,7 +87,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     true
   }
 
-  private final def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
+  protected final def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
     if (Debug.isEnabled && node.hasSlots) {
       throw new IllegalArgumentException("Node has slots.")
     }

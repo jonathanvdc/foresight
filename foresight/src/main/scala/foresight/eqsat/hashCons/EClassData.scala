@@ -33,7 +33,7 @@ private[eqsat] final case class EClassData[NodeT](slots: SlotSet,
     preAppliedNodes.map(_.renamePartial(mapping).asNode)
   }
 
-  val hasSlots: Boolean = {
+  private val hasSlots: Boolean = {
     nodes.values.exists(!_.isEmpty)
   }
 
