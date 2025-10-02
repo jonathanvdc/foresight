@@ -49,7 +49,11 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
    */
   def vectorAxioms: Seq[ArithRule] = Seq(
     mulVectorDistributivity,
-    mulVectorDistributivity2
+    mulVectorDistributivity2,
+
+    vectorExtractX,
+    vectorExtractY,
+    vectorExtractZ
   )
 
   /**
@@ -113,4 +117,20 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
     }
   }
   val mulVectorDistributivity2: ArithRule = mulVectorDistributivity.tryReverse.get
+
+  val vectorExtractX: ArithRule = {
+    rule("vector-extract-x") { (x, y, z) =>
+      ElementAt(Vector3(x, y, z), 0) -> x
+    }
+  }
+  val vectorExtractY: ArithRule = {
+    rule("vector-extract-y") { (x, y, z) =>
+      ElementAt(Vector3(x, y, z), 1) -> y
+    }
+  }
+  val vectorExtractZ: ArithRule = {
+    rule("vector-extract-z") { (x, y, z) =>
+      ElementAt(Vector3(x, y, z), 2) -> z
+    }
+  }
 }

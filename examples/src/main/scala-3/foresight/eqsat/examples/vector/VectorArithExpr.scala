@@ -9,8 +9,8 @@ sealed trait VectorArithExpr derives Language
 /** Floating-point literal. */
 final case class FloatLiteral(value: Double) extends VectorArithExpr
 
-/** A variable. */
-final case class Var(sym: String) extends VectorArithExpr
+/** A variable of a given type. */
+final case class Var(sym: String, t: Type) extends VectorArithExpr
 
 /** Addition node. */
 final case class Add(lhs: VectorArithExpr, rhs: VectorArithExpr) extends VectorArithExpr
@@ -29,6 +29,9 @@ final case class FastInvSqrt(arg: VectorArithExpr) extends VectorArithExpr
 
 /** 3D vector node. */
 final case class Vector3(x: VectorArithExpr, y: VectorArithExpr, z: VectorArithExpr) extends VectorArithExpr
+
+/** Extracts the vector element at a given index. */
+final case class ElementAt(v: VectorArithExpr, index: Int) extends VectorArithExpr
 
 /**
  * An explicit reference to an existing e-class in the e-graph.

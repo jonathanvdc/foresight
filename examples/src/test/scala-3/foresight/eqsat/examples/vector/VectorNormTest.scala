@@ -18,9 +18,11 @@ class VectorNormTest {
     // norm(v) = sqrt(x^2 + y^2 + z^2)
     // (x, y, z) / norm(v)
 
-    val x = Var("x")
-    val y = Var("y")
-    val z = Var("z")
+    val v = Var("v", Type.Vector3Type(Type.FloatType))
+
+    val x = ElementAt(v, 0)
+    val y = ElementAt(v, 1)
+    val z = ElementAt(v, 2)
 
     val normalized = {
       val norm = Sqrt(x * x + y * y + z * z)

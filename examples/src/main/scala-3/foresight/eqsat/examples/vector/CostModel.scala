@@ -19,8 +19,16 @@ object CostModel extends LanguageCostFunction[VectorArithExpr, TypeAndCost] {
         assert(tx == ty && ty == tz)
         TypeAndCost(Type.Vector3Type(tx), cx + cy + cz + 0)
 
+      case ElementAt(v, index) =>
+        val TypeAndCost(tv, cv) = apply(v)
+        val t = tv match {
+          case Type.Vector3Type(elemType) => elemType
+          case _ => throw new RuntimeException(s"ElementAt applied to non-vector type: $tv")
+        }
+        TypeAndCost(t, cv + 1)
+
       case FloatLiteral(value) => TypeAndCost(Type.FloatType, 1)
-      case Var(name) => TypeAndCost(Type.FloatType, 1)
+      case Var(name, t) => TypeAndCost(t, 1)
       case Fact(typeAndCost: TypeAndCost) => typeAndCost
     }
   }
