@@ -1,5 +1,7 @@
 package foresight.eqsat.lang
 
+import scala.collection.immutable.ArraySeq
+
 /**
  * Canonical node representation for a surface language `E`.
  *
@@ -30,8 +32,8 @@ package foresight.eqsat.lang
  * @tparam E the surface language this node belongs to.
  */
 final class LanguageOp[E] private[lang](private[lang] val ord: Int,
-                                        private[lang] val schema: Seq[Byte],
-                                        private[lang] val payload: Seq[Any]) {
+                                        private[lang] val schema: ArraySeq[Byte],
+                                        private[lang] val payload: ArraySeq[Any]) {
 
   override def equals(obj: Any): Boolean = obj match {
     case that: LanguageOp[_] =>
@@ -66,7 +68,7 @@ object LanguageOp {
    * @tparam E The surface language this node belongs to.
    * @return A new `LanguageOp` instance.
    */
-  def apply[E](ord: Int, schema: Seq[Byte], payload: Seq[Any]): LanguageOp[E] =
+  def apply[E](ord: Int, schema: ArraySeq[Byte], payload: ArraySeq[Any]): LanguageOp[E] =
     new LanguageOp[E](ord, schema, payload)
 
   /**
