@@ -19,7 +19,7 @@ package foresight.eqsat.examples
  *     strategies, analyses, and the rule set.
  *
  * ## 1. Surface AST & Language Derivation
- * The core AST lives in `VectorArithExpr.scala`. We define a minimal lambda fragment
+ * The core AST lives in `ArithExpr.scala`. We define a minimal lambda fragment
  * (`Var`, `Lam`, `App`) and arithmetic (`Add`, `Mul`, `Number`). The sealed trait
  * derives a Foresight [[foresight.eqsat.lang.Language Language]] instance, which teaches the
  * e-graph how to encode and decode the surface AST to the core representation.
