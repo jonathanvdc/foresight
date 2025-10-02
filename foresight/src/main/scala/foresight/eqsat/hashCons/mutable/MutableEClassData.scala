@@ -19,7 +19,7 @@ private[eqsat] final class MutableEClassData[NodeT](
   @volatile private var _slots: SlotSet = initialSlots
   @volatile private var _permutations: PermutationGroup[SlotMap] = initialPermutations
 
-  private val _nodes: mutable.HashMap[ENode[NodeT], SlotMap] = mutable.HashMap.empty
+  private val _nodes: mutable.LinkedHashMap[ENode[NodeT], SlotMap] = mutable.LinkedHashMap.empty
   private val _users: mutable.HashSet[ENode[NodeT]] = mutable.HashSet.empty
 
   // Counter that remembers how many nodes with slots have been added.
