@@ -63,18 +63,6 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     }
   }
 
-  private def removeFromHashconsAndUsers(shape: ENode[NodeT]): Unit = {
-    hashCons.remove(shape)
-
-    var i = 0
-    while (i < shape.args.length) {
-      val arg = shape.args(i)
-      val argData = classData(arg.ref)
-      argData.removeUser(shape)
-      i += 1
-    }
-  }
-
   /**
    * Removes a node from an e-class. The node is removed from the hash cons, the class data, and the argument e-classes'
    * users.
@@ -88,20 +76,16 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     }
 
     val data = classData(ref)
+    hashCons.remove(shape)
     data.removeNode(shape)
 
-    removeFromHashconsAndUsers(shape)
-  }
-
-  protected override def removeAllNodesFromClass(call: EClassCall): Unit = {
-    val ref = call.ref
-    val data = classData(ref)
-
-    for (node <- data.nodes.keys) {
-      removeFromHashconsAndUsers(node)
+    var i = 0
+    while (i < shape.args.length) {
+      val arg = shape.args(i)
+      val argData = classData(arg.ref)
+      argData.removeUser(shape)
+      i += 1
     }
-
-    data.removeAllNodes()
   }
 
   /**
