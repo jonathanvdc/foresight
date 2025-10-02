@@ -30,13 +30,9 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
    */
   def arithAxioms: Seq[ArithRule] = Seq(
     // Ring axioms
-//    addCommutativity,
     mulCommutativity,
-//    addAssociativity1,
-//    addAssociativity2,
     mulAssociativity1,
     mulAssociativity2,
-//    distributivity1,
     distributivity2,
     multiplicativeIdentity,
 
@@ -44,7 +40,6 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
     divMulDistributivity,
     divMulDistributivity2,
     mulDivDistributivity3,
-//    mulDivDistributivity4,
     squareOfSqrt
   )
 
@@ -76,21 +71,9 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
       (x1 * x2 + y1 * y2 + z1 * z2) -> DotProduct(Vector3(x1, y1, z1), Vector3(x2, y2, z2))
     }
 
-  val addCommutativity: ArithRule =
-    rule("add-commutativity") { (x, y) =>
-      (x + y) -> (y + x)
-    }
   val mulCommutativity: ArithRule =
     rule("mul-commutativity") { (x, y) =>
       (x * y) -> (y * x)
-    }
-  val addAssociativity1: ArithRule =
-    rule("add-associativity1") { (x, y, z) =>
-      ((x + y) + z) -> (x + (y + z))
-    }
-  val addAssociativity2: ArithRule =
-    rule("add-associativity2") { (x, y, z) =>
-      (x + (y + z)) -> ((x + y) + z)
     }
   val mulAssociativity1: ArithRule =
     rule("mul-associativity1") { (x, y, z) =>
@@ -99,10 +82,6 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
   val mulAssociativity2: ArithRule =
     rule("mul-associativity2") { (x, y, z) =>
       (x * (y * z)) -> ((x * y) * z)
-    }
-  val distributivity1: ArithRule =
-    rule("distributivity1") { (x, a, b) =>
-      (x * (a + b)) -> ((x * a) + (x * b))
     }
   val distributivity2: ArithRule =
     rule("distributivity2") { (x, a, b) =>
@@ -126,7 +105,6 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
       ((x / y) * (z / w)) -> ((x * z) / (y * w))
     }
   }
-  val mulDivDistributivity4: ArithRule = mulDivDistributivity3.tryReverse.get
 
   val squareOfSqrt: ArithRule = {
     rule("square-of-sqrt") { x =>
