@@ -74,12 +74,25 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     isCanonical(call.ref)
   }
 
+  private final def hasAllCanonicalArgs(node: ENode[NodeT]): Boolean = {
+    // Optimized loop version of node.args.forall(isCanonical)
+
+    var i = 0
+    while (i < node.args.length) {
+      if (!isCanonical(node.args(i).ref)) {
+        return false
+      }
+      i += 1
+    }
+    true
+  }
+
   private final def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
     if (Debug.isEnabled && node.hasSlots) {
       throw new IllegalArgumentException("Node has slots.")
     }
 
-    if (node.args.forall(isCanonical)) {
+    if (hasAllCanonicalArgs(node)) {
       node
     } else {
       node.mapArgs(canonicalize)
