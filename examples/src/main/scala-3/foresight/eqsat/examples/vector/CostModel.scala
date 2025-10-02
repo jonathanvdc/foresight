@@ -12,6 +12,16 @@ object CostModel extends LanguageCostFunction[VectorArithExpr, TypeAndCost] {
       case Sqrt(arg) => unary(arg, 1000)
       case FastInvSqrt(arg) => unary(arg, 1100)
 
+      case DotProduct(lhs, rhs) =>
+        val TypeAndCost(tx, cx) = apply(lhs)
+        val TypeAndCost(ty, cy) = apply(rhs)
+        val t = tx.broadcast(ty).get
+        t match {
+          case Type.Vector3Type(elemType) =>
+            TypeAndCost(elemType, cx + cy + 150 * elemType.scalarCount)
+          case _ => throw new RuntimeException(s"DotProduct applied to non-vector type: $t")
+        }
+
       case Vector3(x, y, z) =>
         val TypeAndCost(tx, cx) = apply(x)
         val TypeAndCost(ty, cy) = apply(y)

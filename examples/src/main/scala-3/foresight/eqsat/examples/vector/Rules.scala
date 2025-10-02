@@ -21,7 +21,8 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
    * Returns the idiom recognition rules.
    */
   def idioms: Seq[ArithRule] = Seq(
-    recognizeFastInvSqrt
+    recognizeFastInvSqrt,
+    recognizeDotProduct
   )
 
   /**
@@ -29,19 +30,22 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
    */
   def arithAxioms: Seq[ArithRule] = Seq(
     // Ring axioms
-    addCommutativity,
+//    addCommutativity,
     mulCommutativity,
-    addAssociativity1,
-    addAssociativity2,
+//    addAssociativity1,
+//    addAssociativity2,
     mulAssociativity1,
     mulAssociativity2,
-    distributivity1,
+//    distributivity1,
     distributivity2,
     multiplicativeIdentity,
 
     // Additional useful rules
     divMulDistributivity,
-    divMulDistributivity2
+    divMulDistributivity2,
+    mulDivDistributivity3,
+//    mulDivDistributivity4,
+    squareOfSqrt
   )
 
   /**
@@ -53,7 +57,8 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
 
     vectorExtractX,
     vectorExtractY,
-    vectorExtractZ
+    vectorExtractZ,
+    vectorOfExtract
   )
 
   /**
@@ -64,6 +69,11 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
   val recognizeFastInvSqrt: ArithRule =
     rule("recognize-fast-inv-sqrt") { x =>
       (FloatLiteral(1.0) / Sqrt(x)) -> FastInvSqrt(x)
+    }
+
+  val recognizeDotProduct: ArithRule =
+    rule("recognize-dot-product") { (x1, y1, z1, x2, y2, z2) =>
+      (x1 * x2 + y1 * y2 + z1 * z2) -> DotProduct(Vector3(x1, y1, z1), Vector3(x2, y2, z2))
     }
 
   val addCommutativity: ArithRule =
@@ -111,6 +121,19 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
   }
   val divMulDistributivity2: ArithRule = divMulDistributivity.tryReverse.get
 
+  val mulDivDistributivity3: ArithRule = {
+    rule("mul-div-distributivity") { (x, y, z, w) =>
+      ((x / y) * (z / w)) -> ((x * z) / (y * w))
+    }
+  }
+  val mulDivDistributivity4: ArithRule = mulDivDistributivity3.tryReverse.get
+
+  val squareOfSqrt: ArithRule = {
+    rule("square-of-sqrt") { x =>
+      (Sqrt(x) * Sqrt(x)) -> x
+    }
+  }
+
   val mulVectorDistributivity: ArithRule = {
     rule("mul-vector-distributivity") { (x, y, z, w) =>
       Vector3(x * w, y * w, z * w) -> (Vector3(x, y, z) * w)
@@ -131,6 +154,15 @@ final case class Rules()(using L: Language[VectorArithExpr]) {
   val vectorExtractZ: ArithRule = {
     rule("vector-extract-z") { (x, y, z) =>
       ElementAt(Vector3(x, y, z), 2) -> z
+    }
+  }
+  val vectorOfExtract: ArithRule = {
+    rule("vector-extract-and-reconstruct") { (v) =>
+      Vector3(
+        ElementAt(v, 0),
+        ElementAt(v, 1),
+        ElementAt(v, 2)
+      ) -> v
     }
   }
 }
