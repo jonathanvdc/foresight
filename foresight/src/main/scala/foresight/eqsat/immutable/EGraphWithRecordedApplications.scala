@@ -15,7 +15,7 @@ import foresight.eqsat.rewriting.PortableMatch
  */
 final case class EGraphWithRecordedApplications[
   Node,
-  +Repr <: EGraphLike[Node, Repr] with EGraph[Node],
+  Repr <: EGraphLike[Node, Repr] with EGraph[Node],
   Match <: PortableMatch[Node, Match]
 ](egraph: Repr,
   applied: Map[String, Set[Match]])
