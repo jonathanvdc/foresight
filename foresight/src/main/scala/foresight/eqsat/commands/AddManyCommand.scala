@@ -128,11 +128,11 @@ final case class AddManyCommand[NodeT](
           case Some(call) =>
             resolvedBuilder += (result -> call)
           case None =>
-            val refined = node.copy(args = UnsafeSeqFromArray(resolvedArgs))
+            val refined = node.withArgs(UnsafeSeqFromArray(resolvedArgs))
             unresolvedBuilder += (result -> refined)
         }
       } else {
-        val refined = node.copy(args = node.args.map(_.refine(partialReification)))
+        val refined = node.withArgs(node.args.map(_.refine(partialReification)))
         unresolvedBuilder += (result -> refined)
       }
     }
