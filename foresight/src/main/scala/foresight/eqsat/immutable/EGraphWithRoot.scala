@@ -10,9 +10,14 @@ import foresight.eqsat.parallel.ParallelMap
  * @tparam Node The type of the nodes described by the e-nodes in the e-graph.
  * @tparam Repr The type of the underlying e-graph that implements the [[EGraphLike]] and [[EGraph]] traits.
  */
-final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node]](egraph: Repr,
-                                                                                        root: Option[EClassCall])
-  extends EGraphLike[Node, EGraphWithRoot[Node, Repr]] with EGraph[Node] {
+final case class EGraphWithRoot[
+  Node,
+  Repr <: EGraphLike[Node, Repr] with EGraph[Node]
+](egraph: Repr,
+  root: Option[EClassCall])
+  extends EGraphLike[Node, EGraphWithRoot[Node, Repr]]
+    with EGraph[Node]
+    with readonly.EGraphDecorator[Node, Repr] {
 
   assert(
     root.forall(r => egraph.contains(r.ref)),
@@ -37,14 +42,6 @@ final case class EGraphWithRoot[Node, Repr <: EGraphLike[Node, Repr] with EGraph
     EGraphWithRoot(newGraph, root)
   }
 
-  override def canonicalizeOrNull(ref: EClassRef): EClassCall = egraph.canonicalizeOrNull(ref)
-  override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
-  override def classes: Iterable[EClassRef] = egraph.classes
-  override def nodes(call: EClassCall): Iterable[ENode[Node]] = egraph.nodes(call)
-  override def nodes(call: EClassCall, nodeType: Node): Iterable[ENode[Node]] = egraph.nodes(call, nodeType)
-  override def users(ref: EClassRef): Set[ENode[Node]] = egraph.users(ref)
-  override def findOrNull(node: ENode[Node]): EClassCall = egraph.findOrNull(node)
-  override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
   override def tryAddMany(nodes: Seq[ENode[Node]],
                           parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRoot[Node, Repr]) = {
     egraph.tryAddMany(nodes, parallelize) match {
