@@ -1,12 +1,12 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, Slot}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode}
 
 import scala.collection.compat.immutable.ArraySeq
 
 /**
- * Symbolic handle for an [[ENode]] in an e-graph.
+ * Symbolic description of either an [[ENode]] in an e-graph or a planned insertion of one.
  *
  * Unlike a concrete [[ENode]], an [[ENodeSymbol]] may reference [[EClassSymbol.Virtual]]
  * arguments and therefore may not yet exist in the e-graph. It describes:
@@ -14,8 +14,6 @@ import scala.collection.compat.immutable.ArraySeq
  *   - the value slots it defines (`definitions`),
  *   - the value slots it consumes (`uses`),
  *   - and its child e-classes (`args`).
- *
- * Symbols are typically produced by [[Command]] instances to describe planned insertions.
  *
  * @param nodeType Operator or label of the e-node (e.g., `+`, `*`, function name).
  * @param definitions Slots whose values are defined directly by this node.
@@ -46,8 +44,8 @@ final case class ENodeSymbol[NodeT](
    *
    * val symbol = ENodeSymbol(
    *   nodeType = MyOp.Add,
-   *   definitions = Seq.empty,
-   *   uses = Seq.empty,
+   *   definitions = SlotSeq.empty,
+   *   uses = SlotSeq.empty,
    *   args = Seq(v1)
    * )
    *
