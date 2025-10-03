@@ -245,7 +245,7 @@ object CommandQueue {
     // i is the highest batch in which any of its dependencies are defined.
     type ArraySeqBuilder = mutable.Builder[(EClassSymbol.Virtual, ENodeSymbol[NodeT]), ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
     val batches = mutable.ArrayBuffer.empty[ArraySeqBuilder]
-    val defs = mutable.Map.empty[EClassSymbol, Int]
+    val defs = mutable.HashMap.empty[EClassSymbol, Int]
 
     for (command <- group) {
       val highestDependency = (-1 +: command.uses.collect {
@@ -261,8 +261,12 @@ object CommandQueue {
         batches(batchIndex) ++= command.nodes
       }
 
-      for (node <- command.nodes) {
+      // Record the batch in which each node is defined.
+      var i = 0
+      while (i < command.nodes.length) {
+        val node = command.nodes(i)
         defs(node._1) = batchIndex
+        i += 1
       }
     }
 
