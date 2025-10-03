@@ -13,9 +13,15 @@ import foresight.eqsat.rewriting.PortableMatch
  * @tparam Repr The type of the underlying e-graph.
  * @tparam Match The type of the matches that have been applied to the e-graph.
  */
-final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, Repr] with EGraph[Node], Match <: PortableMatch[Node, Match]](egraph: Repr,
-                                                                                                                                             applied: Map[String, Set[Match]])
-  extends EGraphLike[Node, EGraphWithRecordedApplications[Node, Repr, Match]] with EGraph[Node] {
+final case class EGraphWithRecordedApplications[
+  Node,
+  +Repr <: EGraphLike[Node, Repr] with EGraph[Node],
+  Match <: PortableMatch[Node, Match]
+](egraph: Repr,
+  applied: Map[String, Set[Match]])
+  extends EGraphLike[Node, EGraphWithRecordedApplications[Node, Repr, Match]]
+    with EGraph[Node]
+    with readonly.EGraphDecorator[Node, Repr] {
 
   /**
    * Migrates this e-graph to a new representation, preserving the recorded match applications.
@@ -27,15 +33,6 @@ final case class EGraphWithRecordedApplications[Node, Repr <: EGraphLike[Node, R
   def migrateTo[NewRepr <: EGraphLike[Node, NewRepr] with EGraph[Node]](newEgraph: NewRepr): EGraphWithRecordedApplications[Node, NewRepr, Match] = {
     EGraphWithRecordedApplications(newEgraph, applied)
   }
-
-  override def canonicalizeOrNull(ref: EClassRef): EClassCall = egraph.canonicalizeOrNull(ref)
-  override def canonicalize(node: ENode[Node]): ShapeCall[Node] = egraph.canonicalize(node)
-  override def classes: Iterable[EClassRef] = egraph.classes
-  override def nodes(call: EClassCall): Iterable[ENode[Node]] = egraph.nodes(call)
-  override def nodes(call: EClassCall, nodeType: Node): Iterable[ENode[Node]] = egraph.nodes(call, nodeType)
-  override def users(ref: EClassRef): Set[ENode[Node]] = egraph.users(ref)
-  override def findOrNull(node: ENode[Node]): EClassCall = egraph.findOrNull(node)
-  override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 
   override def tryAddMany(nodes: Seq[ENode[Node]],
                           parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRecordedApplications[Node, Repr, Match]) = {
