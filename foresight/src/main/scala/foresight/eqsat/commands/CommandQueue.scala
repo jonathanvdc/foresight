@@ -255,10 +255,10 @@ object CommandQueue {
       val batchIndex = highestDependency + 1
       if (batchIndex == batches.size) {
         val newBatch = ArraySeq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
-        newBatch.addAll(command.nodes)
+        newBatch ++= command.nodes
         batches += newBatch
       } else {
-        batches(batchIndex).addAll(command.nodes)
+        batches(batchIndex) ++= command.nodes
       }
 
       for (node <- command.nodes) {
