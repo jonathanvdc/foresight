@@ -1,7 +1,7 @@
 package foresight.eqsat
 
 /**
- * Defines the command system for making batched, replayable edits to an [[EGraph]].
+ * Defines the command system for making batched, replayable edits to a [[mutable.EGraph]].
  *
  * A [[commands.Command]] is an immutable description of a single edit,
  * such as inserting one or more nodes ([[commands.AddManyCommand]]) or
@@ -16,9 +16,9 @@ package foresight.eqsat
  *
  * ## Symbols and Reification
  *
- * Commands refer to e-classes symbolically via [[commands.EClassSymbol]]:
- *   - [[commands.EClassSymbol.Real]] for existing classes
- *   - [[commands.EClassSymbol.Virtual]] for classes not yet in the graph
+ * Commands refer to e-classes symbolically via [[EClassSymbol]]:
+ *   - [[EClassCall]] for existing classes
+ *   - [[EClassSymbol.Virtual]] for classes not yet in the graph
  *
  * When a command is applied, virtual symbols are mapped to real classes using
  * a **reification map** (`Map[Virtual, EClassCall]`). This allows command sequences
@@ -40,8 +40,8 @@ package foresight.eqsat
  *
  * ## Common Command Types
  *
- *  - [[commands.AddManyCommand]] — inserts one or more [[commands.ENodeSymbol]]s,
- *    each paired with the [[commands.EClassSymbol.Virtual]] that will represent
+ *  - [[commands.AddManyCommand]] — inserts one or more [[ENodeSymbol]]s,
+ *    each paired with the [[EClassSymbol.Virtual]] that will represent
  *    its resulting class.
  *
  *  - [[commands.UnionManyCommand]] — unifies multiple pairs of e-classes at once.
