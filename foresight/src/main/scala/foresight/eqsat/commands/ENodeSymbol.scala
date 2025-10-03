@@ -1,6 +1,9 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.{EClassCall, EClassSymbol, ENode, Slot}
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * Symbolic handle for an [[ENode]] in an e-graph.
@@ -22,9 +25,9 @@ import foresight.eqsat.{EClassCall, EClassSymbol, ENode, Slot}
  */
 final case class ENodeSymbol[NodeT](
                                      nodeType: NodeT,
-                                     definitions: Seq[Slot],
-                                     uses: Seq[Slot],
-                                     args: Seq[EClassSymbol]
+                                     definitions: SlotSeq,
+                                     uses: SlotSeq,
+                                     args: ArraySeq[EClassSymbol]
                                    ) {
 
   /**

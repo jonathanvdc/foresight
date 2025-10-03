@@ -4,6 +4,7 @@ import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly
+import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable.{Map => MutableMap}
@@ -127,7 +128,7 @@ final case class AddManyCommand[NodeT](
           case Some(call) =>
             resolvedBuilder += (result -> call)
           case None =>
-            val refined = node.copy(args = resolvedArgs)
+            val refined = node.copy(args = UnsafeSeqFromArray(resolvedArgs))
             unresolvedBuilder += (result -> refined)
         }
       } else {

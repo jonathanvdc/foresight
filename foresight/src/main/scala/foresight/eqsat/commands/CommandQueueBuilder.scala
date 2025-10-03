@@ -1,7 +1,8 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree, Slot}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree}
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat.immutable.ArraySeq
@@ -125,8 +126,8 @@ final class CommandQueueBuilder[NodeT] {
   }
 
   private[eqsat] def addSimplifiedNode(nodeType: NodeT,
-                                       definitions: Seq[Slot],
-                                       uses: Seq[Slot],
+                                       definitions: SlotSeq,
+                                       uses: SlotSeq,
                                        args: Array[EClassSymbol],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
 

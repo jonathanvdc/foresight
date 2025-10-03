@@ -1,9 +1,12 @@
 package foresight.eqsat.commands
 
+import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{EClassSymbol, ENode, MixedTree, Slot}
 import foresight.eqsat.immutable.EGraph
 import org.junit.Test
+
+import scala.collection.compat.immutable.ArraySeq
 
 class CommandQueueBuilderTest {
   /**
@@ -26,7 +29,7 @@ class CommandQueueBuilderTest {
     val builder = new CommandQueueBuilder[Int]
     val egraph = EGraph.empty[Int]
 
-    val node = ENodeSymbol(0, Seq.empty, Seq.empty, Seq.empty)
+    val node = ENodeSymbol(0, SlotSeq.empty, SlotSeq.empty, ArraySeq.empty)
     builder.add(node)
 
     val queue = builder.result()
@@ -154,16 +157,16 @@ class CommandQueueBuilderTest {
     val x = Slot.fresh()
     val y = Slot.fresh()
 
-    val node1 = ENodeSymbol(0, Seq.empty, Seq(x, y), Seq.empty)
-    val node2 = ENodeSymbol(0, Seq.empty, Seq(y, x), Seq.empty)
+    val node1 = ENodeSymbol(0, SlotSeq.empty, SlotSeq(x, y), ArraySeq.empty)
+    val node2 = ENodeSymbol(0, SlotSeq.empty, SlotSeq(y, x), ArraySeq.empty)
 
     val a = builder.add(node1)
     val b = builder.add(node2)
 
     builder.union(a, b)
 
-    val node3 = ENodeSymbol(1, Seq(x, y), Seq.empty, Seq(a))
-    val node4 = ENodeSymbol(1, Seq(x, y), Seq.empty, Seq(b))
+    val node3 = ENodeSymbol(1, SlotSeq(x, y), SlotSeq.empty, ArraySeq(a))
+    val node4 = ENodeSymbol(1, SlotSeq(x, y), SlotSeq.empty, ArraySeq(b))
 
     val c = builder.add(node3)
     val d = builder.add(node4)
