@@ -32,8 +32,11 @@ import foresight.eqsat.EClassCall
  * @tparam NodeT The type of e-nodes stored in the e-graph.
  * @tparam Repr The concrete type of the underlying e-graph, which must support union and rebuild.
  */
-final case class EGraphWithPendingUnions[NodeT, +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]](egraph: Repr,
-                                                                                                     pending: List[(EClassCall, EClassCall)]) {
+final case class EGraphWithPendingUnions[
+  NodeT,
+  +Repr <: EGraphLike[NodeT, Repr] with EGraph[NodeT]
+](egraph: Repr,
+  pending: List[(EClassCall, EClassCall)]) {
   /**
    * Checks whether the e-graph has any deferred unions pending application.
    *
