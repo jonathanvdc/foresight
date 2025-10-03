@@ -357,7 +357,7 @@ object Instruction {
       var continueSearch = true
       while (continueSearch && it.hasNext) {
         val node = it.next()
-        if (node.args.size == argCount &&
+        if (node.unsafeArgsArray.length == argCount &&
             allSlotsMatch(definitions, node.definitions) &&
             allSlotsMatch(uses, node.uses)) {
           if (firstMatch eq null) {

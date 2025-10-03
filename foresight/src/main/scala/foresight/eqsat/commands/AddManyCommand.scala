@@ -1,6 +1,6 @@
 package foresight.eqsat.commands
 
-import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENode}
+import foresight.eqsat.{AddNodeResult, EClassCall, EClassSymbol, ENodeSymbol, ENode}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly

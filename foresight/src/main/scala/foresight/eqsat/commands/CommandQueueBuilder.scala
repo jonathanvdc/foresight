@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, MixedTree}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat.immutable.ArraySeq
@@ -139,18 +139,21 @@ final class CommandQueueBuilder[NodeT] {
       val candidateNode = ENode.unsafeWrapArrays(nodeType, definitions, uses, argCalls)
       egraph.findOrNull(candidateNode) match {
         case null =>
-          // Node does not exist in the graph; we will add it below
+          // Node does not exist in the graph; queue it for insertion
+          val result = EClassSymbol.virtual()
+          append(AddManyCommand(ArraySeq(result -> candidateNode)))
+          result
 
         case existingCall =>
           // Node already exists in the graph; reuse its class
-          return EClassSymbol.real(existingCall)
+          EClassSymbol.real(existingCall)
       }
+    } else {
+      val result = EClassSymbol.virtual()
+      val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, UnsafeSeqFromArray(args))
+      append(AddManyCommand(ArraySeq(result -> candidateNode)))
+      result
     }
-
-    val result = EClassSymbol.virtual()
-    val candidateNode = ENodeSymbol[NodeT](nodeType, definitions, uses, UnsafeSeqFromArray(args))
-    append(AddManyCommand(ArraySeq(result -> candidateNode)))
-    result
   }
 
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall], egraph: EGraph[NodeT]): EClassSymbol = {

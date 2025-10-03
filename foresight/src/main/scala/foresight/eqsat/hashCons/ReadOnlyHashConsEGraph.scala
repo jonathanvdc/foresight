@@ -78,8 +78,9 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     // Optimized loop version of node.args.forall(isCanonical)
 
     var i = 0
-    while (i < node.args.length) {
-      if (!isCanonical(node.args(i).ref)) {
+    val unsafeArgs = node.unsafeArgsArray
+    while (i < unsafeArgs.length) {
+      if (!isCanonical(unsafeArgs(i).ref)) {
         return false
       }
       i += 1

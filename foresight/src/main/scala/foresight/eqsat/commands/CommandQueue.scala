@@ -1,7 +1,7 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENodeSymbol, MixedTree}
 import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import foresight.eqsat.readonly
 

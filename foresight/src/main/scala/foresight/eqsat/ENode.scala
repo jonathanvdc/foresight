@@ -27,7 +27,10 @@ final class ENode[+NodeT] private (
   private val _definitions: Array[Slot],
   private val _uses: Array[Slot],
   private val _args: Array[EClassCall]
-) extends Node[NodeT, EClassCall] {
+) extends Node[NodeT, EClassCall] with ENodeSymbol[NodeT] {
+  // Cached hash code to make hashing and equality fast
+  private val _hash: AtomicInteger = new AtomicInteger(0)
+
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
    * redundant by construction at the boundary of this node and exist to model binders such as
@@ -52,8 +55,11 @@ final class ENode[+NodeT] private (
    */
   def args: ArraySeq[EClassCall] = UnsafeSeqFromArray(_args)
 
-  // Cached hash code to make hashing and equality fast
-  private val _hash: AtomicInteger = new AtomicInteger(0)
+  /**
+   * Unsafe access to the internal array of argument e-class calls. Do not modify.
+   * @return Internal array of argument e-class calls.
+   */
+  private[eqsat] def unsafeArgsArray: Array[EClassCall] = _args
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -333,6 +339,8 @@ final class ENode[+NodeT] private (
     _hash.compareAndSet(0, result)
     result
   }
+
+  override def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = this
 }
 
 /**
@@ -448,5 +456,136 @@ object ENode {
   private[eqsat] val sharedNumericArrays: Array[Array[Slot]] = {
     val max = 16
     Array.tabulate(max + 1)(n => Array.tabulate(n)(Slot.numeric))
+  }
+}
+
+/**
+ * Symbolic description of either an [[ENode]] in an e-graph or a planned insertion of one.
+ *
+ * Unlike a concrete [[ENode]], an [[ENodeSymbol]] may reference [[EClassSymbol.Virtual]]
+ * arguments and therefore may not yet exist in the e-graph. It describes:
+ *   - the node's operator or type (`nodeType`),
+ *   - the value slots it defines (`definitions`),
+ *   - the value slots it consumes (`uses`),
+ *   - and its child e-classes (`args`).
+ */
+sealed trait ENodeSymbol[+NodeT] {
+  /**
+   * Operator or label of the e-node (e.g., `+`, `*`, function name).
+   * @return The node's type or operator.
+   */
+  def nodeType: NodeT
+
+  /**
+   * Slots whose values are defined directly by this node.
+   * @return The node's definition slots.
+   */
+  def definitions: SlotSeq
+
+  /**
+   * Slots whose values are read directly by this node.
+   * @return The node's usage slots.
+   */
+  def uses: SlotSeq
+
+  /**
+   * Child e-class symbols representing the node's operands.
+   * These may be either concrete [[EClassCall]]s or [[EClassSymbol.Virtual]]s.
+   * @return The node's argument e-classes.
+   */
+  def args: ArraySeq[EClassSymbol]
+
+  /**
+   * Resolves this symbolic node to a concrete [[ENode]] using the given reification.
+   *
+   * All [[EClassSymbol.Virtual]]s in [[args]] must be present in the `reification` map.
+   * Any [[EClassCall]] in [[args]] is left unchanged.
+   *
+   * @param reification Mapping from virtual e-class symbols to concrete [[EClassCall]]s.
+   * @return An [[ENode]] with all arguments fully resolved.
+   */
+  def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT]
+
+  /**
+   * Creates a copy of this symbol with the given arguments.
+   * @param newArgs New argument e-class symbols.
+   * @return A copy of this symbol with `args` replaced by `newArgs`.
+   */
+  def withArgs(newArgs: ArraySeq[EClassSymbol]): ENodeSymbol[NodeT] = {
+    ENodeSymbol(nodeType, definitions, uses, newArgs)
+  }
+}
+
+/**
+ * Constructors and helpers for [[ENodeSymbol]].
+ */
+object ENodeSymbol {
+  /**
+   * Constructs a symbolic e-node.
+   *
+   * @param nodeType    Operator or label of the e-node (e.g., `+`, `*`, function name).
+   * @param definitions Slots whose values are defined directly by this node.
+   * @param uses        Slots whose values are read directly by this node.
+   * @param args        Child e-class symbols representing the node's operands.
+   * @tparam NodeT Domain-specific type used to represent operators or node labels.
+   * @return A symbolic e-node with the given properties.
+   */
+  def apply[NodeT](
+                    nodeType: NodeT,
+                    definitions: SlotSeq,
+                    uses: SlotSeq,
+                    args: ArraySeq[EClassSymbol]
+                  ): ENodeSymbol[NodeT] = {
+    if (args.forall(_.isReal)) {
+      val reifiedArgs = args.map(_.asInstanceOf[EClassCall])
+      ENode(nodeType, definitions, uses, reifiedArgs)
+    } else {
+      Virtual(nodeType, definitions, uses, args)
+    }
+  }
+
+  /**
+   * Symbolic description a planned insertion of an [[ENode]] into an e-graph.
+   *
+   * @param nodeType    Operator or label of the e-node (e.g., `+`, `*`, function name).
+   * @param definitions Slots whose values are defined directly by this node.
+   * @param uses        Slots whose values are read directly by this node.
+   * @param args        Child e-class symbols representing the node's operands.
+   * @tparam NodeT Domain-specific type used to represent operators or node labels.
+   */
+  final case class Virtual[NodeT](
+                                   nodeType: NodeT,
+                                   definitions: SlotSeq,
+                                   uses: SlotSeq,
+                                   args: ArraySeq[EClassSymbol]
+                                 ) extends ENodeSymbol[NodeT] {
+
+    /**
+     * Resolves this symbolic node to a concrete [[ENode]] using the given reification.
+     *
+     * All [[EClassSymbol.Virtual]]s in [[args]] must be present in the `reification` map.
+     * Any [[EClassCall]] in [[args]] is left unchanged.
+     *
+     * @param reification Mapping from virtual e-class symbols to concrete [[EClassCall]]s.
+     * @return An [[ENode]] with all arguments fully resolved.
+     * @example
+     * {{{
+     * val v1 = EClassSymbol.virtual()
+     * val call1 = EClassCall(...)
+     *
+     * val symbol = ENodeSymbol(
+     *   nodeType = MyOp.Add,
+     *   definitions = SlotSeq.empty,
+     *   uses = SlotSeq.empty,
+     *   args = Seq(v1)
+     * )
+     *
+     * val node: ENode[MyOp] = symbol.reify(Map(v1 -> call1))
+     * }}}
+     */
+    override def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = {
+      val reifiedArgs = args.map(_.reify(reification))
+      ENode(nodeType, definitions, uses, reifiedArgs)
+    }
   }
 }

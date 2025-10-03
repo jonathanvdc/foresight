@@ -130,7 +130,7 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
    */
   def bindNode(node: ENode[NodeT]): Unit = {
     // Append node arguments to registers
-    val args = node.args
+    val args = node.unsafeArgsArray
     var i = 0
     while (i < args.length) {
       registersArr(regIdx) = args(i)

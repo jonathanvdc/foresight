@@ -48,9 +48,10 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     hashCons.put(shape, ref)
     data.addNode(shape, renaming)
 
+    val argsArray = shape.unsafeArgsArray
     var i = 0
-    while (i < shape.args.length) {
-      val arg = shape.args(i)
+    while (i < argsArray.length) {
+      val arg = argsArray(i)
       val argData = classData(arg.ref)
       argData.addUser(shape)
       i += 1
@@ -73,9 +74,10 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     hashCons.remove(shape)
     data.removeNode(shape)
 
+    val argsArray = shape.unsafeArgsArray
     var i = 0
-    while (i < shape.args.length) {
-      val arg = shape.args(i)
+    while (i < argsArray.length) {
+      val arg = argsArray(i)
       val argData = classData(arg.ref)
       argData.removeUser(shape)
       i += 1
