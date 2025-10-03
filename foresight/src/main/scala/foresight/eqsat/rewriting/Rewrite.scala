@@ -6,6 +6,8 @@ import foresight.eqsat.immutable
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly.EGraph
 
+import scala.collection.mutable.HashMap
+
 /**
  * A rewrite rule encapsulates a search-and-replace operation on an e-graph.
  *
@@ -91,7 +93,7 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
      parallelize: ParallelMap = ParallelMap.default
    ): Option[MutEGraphT] = {
     val mutGraph = mutable.FreezableEGraph[NodeT, MutEGraphT](egraph)
-    val anyChanges = delayed(egraph, parallelize)(mutGraph, Map(), parallelize)._1
+    val anyChanges = delayed(egraph, parallelize)(mutGraph, HashMap.empty, parallelize)
     if (anyChanges) {
       Some(mutGraph.freeze())
     } else {
@@ -134,6 +136,6 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
      egraph: MutEGraphT,
      parallelize: ParallelMap = ParallelMap.default
    ): Boolean = {
-    delayed(egraph, parallelize)(egraph, Map(), parallelize)._1
+    delayed(egraph, parallelize)(egraph, HashMap.empty, parallelize)
   }
 }

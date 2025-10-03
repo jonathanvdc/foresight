@@ -1,7 +1,7 @@
 package foresight.eqsat.hashCons.mutable
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.{EClassRef, ENode, ShapeCall}
+import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
 import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, PermutationGroup}
 import foresight.util.Debug
 
@@ -42,21 +42,20 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     ref
   }
 
-  /**
-   * Adds a node to an e-class. The node is added to the hash cons, the class data, and the argument e-classes' users.
-   *
-   * @param ref  The reference to the e-class.
-   * @param node The node to add.
-   */
-  protected override def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit = {
+  protected override def addNodeToClass(ref: EClassRef, shape: ENode[NodeT], renaming: SlotMap): Unit = {
     // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
     val data = classData(ref)
-    hashCons.put(node.shape, ref)
-    data.addNode(node.shape, node.renaming)
-    node.shape.args.map(_.ref).distinct.foreach(c => {
-      val argData = classData(c)
-      argData.addUser(node.shape)
-    })
+    hashCons.put(shape, ref)
+    data.addNode(shape, renaming)
+
+    val argsArray = shape.unsafeArgsArray
+    var i = 0
+    while (i < argsArray.length) {
+      val arg = argsArray(i)
+      val argData = classData(arg.ref)
+      argData.addUser(shape)
+      i += 1
+    }
   }
 
   /**
@@ -74,10 +73,15 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     val data = classData(ref)
     hashCons.remove(shape)
     data.removeNode(shape)
-    shape.args.map(_.ref).distinct.foreach(c => {
-      val argData = classData(c)
+
+    val argsArray = shape.unsafeArgsArray
+    var i = 0
+    while (i < argsArray.length) {
+      val arg = argsArray(i)
+      val argData = classData(arg.ref)
       argData.removeUser(shape)
-    })
+      i += 1
+    }
   }
 
   /**

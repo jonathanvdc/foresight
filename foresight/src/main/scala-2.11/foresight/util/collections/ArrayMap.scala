@@ -32,6 +32,12 @@ final class ArrayMap[K, +V] private[collections] (
 
   override def empty: ArrayMap[K, V] = ArrayMap.empty
 
+  override def apply(key: K): V = {
+    val idx = indexOf(_keys, key.asInstanceOf[AnyRef], size)
+    if (idx >= 0) valueAt[V](_values, idx)
+    else throw new NoSuchElementException(s"Key not found: $key")
+  }
+
   override def get(key: K): Option[V] = {
     val idx = indexOf(_keys, key.asInstanceOf[AnyRef], size)
     if (idx >= 0) Some(valueAt[V](_values, idx)) else None

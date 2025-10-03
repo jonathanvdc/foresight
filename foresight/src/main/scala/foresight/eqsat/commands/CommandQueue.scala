@@ -1,11 +1,12 @@
 package foresight.eqsat.commands
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, MixedTree}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENodeSymbol, MixedTree}
 import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import foresight.eqsat.readonly
 
 import scala.collection.mutable
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A composable batch of [[Command]]s that itself behaves as a single [[Command]].
@@ -15,15 +16,6 @@ import scala.collection.mutable
  *
  * @tparam NodeT Node type for expressions represented by the e-graph.
  * @param commands The commands in execution order (prior to [[optimized]]).
- *
- * @example
- * {{{
- * val q0 = CommandQueue.empty[MyNode]
- * val (x, q1) = q0.add(myTree)                  // add a tree, get its symbol
- * val (y, q2) = q1.add(ENodeSymbol(op, Nil, Nil, Seq(x)))
- * val q3 = q2.union(x, y).optimized             // merge unions, batch adds
- * val (updated, refs) = q3(g, Map.empty, parallel)
- * }}}
  */
 final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Command[NodeT] {
 
@@ -39,31 +31,20 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    * For each step, the current graph and the accumulated virtual-to-real bindings are passed to the next command.
    *
    * @param egraph Initial graph snapshot.
-   * @param reification Initial virtual-to-concrete bindings available to the first command.
+   * @param reification Initial virtual-to-concrete bindings available to the first command. This map is
+   *                    mutated in place to include new bindings from each command.
    * @param parallelize Strategy for distributing work across commands that can parallelize internally.
-   * @return
-   *   - `true` if at least one command changed the graph, otherwise `false`.
-   *   - The final reification map, containing the union of all bindings produced by the sub-commands.
-   *
-   * @example
-   * {{{
-   * val (g1, r1) = {
-   *   val (maybeG, out) = queue.apply(g0, Map.empty, parallel)
-   *   (maybeG.getOrElse(g0), out)
-   * }
-   * }}}
+   * @return `true` if at least one command changed the graph, otherwise `false`.
    */
   override def apply(egraph: MutableEGraph[NodeT],
-                     reification: Map[EClassSymbol.Virtual, EClassCall],
-                     parallelize: ParallelMap): (Boolean, Map[EClassSymbol.Virtual, EClassCall]) = {
+                     reification: mutable.Map[EClassSymbol.Virtual, EClassCall],
+                     parallelize: ParallelMap): Boolean = {
     var anyChanges: Boolean = false
-    var newReification = reification
     for (command <- commands) {
-      val (changed, newReificationPart) = command.apply(egraph, newReification, parallelize)
+      val changed = command.apply(egraph, reification, parallelize)
       anyChanges ||= changed
-      newReification ++= newReificationPart
     }
-    (anyChanges, newReification)
+    anyChanges
   }
 
   /**
@@ -79,7 +60,7 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
    */
   def add(node: ENodeSymbol[NodeT]): (EClassSymbol, CommandQueue[NodeT]) = {
     val result = EClassSymbol.virtual()
-    (result, CommandQueue(commands :+ AddManyCommand(Seq(result -> node))))
+    (result, CommandQueue(commands :+ AddManyCommand(ArraySeq(result -> node))))
   }
 
   /**
@@ -262,8 +243,9 @@ object CommandQueue {
     // Our aim is to partition the add commands into batches of independent additions. We do this by tracking the
     // batches in which each node is defined. When we encounter a fresh addition, we add it to batch i + 1 such that
     // i is the highest batch in which any of its dependencies are defined.
-    val batches = mutable.ArrayBuffer.empty[mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
-    val defs = mutable.Map.empty[EClassSymbol, Int]
+    type ArraySeqBuilder = mutable.Builder[(EClassSymbol.Virtual, ENodeSymbol[NodeT]), ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
+    val batches = mutable.ArrayBuffer.empty[ArraySeqBuilder]
+    val defs = mutable.HashMap.empty[EClassSymbol, Int]
 
     for (command <- group) {
       val highestDependency = (-1 +: command.uses.collect {
@@ -272,19 +254,24 @@ object CommandQueue {
 
       val batchIndex = highestDependency + 1
       if (batchIndex == batches.size) {
-        val newBatch = mutable.ArrayBuffer[(EClassSymbol.Virtual, ENodeSymbol[NodeT])](command.nodes: _*)
+        val newBatch = ArraySeq.newBuilder[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]
+        newBatch ++= command.nodes
         batches += newBatch
       } else {
-        batches(batchIndex).appendAll(command.nodes)
+        batches(batchIndex) ++= command.nodes
       }
 
-      for (node <- command.nodes) {
+      // Record the batch in which each node is defined.
+      var i = 0
+      while (i < command.nodes.length) {
+        val node = command.nodes(i)
         defs(node._1) = batchIndex
+        i += 1
       }
     }
 
     // Merge all the addition commands in each batch.
-    batches.map(_.toSeq).map(AddManyCommand[NodeT]).toSeq
+    batches.map(_.result()).map(AddManyCommand[NodeT]).toSeq
   }
 
   /**
@@ -306,7 +293,7 @@ object CommandQueue {
     val addPairs = addCommands.flatMap(_.nodes)
     addPairs match {
       case Seq()   => remainingCommands
-      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](addPairs.toVector)
+      case Seq(_*) => remainingCommands :+ AddManyCommand[NodeT](ArraySeq(addPairs: _*))
     }
   }
 

@@ -74,12 +74,26 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     isCanonical(call.ref)
   }
 
-  private final def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
+  private final def hasAllCanonicalArgs(node: ENode[NodeT]): Boolean = {
+    // Optimized loop version of node.args.forall(isCanonical)
+
+    var i = 0
+    val unsafeArgs = node.unsafeArgsArray
+    while (i < unsafeArgs.length) {
+      if (!isCanonical(unsafeArgs(i).ref)) {
+        return false
+      }
+      i += 1
+    }
+    true
+  }
+
+  protected final def canonicalizeWithoutSlots(node: ENode[NodeT]): ENode[NodeT] = {
     if (Debug.isEnabled && node.hasSlots) {
       throw new IllegalArgumentException("Node has slots.")
     }
 
-    if (node.args.forall(isCanonical)) {
+    if (hasAllCanonicalArgs(node)) {
       node
     } else {
       node.mapArgs(canonicalize)
@@ -89,15 +103,16 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   final def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = {
     import foresight.util.ordering.SeqOrdering
 
-    if (node.args.forall(isCanonical) && !node.hasSlots) {
-      return ShapeCall(node, SlotMap.empty)
+    val hasSlots = node.hasSlots
+    if (hasSlots) {
+      val nodeWithCanonicalizedArgs = node.mapArgs(canonicalize)
+      groupCompatibleVariants(nodeWithCanonicalizedArgs)
+        .toSeq
+        .map(_.asShapeCall)
+        .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
+    } else {
+      ShapeCall(canonicalizeWithoutSlots(node), SlotMap.empty)
     }
-
-    val nodeWithCanonicalizedArgs = node.mapArgs(canonicalize)
-    groupCompatibleVariants(nodeWithCanonicalizedArgs)
-      .toSeq
-      .map(_.asShapeCall)
-      .minBy(_.shape.slots)(SeqOrdering.lexOrdering(Ordering.by(identity[Slot])))
   }
 
   /**

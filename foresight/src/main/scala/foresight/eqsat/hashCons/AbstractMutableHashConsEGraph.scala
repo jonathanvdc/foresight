@@ -49,9 +49,10 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   /**
    * Adds a node to an e-class. The node is added to the hash cons, the class data, and the argument e-classes' users.
    * @param ref The reference to the e-class.
-   * @param node The node to add.
+   * @param shape The canonical shape of the node to add.
+   * @param renaming The renaming from the node's slots to the e-class' slots.
    */
-  protected def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit
+  protected def addNodeToClass(ref: EClassRef, shape: ENode[NodeT], renaming: SlotMap): Unit
 
   /**
    * Removes a node from an e-class. The node is removed from the hash cons, the class data, and the argument e-classes'
@@ -65,6 +66,15 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
    * Unlinks all empty e-classes from the class data map. An e-class is considered empty if it has no nodes.
    */
   protected def unlinkEmptyClasses(): Unit
+
+  /**
+   * Adds a node to an e-class. The node is added to the hash cons, the class data, and the argument e-classes' users.
+   * @param ref The reference to the e-class.
+   * @param node The shape call of the node to add.
+   */
+  protected final def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit = {
+    addNodeToClass(ref, node.shape, node.renaming)
+  }
 
   final override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
 
@@ -301,7 +311,9 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       // redundant slots in the subordinate class' nodes.
       val invMap = map.inverse
       val subData = dataForClass(subRoot.ref)
-      for ((node, bijection) <- subData.nodes) {
+      val subNodeMap = subData.nodes
+      val allNodes = subData.nodes.toArray // Make a copy to avoid concurrent modification issues.
+      for ((node, bijection) <- allNodes) {
         removeNodeFromClass(subRoot.ref, node)
         addNodeToClass(domRoot.ref, ShapeCall(node, bijection.composeFresh(invMap)))
         nodesRepairWorklist.add(node)
@@ -373,7 +385,58 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       }
     }
 
+    /**
+     * An optimized repair function for nodes without slots. This function assumes that the input node has no slots.
+     * @param node The node to repair.
+     */
+    def repairNodeWithoutSlots(node: ENode[NodeT]): Unit = {
+      val ref = nodeToClassOrNull(node)
+      if (Debug.isEnabled) {
+        assert(ref != EClassRef.Invalid, "The node to repair must be in the hash-cons.")
+        assert(!node.hasSlots, "The node to repair must not have slots.")
+      }
+
+      val data = dataForClass(ref)
+      if (data.slots.nonEmpty) {
+        // The e-class has slots, so we shrink the e-class to have no slots, then we try again.
+        shrinkSlots(ref, SlotSet.empty)
+        repairNodeWithoutSlots(node)
+        return
+      }
+
+      // Canonicalize the node without slots.
+      val canonicalNode = canonicalizeWithoutSlots(node)
+
+      if (canonicalNode != node) {
+        nodeToClassOrNull(canonicalNode) match {
+          case EClassRef.Invalid =>
+            // Eliminate the old node from the e-class and add the canonicalized node.
+            removeNodeFromClass(ref, node)
+            addNodeToClass(ref, canonicalNode, SlotMap.empty)
+
+          case other =>
+            // Union the original node with the canonicalized node in the class data. Remove the old node from the
+            // hash-cons.
+            removeNodeFromClass(ref, node)
+
+            // Call unify on the two nodes without slots.
+            unify(callWithoutSlots(ref), callWithoutSlots(other))
+        }
+      }
+    }
+
+    /**
+     * Repairs a node in the e-graph. This involves canonicalizing the node, checking if it is still canonical,
+     * and if not, either replacing it with its canonical form or unifying it with the canonical form if it exists.
+     * @param node The node to repair.
+     */
     def repairNode(node: ENode[NodeT]): Unit = {
+      if (!node.hasSlots) {
+        // Fast path for nodes without slots.
+        repairNodeWithoutSlots(node)
+        return
+      }
+
       // The first step to repairing a hashcons entry is to canonicalize the node.
       // Once canonicalized, there are three possibilities:
       //   1. The canonicalized node is exactly the same as the original node. In this case, we do nothing.

@@ -55,14 +55,14 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
     ref
   }
 
-  protected override def addNodeToClass(ref: EClassRef, node: ShapeCall[NodeT]): Unit = {
+  protected override def addNodeToClass(ref: EClassRef, shape: ENode[NodeT], renaming: SlotMap): Unit = {
     // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
     val data = classData(ref)
-    hashCons = hashCons + (node.shape -> ref)
-    classData = classData + (ref -> data.copy(nodes = data.nodes + (node.shape -> node.renaming)))
-    classData = classData ++ node.shape.args.map(_.ref).distinct.map(c => {
+    hashCons = hashCons + (shape -> ref)
+    classData = classData + (ref -> data.copy(nodes = data.nodes + (shape -> renaming)))
+    classData = classData ++ shape.args.map(_.ref).distinct.map(c => {
       val argData = classData(c)
-      c -> argData.copy(users = argData.users + node.shape)
+      c -> argData.copy(users = argData.users + shape)
     })
   }
 

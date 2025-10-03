@@ -3,14 +3,15 @@ package foresight.eqsat.lang
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
-import foresight.eqsat._
+import foresight.eqsat.*
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly.EGraph
 import foresight.util.ordering.SeqOrdering
 
+import scala.collection.immutable.ArraySeq
 import scala.compiletime.{erasedValue, summonAll, summonFrom, summonInline}
-import scala.deriving._
+import scala.deriving.*
 import scala.util.NotGiven
 
 /**
@@ -620,11 +621,7 @@ object Language:
           val c1 = java.lang.Integer.compare(a.ord, b.ord)
           if c1 != 0 then return c1
 
-          // 2) schema (lexicographic)
-          val c2 = SeqOrdering.lexOrdering.compare(a.schema, b.schema)
-          if c2 != 0 then return c2
-
-          // 3) payload via precomputed per-ordinal comparators
+          // 2) payload via precomputed per-ordinal comparators
           val cs = payComps(a.ord)
           val len = math.min(math.min(a.payload.length, b.payload.length), cs.length)
 
@@ -666,7 +663,7 @@ object Language:
           i += 1
 
         MixedTree.Node(
-          LanguageOp[E](ord, Seq.from(schema), Seq.from(payload)),
+          LanguageOp[E](ord, schema.toArray, payload.toArray),
           binders.toSeq,
           slots.toSeq,
           kids.toSeq

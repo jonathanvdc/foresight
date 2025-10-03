@@ -19,7 +19,7 @@ private[eqsat] final class MutableEClassData[NodeT](
   @volatile private var _slots: SlotSet = initialSlots
   @volatile private var _permutations: PermutationGroup[SlotMap] = initialPermutations
 
-  private val _nodes: mutable.HashMap[ENode[NodeT], SlotMap] = mutable.HashMap.empty
+  private val _nodes: mutable.LinkedHashMap[ENode[NodeT], SlotMap] = mutable.LinkedHashMap.empty
   private val _users: mutable.HashSet[ENode[NodeT]] = mutable.HashSet.empty
 
   // Counter that remembers how many nodes with slots have been added.
@@ -59,10 +59,10 @@ private[eqsat] final class MutableEClassData[NodeT](
   def users: collection.Set[ENode[NodeT]] = _users
 
   /**
-   * Get the nodes of the e-class, along with their renamings.
-   * @return The nodes of the e-class and their renamings.
+   * Check if the e-class has any slots, including in its nodes.
+   * @return True if the e-class has slots, false otherwise.
    */
-  def hasSlots: Boolean = {
+  private def hasSlots: Boolean = {
     nodeWithSlotCounter > 0
   }
 
@@ -98,11 +98,21 @@ private[eqsat] final class MutableEClassData[NodeT](
   /** Remove a node. */
   def removeNode(node: ENode[NodeT]): Unit = {
     _nodes.remove(node) match {
-      case Some(ren) if !ren.isEmpty =>
-        nodeWithSlotCounter -= 1
+      case Some(ren) =>
+        if (!ren.isEmpty) {
+          nodeWithSlotCounter -= 1
+        }
         bumpVersion()
+
       case _ => // do nothing
     }
+  }
+
+  /** Remove all nodes. */
+  def removeAllNodes(): Unit = {
+    nodeWithSlotCounter = 0
+    bumpVersion()
+    _nodes.clear()
   }
 
   /** Add a user e-node. */

@@ -25,12 +25,6 @@ private[eqsat] trait AbstractEClassData[NodeT] {
    * Get the nodes of the e-class, along with their renamings.
    * @return The nodes of the e-class and their renamings.
    */
-  def hasSlots: Boolean
-
-  /**
-   * Get the nodes of the e-class, along with their renamings.
-   * @return The nodes of the e-class and their renamings.
-   */
   def nodes: collection.Map[ENode[NodeT], SlotMap]
 
   /**

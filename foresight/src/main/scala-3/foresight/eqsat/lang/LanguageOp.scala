@@ -1,5 +1,7 @@
 package foresight.eqsat.lang
 
+import scala.collection.immutable.ArraySeq
+
 /**
  * Canonical node representation for a surface language `E`.
  *
@@ -30,19 +32,38 @@ package foresight.eqsat.lang
  * @tparam E the surface language this node belongs to.
  */
 final class LanguageOp[E] private[lang](private[lang] val ord: Int,
-                                        private[lang] val schema: Seq[Byte],
-                                        private[lang] val payload: Seq[Any]) {
+                                        private[lang] val schema: Array[Byte],
+                                        private[lang] val payload: Array[Any]) {
 
   override def equals(obj: Any): Boolean = obj match {
     case that: LanguageOp[_] =>
-      (this eq that) || (this.ord == that.ord && this.payload == that.payload)
+      if (this eq that) {
+        return true
+      }
+
+      if (this.ord != that.ord || this.payload.length != that.payload.length) {
+        return false
+      }
+
+      var i = 0
+      while (i < this.payload.length) {
+        if (!this.payload(i).equals(that.payload(i))) {
+          return false
+        }
+        i += 1
+      }
+      true
 
     case _ => false
   }
 
   private val _hash: Int = {
     var h = ord.##
-    h = 31 * h + payload.##
+    var i = 0
+    while (i < schema.length) {
+      h = 31 * h + schema(i).##
+      i += 1
+    }
     h
   }
 
@@ -66,7 +87,7 @@ object LanguageOp {
    * @tparam E The surface language this node belongs to.
    * @return A new `LanguageOp` instance.
    */
-  def apply[E](ord: Int, schema: Seq[Byte], payload: Seq[Any]): LanguageOp[E] =
+  def apply[E](ord: Int, schema: Array[Byte], payload: Array[Any]): LanguageOp[E] =
     new LanguageOp[E](ord, schema, payload)
 
   /**
