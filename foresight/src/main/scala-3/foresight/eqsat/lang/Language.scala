@@ -621,11 +621,7 @@ object Language:
           val c1 = java.lang.Integer.compare(a.ord, b.ord)
           if c1 != 0 then return c1
 
-          // 2) schema (lexicographic)
-          val c2 = SeqOrdering.lexOrdering.compare(a.schema, b.schema)
-          if c2 != 0 then return c2
-
-          // 3) payload via precomputed per-ordinal comparators
+          // 2) payload via precomputed per-ordinal comparators
           val cs = payComps(a.ord)
           val len = math.min(math.min(a.payload.length, b.payload.length), cs.length)
 
@@ -667,7 +663,7 @@ object Language:
           i += 1
 
         MixedTree.Node(
-          LanguageOp[E](ord, ArraySeq.from(schema), ArraySeq.from(payload)),
+          LanguageOp[E](ord, schema.toArray, payload.toArray),
           binders.toSeq,
           slots.toSeq,
           kids.toSeq
