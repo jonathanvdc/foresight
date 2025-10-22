@@ -8,21 +8,25 @@ import java.util.concurrent.atomic.AtomicReferenceArray
 
 /**
  * A mutable union-find data structure that uses an array to store parent pointers.
-  *
-  * Write operations to this implementation is not thread-safe.
-  */
+ *
+ * Write operations to this implementation is not thread-safe.
+ */
 private[hashCons] final class SlottedUnionFind extends AbstractMutableSlottedUnionFind {
-  private var parents: AtomicReferenceArray[EClassCall] =
-    new AtomicReferenceArray[EClassCall](16)
-
+  private var parents: AtomicReferenceArray[EClassCall] = new AtomicReferenceArray[EClassCall](16)
   private var currentSize: Int = 0
+
+  override def findOrNull(key: EClassRef): EClassCall = {
+    // We can safely compress under the hood here, as updates are atomic and results
+    // are the same regardless of whether compression happens or not
+    findAndCompressOrNull(key)
+  }
 
   override def update(key: EClassRef, value: EClassCall): Unit = {
     parents.lazySet(key.id, value)
   }
 
   override protected def getParentOrNull(ref: EClassRef): EClassCall = {
-    if (ref.id >= parents.length) null
+    if (ref.id >= currentSize) null
     else parents.get(ref.id)
   }
 
