@@ -17,6 +17,24 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
   protected def getParentOrNull(ref: EClassRef): EClassCall
 
   /**
+   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
+   * representative of the key is returned.
+   *
+   * @param key The key to find.
+   * @return The representative of the key, if the key is in the union-find. Null otherwise.
+   */
+  def findOrNull(key: EClassRef): EClassCall = {
+    val parent = getParentOrNull(key)
+    if (parent == null) {
+      null
+    } else if (parent.ref == key) {
+      parent
+    } else {
+      findOrNull(parent)
+    }
+  }
+
+  /**
    * Constructs an e-class call with the given e-class reference and an empty slot map.
    * @param ref The e-class reference.
    * @return An e-class call with the given e-class reference and an empty slot map.
@@ -44,7 +62,7 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
    * @param ref The key to find.
    * @return The representative of the key, if the key is in the union-find. Null otherwise.
    */
-  def findOrNull(ref: EClassCall): EClassCall = {
+  final def findOrNull(ref: EClassCall): EClassCall = {
     val parent = findOrNull(ref.ref)
     if (parent == null) {
       null
@@ -60,30 +78,12 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
    * @param ref The key to find.
    * @return The representative of the key.
    */
-  def find(ref: EClassCall): EClassCall = {
+  final def find(ref: EClassCall): EClassCall = {
     val result = findOrNull(ref)
     if (result == null) {
       throw new NoSuchElementException(s"EClassRef ${ref.ref} is not in the union-find.")
     } else {
       result
-    }
-  }
-
-  /**
-   * Finds the representative of the given key. If the key is not in the union-find, null is returned; otherwise, the
-   * representative of the key is returned.
-   *
-   * @param key The key to find.
-   * @return The representative of the key, if the key is in the union-find. Null otherwise.
-   */
-  def findOrNull(key: EClassRef): EClassCall = {
-    val parent = getParentOrNull(key)
-    if (parent == null) {
-      null
-    } else if (parent.ref == key) {
-      parent
-    } else {
-      findOrNull(parent)
     }
   }
 
@@ -94,7 +94,7 @@ private[hashCons] abstract class AbstractSlottedUnionFind {
    * @param ref The key to find.
    * @return The representative of the key.
    */
-  def find(ref: EClassRef): EClassCall = {
+  final def find(ref: EClassRef): EClassCall = {
     val result = findOrNull(ref)
     if (result == null) {
       throw new NoSuchElementException(s"EClassRef $ref is not in the union-find.")
