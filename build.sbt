@@ -144,7 +144,7 @@ lazy val benchmarks = (project in file("benchmarks"))
     publish / skip := true,
 //    Test / skip := true,
     Jmh / fork := true,
-    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G")
+//    Jmh / javaOptions ++= Seq("-Xms4G", "-Xmx4G")
   )
 
 // Aggregated Scaladoc for the root project (copies child docs under one folder)
