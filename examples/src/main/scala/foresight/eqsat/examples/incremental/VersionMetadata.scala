@@ -20,6 +20,15 @@ import foresight.eqsat.readonly.EGraph
  */
 final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRef, Int])
   extends Metadata[NodeT, VersionMetadata[NodeT]] {
+  
+  /**
+   * Checks if the given e-class is at the latest version.
+   * @param eclass The e-class to check.
+   * @return true if the e-class is at the latest version, false otherwise.
+   */
+  def isLatestVersion(eclass: EClassRef): Boolean = {
+    data.getOrElse(eclass, -1) == version
+  }
 
   /**
    * Handles the addition of a new term to the e-graph. Increments the global version number

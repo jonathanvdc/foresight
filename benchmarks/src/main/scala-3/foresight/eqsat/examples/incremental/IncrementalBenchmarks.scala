@@ -123,15 +123,25 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   private def optimizeMutable(term: ArithExpr, strategy: Strategy[MutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toMutableEGraph(term)
-    val egraph2 = strategy(mutable.EGraphWithMetadata(egraph), map).getOrElse(egraph)
+    val withMetadata = mutable.EGraphWithMetadata(egraph)
+    withMetadata.addMetadata(metadataName, VersionMetadata.empty)
+    withMetadata.addAnalysis(costAnalysis)
+    withMetadata.addAnalysis(extractionAnalysis)
 
-    L.extract(root, egraph2, arithCostFunction)
+    val egraph2 = strategy(withMetadata, map).getOrElse(withMetadata)
+
+    L.fromTree(extractor(root, egraph2))
   }
 
   private def optimizeImmutable(term: ArithExpr, strategy: Strategy[ImmutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toEGraph(term)
-    val egraph2 = strategy(immutable.EGraphWithMetadata(egraph), map).getOrElse(egraph)
+    val withMetadata = immutable.EGraphWithMetadata(egraph)
+      .addMetadata(metadataName, VersionMetadata.empty)
+      .addAnalysis(costAnalysis)
+      .addAnalysis(extractionAnalysis)
 
-    L.extract(root, egraph2, arithCostFunction)
+    val egraph2 = strategy(withMetadata, map).getOrElse(withMetadata)
+
+    L.fromTree(extractor(root, egraph2))
   }
 }
