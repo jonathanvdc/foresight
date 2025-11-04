@@ -2,16 +2,15 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.metadata.AnalysisMetadata
-import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{EClassSearcher, ReversibleSearcher, Rule, Searcher}
+import foresight.eqsat.rewriting.{EClassSearcher, Rule, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
 import foresight.eqsat.{EClassCall, EClassRef, ENode}
-import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
+import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 
 import scala.collection.mutable.ArrayBuffer
 
 object IncrementalSaturation {
-  def isLatestVersion[NodeT, EGraphT <: EGraph[NodeT] with EGraphLike[NodeT, EGraphT]](
+  def isLatestVersion[NodeT, EGraphT <: EGraph[NodeT]](
     eclass: EClassRef,
     egraph: EGraphWithMetadata[NodeT, EGraphT],
     versionMetadataName: String
@@ -21,7 +20,7 @@ object IncrementalSaturation {
     eclassVersion == meta.version
   }
 
-  def isTopK[NodeT, EGraphT <: EGraph[NodeT] with EGraphLike[NodeT, EGraphT], C](
+  def isTopK[NodeT, EGraphT <: EGraph[NodeT], C](
     node: ENode[NodeT],
     eclass: EClassCall,
     egraph: EGraphWithMetadata[NodeT, EGraphT],
@@ -48,7 +47,7 @@ object IncrementalSaturation {
 
   def makeIncremental[
     NodeT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    EGraphT <: EGraph[NodeT],
     C
   ]
   (
@@ -74,7 +73,7 @@ object IncrementalSaturation {
 
   def makeIncremental[
     NodeT,
-    EGraphT <: EGraphLike[NodeT, EGraphT] with EGraph[NodeT],
+    EGraphT <: EGraph[NodeT],
     C
   ]
   (
@@ -87,7 +86,7 @@ object IncrementalSaturation {
     rules.map(makeIncremental(_, k, versionMetadataName, costAnalysis))
   }
 
-  def toIncrementalSearcher[NodeT, EGraphT <: EGraph[NodeT] with EGraphLike[NodeT, EGraphT], C]
+  def toIncrementalSearcher[NodeT, EGraphT <: EGraph[NodeT], C]
   (
     pattern: CompiledPattern[NodeT, EGraphWithMetadata[NodeT, EGraphT]],
     k: Int,

@@ -2,13 +2,13 @@ package foresight.eqsat.examples.arith
 
 import foresight.eqsat.commands.Command
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
+import foresight.eqsat.readonly.{EGraphWithMetadata, EGraph}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat._
 
 object ApplierOps {
-  implicit class ApplierOfPatternMatchOps[EGraphT <: EGraphLike[ArithIR, EGraphT] with EGraph[ArithIR]](private val applier: Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]]) extends AnyVal {
+  implicit class ApplierOfPatternMatchOps[EGraphT <: EGraph[ArithIR]](private val applier: Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]]) extends AnyVal {
 
     /**
      * Substitutes a variable in a pattern match with another variable.
