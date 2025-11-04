@@ -16,8 +16,11 @@ import java.util.concurrent.TimeUnit
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class IncrementalBenchmarks extends BenchmarksWithParallelMap {
-  @Param(Array("6"))
+  @Param(Array("8"))
   var size: Int = _
+
+  @Param(Array("100"))
+  var termCount: Int = _
 
   @Param(Array("true", "false"))
   var mutableEGraph: Boolean = _
@@ -84,7 +87,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   }
 
   private def terms(n: Int): Seq[ArithExpr] = {
-    RandomArithExprGen.randomTerms(100, n, seed = 42)
+    RandomArithExprGen.randomTerms(termCount, n, seed = 42)
   }
 
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
