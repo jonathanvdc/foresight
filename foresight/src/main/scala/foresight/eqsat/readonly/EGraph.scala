@@ -67,7 +67,7 @@ trait EGraph[NodeT] {
    * @param ref The e-class whose users to retrieve.
    * @return All e-nodes in the graph that reference `ref`.
    */
-  def users(ref: EClassRef): Set[ENode[NodeT]]
+  def users(ref: EClassRef): Iterable[ENode[NodeT]]
 
   /**
    * Finds the e-class containing the given e-node, if present.

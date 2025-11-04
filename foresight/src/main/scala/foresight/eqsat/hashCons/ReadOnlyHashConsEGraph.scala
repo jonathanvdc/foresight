@@ -193,13 +193,13 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
     callWithoutSlots(ref)
   }
 
-  final override def users(ref: EClassRef): Set[ENode[NodeT]] = {
+  final override def users(ref: EClassRef): Iterable[ENode[NodeT]] = {
     val canonicalApp = canonicalize(ref)
     dataForClass(canonicalApp.ref).users.map(node => {
       val c = nodeToRef(node)
       val mapping = dataForClass(c).nodes(node)
       ShapeCall(node, mapping).asNode
-    }).toSet
+    })
   }
 
   final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = {
