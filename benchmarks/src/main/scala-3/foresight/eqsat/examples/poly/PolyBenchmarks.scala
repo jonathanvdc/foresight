@@ -65,22 +65,25 @@ class PolyBenchmarks extends BenchmarksWithParallelMap {
   val R: Rules = poly.Rules()(using L)
   type ArithRule = R.ArithRule
 
+  type MutableEGraph = mutable.EGraphWithMetadata[ArithIR, mutable.EGraph[ArithIR]]
+  type ImmutableEGraph = immutable.EGraphWithMetadata[ArithIR, immutable.EGraph[ArithIR]]
+
   private def polyBenchMutable(n: Int, map: ParallelMap): ArithExpr = {
-    val simpleStrategy: Strategy[mutable.EGraph[ArithIR], Unit] = MaximalRuleApplication.mutable(R.all)
+    val simpleStrategy: Strategy[MutableEGraph, Unit] = MaximalRuleApplication.mutable(R.all)
       .repeatUntilStable
 
     val (root, egraph) = L.toMutableEGraph(polynomialExpr(n))
-    val egraph2 = simpleStrategy(egraph, map).get
+    val egraph2 = simpleStrategy(mutable.EGraphWithMetadata(egraph), map).get
 
     L.extract(root, egraph2, arithCostFunction)
   }
 
   private def polyBenchImmutable(n: Int, map: ParallelMap): ArithExpr = {
-    val simpleStrategy: Strategy[immutable.EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all)
+    val simpleStrategy: Strategy[ImmutableEGraph, Unit] = MaximalRuleApplication(R.all)
       .repeatUntilStable
 
     val (root, egraph) = L.toEGraph(polynomialExpr(n))
-    val egraph2 = simpleStrategy(egraph, map).get
+    val egraph2 = simpleStrategy(immutable.EGraphWithMetadata(egraph), map).get
 
     L.extract(root, egraph2, arithCostFunction)
   }

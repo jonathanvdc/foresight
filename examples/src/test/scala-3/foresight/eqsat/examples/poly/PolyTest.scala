@@ -3,8 +3,8 @@ package foresight.eqsat.examples.poly
 import foresight.eqsat.lang._
 import foresight.eqsat.saturation.{MaximalRuleApplication, MaximalRuleApplicationWithCaching, Strategy}
 import foresight.eqsat.EClassCall
-import foresight.eqsat.immutable.EGraph
-import foresight.eqsat.mutable.EGraph as MutableEGraph
+import foresight.eqsat.immutable
+import foresight.eqsat.mutable
 import org.junit.Test
 
 import scala.language.implicitConversions
@@ -14,13 +14,16 @@ class PolyTest {
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
   val R: Rules = Rules()(using L)
 
-  val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+  type MutableEGraph = mutable.EGraphWithMetadata[ArithIR, mutable.EGraph[ArithIR]]
+  type ImmutableEGraph = immutable.EGraphWithMetadata[ArithIR, immutable.EGraph[ArithIR]]
 
-  val mutableStrategy: Strategy[MutableEGraph[ArithIR], Unit] = MaximalRuleApplication.mutable(R.all).repeatUntilStable
+  val simpleStrategy: Strategy[ImmutableEGraph, Unit] = MaximalRuleApplication(R.all).repeatUntilStable
 
-  val cachingStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplicationWithCaching(R.all).repeatUntilStable.closeRecording
+  val mutableStrategy: Strategy[MutableEGraph, Unit] = MaximalRuleApplication.mutable(R.all).repeatUntilStable
 
-  val strategies: Seq[Strategy[EGraph[ArithIR], Unit]] = Seq(simpleStrategy, cachingStrategy)
+  val cachingStrategy: Strategy[ImmutableEGraph, Unit] = MaximalRuleApplicationWithCaching(R.all).repeatUntilStable.closeRecording
+
+  val strategies: Seq[Strategy[ImmutableEGraph, Unit]] = Seq(simpleStrategy, cachingStrategy)
 
   val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
     override def apply(expr: ArithExpr): Int = {
@@ -49,7 +52,7 @@ class PolyTest {
     val poly2 = a * (x ** c2) + b * x + c
     val poly2Simplified = c + x * (b + a * x)
 
-    val egraph = EGraph.empty[ArithIR]
+    val egraph = immutable.EGraphWithMetadata(immutable.EGraph.empty[ArithIR])
     val (class1, egraph2) = egraph.add(poly2)
     val (class2, egraph3) = egraph2.add(poly2Simplified)
 
@@ -78,7 +81,7 @@ class PolyTest {
     val poly2Simplified = c + x * (b + a * x)
 
     val (root, egraph) = L.toEGraph(poly2)
-    val egraph2 = cachingStrategy(egraph).get
+    val egraph2 = cachingStrategy(immutable.EGraphWithMetadata(egraph)).get
 
     val poly2Cost = costFunction(poly2)
     val poly2ExpandedCost = costFunction(poly2Expanded)
@@ -113,7 +116,7 @@ class PolyTest {
     val poly5 = a * (x ** c5) + b * (x ** c4) + c * (x ** c3) + d * (x ** c2) + e * x + f
     val poly5Simplified = f + x * (e + x * (d + x * (c + x * (b + a * x))))
 
-    val egraph = EGraph.empty[ArithIR]
+    val egraph = immutable.EGraphWithMetadata(immutable.EGraph.empty[ArithIR])
     val (class1, egraph2) = egraph.add(poly5)
     val (class2, egraph3) = egraph2.add(poly5Simplified)
 
@@ -147,7 +150,7 @@ class PolyTest {
     val poly5Simplified = f + x * (e + x * (d + x * (c + x * (b + a * x))))
 
     val (root, egraph) = L.toEGraph(poly5)
-    val egraph2 = simpleStrategy(egraph).get
+    val egraph2 = simpleStrategy(immutable.EGraphWithMetadata(egraph)).get
 
     val extracted = egraph2.extract(root, costFunction)
     assert(extracted == poly5Simplified, s"Expected $poly5Simplified but got $extracted")
@@ -158,7 +161,7 @@ class PolyTest {
     type ArithRule = R.ArithRule
     val L: Language[ArithExpr] = summon[Language[ArithExpr]]
     val R: Rules = Rules()(using L)
-    val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
+    val simpleStrategy: Strategy[ImmutableEGraph, Unit] = MaximalRuleApplication(R.all).repeatUntilStable
     val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
       override def apply(expr: ArithExpr): Int = {
         expr match {
@@ -191,7 +194,7 @@ class PolyTest {
     val poly5Simplified = f + x * (e + x * (d + x * (c + x * (b + a * x))))
 
     val (root, egraph) = L.toEGraph(poly5)
-    val egraph2 = simpleStrategy(egraph).get
+    val egraph2 = simpleStrategy(immutable.EGraphWithMetadata(egraph)).get
 
     val extracted = egraph2.extract(root, costFunction)
   }
@@ -201,7 +204,6 @@ class PolyTest {
     type ArithRule = R.ArithRule
     val L: Language[ArithExpr] = summon[Language[ArithExpr]]
     val R: Rules = Rules()(using L)
-    val simpleStrategy: Strategy[EGraph[ArithIR], Unit] = MaximalRuleApplication(R.all).repeatUntilStable
     val costFunction: LanguageCostFunction[ArithExpr, Int] = new LanguageCostFunction[ArithExpr, Int]() {
       override def apply(expr: ArithExpr): Int = {
         expr match {
@@ -233,8 +235,8 @@ class PolyTest {
     val poly5 = a * (x ** c5) + b * (x ** c4) + c * (x ** c3) + d * (x ** c2) + e * x + f
     val poly5Simplified = f + x * (e + x * (d + x * (c + x * (b + a * x))))
 
-    val (root, egraph) = MutableEGraph.from(L.toTree(poly5))
-    val egraph2 = mutableStrategy(egraph).get
+    val (root, egraph) = mutable.EGraph.from(L.toTree(poly5))
+    val egraph2 = mutableStrategy(mutable.EGraphWithMetadata(egraph)).get
 
     egraph.asInstanceOf[foresight.eqsat.hashCons.mutable.HashConsEGraph[ArithIR]].checkInvariants()
 
