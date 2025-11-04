@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class IncrementalBenchmarks extends BenchmarksWithParallelMap {
-  @Param(Array("5", "6"))
+  @Param(Array("6"))
   var size: Int = _
 
   @Param(Array("true", "false"))
@@ -37,6 +37,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
       egraph.addMetadata(metadataName, VersionMetadata.empty)
       egraph.addAnalysis(costAnalysis)
+      egraph.addAnalysis(extractionAnalysis)
 
       for (term <- terms(size)) yield {
         val tree = L.toTree(term)
@@ -47,12 +48,13 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
         incrementalMutableStrategy(egraph, parallelMap)
 
-        L.extract(root, egraph, arithCostFunction)
+        L.fromTree(extractionAnalysis.extractor(root, egraph))
       }
     } else {
       var egraph = immutable.EGraphWithMetadata(immutable.EGraph.empty[ArithIR])
         .addMetadata(metadataName, VersionMetadata.empty)
         .addAnalysis(costAnalysis)
+        .addAnalysis(extractionAnalysis)
 
       for (term <- terms(size)) yield {
         val tree = L.toTree(term)
@@ -64,7 +66,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
         egraph = incrementalImmutableStrategy(egraph, parallelMap).getOrElse(egraph)
 
-        L.extract(root, egraph, arithCostFunction)
+        L.fromTree(extractor(root, egraph))
       }
     }
   }
@@ -94,6 +96,8 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   // Define the metadata name and cost analysis
   private val metadataName = "version"
   private val costAnalysis = CostAnalysis[ArithIR, Int]("cost", arithCostFunction)
+  private val extractionAnalysis = L.extractionAnalysis("extract", arithCostFunction)
+  private val extractor = extractionAnalysis.extractor
 
   private val k = 2
   private val incrementalRules = IncrementalSaturation.makeIncremental(
