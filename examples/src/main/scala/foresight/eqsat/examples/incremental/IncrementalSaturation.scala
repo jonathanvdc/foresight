@@ -114,7 +114,8 @@ object IncrementalSaturation {
 
       override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): Unit = {
         val meta = egraph.getMetadata[VersionMetadata[NodeT]](versionMetadataName)
-        search(UnsafeSeqFromArray(egraph.classes.view.filter(meta.isLatestVersion).map(egraph.canonicalize).toArray), egraph, parallelize)
+        val latest = UnsafeSeqFromArray(meta.latestVersionClasses.map(egraph.canonicalize).toArray)
+        search(latest, egraph, parallelize)
       }
 
       protected override def search(call: EClassCall, egraph: EGraphWithMetadata[NodeT, EGraphT], continuation: Continuation): Unit = {

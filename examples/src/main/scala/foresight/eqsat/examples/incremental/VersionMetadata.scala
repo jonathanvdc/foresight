@@ -18,9 +18,20 @@ import foresight.eqsat.readonly.EGraph
  * @param data The per-e-class version mapping.
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-final case class VersionMetadata[NodeT] private(version: Int, data: Map[EClassRef, Int])
+final case class VersionMetadata[NodeT] private(version: Int,
+                                                private val data: Map[EClassRef, Int])
   extends Metadata[NodeT, VersionMetadata[NodeT]] {
-  
+
+  private lazy val _latestVersionClasses = {
+    data.collect { case (eclass, v) if v == version => eclass }
+  }
+
+  /**
+   * Retrieves all e-classes that are at the latest version.
+   * @return An iterable of e-classes at the latest version.
+   */
+  def latestVersionClasses: Iterable[EClassRef] = _latestVersionClasses
+
   /**
    * Checks if the given e-class is at the latest version.
    * @param eclass The e-class to check.
