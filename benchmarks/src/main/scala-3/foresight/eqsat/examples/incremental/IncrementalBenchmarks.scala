@@ -104,7 +104,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   }
 
   private def terms(n: Int): Seq[ArithExpr] = {
-    for (i <- 0 to n) yield {
+    for (i <- 2 to n) yield {
       polynomialExpr(i)
     }
   }
