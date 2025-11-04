@@ -81,32 +81,8 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
     }
   }
 
-  /**
-   * Constructs a polynomial expression of degree `n` in variable `x` with symbolic coefficients.
-   * Coefficients are named 'a', 'b', ..., corresponding to each term.
-   * The polynomial is built as: a_n * x^n + a_{n-1} * x^{n-1} + ... + a_0
-   *
-   * @param n Degree of the polynomial
-   * @return The constructed polynomial as an `ArithExpr`
-   */
-  private def polynomialExpr(n: Int): ArithExpr = {
-    val x = Var("x")
-    val coeffs = (0 to n).map(i => Var(('a' + i).toChar.toString))
-    coeffs.zipWithIndex.reverse.map { case (c, i) =>
-      if (i == 0) c
-      else c * (x ** const(i))
-    }.reduce(_ + _)
-  }
-
-  private def const(n: Int): ArithExpr = {
-    if (n == 0) Zero
-    else Succ(const(n - 1))
-  }
-
   private def terms(n: Int): Seq[ArithExpr] = {
-    for (i <- 2 to n) yield {
-      polynomialExpr(i)
-    }
+    RandomArithExprGen.randomTerms(100, n, seed = 42)
   }
 
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
@@ -143,14 +119,14 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   private def optimizeMutable(term: ArithExpr, strategy: Strategy[MutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toMutableEGraph(term)
-    val egraph2 = strategy(mutable.EGraphWithMetadata(egraph), map).get
+    val egraph2 = strategy(mutable.EGraphWithMetadata(egraph), map).getOrElse(egraph)
 
     L.extract(root, egraph2, arithCostFunction)
   }
 
   private def optimizeImmutable(term: ArithExpr, strategy: Strategy[ImmutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toEGraph(term)
-    val egraph2 = strategy(immutable.EGraphWithMetadata(egraph), map).get
+    val egraph2 = strategy(immutable.EGraphWithMetadata(egraph), map).getOrElse(egraph)
 
     L.extract(root, egraph2, arithCostFunction)
   }
