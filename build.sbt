@@ -150,39 +150,41 @@ lazy val benchmarks = (project in file("benchmarks"))
 // Aggregated Scaladoc for the root project (copies child docs under one folder)
 lazy val aggregatedDoc = taskKey[File]("Generate aggregated Scaladoc for the root from subprojects")
 
-lazy val root = (project in file("."))
-  .aggregate(foresight, examples, benchmarks)
-  .settings(
-    name := "foresight-root",
-    commonScalaSettings,
-    // Make `root / doc` build and collect child docs without publishing any package
-    Compile / doc := aggregatedDoc.value,
-    aggregatedDoc := {
-      val log = streams.value.log
-      val sv   = scalaVersion.value
-      val sbin = scalaBinaryVersion.value
-      val scalaDir = if (sbin.startsWith("3")) s"scala-$sv" else s"scala-$sbin"
-      val out = target.value / scalaDir / "api"
-      sbt.IO.delete(out)
+lazy val root = {
+  val p = (project in file("."))
+    .aggregate(foresight, examples, benchmarks)
+    .settings(
+      name := "foresight-root",
+      commonScalaSettings,
+      // Make `root / doc` build and collect child docs without publishing any package
+      Compile / doc := aggregatedDoc.value,
+      aggregatedDoc := {
+        val log = streams.value.log
+        val sv = scalaVersion.value
+        val sbin = scalaBinaryVersion.value
+        val scalaDir = if (sbin.startsWith("3")) s"scala-$sv" else s"scala-$sbin"
+        val out = target.value / scalaDir / "api"
+        sbt.IO.delete(out)
 
-      // Trigger docs for each child explicitly (avoid ScopeFilter + lambda captures)
-      val foresightDocOut  = (foresight  / Compile / doc).value
-      val examplesDocOut   = (examples   / Compile / doc).value
-      val benchmarksDocOut = (benchmarks / Compile / doc).value
+        // Trigger docs for each child explicitly (avoid ScopeFilter + lambda captures)
+        val foresightDocOut = (foresight / Compile / doc).value
+        val examplesDocOut = (examples / Compile / doc).value
+        val benchmarksDocOut = (benchmarks / Compile / doc).value
 
-      // Copy into per-project subfolders under the aggregate
-      sbt.IO.copyDirectory(foresightDocOut,  out / foresight.id)
-      sbt.IO.copyDirectory(examplesDocOut,   out / examples.id)
-      sbt.IO.copyDirectory(benchmarksDocOut, out / benchmarks.id)
+        // Copy into per-project subfolders under the aggregate
+        sbt.IO.copyDirectory(foresightDocOut, out / foresight.id)
+        sbt.IO.copyDirectory(examplesDocOut, out / examples.id)
+        sbt.IO.copyDirectory(benchmarksDocOut, out / benchmarks.id)
 
-      log.info(s"Aggregated docs written to: $out")
-      out
-    },
-    publish / skip := true,            // don't publish the aggregate
-    Compile / packageDoc / publishArtifact := false,
-    Compile / packageSrc / publishArtifact := false
-  )
-
-// Publish to GitHub Pages
-enablePlugins(GhpagesPlugin, SitePlugin, SiteScaladocPlugin)
-git.remoteRepo := "https://github.com/jonathanvdc/foresight.git"
+        log.info(s"Aggregated docs written to: $out")
+        out
+      },
+      publish / skip := true, // don't publish the aggregate
+      Compile / packageDoc / publishArtifact := false,
+      Compile / packageSrc / publishArtifact := false
+    )
+  // Enable Git-based site publishing plugins unless NO_GIT=1 is set
+  if (sys.env.get("NO_GIT").contains("1")) p
+  else p.enablePlugins(GhpagesPlugin, SitePlugin, SiteScaladocPlugin)
+    .settings(git.remoteRepo := "https://github.com/jonathanvdc/foresight.git")
+}
