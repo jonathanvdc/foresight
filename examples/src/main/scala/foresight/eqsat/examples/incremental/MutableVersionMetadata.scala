@@ -5,6 +5,7 @@ import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly.EGraph
 
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable.HashMap
 
 /**
@@ -97,10 +98,18 @@ final class MutableVersionMetadata[NodeT] private(version: Int)
       case MixedTree.Atom(call: EClassCall) =>
         call -> Set(egraph.canonicalize(call).ref)
       case MixedTree.Node(n: NodeT, defs, uses, args: Seq[MixedTree[NodeT, EClassCall]]) =>
-        val (argCalls, argEClasses) = args.map(arg => findEClassesInTerm(arg, egraph)).unzip
+        val argCallsBuf = ArraySeq.newBuilder[EClassCall]
+        val argEClassesSet = Set.newBuilder[EClassRef]
+        for (arg <- args) {
+          val (ac, ecs) = findEClassesInTerm(arg, egraph)
+          argCallsBuf += ac
+          argEClassesSet ++= ecs
+        }
+        val argCalls = argCallsBuf.result()
         val eNode = ENode(n, defs, uses, argCalls)
         val eClassCall = egraph.find(eNode).getOrElse(throw new IllegalStateException("Node in term not found in e-graph"))
-        eClassCall -> (argEClasses.flatten.toSet + egraph.canonicalize(eClassCall).ref)
+        argEClassesSet += egraph.canonicalize(eClassCall).ref
+        eClassCall -> argEClassesSet.result()
     }
   }
 }
