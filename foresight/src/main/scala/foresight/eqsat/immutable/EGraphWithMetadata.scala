@@ -109,7 +109,7 @@ extends readonly.EGraphWithMetadata[NodeT, Repr]
    * @throws NoSuchElementException if no registration exists under `name`.
    * @throws ClassCastException if the stored manager has a different type.
    */
-  def getMetadata[MetadataManagerT <: Metadata[NodeT, _]](name: String): MetadataManagerT = {
+  def getMetadata[MetadataManagerT](name: String): MetadataManagerT = {
     metadata(name).asInstanceOf[MetadataManagerT]
   }
 

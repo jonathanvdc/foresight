@@ -35,7 +35,7 @@ class IncrementalSaturationTest {
 
     // Initialize an e-graph with version metadata and a cost analysis
     var egraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]](EGraph.empty[ArithIR])
-      .addMetadata(metadataName, VersionMetadata.empty)
+      .addMetadata(metadataName, ImmutableVersionMetadata.empty)
       .addAnalysis(costAnalysis)
       .addAnalysis(extractionAnalysis)
       .addAnalysis(ConstantAnalysis)
@@ -46,7 +46,7 @@ class IncrementalSaturationTest {
       egraph = newEgraph
 
       // Update the version metadata to reflect the addition of the new term
-      val versionMetadata = egraph.getMetadata[VersionMetadata[ArithIR]](metadataName)
+      val versionMetadata = egraph.getMetadata[ImmutableVersionMetadata[ArithIR]](metadataName)
       egraph = egraph.addMetadata(metadataName, versionMetadata.onNewTermAdded(term, egraph.egraph))
 
       // Saturate the e-graph

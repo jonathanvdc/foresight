@@ -1,10 +1,11 @@
-package foresight.eqsat.metadata
+package foresight.eqsat.immutable
 
-import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
 import foresight.eqsat.collections.SlotMap
-import foresight.eqsat.immutable.Metadata
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.readonly
+import foresight.eqsat.readonly.{EGraph => ReadOnlyEGraph}
+import foresight.eqsat.{EClassCall, EClassRef, ENode}
 
 /**
  * Incremental, queryable results of running an [[Analysis]] over an e-graph.
@@ -22,52 +23,15 @@ import foresight.eqsat.readonly.EGraph
  * @tparam A       Analysis result type.
  */
 final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], results: Map[EClassRef, A])
-  extends Metadata[NodeT, AnalysisMetadata[NodeT, A]] {
+  extends Metadata[NodeT, AnalysisMetadata[NodeT, A]] with readonly.AnalysisMetadata[NodeT, A] {
 
   /**
-   * Compute the analysis result for an e-class application.
+   * Get the stored analysis result for the given e-class reference.
    *
-   * Canonicalizes `call` against `egraph` and then delegates to [[applyPrecanonicalized]].
-   *
-   * @param call   The (possibly non-canonical) e-class application.
-   * @param egraph The e-graph to canonicalize within.
-   * @return The analysis result for `call`.
+   * @param call The e-class reference to get the analysis result for.
+   * @return The analysis result for the given e-class reference.
    */
-  def apply(call: EClassCall, egraph: EGraph[NodeT]): A = applyPrecanonicalized(egraph.canonicalize(call))
-
-  /**
-   * Evaluate a mixed tree whose leaves are either e-class applications or concrete nodes.
-   *
-   * For a call leaf, this delegates to [[apply(EClassCall,EGraph)]]. For a node leaf, it first
-   * computes the results of all argument subtrees and then invokes the analysis transfer function
-   * [[Analysis.make]] using the node’s definitions and uses provided by the tree.
-   *
-   * @param tree   The mixed tree to evaluate.
-   * @param egraph The e-graph to resolve calls and canonicalization.
-   * @return The analysis result for the whole tree.
-   */
-  def apply(tree: MixedTree[NodeT, EClassCall],
-            egraph: EGraph[NodeT]): A = {
-    tree match {
-      case MixedTree.Atom(call: EClassCall) => apply(call, egraph)
-
-      case MixedTree.Node(node, defs, uses, args) =>
-        val argsResults = args.map(apply(_, egraph))
-        analysis.make(node, defs, uses, argsResults)
-    }
-  }
-
-  /**
-   * Compute the analysis result for an already-canonicalized e-class application.
-   *
-   * The stored class result is parameterized over *generic* slots; we specialize it to this call
-   * by alpha-renaming according to the call’s argument mapping.
-   *
-   * @param call Canonical e-class application.
-   * @return The specialized analysis result.
-   */
-  private def applyPrecanonicalized(call: EClassCall): A =
-    analysis.rename(results(call.ref), call.args)
+  override def apply(call: EClassRef): A = results(call)
 
   /**
    * Update results after a batch of newly-added e-nodes.
@@ -89,7 +53,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @return A new [[AnalysisMetadata]] reflecting the added nodes.
    */
   override def onAddMany(added: Seq[(ENode[NodeT], EClassCall)],
-                         after: EGraph[NodeT],
+                         after: ReadOnlyEGraph[NodeT],
                          parallelize: ParallelMap): Metadata[NodeT, AnalysisMetadata[NodeT, A]] = {
 
     val resultsPerNode = parallelize[(ENode[NodeT], EClassCall), (EClassRef, A)](added, {
@@ -120,7 +84,7 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * @param after        The post-union e-graph.
    * @return A new [[AnalysisMetadata]] consistent with the unified state.
    */
-  def onUnionMany(equivalences: Set[Set[EClassCall]], after: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
+  def onUnionMany(equivalences: Set[Set[EClassCall]], after: ReadOnlyEGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
     val updater = new AnalysisUpdater(analysis, after, results)
 
     // First, merge class-level results within each equivalence group.
@@ -146,6 +110,47 @@ final case class AnalysisMetadata[NodeT, A](analysis: Analysis[NodeT, A], result
    * The same [[analysis]] instance is retained, but all class results are cleared.
    */
   override def emptied: Metadata[NodeT, AnalysisMetadata[NodeT, A]] = {
-    AnalysisMetadata(analysis, Map.empty)
+    AnalysisMetadata[NodeT, A](analysis, Map.empty)
+  }
+}
+
+/**
+ * Factory for [[AnalysisMetadata]].
+ */
+object AnalysisMetadata {
+  /**
+   * Evaluate an analysis over an entire e-graph and produce its metadata snapshot.
+   *
+   * Evaluation strategy:
+   *   1. Seed: For each e-class, compute results for **nullary** nodes (`args.isEmpty`) and
+   *      initialize per-class state.
+   *   2. Propagate: Use a worklist to process remaining nodes whose argument results become available,
+   *      repeatedly applying [[Analysis.make]] and merging with [[Analysis.join]] until no changes occur.
+   *
+   * Termination relies on `join` being monotone and idempotent w.r.t. the underlying partial order.
+   *
+   * @param analysis The analysis to evaluate.
+   * @param egraph   The e-graph to analyze.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @tparam A     The analysis result type.
+   * @return [[AnalysisMetadata]] capturing the per-class results for this analysis.
+   */
+  def compute[NodeT, A](analysis: Analysis[NodeT, A],
+                        egraph: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
+    val updater = new AnalysisUpdater(analysis, egraph, Map.empty)
+
+    // Seed: nodes with no arguments.
+    for (c <- egraph.classes) {
+      for (node <- egraph.nodes(egraph.canonicalize(c))) {
+        if (node.args.isEmpty) {
+          updater.update(c, analysis.make(node, Seq.empty))
+        }
+      }
+    }
+
+    // Propagate to a fixed point; eventually touches all e-nodes.
+    updater.processPending(initialized = false)
+
+    AnalysisMetadata(analysis, updater.results)
   }
 }

@@ -1,7 +1,5 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat.extraction.CostAnalysis
-import foresight.eqsat.metadata.AnalysisMetadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{EClassSearcher, Rule, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
@@ -36,10 +34,10 @@ object IncrementalSaturation {
       val costs = costAnalysis.get(egraph)
 
       def nodeCost(node: ENode[NodeT]): C = {
-        costAnalysis.cost(node.nodeType, node.definitions, node.uses, node.args.map(arg => costs.results(arg.ref).min))
+        costAnalysis.cost(node.nodeType, node.definitions, node.uses, node.args.map(arg => costs(arg.ref).min))
       }
 
-      val cutoff = costs.results(eclass.ref).cutoff
+      val cutoff = costs(eclass.ref).cutoff
       costAnalysis.costOrdering.lt(nodeCost(node), cutoff)
     }
   }

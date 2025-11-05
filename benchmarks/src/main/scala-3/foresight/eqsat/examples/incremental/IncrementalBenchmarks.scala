@@ -1,6 +1,6 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat.examples.poly._
+import foresight.eqsat.examples.poly.*
 import foresight.eqsat.mutable
 import foresight.eqsat.immutable
 import foresight.eqsat.lang.{Language, LanguageCostFunction}
@@ -44,7 +44,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
     if (mutableEGraph) {
       val egraph = mutable.EGraphWithMetadata(mutable.EGraph.empty[ArithIR])
 
-      egraph.addMetadata(metadataName, VersionMetadata.empty)
+      egraph.addMetadata(metadataName, MutableVersionMetadata.empty)
       egraph.addAnalysis(costAnalysis)
       egraph.addAnalysis(extractionAnalysis)
 
@@ -52,19 +52,16 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
         val tree = L.toTree(term)
         val root = egraph.add(tree)
 
-        val versionMetadata = egraph.getMetadata[VersionMetadata[ArithIR]](metadataName)
-        egraph.addMetadata(metadataName, versionMetadata.onNewTermAdded(tree, egraph.egraph))
+        val versionMetadata = egraph.getMetadata[MutableVersionMetadata[ArithIR]](metadataName)
+        versionMetadata.onNewTermAdded(tree, egraph.egraph)
 
         incrementalMutableStrategy(egraph, parallelMap)
         L.fromTree(extractionAnalysis.extractor(root, egraph))
       }
-
-      println("Number of e-nodes: " + egraph.nodeCount)
-      println("Number of e-classes: " + egraph.classCount)
       result
     } else {
       var egraph = immutable.EGraphWithMetadata(immutable.EGraph.empty[ArithIR])
-        .addMetadata(metadataName, VersionMetadata.empty)
+        .addMetadata(metadataName, ImmutableVersionMetadata.empty[ArithIR])
         .addAnalysis(costAnalysis)
         .addAnalysis(extractionAnalysis)
 
@@ -73,7 +70,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
         val (root, egraph2) = egraph.add(tree)
         egraph = egraph2
 
-        val versionMetadata = egraph.getMetadata[VersionMetadata[ArithIR]](metadataName)
+        val versionMetadata = egraph.getMetadata[ImmutableVersionMetadata[ArithIR]](metadataName)
         egraph = egraph.addMetadata(metadataName, versionMetadata.onNewTermAdded(tree, egraph.egraph))
 
         egraph = incrementalImmutableStrategy(egraph, parallelMap).getOrElse(egraph)
@@ -130,7 +127,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   private def optimizeMutable(term: ArithExpr, strategy: Strategy[MutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toMutableEGraph(term)
     val withMetadata = mutable.EGraphWithMetadata(egraph)
-    withMetadata.addMetadata(metadataName, VersionMetadata.empty)
+    withMetadata.addMetadata(metadataName, MutableVersionMetadata.empty)
     withMetadata.addAnalysis(costAnalysis)
     withMetadata.addAnalysis(extractionAnalysis)
 
@@ -142,7 +139,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   private def optimizeImmutable(term: ArithExpr, strategy: Strategy[ImmutableEGraph, Unit], map: ParallelMap): ArithExpr = {
     val (root, egraph) = L.toEGraph(term)
     val withMetadata = immutable.EGraphWithMetadata(egraph)
-      .addMetadata(metadataName, VersionMetadata.empty)
+      .addMetadata(metadataName, ImmutableVersionMetadata.empty)
       .addAnalysis(costAnalysis)
       .addAnalysis(extractionAnalysis)
 
