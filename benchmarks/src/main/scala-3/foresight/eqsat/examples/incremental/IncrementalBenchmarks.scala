@@ -18,7 +18,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   @Param(Array("6"))
   var depth: Int = _
 
-  @Param(Array("1000"))
+  @Param(Array("500"))
   var size: Int = _
 
   @Param(Array("true", "false"))
@@ -48,7 +48,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
       egraph.addAnalysis(costAnalysis)
       egraph.addAnalysis(extractionAnalysis)
 
-      for (term <- cachedTerms) yield {
+      val result = for (term <- cachedTerms) yield {
         val tree = L.toTree(term)
         val root = egraph.add(tree)
 
@@ -56,9 +56,12 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
         egraph.addMetadata(metadataName, versionMetadata.onNewTermAdded(tree, egraph.egraph))
 
         incrementalMutableStrategy(egraph, parallelMap)
-
         L.fromTree(extractionAnalysis.extractor(root, egraph))
       }
+
+      println("Number of e-nodes: " + egraph.nodeCount)
+      println("Number of e-classes: " + egraph.classCount)
+      result
     } else {
       var egraph = immutable.EGraphWithMetadata(immutable.EGraph.empty[ArithIR])
         .addMetadata(metadataName, VersionMetadata.empty)
