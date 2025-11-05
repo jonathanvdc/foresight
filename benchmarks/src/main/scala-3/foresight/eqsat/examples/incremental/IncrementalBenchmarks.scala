@@ -6,7 +6,6 @@ import foresight.eqsat.immutable
 import foresight.eqsat.lang.{Language, LanguageCostFunction}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
-import foresight.util.BenchmarksWithParallelMap
 import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Level, Mode, OutputTimeUnit, Param, Scope, Setup, State}
 
 import java.util.concurrent.TimeUnit
@@ -14,7 +13,7 @@ import java.util.concurrent.TimeUnit
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-class IncrementalBenchmarks extends BenchmarksWithParallelMap {
+class IncrementalBenchmarks {
   @Param(Array("6"))
   var depth: Int = _
 
@@ -23,6 +22,8 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   @Param(Array("true", "false"))
   var mutableEGraph: Boolean = _
+
+  private val parallelMap: ParallelMap = ParallelMap.sequential
 
   private var cachedTerms: Seq[ArithExpr] = _
 
