@@ -19,7 +19,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   @Param(Array("8"))
   var size: Int = _
 
-  @Param(Array("100"))
+  @Param(Array("50"))
   var termCount: Int = _
 
   @Param(Array("true", "false"))
