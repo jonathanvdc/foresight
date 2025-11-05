@@ -105,7 +105,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   // Define the metadata name and cost analysis
   private val metadataName = "version"
-  private val costAnalysis = TopKCostAnalysis[ArithIR, Int]("cost", 2, arithCostFunction)
+  private val costAnalysis = TopKCostAnalysis[ArithIR, Int]("cost", 4, arithCostFunction)
   private val extractionAnalysis = L.extractionAnalysis("extract", arithCostFunction)
   private val extractor = extractionAnalysis.extractor
 

@@ -1,6 +1,5 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.rewriting.patterns.Instruction
 import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 

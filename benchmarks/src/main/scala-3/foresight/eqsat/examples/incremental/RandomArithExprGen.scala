@@ -5,7 +5,7 @@ import foresight.eqsat.examples.poly._
 import scala.util.Random
 
 object RandomArithExprGen {
-  private val defaultReuseProb = 0.35
+  private val defaultReuseProb = 0.5
   private val vars = Seq("x") //, "y", "z", "a", "b", "c")
 
   /** Height (max depth) of a tree where leaves have height 0. Unknown nodes default to 0. */
