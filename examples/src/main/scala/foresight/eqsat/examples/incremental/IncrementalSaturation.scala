@@ -25,23 +25,21 @@ object IncrementalSaturation {
     node: ENode[NodeT],
     eclass: EClassCall,
     egraph: EGraphWithMetadata[NodeT, EGraphT],
-    k: Int,
-    costAnalysis: CostAnalysis[NodeT, C]
+    costAnalysis: TopKCostAnalysis[NodeT, C]
   ): Boolean = {
     val nodes = egraph.nodes(eclass)
-    if (nodes.size <= k) {
+    if (nodes.size <= costAnalysis.k) {
       // If there are k or fewer nodes in the e-class, all nodes are permissible
       true
     } else {
       // Otherwise, only the top-k cheapest nodes are permissible
-      val costs = egraph.getMetadata[AnalysisMetadata[NodeT, C]](costAnalysis.name)
+      val costs = costAnalysis.get(egraph)
 
       def nodeCost(node: ENode[NodeT]): C = {
-        costAnalysis.make(node, node.args.map(arg => costs.results(arg.ref)))
+        costAnalysis.cost(node.nodeType, node.definitions, node.uses, node.args.map(arg => costs.results(arg.ref).min))
       }
 
-      val nodeCosts = nodes.toSeq.map(nodeCost)
-      val cutoff = nodeCosts.sorted(costAnalysis.costOrdering)(k)
+      val cutoff = costs.results(eclass.ref).cutoff
       costAnalysis.costOrdering.lt(nodeCost(node), cutoff)
     }
   }
@@ -53,16 +51,15 @@ object IncrementalSaturation {
   ]
   (
     rule: Rule[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]],
-    k: Int,
     versionMetadataName: String,
-    costAnalysis: CostAnalysis[NodeT, C]
+    costAnalysis: TopKCostAnalysis[NodeT, C]
   ): Rule[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
 
     rule match {
       case Rule(name, MachineEClassSearcher(pattern: CompiledPattern[NodeT, EGraphT], buildContinuation), applier) =>
         // For machine searchers, convert to an incremental searcher, which only matches on the latest version
         // and for each node binding only matches the top-k cheapest nodes
-        Rule(name, toIncrementalSearcher(pattern, k, versionMetadataName, costAnalysis, buildContinuation), applier)
+        Rule(name, toIncrementalSearcher(pattern, versionMetadataName, costAnalysis, buildContinuation), applier)
 
       case Rule(name, searcher, applier) =>
         // For other searchers, filter to only apply on the latest version
@@ -79,20 +76,18 @@ object IncrementalSaturation {
   ]
   (
     rules: Seq[Rule[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]]],
-    k: Int,
     versionMetadataName: String,
-    costAnalysis: CostAnalysis[NodeT, C]
+    costAnalysis: TopKCostAnalysis[NodeT, C]
   ): Seq[Rule[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]]] = {
 
-    rules.map(makeIncremental(_, k, versionMetadataName, costAnalysis))
+    rules.map(makeIncremental(_, versionMetadataName, costAnalysis))
   }
 
   def toIncrementalSearcher[NodeT, EGraphT <: EGraph[NodeT], C]
   (
     pattern: CompiledPattern[NodeT, EGraphWithMetadata[NodeT, EGraphT]],
-    k: Int,
     versionMetadataName: String,
-    costAnalysis: CostAnalysis[NodeT, C],
+    costAnalysis: TopKCostAnalysis[NodeT, C],
     buildContinuation: MachineEClassSearcher[NodeT, EGraphWithMetadata[NodeT, EGraphT]]#ContinuationBuilder
   ): Searcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
     val newInstructions = ArrayBuffer[Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]]]()
@@ -101,7 +96,7 @@ object IncrementalSaturation {
       newInstructions.append(instr)
       instr match {
         case Instruction.BindNode(register, nodeType, definitions, uses, arity) =>
-          newInstructions.append(LatestVersionOrTopKInstruction(register, bindings, k, versionMetadataName, costAnalysis))
+          newInstructions.append(LatestVersionOrTopKInstruction(register, bindings, versionMetadataName, costAnalysis))
           bindings += 1
         case _ =>
       }

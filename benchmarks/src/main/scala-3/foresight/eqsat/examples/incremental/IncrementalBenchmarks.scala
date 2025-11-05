@@ -8,7 +8,7 @@ import foresight.eqsat.lang.{Language, LanguageCostFunction}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.util.BenchmarksWithParallelMap
-import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Mode, OutputTimeUnit, Param, Scope, State}
+import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Level, Mode, OutputTimeUnit, Param, Scope, Setup, State}
 
 import java.util.concurrent.TimeUnit
 
@@ -16,18 +16,25 @@ import java.util.concurrent.TimeUnit
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class IncrementalBenchmarks extends BenchmarksWithParallelMap {
-  @Param(Array("8"))
+  @Param(Array("6"))
   var size: Int = _
 
-  @Param(Array("50"))
+  @Param(Array("1000"))
   var termCount: Int = _
 
   @Param(Array("true", "false"))
   var mutableEGraph: Boolean = _
 
+  private var cachedTerms: Seq[ArithExpr] = _
+
+  @Setup(Level.Trial)
+  def setup(): Unit = {
+    cachedTerms = RandomArithExprGen.randomTerms(termCount, size, seed = 42)
+  }
+
   @Benchmark
   def oneByOnePolynomial(): Seq[ArithExpr] = {
-    for (term <- terms(size)) yield {
+    for (term <- cachedTerms) yield {
       if (mutableEGraph) optimizeMutable(term, regularMutableStrategy, parallelMap)
       else optimizeImmutable(term, regularImmutableStrategy, parallelMap)
     }
@@ -42,7 +49,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
       egraph.addAnalysis(costAnalysis)
       egraph.addAnalysis(extractionAnalysis)
 
-      for (term <- terms(size)) yield {
+      for (term <- cachedTerms) yield {
         val tree = L.toTree(term)
         val root = egraph.add(tree)
 
@@ -59,7 +66,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
         .addAnalysis(costAnalysis)
         .addAnalysis(extractionAnalysis)
 
-      for (term <- terms(size)) yield {
+      for (term <- cachedTerms) yield {
         val tree = L.toTree(term)
         val (root, egraph2) = egraph.add(tree)
         egraph = egraph2
@@ -98,14 +105,12 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   // Define the metadata name and cost analysis
   private val metadataName = "version"
-  private val costAnalysis = CostAnalysis[ArithIR, Int]("cost", arithCostFunction)
+  private val costAnalysis = TopKCostAnalysis[ArithIR, Int]("cost", 2, arithCostFunction)
   private val extractionAnalysis = L.extractionAnalysis("extract", arithCostFunction)
   private val extractor = extractionAnalysis.extractor
 
-  private val k = 2
   private val incrementalRules = IncrementalSaturation.makeIncremental(
     R.all,
-    k,
     metadataName,
     costAnalysis)
 
