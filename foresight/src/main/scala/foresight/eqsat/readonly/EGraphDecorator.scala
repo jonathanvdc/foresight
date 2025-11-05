@@ -23,7 +23,7 @@ trait EGraphDecorator[NodeT, +Repr <: EGraph[NodeT]] extends EGraph[NodeT] {
   final override def classes: Iterable[EClassRef] = egraph.classes
   final override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = egraph.nodes(call)
   final override def nodes(call: EClassCall, nodeType: NodeT): Iterable[ENode[NodeT]] = egraph.nodes(call, nodeType)
-  final override def users(ref: EClassRef): Set[ENode[NodeT]] = egraph.users(ref)
+  final override def users(ref: EClassRef): Iterable[ENode[NodeT]] = egraph.users(ref)
   final override def findOrNull(node: ENode[NodeT]): EClassCall = egraph.findOrNull(node)
   final override def areSame(first: EClassCall, second: EClassCall): Boolean = egraph.areSame(first, second)
 }

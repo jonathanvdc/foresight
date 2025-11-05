@@ -1,7 +1,10 @@
 package foresight.eqsat.metadata
 
 import foresight.eqsat.{ENode, Slot}
+import foresight.eqsat.readonly
 import foresight.eqsat.readonly.{EGraphWithMetadata, EGraph}
+import foresight.eqsat.immutable
+import foresight.eqsat.mutable
 import foresight.eqsat.collections.SlotMap
 
 /**
@@ -100,22 +103,26 @@ trait Analysis[NodeT, A] {
    * @param egraph The e-graph to analyze.
    * @return [[AnalysisMetadata]] capturing the per-class results for this analysis.
    */
-  final def apply(egraph: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
-    val updater = new AnalysisUpdater(this, egraph, Map.empty)
-
-    // Seed: nodes with no arguments.
-    for (c <- egraph.classes) {
-      for (node <- egraph.nodes(egraph.canonicalize(c))) {
-        if (node.args.isEmpty) {
-          updater.update(c, make(node, Seq.empty))
-        }
-      }
-    }
-
-    // Propagate to a fixed point; eventually touches all e-nodes.
-    updater.processPending(initialized = false)
-
-    AnalysisMetadata(this, updater.results)
+  final def apply(egraph: immutable.EGraph[NodeT]): immutable.AnalysisMetadata[NodeT, A] = {
+    immutable.AnalysisMetadata.compute(this, egraph)
+  }
+  
+  /**
+   * Evaluate this analysis over an entire mutable e-graph and return its metadata snapshot.
+   *
+   * Evaluation strategy:
+   *   1. Seed: For each e-class, compute results for **nullary** nodes (`args.isEmpty`) and
+   *      initialize per-class state.
+   *   2. Propagate: Use a worklist to process remaining nodes whose argument results become available,
+   *      repeatedly applying [[make]] and merging with [[join]] until no changes occur.
+   *
+   * Termination relies on `join` being monotone and idempotent w.r.t. the underlying partial order.
+   *
+   * @param egraph The mutable e-graph to analyze.
+   * @return [[AnalysisMetadata]] capturing the per-class results for this analysis.
+   */
+  final def apply(egraph: mutable.EGraph[NodeT]): mutable.AnalysisMetadata[NodeT, A] = {
+    mutable.AnalysisMetadata.compute(this, egraph)
   }
 
   /**
@@ -128,7 +135,7 @@ trait Analysis[NodeT, A] {
    * @throws NoSuchElementException if the analysis was not registered.
    * @throws ClassCastException if the stored metadata has a different type.
    */
-  final def get(egraph: EGraphWithMetadata[NodeT, _]): AnalysisMetadata[NodeT, A] = {
+  final def get(egraph: EGraphWithMetadata[NodeT, _]): readonly.AnalysisMetadata[NodeT, A] = {
     egraph.getMetadata(name)
   }
 }

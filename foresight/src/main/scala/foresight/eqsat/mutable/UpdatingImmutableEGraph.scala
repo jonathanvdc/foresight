@@ -30,7 +30,7 @@ private final class UpdatingImmutableEGraph[
   override def canonicalize(node: ENode[NodeT]): ShapeCall[NodeT] = _egraph.canonicalize(node)
   override def classes: Iterable[EClassRef] = _egraph.classes
   override def nodes(call: EClassCall): Iterable[ENode[NodeT]] = _egraph.nodes(call)
-  override def users(ref: EClassRef): Set[ENode[NodeT]] = _egraph.users(ref)
+  override def users(ref: EClassRef): Iterable[ENode[NodeT]] = _egraph.users(ref)
   override def findOrNull(node: ENode[NodeT]): EClassCall = _egraph.findOrNull(node)
   override def areSame(first: EClassCall, second: EClassCall): Boolean = _egraph.areSame(first, second)
 }

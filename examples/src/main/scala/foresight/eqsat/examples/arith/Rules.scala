@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.arith
 
 import foresight.eqsat.examples.arith.ApplierOps._
-import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
+import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat.{MixedTree, Slot}

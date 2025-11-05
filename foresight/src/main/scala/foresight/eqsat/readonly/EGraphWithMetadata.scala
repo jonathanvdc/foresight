@@ -1,7 +1,5 @@
 package foresight.eqsat.readonly
 
-import foresight.eqsat.metadata.Metadata
-
 /**
  * An e-graph decorator that supports metadata management.
  *
@@ -22,5 +20,5 @@ trait EGraphWithMetadata[NodeT, +Repr <: EGraph[NodeT]] extends EGraphDecorator[
    * @throws NoSuchElementException if no registration exists under `name`.
    * @throws ClassCastException if the stored manager has a different type.
    */
-  def getMetadata[MetadataManagerT <: Metadata[NodeT, _]](name: String): MetadataManagerT
+  def getMetadata[MetadataManagerT](name: String): MetadataManagerT
 }

@@ -1,7 +1,7 @@
 package foresight.eqsat
 
 /**
- * Provides a functional framework for attaching metadata to an [[foresight.eqsat.EGraph]] and
+ * Provides a functional framework for attaching metadata to an [[foresight.eqsat.readonly.EGraph]] and
  * keeping it in sync as the graph evolves.
  * It covers both general-purpose metadata and dataflow-style analyses.
  *
@@ -12,11 +12,11 @@ package foresight.eqsat
  * to keep such metadata up-to-date automatically as nodes are inserted or e-classes are merged.
  *
  * Two main usage patterns are supported. The first is direct use of the
- * [[foresight.eqsat.metadata.Metadata]] trait, which defines how to update a metadata value
+ * [[foresight.eqsat.readonly.Metadata]] trait, which defines how to update a metadata value
  * incrementally when the e-graph changes. The second is the [[foresight.eqsat.metadata.Analysis]]
  * API, which allows you to describe a dataflow-like transfer function and a join operation over
  * e-classes, and then evaluate it to a fixpoint. The results of an analysis are stored in an
- * [[foresight.eqsat.metadata.AnalysisMetadata]] object, which itself implements [[Metadata]].
+ * [[foresight.eqsat.metadata.AnalysisMetadata]] object, which itself implements [[foresight.eqsat.readonly.Metadata]].
  *
  * The [[foresight.eqsat.metadata.EGraphWithMetadata]] wrapper is the central tool for managing
  * metadata. It wraps an e-graph and ensures that all registered metadata instances are updated
@@ -88,7 +88,7 @@ package foresight.eqsat
  * ## Implementing Custom Metadata
  *
  * If your derived information is not naturally expressed as an analysis, you can implement
- * [[foresight.eqsat.metadata.Metadata]] directly. In `onAddMany`, update only the portions
+ * [[foresight.eqsat.readonly.Metadata]] directly. In `onAddMany`, update only the portions
  * of the metadata that depend on the newly inserted nodes. In `onUnionMany`, merge state
  * across unified classes and ensure that any dependent state is revalidated. The `emptied`
  * method must produce a completely fresh metadata instance with no hidden aliasing.
@@ -96,7 +96,7 @@ package foresight.eqsat
  * ## Error Handling
  *
  * Callers are responsible for providing the correct type parameter when retrieving metadata
- * with [[foresight.eqsat.metadata.EGraphWithMetadata.getMetadata]]. Analyses must be total
+ * with [[foresight.eqsat.readonly.EGraphWithMetadata.getMetadata]]. Analyses must be total
  * and pure, and throw exceptions only for unrecoverable programmer errors.
  */
 package object metadata

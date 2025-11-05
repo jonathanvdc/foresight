@@ -2,7 +2,7 @@ package foresight.eqsat.immutable
 
 import foresight.eqsat._
 import foresight.eqsat.readonly
-import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
@@ -109,7 +109,7 @@ extends readonly.EGraphWithMetadata[NodeT, Repr]
    * @throws NoSuchElementException if no registration exists under `name`.
    * @throws ClassCastException if the stored manager has a different type.
    */
-  def getMetadata[MetadataManagerT <: Metadata[NodeT, _]](name: String): MetadataManagerT = {
+  def getMetadata[MetadataManagerT](name: String): MetadataManagerT = {
     metadata(name).asInstanceOf[MetadataManagerT]
   }
 

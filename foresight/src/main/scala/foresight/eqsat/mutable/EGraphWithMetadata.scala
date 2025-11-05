@@ -1,6 +1,6 @@
 package foresight.eqsat.mutable
 
-import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, readonly}
 
@@ -24,7 +24,7 @@ final class EGraphWithMetadata[
   +Repr <: EGraph[NodeT]
 ](
   override val egraph: Repr,
-  private val metadata: mutable.Map[String, Metadata[NodeT, _]]
+  private val metadata: mutable.Map[String, Metadata[NodeT]]
  )
   extends readonly.EGraphWithMetadata[NodeT, Repr] with EGraph[NodeT] {
 
@@ -39,7 +39,7 @@ final class EGraphWithMetadata[
    * @throws NoSuchElementException if no registration exists under `name`.
    * @throws ClassCastException     if the stored manager has a different type.
    */
-  override def getMetadata[MetadataManagerT <: Metadata[NodeT, _]](name: String): MetadataManagerT = {
+  override def getMetadata[MetadataManagerT](name: String): MetadataManagerT = {
     metadata(name).asInstanceOf[MetadataManagerT]
   }
 
@@ -52,7 +52,7 @@ final class EGraphWithMetadata[
    * @param metadata The manager to register.
    * @tparam MetadataT The manager's internal payload type.
    */
-  def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT, MetadataT]): Unit = {
+  def addMetadata[MetadataT](name: String, metadata: Metadata[NodeT]): Unit = {
     this.metadata(name) = metadata
   }
 
@@ -86,12 +86,9 @@ final class EGraphWithMetadata[
     }
 
     val p = parallelize.child("metadata for new nodes")
-    val newMetadata = p[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
-      case (key, metadata) => key -> metadata.onAddMany(newNodes, egraph, p.child(s"metadata for new nodes - $key"))
-    }).toMap
-    for ((key, meta) <- newMetadata) {
-      metadata(key) = meta
-    }
+    p[(String, Metadata[NodeT]), Unit](metadata, {
+      case (key, metadata) => metadata.onAddMany(newNodes, egraph, p.child(s"metadata for new nodes - $key"))
+    })
     results
   }
 
@@ -99,19 +96,15 @@ final class EGraphWithMetadata[
     val equivalences = egraph.unionMany(pairs, parallelize)
 
     val p = parallelize.child("metadata unification")
-    val newMetadata = p[(String, Metadata[NodeT, _]), (String, Metadata[NodeT, _])](metadata, {
-      case (key, metadata) => key -> p.child(s"metadata unification - $key").run(metadata.onUnionMany(equivalences, egraph))
-    }).toMap
-    for ((key, meta) <- newMetadata) {
-      metadata(key) = meta
-    }
-
+    p[(String, Metadata[NodeT]), Unit](metadata, {
+      case (key, metadata) => p.child(s"metadata unification - $key").run(metadata.onUnionMany(equivalences, egraph))
+    })
     equivalences
   }
 
   override def emptied: this.type = new EGraphWithMetadata(
     egraph.emptied,
-    mutable.Map[String, Metadata[NodeT, _]](metadata.toSeq.map { case (k, v) => k -> v.emptied }:_*)
+    mutable.Map[String, Metadata[NodeT]](metadata.toSeq.map { case (k, v) => k -> v.emptied }:_*)
   ).asInstanceOf[this.type]
 }
 
@@ -133,6 +126,6 @@ object EGraphWithMetadata {
   ](
     egraph: Repr
    ): EGraphWithMetadata[NodeT, Repr] = {
-    new EGraphWithMetadata(egraph, mutable.Map.empty[String, Metadata[NodeT, _]])
+    new EGraphWithMetadata(egraph, mutable.Map.empty[String, Metadata[NodeT]])
   }
 }

@@ -66,7 +66,7 @@ trait EClassSearcher[
     }
   }
 
-  final override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
+  override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
     search(UnsafeSeqFromArray(egraph.classes.view.map(egraph.canonicalize).toArray), egraph, parallelize)
   }
 }

@@ -5,6 +5,7 @@ import foresight.eqsat.extraction.{CostAnalysis, CostFunction, ExtractionAnalysi
 import foresight.eqsat.saturation.{MaximalRuleApplication, Strategy}
 import foresight.eqsat.MixedTree
 import foresight.eqsat.immutable.{EGraph, EGraphWithMetadata}
+import foresight.eqsat.rewriting.patterns.PatternMatch
 import org.junit.Test
 
 class IncrementalSaturationTest {
@@ -22,18 +23,19 @@ class IncrementalSaturationTest {
 
     // Define the metadata name and cost analysis
     val metadataName = "version"
-    val costAnalysis = CostAnalysis[ArithIR, Int]("cost", CostFunction.size)
+    val k = 2
+    val costAnalysis = TopKCostAnalysis[ArithIR, Int]("cost", k, CostFunction.size)
     val extractionAnalysis = ExtractionAnalysis.smallest[ArithIR]
 
-    val k = 2
-    val rules = IncrementalSaturation.makeIncremental(Rules.all, k, metadataName, costAnalysis)
-    val strategy: Strategy[EGraphWithMetadata[ArithIR, EGraph[ArithIR]], Unit] = MaximalRuleApplication(rules)
-      .withIterationLimit(5)
-      .repeatUntilStable
+    val rules = IncrementalSaturation.makeIncremental(Rules.all, metadataName, costAnalysis)
+    val strategy: Strategy[EGraphWithMetadata[ArithIR, EGraph[ArithIR]], Unit] =
+      MaximalRuleApplication[ArithIR, EGraphWithMetadata[ArithIR, EGraph[ArithIR]], PatternMatch[ArithIR]](rules)
+        .withIterationLimit(5)
+        .repeatUntilStable
 
     // Initialize an e-graph with version metadata and a cost analysis
     var egraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]](EGraph.empty[ArithIR])
-      .addMetadata(metadataName, VersionMetadata.empty)
+      .addMetadata(metadataName, ImmutableVersionMetadata.empty)
       .addAnalysis(costAnalysis)
       .addAnalysis(extractionAnalysis)
       .addAnalysis(ConstantAnalysis)
@@ -44,7 +46,7 @@ class IncrementalSaturationTest {
       egraph = newEgraph
 
       // Update the version metadata to reflect the addition of the new term
-      val versionMetadata = egraph.getMetadata[VersionMetadata[ArithIR]](metadataName)
+      val versionMetadata = egraph.getMetadata[ImmutableVersionMetadata[ArithIR]](metadataName)
       egraph = egraph.addMetadata(metadataName, versionMetadata.onNewTermAdded(term, egraph.egraph))
 
       // Saturate the e-graph

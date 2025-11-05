@@ -32,12 +32,8 @@ trait Extractor[NodeT, -Repr <: readonly.EGraph[NodeT]] {
   def apply(call: EClassCall, egraph: Repr): Tree[NodeT]
 
   /**
-   * Extracts a concrete expression tree from a [[MixedTree]] by first materializing it into an
-   * e-class call on a derived e-graph and then extracting from that call.
-   *
-   * The original e-graph is not mutated. In Foresight, e-graphs are immutable; `egraph.add(tree)`
-   * returns a new e-graph along with the created call. This method uses that derived e-graph for
-   * extraction but does not expose it to the caller.
+   * Extracts a concrete expression tree from a [[MixedTree]] by extracting an expression for each
+   * e-class call within it.
    *
    * @param tree   The mixed tree to materialize prior to extraction.
    * @param egraph The original e-graph; remains unchanged.
@@ -48,10 +44,14 @@ trait Extractor[NodeT, -Repr <: readonly.EGraph[NodeT]] {
    *   val result: Tree[NodeT] = extractor(mixedTree, egraph) // `egraph` is unchanged
    *   }}}
    */
-  final def apply[
-    EGraphT <: Repr with EGraph[NodeT] with EGraphLike[NodeT, EGraphT]
-  ](tree: MixedTree[NodeT, EClassCall], egraph: EGraphT): Tree[NodeT] = {
-    val (call, newGraph) = egraph.add(tree)
-    apply(call, newGraph)
+  final def apply(tree: MixedTree[NodeT, EClassCall], egraph: Repr): Tree[NodeT] = {
+    tree match {
+      case MixedTree.Node(nodeType, defs, uses, args) =>
+        val extractedArgs = args.map(arg => apply(arg, egraph))
+        Tree(nodeType, defs, uses, extractedArgs)
+
+      case MixedTree.Atom(call) =>
+        apply(call, egraph)
+    }
   }
 }
