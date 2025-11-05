@@ -1,7 +1,6 @@
 package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.examples.poly.*
-import foresight.eqsat.extraction.CostAnalysis
 import foresight.eqsat.mutable
 import foresight.eqsat.immutable
 import foresight.eqsat.lang.{Language, LanguageCostFunction}
