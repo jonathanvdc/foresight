@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class IncrementalBenchmarks extends BenchmarksWithParallelMap {
   @Param(Array("6"))
-  var size: Int = _
+  var depth: Int = _
 
   @Param(Array("1000"))
-  var termCount: Int = _
+  var size: Int = _
 
   @Param(Array("true", "false"))
   var mutableEGraph: Boolean = _
@@ -28,7 +28,7 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
 
   @Setup(Level.Trial)
   def setup(): Unit = {
-    cachedTerms = RandomArithExprGen.randomTerms(termCount, size, seed = 42)
+    cachedTerms = RandomArithExprGen.randomTerms(size, depth, seed = 42)
   }
 
   @Benchmark
@@ -90,10 +90,6 @@ class IncrementalBenchmarks extends BenchmarksWithParallelMap {
         case _ => 1
       }
     }
-  }
-
-  private def terms(n: Int): Seq[ArithExpr] = {
-    RandomArithExprGen.randomTerms(termCount, n, seed = 42)
   }
 
   val L: Language[ArithExpr] = summon[Language[ArithExpr]]
