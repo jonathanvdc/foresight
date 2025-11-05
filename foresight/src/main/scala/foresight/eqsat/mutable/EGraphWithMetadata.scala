@@ -1,6 +1,7 @@
 package foresight.eqsat.mutable
 
-import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.immutable.Metadata
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, readonly}
 

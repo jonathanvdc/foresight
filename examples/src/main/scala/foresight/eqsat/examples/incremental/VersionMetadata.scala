@@ -1,7 +1,7 @@
 package foresight.eqsat.examples.incremental
 
+import foresight.eqsat.immutable.Metadata
 import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
-import foresight.eqsat.metadata.Metadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly.EGraph
 

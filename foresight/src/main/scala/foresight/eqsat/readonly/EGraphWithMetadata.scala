@@ -1,6 +1,6 @@
 package foresight.eqsat.readonly
 
-import foresight.eqsat.metadata.Metadata
+import foresight.eqsat.immutable.Metadata
 
 /**
  * An e-graph decorator that supports metadata management.

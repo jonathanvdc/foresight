@@ -2,7 +2,7 @@ package foresight.eqsat.immutable
 
 import foresight.eqsat._
 import foresight.eqsat.readonly
-import foresight.eqsat.metadata.{Analysis, Metadata}
+import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 

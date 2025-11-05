@@ -2,6 +2,7 @@ package foresight.eqsat.metadata
 
 import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
 import foresight.eqsat.collections.SlotMap
+import foresight.eqsat.immutable.Metadata
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly.EGraph
 
