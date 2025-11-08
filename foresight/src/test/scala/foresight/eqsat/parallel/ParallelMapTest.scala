@@ -159,7 +159,7 @@ class ParallelMapTest {
   @Test
   def processBlocksEmptyInputs(): Unit = {
     for (impl <- implementations) {
-      val inputs = ArraySeq.empty[Int]
+      val inputs = ArraySeq.unsafeWrapArray(Array.empty[Int])
       val counter = new AtomicInteger(0)
       impl.processBlocks[Int](inputs, 4, _ => counter.incrementAndGet())
       assert(counter.get() == 0)
