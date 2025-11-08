@@ -139,13 +139,19 @@ trait ParallelMap {
     apply[Int, A](Seq(0), _ => f).head
 
   /**
-   * Processes an array sequence in blocks of a given size.
+   * Applies a function to each element of an array sequence in blocks. Blocks control the
+   * granularity of parallelism: each block is processed sequentially, while different blocks
+   * may be processed in parallel.
    * @param inputs The input array sequence.
    * @param blockSize The size of each block to process.
    * @param f The function to apply to each element.
    * @tparam A The type of elements in the input array sequence.
    */
   def processBlocks[A](inputs: ArraySeq[A], blockSize: Int, f: A => Unit): Unit = {
+    if (blockSize <= 0) {
+      throw new IllegalArgumentException(s"blockSize must be positive, got $blockSize")
+    }
+
     val numBlocks = (inputs.length + blockSize - 1) / blockSize
     if (numBlocks == 0) {
       // No blocks: nothing to do
