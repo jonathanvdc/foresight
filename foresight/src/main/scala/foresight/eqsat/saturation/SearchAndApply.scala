@@ -171,6 +171,8 @@ object SearchAndApply {
     MatchT
   ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
+      override def searchLoopInterchange: Boolean = false
+
       override def update(command: Command[NodeT],
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphT,
@@ -194,6 +196,8 @@ object SearchAndApply {
     MatchT
   ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
+      override def searchLoopInterchange: Boolean = false
+
       override def update(command: Command[NodeT],
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphT,
@@ -249,6 +253,13 @@ object SearchAndApply {
     EGraphT <: readonly.EGraph[NodeT],
     MatchT
   ] extends SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] {
+    /**
+     * Whether to perform the search-loop interchange optimization, which groups rules that search the same
+     * e-classes together to reduce redundant work.
+     * @return True to enable search-loop interchange, false to disable it.
+     */
+    def searchLoopInterchange: Boolean
+
     final override def search(rule: Rewrite[NodeT, MatchT, EGraphT],
                               egraph: EGraphT,
                               parallelize: ParallelMap): Seq[MatchT] = {
@@ -269,7 +280,7 @@ object SearchAndApply {
       val updates = Seq.newBuilder[Command[NodeT]]
       val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
 
-      if (egraph.classCount <= EClassSearcher.smallEGraphThreshold) {
+      if (!searchLoopInterchange || egraph.classCount <= EClassSearcher.smallEGraphThreshold) {
         // Small e-graph optimization: for small e-graphs, the overhead of partitioning and
         // fusing rule applications outweighs the benefits. Just process each rule normally.
         for (rule <- rules) {
