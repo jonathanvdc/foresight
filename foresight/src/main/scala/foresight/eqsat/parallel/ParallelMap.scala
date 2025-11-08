@@ -1,5 +1,7 @@
 package foresight.eqsat.parallel
 
+import scala.collection.compat.immutable.ArraySeq
+
 /**
  * Core parallelism abstraction in Foresight.
  *
@@ -135,6 +137,39 @@ trait ParallelMap {
    */
   def run[A](f: => A): A =
     apply[Int, A](Seq(0), _ => f).head
+
+  /**
+   * Processes an array sequence in blocks of a given size.
+   * @param inputs The input array sequence.
+   * @param blockSize The size of each block to process.
+   * @param f The function to apply to each element.
+   * @tparam A The type of elements in the input array sequence.
+   */
+  def processBlocks[A](inputs: ArraySeq[A], blockSize: Int, f: A => Unit): Unit = {
+    val numBlocks = (inputs.length + blockSize - 1) / blockSize
+    if (numBlocks == 0) {
+      // No blocks: nothing to do
+      return
+    }
+
+    def processBlock(blockIdx: Int): Unit = {
+      val start = blockIdx * blockSize
+      val end = math.min(start + blockSize, inputs.length)
+      var i = start
+      while (i < end) {
+        f(inputs(i))
+        i += 1
+      }
+    }
+
+    if (numBlocks == 1) {
+      // Single block: process sequentially to avoid overhead
+      processBlock(0)
+    } else {
+      // Multiple blocks: process in parallel
+      apply[Int, Unit](0 until numBlocks, processBlock)
+    }
+  }
 
   /**
    * Collects elements produced by a callback function into a sequence.
