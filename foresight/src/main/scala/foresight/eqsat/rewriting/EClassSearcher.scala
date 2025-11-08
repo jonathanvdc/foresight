@@ -154,7 +154,7 @@ private[eqsat] object EClassSearcher {
     MatchT,
     EGraphT <: EGraph[NodeT]
   ](
-     rulesPerSharedEClassToSearch: Map[EClassesToSearch[EGraphT], Seq[Rewrite[NodeT, MatchT, EGraphT]]],
+     rulesPerSharedEClassToSearch: Map[EClassesToSearch[EGraphT], Seq[Rule[NodeT, MatchT, EGraphT]]],
      regularRules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
    )
 
@@ -194,7 +194,7 @@ private[eqsat] object EClassSearcher {
         .map { eclassesToSearch =>
           eclassesToSearch -> rules.collect {
             case rule if eclassesToSearchPerRule.get(rule.name).contains(eclassesToSearch) =>
-              rule
+              rule.asInstanceOf[Rule[NodeT, MatchT, EGraphT]]
           }
         }.toMap
 
