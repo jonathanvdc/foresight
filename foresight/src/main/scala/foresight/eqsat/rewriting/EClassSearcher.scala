@@ -62,7 +62,7 @@ trait EClassSearcher[
     }
 
     try {
-      parallelize(calls, searchClass)
+      parallelize.processBlocks(calls, EClassSearcher.blockSize, searchClass)
     } catch {
       case HaltSearchException => // Swallow the exception to halt the search early
     }
@@ -71,4 +71,11 @@ trait EClassSearcher[
   override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
     search(UnsafeSeqFromArray(egraph.classes.view.map(egraph.canonicalize).toArray), egraph, parallelize)
   }
+}
+
+private object EClassSearcher {
+  /**
+   * The block size to use when parallelizing searches over e-classes.
+   */
+  final val blockSize: Int = 64
 }
