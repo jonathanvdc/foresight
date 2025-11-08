@@ -3,6 +3,7 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.EClassCall
 import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 import java.util.concurrent.atomic.AtomicIntegerArray
@@ -156,7 +157,46 @@ private[eqsat] object EClassSearcher {
   ](
      rulesPerSharedEClassToSearch: Map[EClassesToSearch[EGraphT], Seq[Rule[NodeT, MatchT, EGraphT]]],
      regularRules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
-   )
+   ) {
+
+    /**
+     * Creates command searchers for a group of rules that share the same EClassesToSearch.
+     *
+     * Each searcher first searches for matches using the shared EClassesToSearch,
+     * then applies all associated rules to produce commands. These commands
+     * are passed to the provided continuation.
+     *
+     * @param eclassesToSearch The EClassesToSearch instance to get rules for.
+     * @param continuation     Continuation to handle commands produced by rule applications.
+     * @return A sequence of EClassSearcher instances that produce commands.
+     */
+    def commandSearchers(eclassesToSearch: EClassesToSearch[EGraphT],
+                         continuation: Command[NodeT] => Unit): Seq[EClassSearcher[NodeT, MatchT, EGraphT]] = {
+      rulesPerSharedEClassToSearch(eclassesToSearch).map {
+        case Rule(_, searcher: EClassSearcher[NodeT, MatchT, _], applier) =>
+          val castSearcher = searcher.asInstanceOf[EClassSearcher[NodeT, MatchT, EGraphT]]
+
+          castSearcher
+            .andThen(new castSearcher.ContinuationBuilder {
+              def apply(downstream: castSearcher.Continuation): castSearcher.Continuation = (m: MatchT, egraph: EGraphT) => {
+                if (downstream(m, egraph)) {
+                  applier(m, egraph) match {
+                    case CommandQueue(Seq()) => // Ignore no-op commands.
+                    case cmd =>
+                      // Collect nontrivial commands.
+                      continuation(cmd)
+                  }
+                  true
+                } else {
+                  false
+                }
+              }
+            })
+
+        case _ => throw new IllegalStateException("Expected EClassSearcher rule.")
+      }
+    }
+  }
 
   /**
    * Partitions a sequence of rules into those that share EClassesToSearch instances and those that do not.

@@ -289,35 +289,9 @@ object SearchAndApply {
         }
 
         // Process shared EClassesToSearch rules together.
-        for ((eclassesToSearch, sharedRules) <- partitioned.rulesPerSharedEClassToSearch) {
+        for (eclassesToSearch <- partitioned.rulesPerSharedEClassToSearch.keys) {
           updates ++= ruleMatchingAndApplicationParallelize.collectFrom[Command[NodeT]] { (add: Command[NodeT] => Unit) =>
-            // Build combined searchers that first search and for each match apply the corresponding rule's applier.
-            // Each combined searcher corresponds to one of the shared rules.
-            val commandSearchers = sharedRules.map {
-              case Rule(_, searcher: EClassSearcher[NodeT, MatchT, _], applier) =>
-                val castSearcher = searcher.asInstanceOf[EClassSearcher[NodeT, MatchT, EGraphT]]
-
-                castSearcher
-                  .andThen(new castSearcher.ContinuationBuilder {
-                    def apply(downstream: castSearcher.Continuation): Continuation[NodeT, MatchT, EGraphT] = (m: MatchT, egraph: EGraphT) => {
-                      if (downstream(m, egraph)) {
-                        applier(m, egraph) match {
-                          case CommandQueue(Seq()) => // Ignore no-op commands.
-                          case cmd =>
-                            // Collect nontrivial commands.
-                            add(cmd)
-                        }
-                        true
-                      } else {
-                        false
-                      }
-                    }
-                  })
-
-              case _ =>
-                throw new IllegalStateException("Expected only EClassSearcher rules in shared EClassesToSearch group.")
-            }
-
+            val commandSearchers = partitioned.commandSearchers(eclassesToSearch, add)
             EClassSearcher.searchMultiple(
               UnsafeSeqFromArray(commandSearchers.toArray),
               eclassesToSearch(egraph),
