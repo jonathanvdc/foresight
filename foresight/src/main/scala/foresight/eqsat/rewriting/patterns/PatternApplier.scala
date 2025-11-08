@@ -67,39 +67,43 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
     }
   }
 
+  private final class SimplifiedAddCommandInstantiator(m: PatternMatch[NodeT],
+                                                       egraph: EGraphT,
+                                                       builder: CommandQueueBuilder[NodeT]) {
+    def instantiate(pattern: MixedTree[NodeT, Pattern.Var]): EClassSymbol = {
+      pattern match {
+        case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
+        case MixedTree.Node(t, defs@Seq(), uses, args) =>
+          // No definitions, so we can reuse the PatternMatch and its original slot mapping
+          addSimplifiedNode(t, defs, uses, args)
+
+        case MixedTree.Node(t, defs, uses, args) =>
+          val defSlots = defs.map { (s: Slot) =>
+            m.slotMapping.get(s) match {
+              case Some(v) => v
+              case None => Slot.fresh()
+            }
+          }
+          val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
+          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder).addSimplifiedNode(t, defSlots, uses, args)
+      }
+    }
+
+    private def addSimplifiedNode(nodeType: NodeT,
+                                  definitions: SlotSeq,
+                                  uses: SlotSeq,
+                                  args: immutable.ArraySeq[MixedTree[NodeT, Pattern.Var]]): EClassSymbol = {
+      val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, instantiate)
+      val useSymbols = uses.map(m.apply: Slot => Slot)
+      builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, egraph)
+    }
+  }
+
   private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
                                                 m: PatternMatch[NodeT],
                                                 egraph: EGraphT,
                                                 builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
 
-    pattern match {
-      case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
-      case MixedTree.Node(t, defs@Seq(), uses, args) =>
-        // No definitions, so we can reuse the PatternMatch and its original slot mapping
-        addSimplifiedNode(m, t, defs, uses, args, egraph, builder)
-
-      case MixedTree.Node(t, defs, uses, args) =>
-        val defSlots = defs.map { (s: Slot) =>
-          m.slotMapping.get(s) match {
-            case Some(v) => v
-            case None => Slot.fresh()
-          }
-        }
-        val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-        addSimplifiedNode(newMatch, t, defSlots, uses, args, egraph, builder)
-    }
-  }
-
-  private def addSimplifiedNode(m: PatternMatch[NodeT],
-                                nodeType: NodeT,
-                                definitions: SlotSeq,
-                                uses: SlotSeq,
-                                args: immutable.ArraySeq[MixedTree[NodeT, Pattern.Var]],
-                                egraph: EGraphT,
-                                builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
-    val argSymbols = CommandQueueBuilder.symbolArrayFrom(
-      args, (mt: MixedTree[NodeT, Pattern.Var]) => instantiateAsSimplifiedAddCommand(mt, m, egraph, builder))
-    val useSymbols = uses.map(m.apply: Slot => Slot)
-    builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, egraph)
+    new SimplifiedAddCommandInstantiator(m, egraph, builder).instantiate(pattern)
   }
 }
