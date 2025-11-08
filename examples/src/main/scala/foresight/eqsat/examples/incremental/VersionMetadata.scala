@@ -1,9 +1,11 @@
 package foresight.eqsat.examples.incremental
 
-import foresight.eqsat.immutable.Metadata
-import foresight.eqsat.{EClassCall, EClassRef, ENode, MixedTree}
-import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly.EGraph
+import foresight.eqsat.{EClassCall, EClassRef}
+import foresight.eqsat.readonly.EGraphWithMetadata
+import foresight.eqsat.rewriting.EClassesToSearch
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * Metadata that tracks a global version number for the e-graph and a version number for each e-class.
@@ -29,4 +31,24 @@ trait VersionMetadata[NodeT] {
    * @return An iterable of e-classes at the latest version.
    */
   def latestVersionClasses: Iterable[EClassRef]
+}
+
+/**
+ * Companion object for [[VersionMetadata]] containing common implementations.
+ */
+object VersionMetadata {
+  /**
+   * An [[EClassesToSearch]] that searches only the latest version e-classes in the e-graph.
+   *
+   * @param versionMetadataName The name of the version metadata to use.
+   */
+  final case class SearchOnlyLatestVersionClasses(versionMetadataName: String) extends EClassesToSearch[EGraphWithMetadata[_, _]] {
+    override def apply(egraph: EGraphWithMetadata[_, _]): ArraySeq[EClassCall] = {
+      val meta = egraph.getMetadata[VersionMetadata[_]](versionMetadataName)
+      val classes = meta.latestVersionClasses
+        .map(egraph.canonicalize)
+        .toArray
+      UnsafeSeqFromArray(classes)
+    }
+  }
 }
