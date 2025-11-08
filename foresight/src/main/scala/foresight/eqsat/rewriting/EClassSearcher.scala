@@ -176,7 +176,7 @@ private[eqsat] object EClassSearcher {
     // Collect the EClassesToSearch instances from all EClassSearcher rules.
     val eclassesToSearchPerRule = rules.collect {
       case Rule(name, searcher: EClassSearcher[NodeT, MatchT, _], _) =>
-        name -> searcher.classesToSearch
+        name -> searcher.classesToSearch.asInstanceOf[EClassesToSearch[EGraphT]]
     }.toMap
 
     // Count how many times each unique EClassesToSearch instance is used across all rules.
