@@ -5,6 +5,8 @@ import foresight.eqsat.EClassCall
 import foresight.eqsat.readonly.EGraph
 import foresight.util.collections.UnsafeSeqFromArray
 
+import scala.collection.compat.immutable.ArraySeq
+
 /**
  * A searcher that searches for matches within individual e-classes.
  *
@@ -47,7 +49,7 @@ trait EClassSearcher[
    * @param egraph      Immutable e-graph snapshot.
    * @param parallelize Parallel map implementation to use for distributing work.
    */
-  final def search(calls: Iterable[EClassCall], egraph: EGraphT, parallelize: ParallelMap): Unit = {
+  final def search(calls: ArraySeq[EClassCall], egraph: EGraphT, parallelize: ParallelMap): Unit = {
     object HaltSearchException extends Throwable
 
     val baseContinuation = continuation
