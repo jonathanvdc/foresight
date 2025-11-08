@@ -231,6 +231,35 @@ object CommandQueue {
   }
 
   /**
+   * Computes the highest batch index among the dependencies of the given nodes,
+   * based on the currently known definitions in `defs`.
+   */
+  private def highestDependencyForNodes[NodeT](
+    nodes: ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])],
+    defs: mutable.HashMap[EClassSymbol, Int]
+  ): Int = {
+    var highest = -1
+    var n = 0
+    while (n < nodes.length) {
+      val args = nodes(n)._2.args
+      var a = 0
+      while (a < args.length) {
+        args(a) match {
+          case use: EClassSymbol.Virtual =>
+            if (defs.contains(use)) {
+              val idx = defs(use)
+              if (idx > highest) highest = idx
+            }
+          case _ => // ignore non-virtual uses
+        }
+        a += 1
+      }
+      n += 1
+    }
+    highest
+  }
+
+  /**
    * Batches independent [[AddManyCommand]]s into layers based on their intra-batch dependencies.
    *
    * Nodes whose arguments are produced in earlier layers are scheduled in later layers; unrelated
@@ -248,9 +277,7 @@ object CommandQueue {
     val defs = mutable.HashMap.empty[EClassSymbol, Int]
 
     for (command <- group) {
-      val highestDependency = (-1 +: command.uses.collect {
-        case use: EClassSymbol.Virtual if defs.contains(use) => defs(use)
-      }).max
+      val highestDependency = highestDependencyForNodes[NodeT](command.nodes, defs)
 
       val batchIndex = highestDependency + 1
       if (batchIndex == batches.size) {
