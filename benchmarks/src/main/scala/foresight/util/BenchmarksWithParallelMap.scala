@@ -47,5 +47,5 @@ class BenchmarksWithParallelMap {
     *
     * @return a `ParallelMap` that schedules work on exactly `threadCount` threads.
     */
-  def parallelMap: ParallelMap = ParallelMap.fixedThreadParallel(threadCount)
+  lazy val parallelMap: ParallelMap = ParallelMap.fixedThreadParallel(threadCount)
 }
