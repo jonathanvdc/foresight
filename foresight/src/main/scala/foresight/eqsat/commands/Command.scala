@@ -87,41 +87,6 @@ trait Command[NodeT] {
       (None, mutableReification.toMap)
     }
   }
-
-  /**
-   * Returns a semantically equivalent command that is cheaper to execute on the given e-graph.
-   *
-   * Typical simplifications include:
-   *   - eliminating unions whose endpoints are already congruent
-   *   - dropping inserts of nodes already present
-   *   - narrowing work by pre-binding outputs in the returned partial reification
-   *
-   * The returned partial map contains bindings this command can prove without running, which callers
-   * may compose across multiple commands to reduce future work.
-   *
-   * @param egraph Target e-graph used as context for optimization.
-   * @param partialReification Known virtual-to-concrete bindings available upstream.
-   * @return A pair `(simplifiedCommand, partialBindings)` for this command.
-   */
-  def simplify(
-                egraph: EGraph[NodeT],
-                partialReification: Map[EClassSymbol.Virtual, EClassCall]
-              ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall])
-
-  /**
-   * Returns a semantically equivalent command that is cheaper to execute on the given e-graph.
-   * Assumes no prior reification information and does not return any partial bindings.
-   *
-   * Typical simplifications include:
-   *   - eliminating unions whose endpoints are already congruent
-   *   - dropping inserts of nodes already present
-   *   - narrowing work by pre-binding outputs in the returned partial reification
-   *
-   * @param egraph Target e-graph used as context for optimization.
-   * @return A simplified command.
-   */
-  final def simplify(egraph: EGraph[NodeT]): Command[NodeT] =
-    simplify(egraph, Map.empty)._1
 }
 
 /**

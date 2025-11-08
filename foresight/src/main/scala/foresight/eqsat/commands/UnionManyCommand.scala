@@ -67,44 +67,4 @@ final case class UnionManyCommand[NodeT](pairs: Seq[(EClassSymbol, EClassSymbol)
       true
     }
   }
-
-  /**
-   * Simplifies the union set against the current e-graph and partial bindings.
-   *
-   * Each side is first refined using `partialReification`. Pairs that become
-   * two real calls already known to be equal are dropped. If all pairs drop,
-   * the result is [[CommandQueue.empty]]; otherwise a reduced [[UnionManyCommand]]
-   * is returned.
-   *
-   * @param egraph Context used for equality checks.
-   * @param partialReification Known virtual-to-real bindings.
-   * @return A simplified command and an (empty) partial reification.
-   *
-   * @example
-   * {{{
-   * val v = EClassSymbol.virtual()
-   * val simplified = UnionManyCommand(Seq(v -> EClassSymbol.real(callX)))
-   *   .simplify(egraph, Map(v -> callX))
-   * // Becomes CommandQueue.empty because both sides resolve to the same class.
-   * }}}
-   */
-  override def simplify(
-                         egraph: readonly.EGraph[NodeT],
-                         partialReification: Map[EClassSymbol.Virtual, EClassCall]
-                       ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val builder = Seq.newBuilder[(EClassSymbol, EClassSymbol)]
-    for ((left, right) <- pairs) {
-      val lRefined = left.refine(partialReification)
-      val rRefined = right.refine(partialReification)
-      (lRefined, rRefined) match {
-        case (l: EClassCall, r: EClassCall) =>
-          if (!egraph.areSame(l, r)) builder += ((lRefined, rRefined))
-        case _ =>
-          builder += ((lRefined, rRefined))
-      }
-    }
-    val simplifiedPairs = builder.result()
-    if (simplifiedPairs.isEmpty) (CommandQueue.empty, Map.empty)
-    else (UnionManyCommand(simplifiedPairs), Map.empty)
-  }
 }

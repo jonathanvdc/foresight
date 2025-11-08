@@ -60,24 +60,6 @@ object Applier {
     }
 
   /**
-   * An applier that simplifies the commands produced by another applier.
-   * @param applier  Inner applier whose commands will be simplified.
-   * @tparam NodeT   Node payload type stored in the e-graph.
-   * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
-   * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
-   */
-  final case class Simplify[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraph[NodeT]
-  ](applier: Applier[NodeT, MatchT, EGraphT]) extends Applier[NodeT, MatchT, EGraphT] {
-    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = {
-      val command = applier.apply(m, egraph)
-      command.simplify(egraph)
-    }
-  }
-
-  /**
    * Conditionally apply: run `applier` only when `filter(match, egraph)` is true; otherwise emit no-op.
    *
    * Preserves reversibility: if the inner applier is [[ReversibleApplier]], reversal yields a
@@ -171,13 +153,6 @@ object Applier {
     NodeT, MatchT,
     EGraphT <: EGraph[NodeT]
   ](private val applier: Applier[NodeT, MatchT, EGraphT]) extends AnyVal {
-
-    /**
-     * Simplify the commands produced by this applier before returning them.
-     *
-     * @return An applier that simplifies its commands.
-     */
-    def simplify: Applier[NodeT, MatchT, EGraphT] = Simplify(applier)
 
     /**
      * Conditionally apply this applier; otherwise emit an empty command.

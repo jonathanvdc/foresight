@@ -146,36 +146,6 @@ final case class CommandQueue[NodeT](commands: Seq[Command[NodeT]]) extends Comm
       case queue: CommandQueue[NodeT] => queue.flatCommands
       case command => Seq(command)
     }
-
-  /**
-   * Simplifies each command against the current e-graph and threads partial reification.
-   *
-   * Each command is simplified in sequence, accumulating any discovered bindings. The resulting queue
-   * is then [[optimized]] to merge unions and batch adds.
-   *
-   * @param egraph Context graph used by sub-command simplifications.
-   * @param partialReification Upstream bindings available prior to running this queue.
-   * @return The simplified-and-optimized queue and the accumulated partial bindings.
-   *
-   * @example
-   * {{{
-   * val (simp, partial) = q.simplify(g, Map.empty)
-   * val (maybeG, finalRefs) = simp.apply(g, partial, parallel)
-   * }}}
-   */
-  override def simplify(
-                         egraph: readonly.EGraph[NodeT],
-                         partialReification: Map[EClassSymbol.Virtual, EClassCall]
-                       ): (Command[NodeT], Map[EClassSymbol.Virtual, EClassCall]) = {
-    val newQueue = Seq.newBuilder[Command[NodeT]]
-    var newReification = partialReification
-    for (command <- flatCommands) {
-      val (simplified, newReificationPart) = command.simplify(egraph, newReification)
-      newQueue += simplified
-      newReification ++= newReificationPart
-    }
-    (CommandQueue(newQueue.result()), newReification)
-  }
 }
 
 /**
@@ -272,7 +242,6 @@ object CommandQueue {
     // i is the highest batch in which any of its dependencies are defined.
     type ArraySeqBuilder = mutable.Builder[(EClassSymbol.Virtual, ENodeSymbol[NodeT]), ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
     val batches = mutable.ArrayBuffer.empty[ArraySeqBuilder]
-
 
     // Pre-size to avoid rehashing during hot insert loop.
     var totalDefs = 0
