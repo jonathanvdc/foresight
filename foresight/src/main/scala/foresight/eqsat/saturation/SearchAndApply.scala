@@ -2,11 +2,13 @@ package foresight.eqsat.saturation
 
 import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{PortableMatch, Rewrite}
+import foresight.eqsat.rewriting.{EClassSearcher, EClassesToSearch, PortableMatch, Rewrite, Rule}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
 import foresight.eqsat.readonly
+import foresight.eqsat.rewriting.SearcherContinuation.Continuation
 import foresight.util.collections.StrictMapOps.toStrictMapOps
+import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.mutable.HashMap
 
@@ -263,15 +265,70 @@ object SearchAndApply {
     final override def apply(rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
                              egraph: EGraphT,
                              parallelize: ParallelMap): Option[EGraphT] = {
-      val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
-      val updates = ruleMatchingAndApplicationParallelize(
-        rules,
-        (rule: Rewrite[NodeT, MatchT, EGraphT]) => {
-          rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
-        }
-      ).toSeq
 
-      update(updates, Map.empty[String, Seq[MatchT]], egraph, parallelize)
+      val updates = Seq.newBuilder[Command[NodeT]]
+      val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
+
+      if (egraph.classCount <= EClassSearcher.smallEGraphThreshold) {
+        // Small e-graph optimization: for small e-graphs, the overhead of partitioning and
+        // fusing rule applications outweighs the benefits. Just process each rule normally.
+        for (rule <- rules) {
+          updates += rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+        }
+      } else {
+        // Idea: EClassSearcher rules are the common case, and they apply in parallel over a subset of
+        // e-classes in the e-graph. If multiple rules share the same subset of e-classes to search,
+        // we can group them together to fuse iterations over those e-classes. Fusion both reduces
+        // redundant work and increases the amount of work done per e-class per iteration, allowing
+        // for better parallelism.
+        val partitioned = EClassSearcher.partitionRulesBySharedEClassesToSearch(rules)
+
+        // Process regular rules normally.
+        for (rule <- partitioned.regularRules) {
+          updates += rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+        }
+
+        // Process shared EClassesToSearch rules together.
+        for ((eclassesToSearch, sharedRules) <- partitioned.rulesPerSharedEClassToSearch) {
+          updates ++= ruleMatchingAndApplicationParallelize.collectFrom[Command[NodeT]] { (add: Command[NodeT] => Unit) =>
+            // Build combined searchers that first search and for each match apply the corresponding rule's applier.
+            // Each combined searcher corresponds to one of the shared rules.
+            val commandSearchers = sharedRules.map {
+              case Rule(_, searcher: EClassSearcher[NodeT, MatchT, _], applier) =>
+                val castSearcher = searcher.asInstanceOf[EClassSearcher[NodeT, MatchT, EGraphT]]
+
+                castSearcher
+                  .andThen(new castSearcher.ContinuationBuilder {
+                    def apply(downstream: castSearcher.Continuation): Continuation[NodeT, MatchT, EGraphT] = (m: MatchT, egraph: EGraphT) => {
+                      if (downstream(m, egraph)) {
+                        applier(m, egraph) match {
+                          case CommandQueue(Seq()) => // Ignore no-op commands.
+                          case cmd =>
+                            // Collect nontrivial commands.
+                            add(cmd)
+                        }
+                        true
+                      } else {
+                        false
+                      }
+                    }
+                  })
+
+              case _ =>
+                throw new IllegalStateException("Expected only EClassSearcher rules in shared EClassesToSearch group.")
+            }
+
+            EClassSearcher.searchMultiple(
+              UnsafeSeqFromArray(commandSearchers.toArray),
+              eclassesToSearch(egraph),
+              egraph,
+              ruleMatchingAndApplicationParallelize
+            )
+          }
+        }
+      }
+
+      update(updates.result(), Map.empty[String, Seq[MatchT]], egraph, parallelize)
     }
   }
 }

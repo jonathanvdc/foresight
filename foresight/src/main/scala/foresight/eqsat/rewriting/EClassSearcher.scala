@@ -3,6 +3,7 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.EClassCall
 import foresight.eqsat.readonly.EGraph
+import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 import java.util.concurrent.atomic.AtomicIntegerArray
 import scala.collection.compat.immutable.ArraySeq
@@ -78,6 +79,12 @@ private[eqsat] object EClassSearcher {
   final val blockSize: Int = 64
 
   /**
+   * The threshold size (in number of e-classes) below which we consider an e-graph "small"
+   * and may choose simpler strategies that have a lower constant overhead.
+   */
+  final val smallEGraphThreshold: Int = 4 * blockSize
+
+  /**
    * Searches for matches within multiple e-classes in parallel.
    *
    * Implementations can assume each `call` refers to the class's canonical representative.
@@ -134,5 +141,70 @@ private[eqsat] object EClassSearcher {
     } catch {
       case HaltSearchException => // Swallow the exception to halt the search early
     }
+  }
+
+  /**
+   * Result of partitioning rules by shared EClassesToSearch instances.
+   *
+   * @param rulesPerSharedEClassToSearch Map from shared EClassesToSearch instances to the rules that use them.
+   * @param regularRules                  Rules that either don't use EClassSearcher or use unique EClassesToSearch.
+   */
+  final case class PartitionedRules[
+    NodeT,
+    MatchT,
+    EGraphT <: EGraph[NodeT]
+  ](
+     rulesPerSharedEClassToSearch: Map[EClassesToSearch[EGraphT], Seq[Rewrite[NodeT, MatchT, EGraphT]]],
+     regularRules: Seq[Rewrite[NodeT, MatchT, EGraphT]]
+   )
+
+  /**
+   * Partitions a sequence of rules into those that share EClassesToSearch instances and those that do not.
+   *
+   * This is useful for optimizing rule application by grouping rules that search the same e-classes.
+   * @param rules Sequence of rules to partition.
+   * @tparam NodeT   Node payload type.
+   * @tparam MatchT  Match element type.
+   * @tparam EGraphT E-graph type.
+   * @return A [[PartitionedRules]] instance containing the partitioned rules.
+   */
+  def partitionRulesBySharedEClassesToSearch[
+    NodeT,
+    MatchT,
+    EGraphT <: EGraph[NodeT]
+  ](rules: Seq[Rewrite[NodeT, MatchT, EGraphT]]): PartitionedRules[NodeT, MatchT, EGraphT] = {
+    // Collect the EClassesToSearch instances from all EClassSearcher rules.
+    val eclassesToSearchPerRule = rules.collect {
+      case Rule(name, searcher: EClassSearcher[NodeT, MatchT, _], _) =>
+        name -> searcher.classesToSearch
+    }.toMap
+
+    // Count how many times each unique EClassesToSearch instance is used across all rules.
+    val usageCounts =
+      eclassesToSearchPerRule
+        .values
+        .groupBy(identity) // groups by unique EClassesToSearch instance
+        .mapValuesStrict(_.size) // count how many times each one appears
+
+    // For shared EClassesToSearch, group the corresponding rules together.
+    val rulesPerSharedEClassToSearch =
+      usageCounts
+        .filter { case (_, count) => count > 1 }
+        .keys
+        .map { eclassesToSearch =>
+          eclassesToSearch -> rules.collect {
+            case rule if eclassesToSearchPerRule.get(rule.name).contains(eclassesToSearch) =>
+              rule
+          }
+        }.toMap
+
+    // Rules that either don't use EClassSearcher or use a unique EClassesToSearch.
+    val regularRules: Seq[Rewrite[NodeT, MatchT, EGraphT]] =
+      rules.filter { rule =>
+        !eclassesToSearchPerRule.contains(rule.name) ||
+          usageCounts(eclassesToSearchPerRule(rule.name)) == 1
+      }
+
+    PartitionedRules(rulesPerSharedEClassToSearch, regularRules)
   }
 }
