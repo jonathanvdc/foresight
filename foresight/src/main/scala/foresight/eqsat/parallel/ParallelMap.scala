@@ -120,6 +120,14 @@ trait ParallelMap {
       })
     }
 
+    override def processBlock[A](inputs: ArraySeq[A], blockIdx: Int, blockSize: Int, f: A => Unit): Unit = {
+      if (token.isCanceled) throw OperationCanceledException(token)
+      ParallelMap.this.processBlock(inputs, blockIdx, blockSize, (a: A) => {
+        if (token.isCanceled) throw OperationCanceledException(token)
+        f(a)
+      })
+    }
+
     override def run[A](f: => A): A = {
       if (token.isCanceled) throw OperationCanceledException(token)
       ParallelMap.this.run(f)
@@ -139,41 +147,56 @@ trait ParallelMap {
     apply[Int, A](Seq(0), _ => f).head
 
   /**
+   * Processes a single block of elements from an array sequence.
+   * @param inputs The input array sequence.
+   * @param blockIdx The index of the block to process.
+   * @param blockSize The size of each block.
+   * @param f The function to apply to each element.
+   * @tparam A The type of elements in the input array sequence.
+   */
+  protected def processBlock[A](inputs: ArraySeq[A], blockIdx: Int, blockSize: Int, f: A => Unit): Unit = {
+    val start = blockIdx * blockSize
+    val end = math.min(start + blockSize, inputs.length)
+    var i = start
+    while (i < end) {
+      f(inputs(i))
+      i += 1
+    }
+  }
+
+  /**
    * Applies a function to each element of an array sequence in blocks. Blocks control the
    * granularity of parallelism: each block is processed sequentially, while different blocks
    * may be processed in parallel.
+   *
+   * - Each block is processed in input order (sequentially within the block).
+   * - Blocks may execute concurrently, and their relative order is not guaranteed.
+   * - If wrapped by a [[cancelable]] strategy, cancellation is checked before and during
+   *   processing (between blocks and between elements within a block).
+   *
    * @param inputs The input array sequence.
-   * @param blockSize The size of each block to process.
+   * @param blockSize The size of each block to process. Must be positive.
    * @param f The function to apply to each element.
    * @tparam A The type of elements in the input array sequence.
+   * @throws IllegalArgumentException if `blockSize <= 0`
    */
   def processBlocks[A](inputs: ArraySeq[A], blockSize: Int, f: A => Unit): Unit = {
     if (blockSize <= 0) {
       throw new IllegalArgumentException(s"blockSize must be positive, got $blockSize")
     }
 
-    val numBlocks = (inputs.length + blockSize - 1) / blockSize
+    val numBlocks = ((inputs.length.toLong + blockSize - 1) / blockSize).toInt
     if (numBlocks == 0) {
       // No blocks: nothing to do
       return
     }
 
-    def processBlock(blockIdx: Int): Unit = {
-      val start = blockIdx * blockSize
-      val end = math.min(start + blockSize, inputs.length)
-      var i = start
-      while (i < end) {
-        f(inputs(i))
-        i += 1
-      }
-    }
-
     if (numBlocks == 1) {
       // Single block: process sequentially to avoid overhead
-      processBlock(0)
+      processBlock(inputs, 0, blockSize, f)
     } else {
       // Multiple blocks: process in parallel
-      apply[Int, Unit](0 until numBlocks, processBlock)
+      apply[Int, Unit](0 until numBlocks, processBlock(inputs, _, blockSize, f))
     }
   }
 
