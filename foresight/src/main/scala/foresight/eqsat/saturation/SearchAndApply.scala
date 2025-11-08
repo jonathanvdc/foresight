@@ -27,9 +27,9 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
    * @param parallelize A parallelization strategy for searching.
    * @return A sequence of matches found for the rule.
    */
-  def search(rule: RuleT,
-             egraph: EGraphT,
-             parallelize: ParallelMap): Seq[MatchT]
+  protected def search(rule: RuleT,
+                       egraph: EGraphT,
+                       parallelize: ParallelMap): Seq[MatchT]
 
   /**
    * Produces a command that applies the given matches of the rule to the e-graph.
@@ -40,10 +40,10 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
    * @param parallelize A parallelization strategy for applying the matches.
    * @return A command that applies the matches to the e-graph.
    */
-  def delayed(rule: RuleT,
-              matches: Seq[MatchT],
-              egraph: EGraphT,
-              parallelize: ParallelMap): Command[NodeT]
+  protected def delayed(rule: RuleT,
+                        matches: Seq[MatchT],
+                        egraph: EGraphT,
+                        parallelize: ParallelMap): Command[NodeT]
 
   /**
    * Applies the given command to the e-graph.
@@ -56,10 +56,10 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
    * @param parallelize A parallelization strategy for applying the command.
    * @return An updated e-graph with the command applied, or None if the command made no changes.
    */
-  def update(command: Command[NodeT],
-             matches: Map[String, Seq[MatchT]],
-             egraph: EGraphT,
-             parallelize: ParallelMap): Option[EGraphT]
+  protected def update(command: Command[NodeT],
+                       matches: Map[String, Seq[MatchT]],
+                       egraph: EGraphT,
+                       parallelize: ParallelMap): Option[EGraphT]
 
   /**
    * Searches for matches of the given rules in the e-graph.
