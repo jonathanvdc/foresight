@@ -1,6 +1,9 @@
 package foresight.eqsat.parallel
 
 import org.junit.Test
+import scala.collection.compat.immutable.ArraySeq
+import scala.collection.mutable.ArrayBuffer
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Tests for parallel maps and their cancellation.
@@ -148,5 +151,150 @@ class ParallelMapTest {
     assert(impl.nanos > 0)
     assert(impl.children.size == inputs.size)
     assert(impl.children.forall(_.nanos > 0))
+  }
+
+  /**
+   * processBlocks: empty inputs do not invoke f.
+   */
+  @Test
+  def processBlocksEmptyInputs(): Unit = {
+    for (impl <- implementations) {
+      val inputs = ArraySeq.empty[Int]
+      val counter = new AtomicInteger(0)
+      impl.processBlocks[Int](inputs, 4, _ => counter.incrementAndGet())
+      assert(counter.get() == 0)
+    }
+  }
+
+  /**
+   * processBlocks: single block path (blockSize >= length) processes sequentially and preserves order.
+   */
+  @Test
+  def processBlocksSingleBlockSequentialPath(): Unit = {
+    for (impl <- implementations) {
+      for (n <- 1 to 20) {
+        val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
+        val seen = new ArrayBuffer[Int]()
+        impl.processBlocks[Int](inputs, blockSize = n + 1, i => seen.synchronized {
+          seen += i
+        })
+        // Exact order since the single-block path is sequential.
+        assert(seen.toSeq == inputs.toSeq)
+      }
+    }
+  }
+
+  /**
+   * processBlocks: multiple blocks process every element exactly once (order across blocks unspecified).
+   */
+  @Test
+  def processBlocksMultipleBlocksAllElementsProcessed(): Unit = {
+    for (impl <- implementations) {
+      val n = 32
+      val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
+      val seen = new ArrayBuffer[Int]()
+      impl.processBlocks[Int](inputs, blockSize = 4, i => seen.synchronized { seen += i })
+      // Same multiset of elements
+      assert(seen.sorted == inputs.toSeq)
+      // No duplicates / omissions
+      assert(seen.distinct.size == n)
+    }
+  }
+
+  /**
+   * processBlocks: within each block, element order is preserved even if blocks interleave.
+   */
+  @Test
+  def processBlocksPerBlockOrderPreserved(): Unit = {
+    for (impl <- implementations) {
+      val n = 25
+      val blockSize = 6 // creates 5 blocks: [0..5], [6..11], [12..17], [18..23], [24]
+      val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
+      val seen = new ArrayBuffer[Int]()
+      impl.processBlocks[Int](inputs, blockSize, i => seen.synchronized { seen += i })
+
+      // Check: for every block, the subsequence of seen that belongs to the block is increasing.
+      val numBlocks = (n + blockSize - 1) / blockSize
+      for (b <- 0 until numBlocks) {
+        val start = b * blockSize
+        val end = math.min(start + blockSize, n)
+        val subseq = seen.filter(i => i >= start && i < end)
+        assert(subseq == subseq.sorted, s"Elements within block $b not in order: $subseq")
+      }
+    }
+  }
+
+  /**
+   * processBlocks: blockSize == 1 is valid and processes all elements.
+   */
+  @Test
+  def processBlocksBlockSizeOne(): Unit = {
+    for (impl <- implementations) {
+      val n = 17
+      val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
+      val counter = new AtomicInteger(0)
+      impl.processBlocks[Int](inputs, blockSize = 1, _ => counter.incrementAndGet())
+      assert(counter.get() == n)
+    }
+  }
+
+  /**
+   * processBlocks: cancellation stops work in the parallel path.
+   * Note: cancellation may only be observed between blocks.
+   */
+  @Test
+  def processBlocksCancellationDuringProcessing(): Unit = {
+    for (impl0 <- implementations) {
+      val token = new CancellationToken
+      val impl = impl0.cancelable(token)
+      val n = 100
+      val blockSize = 5
+      val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
+
+      try {
+        impl.processBlocks[Int](inputs, blockSize, i => {
+          if (i == 0) token.cancel() // cancel early
+          Thread.sleep(2) // give scheduler a chance to observe the token
+          ()
+        })
+        assert(false, "Expected OperationCanceledException was not thrown")
+      } catch {
+        case OperationCanceledException(_) => // expected
+      }
+    }
+  }
+
+  /**
+   * processBlocks: blockSize must be positive; a zero blockSize raises an exception.
+   */
+  @Test
+  def processBlocksBlockSizeZeroThrows(): Unit = {
+    for (impl <- implementations) {
+      val inputs = ArraySeq.unsafeWrapArray((0 until 10).toArray)
+      var threw = false
+      try {
+        impl.processBlocks[Int](inputs, 0, _ => ())
+      } catch {
+        case _: IllegalArgumentException => threw = true
+      }
+      assert(threw, "Expected an IllegalArgumentException when blockSize == 0")
+    }
+  }
+
+  /**
+   * processBlocks: negative blockSize raises an exception.
+   */
+  @Test
+  def processBlocksNegativeBlockSizeThrows(): Unit = {
+    for (impl <- implementations) {
+      val inputs = ArraySeq.unsafeWrapArray((0 until 10).toArray)
+      var threw = false
+      try {
+        impl.processBlocks[Int](inputs, -1, _ => ())
+      } catch {
+        case _: IllegalArgumentException => threw = true
+      }
+      assert(threw, "Expected an IllegalArgumentException when blockSize < 0")
+    }
   }
 }
