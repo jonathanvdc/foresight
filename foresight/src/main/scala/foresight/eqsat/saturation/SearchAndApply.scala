@@ -276,17 +276,21 @@ object SearchAndApply {
     final override def apply(rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
                              egraph: EGraphT,
                              parallelize: ParallelMap): Option[EGraphT] = {
-
-      val updates = Seq.newBuilder[Command[NodeT]]
       val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
 
       if (!searchLoopInterchange || egraph.classCount <= EClassSearcher.smallEGraphThreshold) {
         // Small e-graph optimization: for small e-graphs, the overhead of partitioning and
         // fusing rule applications outweighs the benefits. Just process each rule normally.
-        for (rule <- rules) {
-          updates += rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
-        }
+        val updates = ruleMatchingAndApplicationParallelize(
+          rules,
+          (rule: Rewrite[NodeT, MatchT, EGraphT]) => {
+            rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+          }
+        ).toSeq
+        update(updates, Map.empty[String, Seq[MatchT]], egraph, parallelize)
       } else {
+        val updates = Seq.newBuilder[Command[NodeT]]
+
         // Idea: EClassSearcher rules are the common case, and they apply in parallel over a subset of
         // e-classes in the e-graph. If multiple rules share the same subset of e-classes to search,
         // we can group them together to fuse iterations over those e-classes. Fusion both reduces
@@ -311,9 +315,9 @@ object SearchAndApply {
             )
           }
         }
-      }
 
-      update(updates.result(), Map.empty[String, Seq[MatchT]], egraph, parallelize)
+        update(updates.result(), Map.empty[String, Seq[MatchT]], egraph, parallelize)
+      }
     }
   }
 }
