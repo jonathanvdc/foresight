@@ -7,7 +7,7 @@
 </div>
 <div class="main-signature mono-small-block">
  <div class="signature">
-  <span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="IncrementalBenchmarks.html" t="n" class="documentableName ">IncrementalBenchmarks</a>
+  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="IncrementalBenchmarks.html" t="n" class="documentableName ">IncrementalBenchmarks</a><span t="k"> extends </span><a href="../../../util/BenchmarksWithParallelMap.html" t="t">BenchmarksWithParallelMap</a></span><span class="signature-long"></span>
  </div>
 </div>
 <div class="cover">
@@ -24,15 +24,17 @@
      <svg id="graph"></svg>
      <script type="text/dot" id="dot"> digraph g {
  node0 [id=node0, label="<span style=\"color: #FFFFFF;\">class <a href=\"IncrementalBenchmarks.html\" t=\"n\">IncrementalBenchmarks</a></span>", class="class vertex"];
-node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
-node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
-node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
+node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <a href=\"../../../util/BenchmarksWithParallelMap.html\" t=\"n\">BenchmarksWithParallelMap</a></span>", class="class vertex"];
+node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
+node3 [id=node3, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
 
 
  node0 -> node1;
 node1 -> node2;
-node1 -> node3;
-node3 -> node2;
+node2 -> node3;
+node2 -> node4;
+node4 -> node3;
 
 }
 </script>
@@ -43,6 +45,9 @@ node3 -> node2;
    </dt>
    <dd class="body-medium">
     <div class="mono-small-block supertypes">
+     <div>
+      class <a href="../../../util/BenchmarksWithParallelMap.html" t="n">BenchmarksWithParallelMap</a>
+     </div>
      <div>
       class <span data-unresolved-link="" t="n">Object</span>
      </div>
@@ -200,9 +205,94 @@ node3 -> node2;
         </div>
        </div>
       </section>
+      <section id="Inherited-fields">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Inherited fields</h4>
+        </div>
+        <div class="documentableElement" id="parallelMap-0" data-f-keywords="lazy" data-f-inherited="BenchmarksWithParallelMap">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">lazy </span></span><span class="kind"><span t="k">val </span></span><a href="IncrementalBenchmarks.html#parallelMap-0" t="n" class="documentableName ">parallelMap</a>: <span data-unresolved-link="" t="t">ParallelMap</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Builds a fixed-size <span data-unresolved-link="">foresight.eqsat.parallel.ParallelMap</span> using the configured <code>threadCount</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Builds a fixed-size <span data-unresolved-link="">foresight.eqsat.parallel.ParallelMap</span> using the configured <code>threadCount</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>a <code>ParallelMap</code> that schedules work on exactly <code>threadCount</code> threads.</p>
+              </dd>
+              <dt class="body-small">
+               Inherited from:
+              </dt>
+              <dd class="body-medium">
+               <a href="../../../util/BenchmarksWithParallelMap.html#parallelMap-0">BenchmarksWithParallelMap</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="threadCount-0" data-f-inherited="BenchmarksWithParallelMap">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">var </span></span><a href="IncrementalBenchmarks.html#threadCount-0" t="n" class="documentableName ">threadCount</a>: <span data-unresolved-link="" t="t">Int</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Number of worker threads used by the created <span data-unresolved-link="">foresight.eqsat.parallel.ParallelMap</span>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Number of worker threads used by the created <span data-unresolved-link="">foresight.eqsat.parallel.ParallelMap</span>.</p>
+              <p>This field is populated by JMH from the <code>-p threadCount=...</code> command-line parameter. Provide a single value (e.g., <code>1</code>) or a comma-separated list (e.g., <code>1,2,4</code>) to run sweeps.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Inherited from:
+              </dt>
+              <dd class="body-medium">
+               <a href="../../../util/BenchmarksWithParallelMap.html#threadCount-0">BenchmarksWithParallelMap</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
      </div>
     </section>
    </div>
   </div>
  </div>
-</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Type-members">Type members</a><ul><li><a href="#Types">Types</a></li></ul></li><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Concrete-fields">Concrete fields</a></li><li><a href="#Inherited-fields">Inherited fields</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

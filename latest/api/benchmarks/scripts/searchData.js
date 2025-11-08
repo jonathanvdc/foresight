@@ -2,7 +2,7 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"foresight-benchmarks","t":"for
 {"l":"foresight.html#","e":false,"i":"","n":"foresight","t":"foresight","d":"","k":"package","x":""},
 {"l":"foresight/eqsat/examples.html#","e":false,"i":"","n":"foresight.eqsat.examples","t":"foresight.eqsat.examples","d":"","k":"package","x":""},
 {"l":"foresight/eqsat/examples/incremental.html#","e":false,"i":"","n":"foresight.eqsat.examples.incremental","t":"foresight.eqsat.examples.incremental","d":"","k":"package","x":""},
-{"l":"foresight/eqsat/examples/incremental/IncrementalBenchmarks.html#","e":false,"i":"","n":"IncrementalBenchmarks","t":"IncrementalBenchmarks","d":"foresight.eqsat.examples.incremental","k":"class","x":""},
+{"l":"foresight/eqsat/examples/incremental/IncrementalBenchmarks.html#","e":false,"i":"","n":"IncrementalBenchmarks","t":"IncrementalBenchmarks extends BenchmarksWithParallelMap","d":"foresight.eqsat.examples.incremental","k":"class","x":""},
 {"l":"foresight/eqsat/examples/incremental/IncrementalBenchmarks.html#ArithRule-0","e":false,"i":"","n":"ArithRule","t":"ArithRule = R.ArithRule","d":"foresight.eqsat.examples.incremental.IncrementalBenchmarks","k":"type","x":""},
 {"l":"foresight/eqsat/examples/incremental/IncrementalBenchmarks.html#ImmutableEGraph-0","e":false,"i":"","n":"ImmutableEGraph","t":"ImmutableEGraph = EGraphWithMetadata[ArithIR, EGraph[ArithIR]]","d":"foresight.eqsat.examples.incremental.IncrementalBenchmarks","k":"type","x":""},
 {"l":"foresight/eqsat/examples/incremental/IncrementalBenchmarks.html#L-0","e":false,"i":"","n":"L","t":"L: Language[ArithExpr]","d":"foresight.eqsat.examples.incremental.IncrementalBenchmarks","k":"val","x":""},
@@ -56,5 +56,5 @@ pages = [{"l":"index.html#","e":false,"i":"","n":"foresight-benchmarks","t":"for
 {"l":"foresight/eqsat/examples/vector/VectorBenchmarks.html#vectorNormalization-fffff957","e":false,"i":"","n":"vectorNormalization","t":"vectorNormalization(): VectorArithExpr","d":"foresight.eqsat.examples.vector.VectorBenchmarks","k":"def","x":""},
 {"l":"foresight/util.html#","e":false,"i":"","n":"foresight.util","t":"foresight.util","d":"","k":"package","x":""},
 {"l":"foresight/util/BenchmarksWithParallelMap.html#","e":false,"i":"","n":"BenchmarksWithParallelMap","t":"BenchmarksWithParallelMap","d":"foresight.util","k":"class","x":""},
-{"l":"foresight/util/BenchmarksWithParallelMap.html#parallelMap-0","e":false,"i":"","n":"parallelMap","t":"parallelMap: ParallelMap","d":"foresight.util.BenchmarksWithParallelMap","k":"def","x":""},
+{"l":"foresight/util/BenchmarksWithParallelMap.html#parallelMap-0","e":false,"i":"","n":"parallelMap","t":"parallelMap: ParallelMap","d":"foresight.util.BenchmarksWithParallelMap","k":"val","x":""},
 {"l":"foresight/util/BenchmarksWithParallelMap.html#threadCount-0","e":false,"i":"","n":"threadCount","t":"threadCount: Int","d":"foresight.util.BenchmarksWithParallelMap","k":"var","x":""}];
