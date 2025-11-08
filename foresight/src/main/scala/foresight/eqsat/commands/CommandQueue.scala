@@ -5,6 +5,7 @@ import foresight.eqsat.{EClassCall, EClassSymbol, ENodeSymbol, MixedTree}
 import foresight.eqsat.mutable.{EGraph => MutableEGraph}
 import foresight.eqsat.readonly
 
+import java.util
 import scala.collection.mutable
 import scala.collection.compat.immutable.ArraySeq
 
@@ -230,13 +231,10 @@ object CommandQueue {
     }
   }
 
-  /**
-   * Computes the highest batch index among the dependencies of the given nodes,
-   * based on the currently known definitions in `defs`.
-   */
-  private def highestDependencyForNodes[NodeT](
+
+  @inline private def highestDependencyForNodes[NodeT](
     nodes: ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])],
-    defs: mutable.HashMap[EClassSymbol, Int]
+    defs: util.IdentityHashMap[EClassSymbol, Int]
   ): Int = {
     var highest = -1
     var n = 0
@@ -246,8 +244,8 @@ object CommandQueue {
       while (a < args.length) {
         args(a) match {
           case use: EClassSymbol.Virtual =>
-            if (defs.contains(use)) {
-              val idx = defs(use)
+            if (defs.containsKey(use)) {
+              val idx = defs.get(use)
               if (idx > highest) highest = idx
             }
           case _ => // ignore non-virtual uses
@@ -274,8 +272,15 @@ object CommandQueue {
     // i is the highest batch in which any of its dependencies are defined.
     type ArraySeqBuilder = mutable.Builder[(EClassSymbol.Virtual, ENodeSymbol[NodeT]), ArraySeq[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]]
     val batches = mutable.ArrayBuffer.empty[ArraySeqBuilder]
-    val defs = mutable.HashMap.empty[EClassSymbol, Int]
 
+
+    // Pre-size to avoid rehashing during hot insert loop.
+    var totalDefs = 0
+    for (command <- group) {
+      totalDefs += command.nodes.length
+    }
+
+    val defs = new util.IdentityHashMap[EClassSymbol, Int](totalDefs)
     for (command <- group) {
       val highestDependency = highestDependencyForNodes[NodeT](command.nodes, defs)
 
@@ -292,7 +297,7 @@ object CommandQueue {
       var i = 0
       while (i < command.nodes.length) {
         val node = command.nodes(i)
-        defs(node._1) = batchIndex
+        defs.put(node._1, batchIndex)
         i += 1
       }
     }
