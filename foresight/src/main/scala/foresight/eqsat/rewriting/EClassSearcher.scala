@@ -27,7 +27,7 @@ trait EClassSearcher[
    * Implementations can assume `call` refers to the class's canonical representative.
    *
    * @param call         Canonical e-class application to search within.
-   * @param egraph       Immutable e-graph snapshot.
+   * @param egraph       Read-only e-graph snapshot.
    * @param continuation Continuation to call with each match found.
    */
   protected def search(call: EClassCall, egraph: EGraphT, continuation: Continuation): Unit
@@ -35,18 +35,24 @@ trait EClassSearcher[
   /**
    * Searches for matches within a single e-class
    * @param call        Canonical e-class application
-   * @param egraph      Immutable e-graph snapshot
+   * @param egraph      Read-only e-graph snapshot
    */
   final def search(call: EClassCall, egraph: EGraphT): Unit = {
     search(call, egraph, continuation)
   }
 
   /**
+   * Describes which e-classes to search in the e-graph. By default, searches all e-classes.
+   * Implementations can override this to customize which classes are searched.
+   */
+  def classesToSearch: EClassesToSearch[EGraphT] = EClassesToSearch.all
+
+  /**
    * Searches for matches within multiple e-classes in parallel.
    *
    * Implementations can assume each `call` refers to the class's canonical representative.
    * @param calls       Canonical e-class applications to search within.
-   * @param egraph      Immutable e-graph snapshot.
+   * @param egraph      Read-only e-graph snapshot.
    * @param parallelize Parallel map implementation to use for distributing work.
    */
   final def search(calls: ArraySeq[EClassCall], egraph: EGraphT, parallelize: ParallelMap): Unit = {
@@ -68,8 +74,8 @@ trait EClassSearcher[
     }
   }
 
-  override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
-    search(UnsafeSeqFromArray(egraph.classes.view.map(egraph.canonicalize).toArray), egraph, parallelize)
+  final override def search(egraph: EGraphT, parallelize: ParallelMap): Unit = {
+    search(classesToSearch(egraph), egraph, parallelize)
   }
 }
 

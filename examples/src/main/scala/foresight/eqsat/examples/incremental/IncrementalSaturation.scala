@@ -1,12 +1,13 @@
 package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{EClassSearcher, Rule, Searcher}
+import foresight.eqsat.rewriting.{EClassSearcher, EClassesToSearch, Rule, Searcher}
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
 import foresight.eqsat.{EClassCall, EClassRef, ENode}
 import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 import foresight.util.collections.UnsafeSeqFromArray
 
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
 
 object IncrementalSaturation {
@@ -105,11 +106,8 @@ object IncrementalSaturation {
     final case class IncrementalMachineSearcher(buildContinuation: MachineEClassSearcher[NodeT, EGraphWithMetadata[NodeT, EGraphT]]#ContinuationBuilder)
       extends EClassSearcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] {
 
-      override def search(egraph: EGraphWithMetadata[NodeT, EGraphT], parallelize: ParallelMap): Unit = {
-        val meta = egraph.getMetadata[VersionMetadata[NodeT]](versionMetadataName)
-        val latest = UnsafeSeqFromArray(meta.latestVersionClasses.map(egraph.canonicalize).toArray)
-        search(latest, egraph, parallelize)
-      }
+      override val classesToSearch: EClassesToSearch[EGraphWithMetadata[NodeT, EGraphT]] =
+        VersionMetadata.SearchOnlyLatestVersionClasses(versionMetadataName)
 
       protected override def search(call: EClassCall, egraph: EGraphWithMetadata[NodeT, EGraphT], continuation: Continuation): Unit = {
         if (!isLatestVersion(call.ref, egraph, versionMetadataName)) {
