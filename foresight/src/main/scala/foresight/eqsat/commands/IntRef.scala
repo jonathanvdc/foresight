@@ -12,8 +12,9 @@ object IntRef {
    *   IntRef.release(r)           // return to pool
    */
   final class Pool {
+    private final val maxSize = 64
     // LIFO stack to maximize cache locality
-    private val free = new java.util.ArrayDeque[IntRef]()
+    private val free = new java.util.ArrayDeque[IntRef](maxSize)
 
     /** Acquire an IntRef, initializing its value. */
     @inline def acquire(initial: Int): IntRef = {
@@ -24,6 +25,7 @@ object IntRef {
 
     /** Return an IntRef to the pool for reuse. */
     @inline def release(ref: IntRef): Unit = {
+      if (free.size() >= maxSize) return
       // no double-free tracking for performance; callers ensure discipline
       free.addFirst(ref)
     }
