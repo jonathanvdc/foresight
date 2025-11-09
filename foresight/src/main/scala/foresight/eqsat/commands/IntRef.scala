@@ -1,3 +1,3 @@
 package foresight.eqsat.commands
 
-private[eqsat] class IntRef(var elem: Int)
+private[eqsat] final class IntRef(var elem: Int)
