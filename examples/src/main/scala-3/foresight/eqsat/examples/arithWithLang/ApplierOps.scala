@@ -46,7 +46,7 @@ object ApplierOps {
           }
 
           val substituted = subst(extractedExpr)
-          val newMatch = m.copy(varMapping = m.varMapping + (destination.variable -> L.toTree[EClassCall](substituted)))
+          val newMatch = m.bind(destination.variable, L.toTree[EClassCall](substituted))
           applier.apply(newMatch, egraph, builder)
         }
       }

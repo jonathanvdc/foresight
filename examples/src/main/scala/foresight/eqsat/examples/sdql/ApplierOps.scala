@@ -36,7 +36,7 @@ object ApplierOps {
           }
 
           val substituted = subst(extracted)
-          val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
+          val newMatch = m.bind(destination, substituted)
           applier.apply(newMatch, egraph, builder)
         }
       }
