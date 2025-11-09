@@ -1,12 +1,13 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.collections.SlotSeq
-import foresight.eqsat.commands.{Command, CommandQueueBuilder}
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
 import foresight.eqsat.{EClassSymbol, MixedTree, Slot}
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
+import scala.runtime.IntRef
 
 /**
  * An applier that applies a pattern match to an e-graph.
@@ -18,11 +19,9 @@ import scala.collection.compat._
 final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
   extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
 
-  override def apply(m: PatternMatch[NodeT], egraph: EGraphT): Command[NodeT] = {
-    val builder = new CommandQueueBuilder[NodeT]()
+  override def apply(m: PatternMatch[NodeT], egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
     val symbol = instantiateAsSimplifiedAddCommand(pattern, m, egraph, builder)
     builder.unionSimplified(EClassSymbol.real(m.root), symbol, egraph)
-    builder.result()
   }
 
   override def tryReverse: Option[Searcher[NodeT, PatternMatch[NodeT], EGraphT]] = {
@@ -69,13 +68,13 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
 
   private final class SimplifiedAddCommandInstantiator(m: PatternMatch[NodeT],
                                                        egraph: EGraphT,
-                                                       builder: CommandQueueBuilder[NodeT]) {
-    def instantiate(pattern: MixedTree[NodeT, Pattern.Var]): EClassSymbol = {
+                                                       builder: CommandScheduleBuilder[NodeT]) {
+    def instantiate(pattern: MixedTree[NodeT, Pattern.Var], maxBatch: IntRef): EClassSymbol = {
       pattern match {
         case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
         case MixedTree.Node(t, defs@Seq(), uses, args) =>
           // No definitions, so we can reuse the PatternMatch and its original slot mapping
-          addSimplifiedNode(t, defs, uses, args)
+          addSimplifiedNode(t, defs, uses, args, maxBatch)
 
         case MixedTree.Node(t, defs, uses, args) =>
           val defSlots = defs.map { (s: Slot) =>
@@ -85,25 +84,31 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
             }
           }
           val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder).addSimplifiedNode(t, defSlots, uses, args)
+          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder).addSimplifiedNode(t, defSlots, uses, args, maxBatch)
       }
     }
 
     private def addSimplifiedNode(nodeType: NodeT,
                                   definitions: SlotSeq,
                                   uses: SlotSeq,
-                                  args: immutable.ArraySeq[MixedTree[NodeT, Pattern.Var]]): EClassSymbol = {
-      val argSymbols = CommandQueueBuilder.symbolArrayFrom(args, instantiate)
+                                  args: ArraySeq[MixedTree[NodeT, Pattern.Var]],
+                                  maxBatch: IntRef): EClassSymbol = {
+      val argMaxBatch = IntRef(0)
+      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, instantiate)
       val useSymbols = uses.map(m.apply: Slot => Slot)
-      builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, egraph)
+      val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph)
+      if (argMaxBatch.elem > maxBatch.elem) {
+        maxBatch.elem = argMaxBatch.elem
+      }
+      result
     }
   }
 
   private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
                                                 m: PatternMatch[NodeT],
                                                 egraph: EGraphT,
-                                                builder: CommandQueueBuilder[NodeT]): EClassSymbol = {
+                                                builder: CommandScheduleBuilder[NodeT]): EClassSymbol = {
 
-    new SimplifiedAddCommandInstantiator(m, egraph, builder).instantiate(pattern)
+    new SimplifiedAddCommandInstantiator(m, egraph, builder).instantiate(pattern, new IntRef(0))
   }
 }

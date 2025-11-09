@@ -4,6 +4,8 @@ import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly
 
+import scala.collection.compat.immutable.ArraySeq
+
 /**
  * An e-graph is a data structure for representing and maintaining equivalence classes of expressions.
  * E-graphs support equality saturation, a powerful technique for exploring all equivalent forms of a term
@@ -79,7 +81,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] ext
    * @param parallelize  Strategy used for any parallel work within the addition.
    * @return (Per-node results in input order, new e-graph containing the additions).
    */
-  def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): (Seq[AddNodeResult], This)
+  def tryAddMany(nodes: ArraySeq[ENode[NodeT]], parallelize: ParallelMap): (ArraySeq[AddNodeResult], This)
 
   /**
    * Unions (merges) pairs of e-classes.
@@ -116,7 +118,7 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] ext
    * @return (E-class of `node`, new e-graph).
    */
   final def add(node: ENode[NodeT]): (EClassCall, This) = {
-    tryAddMany(Seq(node), ParallelMap.sequential) match {
+    tryAddMany(ArraySeq(node), ParallelMap.sequential) match {
       case (Seq(AddNodeResult.Added(call)), egraph) => (call, egraph)
       case (Seq(AddNodeResult.AlreadyThere(call)), egraph) => (call, egraph)
       case _ => throw new IllegalStateException("Unexpected result from tryAddMany")

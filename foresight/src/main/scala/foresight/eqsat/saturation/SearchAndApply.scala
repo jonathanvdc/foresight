@@ -1,16 +1,13 @@
 package foresight.eqsat.saturation
 
-import foresight.eqsat.commands.{Command, CommandQueue}
+import foresight.eqsat.commands.{CommandSchedule, CommandScheduleBuilder}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.rewriting.{EClassSearcher, EClassesToSearch, PortableMatch, Rewrite, Rule}
+import foresight.eqsat.rewriting.{EClassSearcher, PortableMatch, Rewrite}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithRecordedApplications}
 import foresight.eqsat.mutable.{FreezableEGraph, EGraph => MutableEGraph}
 import foresight.eqsat.readonly
-import foresight.eqsat.rewriting.SearcherContinuation.Continuation
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 import foresight.util.collections.UnsafeSeqFromArray
-
-import scala.collection.mutable.HashMap
 
 /**
  * A strategy that searches for matches of a set of rules in an e-graph and applies them.
@@ -34,18 +31,20 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
                        parallelize: ParallelMap): Seq[MatchT]
 
   /**
-   * Produces a command that applies the given matches of the rule to the e-graph.
+   * Converts the matches found for the given rule into commands that can be applied to the e-graph.
    *
    * @param rule        The rule whose matches are to be applied.
    * @param matches     The matches to be applied.
    * @param egraph      The e-graph to which the matches are applied.
    * @param parallelize A parallelization strategy for applying the matches.
-   * @return A command that applies the matches to the e-graph.
+   * @param collector   A command schedule builder to collect the generated commands.
+   *
    */
   protected def delayed(rule: RuleT,
                         matches: Seq[MatchT],
                         egraph: EGraphT,
-                        parallelize: ParallelMap): Command[NodeT]
+                        parallelize: ParallelMap,
+                        collector: CommandScheduleBuilder[NodeT]): Unit
 
   /**
    * Applies the given command to the e-graph.
@@ -58,7 +57,7 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
    * @param parallelize A parallelization strategy for applying the command.
    * @return An updated e-graph with the command applied, or None if the command made no changes.
    */
-  protected def update(command: Command[NodeT],
+  protected def update(command: CommandSchedule[NodeT],
                        matches: Map[String, Seq[MatchT]],
                        egraph: EGraphT,
                        parallelize: ParallelMap): Option[EGraphT]
@@ -83,42 +82,42 @@ trait SearchAndApply[NodeT, -RuleT <: Rewrite[NodeT, MatchT, _], EGraphT <: read
   }
 
   /**
-   * Produces a sequence of commands that apply the given matches of the rules to the e-graph.
+   * Converts the matches found for the given rules into commands that can be applied to the e-graph.
    * @param rules The rules whose matches are to be applied.
    * @param matches A map from rule names to sequences of matches found for each rule.
    * @param egraph The e-graph to which the matches are applied.
    * @param parallelize A parallelization strategy for applying the matches.
-   * @return A sequence of commands that apply the matches to the e-graph.
+   * @param builder A command schedule builder to collect the generated commands.
    */
   final def delayed(rules: Seq[RuleT],
                     matches: Map[String, Seq[MatchT]],
                     egraph: EGraphT,
-                    parallelize: ParallelMap): Seq[Command[NodeT]] = {
+                    parallelize: ParallelMap,
+                    builder: CommandScheduleBuilder[NodeT]): Unit = {
+
     val ruleApplicationParallelize = parallelize.child("rule application")
-    ruleApplicationParallelize[RuleT, Command[NodeT]](rules, (rule: RuleT) => {
+    ruleApplicationParallelize[RuleT, Unit](rules, (rule: RuleT) => {
       val newMatches = matches(rule.name)
-      delayed(rule, newMatches, egraph, ruleApplicationParallelize)
-    }).toSeq
+      delayed(rule, newMatches, egraph, ruleApplicationParallelize, builder)
+    })
   }
 
   /**
-   * Applies the given sequence of commands to the e-graph. This method first optimizes the sequence of commands
-   * and then applies the optimized command to the e-graph.
-   * @param commands The sequence of commands to apply.
-   * @param matches A map from rule names to sequences of matches found for each rule. This is provided for
-   *                commands that may need to know which matches were found for which rules (e.g., for caching).
-   * @param egraph The e-graph to which the commands are applied. Depending on the implementation, this may be a mutable
-   *               or immutable e-graph. If it is mutable, the commands may modify it in place. If it is immutable,
-   *               the commands will return a new e-graph if they make any changes.
-   * @param parallelize A parallelization strategy for applying the commands.
-   * @return An updated e-graph with the commands applied, or None if no commands made any changes.
+   * Converts the matches found for the given rules into commands that can be applied to the e-graph.
+   * @param rules The rules whose matches are to be applied.
+   * @param matches A map from rule names to sequences of matches found for each rule.
+   * @param egraph The e-graph to which the matches are applied.
+   * @param parallelize A parallelization strategy for applying the matches.
+   * @return A command schedule that applies the matches to the e-graph.
    */
-  final def update(commands: Seq[Command[NodeT]],
-                   matches: Map[String, Seq[MatchT]],
-                   egraph: EGraphT,
-                   parallelize: ParallelMap): Option[EGraphT] = {
-    val command = CommandQueue(commands).optimized
-    update(command, matches, egraph, parallelize)
+  final def delayed(rules: Seq[RuleT],
+                    matches: Map[String, Seq[MatchT]],
+                    egraph: EGraphT,
+                    parallelize: ParallelMap): CommandSchedule[NodeT] = {
+    // FIXME: build sequential variant that avoids concurrency overheads when parallelism is disabled
+    val collector = CommandScheduleBuilder.newConcurrentBuilder[NodeT]
+    delayed(rules, matches, egraph, parallelize, collector)
+    collector.result()
   }
 
   /**
@@ -173,11 +172,11 @@ object SearchAndApply {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
       override def searchLoopInterchange: Boolean = false
 
-      override def update(command: Command[NodeT],
+      override def update(command: CommandSchedule[NodeT],
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphT,
                           parallelize: ParallelMap): Option[EGraphT] = {
-        val anyChanges = command(egraph, HashMap.empty, parallelize)
+        val anyChanges = command(egraph, parallelize)
         if (anyChanges) Some(egraph) else None
       }
     }
@@ -198,12 +197,11 @@ object SearchAndApply {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
       override def searchLoopInterchange: Boolean = false
 
-      override def update(command: Command[NodeT],
+      override def update(command: CommandSchedule[NodeT],
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphT,
                           parallelize: ParallelMap): Option[EGraphT] = {
-        val (newEGraph, _) = command.applyImmutable(egraph, Map.empty, parallelize)
-        newEGraph
+        command.applyImmutable(egraph, parallelize)
       }
     }
   }
@@ -232,17 +230,18 @@ object SearchAndApply {
       override def delayed(rule: Rewrite[NodeT, MatchT, EGraphT],
                            matches: Seq[MatchT],
                            egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
-                           parallelize: ParallelMap): Command[NodeT] = {
-        rule.delayed(matches, egraph.egraph, parallelize)
+                           parallelize: ParallelMap,
+                           builder: CommandScheduleBuilder[NodeT]): Unit = {
+        rule.delayed(matches, egraph.egraph, parallelize, builder)
       }
 
-      override def update(command: Command[NodeT],
+      override def update(command: CommandSchedule[NodeT],
                           matches: Map[String, Seq[MatchT]],
                           egraph: EGraphWithRecordedApplications[NodeT, EGraphT, MatchT],
                           parallelize: ParallelMap): Option[EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]] = {
         val recorded = matches.mapValuesStrict(_.toSet)
         val mutEGraph = FreezableEGraph[NodeT, EGraphWithRecordedApplications[NodeT, EGraphT, MatchT]](egraph.record(recorded))
-        val anyChanges = command(mutEGraph, HashMap.empty, parallelize)
+        val anyChanges = command(mutEGraph, parallelize)
         if (anyChanges) Some(mutEGraph.freeze()) else None
       }
     }
@@ -269,8 +268,9 @@ object SearchAndApply {
     final override def delayed(rule: Rewrite[NodeT, MatchT, EGraphT],
                                matches: Seq[MatchT],
                                egraph: EGraphT,
-                               parallelize: ParallelMap): Command[NodeT] = {
-      rule.delayed(matches, egraph, parallelize)
+                               parallelize: ParallelMap,
+                               builder: CommandScheduleBuilder[NodeT]): Unit = {
+      rule.delayed(matches, egraph, parallelize, builder)
     }
 
     final override def apply(rules: Seq[Rewrite[NodeT, MatchT, EGraphT]],
@@ -278,19 +278,19 @@ object SearchAndApply {
                              parallelize: ParallelMap): Option[EGraphT] = {
       val ruleMatchingAndApplicationParallelize = parallelize.child("rule matching+application")
 
+      // FIXME: build sequential variant that avoids concurrency overheads when parallelism is disabled
+      val collector = CommandScheduleBuilder.newConcurrentBuilder[NodeT]
+
       if (!searchLoopInterchange || egraph.classCount <= EClassSearcher.smallEGraphThreshold) {
         // Small e-graph optimization: for small e-graphs, the overhead of partitioning and
         // fusing rule applications outweighs the benefits. Just process each rule normally.
-        val updates = ruleMatchingAndApplicationParallelize(
+        ruleMatchingAndApplicationParallelize(
           rules,
           (rule: Rewrite[NodeT, MatchT, EGraphT]) => {
-            rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+            rule.delayed(egraph, ruleMatchingAndApplicationParallelize, collector)
           }
-        ).toSeq
-        update(updates, Map.empty[String, Seq[MatchT]], egraph, parallelize)
+        )
       } else {
-        val updates = Seq.newBuilder[Command[NodeT]]
-
         // Idea: EClassSearcher rules are the common case, and they apply in parallel over a subset of
         // e-classes in the e-graph. If multiple rules share the same subset of e-classes to search,
         // we can group them together to fuse iterations over those e-classes. Fusion both reduces
@@ -300,24 +300,22 @@ object SearchAndApply {
 
         // Process regular rules normally.
         for (rule <- partitioned.regularRules) {
-          updates += rule.delayed(egraph, ruleMatchingAndApplicationParallelize)
+          rule.delayed(egraph, ruleMatchingAndApplicationParallelize, collector)
         }
 
         // Process shared EClassesToSearch rules together.
         for (eclassesToSearch <- partitioned.rulesPerSharedEClassToSearch.keys) {
-          updates ++= ruleMatchingAndApplicationParallelize.collectFrom[Command[NodeT]] { (add: Command[NodeT] => Unit) =>
-            val commandSearchers = partitioned.commandSearchers(eclassesToSearch, add)
-            EClassSearcher.searchMultiple(
-              UnsafeSeqFromArray(commandSearchers.toArray),
-              eclassesToSearch(egraph),
-              egraph,
-              ruleMatchingAndApplicationParallelize
-            )
-          }
+          val commandSearchers = partitioned.commandSearchers(eclassesToSearch, collector)
+          EClassSearcher.searchMultiple(
+            UnsafeSeqFromArray(commandSearchers.toArray),
+            eclassesToSearch(egraph),
+            egraph,
+            ruleMatchingAndApplicationParallelize
+          )
         }
-
-        update(updates.result(), Map.empty[String, Seq[MatchT]], egraph, parallelize)
       }
+
+      update(collector.result(), Map.empty[String, Seq[MatchT]], egraph, parallelize)
     }
   }
 }

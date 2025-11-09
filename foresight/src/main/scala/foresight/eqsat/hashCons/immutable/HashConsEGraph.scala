@@ -4,6 +4,9 @@ import foresight.eqsat.hashCons.{EClassData, ReadOnlyHashConsEGraph}
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode}
 import foresight.eqsat.parallel.ParallelMap
+import foresight.util.collections.UnsafeSeqFromArray
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * An e-graph that uses hash-consing to map e-nodes to e-classes.
@@ -51,8 +54,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](protecte
     classData(ref)
   }
 
-  override def tryAddMany(nodes: Seq[ENode[NodeT]],
-                          parallelize: ParallelMap): (Seq[AddNodeResult], HashConsEGraph[NodeT]) = {
+  override def tryAddMany(nodes: ArraySeq[ENode[NodeT]],
+                          parallelize: ParallelMap): (ArraySeq[AddNodeResult], HashConsEGraph[NodeT]) = {
     // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
     // is canonicalizing them and looking them up in the e-graph. Canonicalization can be parallelized since adding a
     // node will never change the canonical form of other nodes - only union operations can do that.
@@ -64,13 +67,15 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](protecte
     val p = parallelize.child("add nodes")
 
     val mutable = toBuilder
+
+    // FIXME: produce an array from the parallel map directly to avoid an extra copy.
     val canonicalized = p(nodes, canonicalize)
     val results = p.run {
       canonicalized.map { node =>
         mutable.tryAddUnsafe(node)
       }
     }
-    (results.toSeq, mutable.result())
+    (UnsafeSeqFromArray(results.toArray), mutable.result())
   }
 
   override def unionMany(pairs: Seq[(EClassCall, EClassCall)],

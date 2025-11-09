@@ -1,10 +1,9 @@
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.commands.Command
-import foresight.eqsat.parallel.ParallelMap
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.rewriting.SearcherContinuation.Continuation
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
-import foresight.eqsat.rewriting.{Applier, ReversibleApplier, ReversibleSearcher, Searcher, SearcherContinuation}
+import foresight.eqsat.rewriting.{Applier, ReversibleApplier, Searcher, SearcherContinuation}
 import foresight.eqsat.MixedTree
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
@@ -54,7 +53,7 @@ object TypeRequirements {
   }
 
   final case class ApplierWithRequirements[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]],
-                                                                                                          types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
+                                                                                                         types: Map[Pattern.Var, MixedTree[ArrayIR, Pattern.Var]])
     extends ReversibleApplier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
 
     // Precompile the patterns.
@@ -62,8 +61,8 @@ object TypeRequirements {
       case (v, t) => v -> t.compiled[EGraph[ArrayIR]]
     }
 
-    override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
-      applier.flatMap((m2: PatternMatch[ArrayIR], egraph2: EGraphWithMetadata[ArrayIR, EGraphT]) => checkMatch(m2, compiledPatterns, egraph2)).apply(m, egraph)
+    override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT], builder: CommandScheduleBuilder[ArrayIR]): Unit = {
+      applier.flatMap((m2: PatternMatch[ArrayIR], egraph2: EGraphWithMetadata[ArrayIR, EGraphT]) => checkMatch(m2, compiledPatterns, egraph2)).apply(m, egraph, builder)
     }
 
     override def tryReverse: Option[Searcher[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]] = {

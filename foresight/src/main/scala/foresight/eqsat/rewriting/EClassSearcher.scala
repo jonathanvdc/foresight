@@ -3,7 +3,7 @@ package foresight.eqsat.rewriting
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.EClassCall
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.commands.{Command, CommandQueue}
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
 import java.util.concurrent.atomic.AtomicIntegerArray
@@ -167,31 +167,15 @@ private[eqsat] object EClassSearcher {
      * are passed to the provided continuation.
      *
      * @param eclassesToSearch The EClassesToSearch instance to get rules for.
-     * @param continuation     Continuation to handle commands produced by rule applications.
+     * @param builder          Command queue builder to collect produced commands.
      * @return A sequence of EClassSearcher instances that produce commands.
      */
     def commandSearchers(eclassesToSearch: EClassesToSearch[EGraphT],
-                         continuation: Command[NodeT] => Unit): Seq[EClassSearcher[NodeT, MatchT, EGraphT]] = {
+                         builder: CommandScheduleBuilder[NodeT]): Seq[EClassSearcher[NodeT, MatchT, EGraphT]] = {
       rulesPerSharedEClassToSearch(eclassesToSearch).map {
         case Rule(_, searcher: EClassSearcher[NodeT, MatchT, _], applier) =>
           val castSearcher = searcher.asInstanceOf[EClassSearcher[NodeT, MatchT, EGraphT]]
-
-          castSearcher
-            .andThen(new castSearcher.ContinuationBuilder {
-              def apply(downstream: castSearcher.Continuation): castSearcher.Continuation = (m: MatchT, egraph: EGraphT) => {
-                if (downstream(m, egraph)) {
-                  applier(m, egraph) match {
-                    case CommandQueue(Seq()) => // Ignore no-op commands.
-                    case cmd =>
-                      // Collect nontrivial commands.
-                      continuation(cmd)
-                  }
-                  true
-                } else {
-                  false
-                }
-              }
-            })
+          castSearcher.andApplyAndCollect(applier, builder)
 
         case _ => throw new IllegalStateException("Expected EClassSearcher rule.")
       }

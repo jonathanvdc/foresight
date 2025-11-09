@@ -340,7 +340,7 @@ final class ENode[+NodeT] private (
     result
   }
 
-  override def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = this
+  override def reify(reification: EClassSymbol.Virtual => EClassCall): ENode[NodeT] = this
 }
 
 /**
@@ -504,7 +504,7 @@ sealed trait ENodeSymbol[+NodeT] {
    * @param reification Mapping from virtual e-class symbols to concrete [[EClassCall]]s.
    * @return An [[ENode]] with all arguments fully resolved.
    */
-  def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT]
+  def reify(reification: EClassSymbol.Virtual => EClassCall): ENode[NodeT]
 
   /**
    * Creates a copy of this symbol with the given arguments.
@@ -583,7 +583,7 @@ object ENodeSymbol {
      * val node: ENode[MyOp] = symbol.reify(Map(v1 -> call1))
      * }}}
      */
-    override def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): ENode[NodeT] = {
+    override def reify(reification: EClassSymbol.Virtual => EClassCall): ENode[NodeT] = {
       val reifiedArgs = args.map(_.reify(reification))
       ENode(nodeType, definitions, uses, reifiedArgs)
     }
