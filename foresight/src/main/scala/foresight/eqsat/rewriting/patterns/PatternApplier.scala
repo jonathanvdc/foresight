@@ -68,7 +68,8 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
   private final class SimplifiedAddCommandInstantiator(m: PatternMatch[NodeT],
                                                        egraph: EGraphT,
                                                        builder: CommandScheduleBuilder[NodeT],
-                                                       pool: ENode.Pool) {
+                                                       nodePool: ENode.Pool,
+                                                       refPool: IntRef.Pool) {
     def instantiate(pattern: MixedTree[NodeT, Pattern.Var], maxBatch: IntRef): EClassSymbol = {
       pattern match {
         case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
@@ -84,7 +85,8 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
             }
           }
           val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder, pool).addSimplifiedNode(t, defSlots, uses, args, maxBatch)
+          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder, nodePool, refPool)
+            .addSimplifiedNode(t, defSlots, uses, args, maxBatch)
       }
     }
 
@@ -93,13 +95,14 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                                   uses: SlotSeq,
                                   args: ArraySeq[MixedTree[NodeT, Pattern.Var]],
                                   maxBatch: IntRef): EClassSymbol = {
-      val argMaxBatch = new IntRef(0)
-      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, pool, instantiate)
+      val argMaxBatch = refPool.acquire(0)
+      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, nodePool, instantiate)
       val useSymbols = uses.map(m.apply: Slot => Slot)
-      val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph, pool)
+      val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph, nodePool)
       if (argMaxBatch.elem > maxBatch.elem) {
         maxBatch.elem = argMaxBatch.elem
       }
+      refPool.release(argMaxBatch)
       result
     }
   }
@@ -109,6 +112,10 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                                                 egraph: EGraphT,
                                                 builder: CommandScheduleBuilder[NodeT]): EClassSymbol = {
 
-    new SimplifiedAddCommandInstantiator(m, egraph, builder, ENode.defaultPool).instantiate(pattern, new IntRef(0))
+    val refPool = IntRef.defaultPool
+    val ref = refPool.acquire(0)
+    val result = new SimplifiedAddCommandInstantiator(m, egraph, builder, ENode.defaultPool, refPool).instantiate(pattern, ref)
+    refPool.release(ref)
+    result
   }
 }

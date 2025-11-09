@@ -83,27 +83,32 @@ trait CommandScheduleBuilder[NodeT] {
 
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
-    val maxBatch = new IntRef(0)
-    addSimplifiedReal(tree, egraph, maxBatch, ENode.defaultPool)
+    val refPool = IntRef.defaultPool
+    val maxBatch = refPool.acquire(0)
+    val result = addSimplifiedReal(tree, egraph, maxBatch, ENode.defaultPool, refPool)
+    refPool.release(maxBatch)
+    result
   }
 
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
                                        egraph: EGraph[NodeT],
                                        maxBatch: IntRef,
-                                       pool: ENode.Pool): EClassSymbol = {
+                                       nodePool: ENode.Pool,
+                                       refPool: IntRef.Pool): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         // Local accumulator for children of this node.
-        val childMax = new IntRef(0)
+        val childMax = refPool.acquire(0)
         val argSymbols = CommandScheduleBuilder.symbolArrayFrom(
           args,
           childMax,
-          pool,
-          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb, pool)
+          nodePool,
+          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb, nodePool, refPool)
         )
-        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph, pool)
+        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph, nodePool)
         // Propagate maximum required batch up to the caller's accumulator.
         if (childMax.elem > maxBatch.elem) maxBatch.elem = childMax.elem
+        refPool.release(childMax)
         sym
 
       case MixedTree.Atom(call) =>
