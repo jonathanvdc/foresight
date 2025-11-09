@@ -8,7 +8,6 @@ import foresight.eqsat.{EClassSymbol, ENode, MixedTree, Slot}
 
 import scala.collection.compat.immutable.ArraySeq
 import java.util.ArrayDeque
-import scala.compiletime.uninitialized
 
 /**
  * An applier that applies a pattern match to an e-graph.
