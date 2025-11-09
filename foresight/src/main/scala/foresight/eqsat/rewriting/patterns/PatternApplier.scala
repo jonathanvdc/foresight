@@ -7,6 +7,8 @@ import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
 import foresight.eqsat.{EClassSymbol, ENode, MixedTree, Slot}
 
 import scala.collection.compat.immutable.ArraySeq
+import java.util.ArrayDeque
+import scala.compiletime.uninitialized
 
 /**
  * An applier that applies a pattern match to an e-graph.
@@ -65,11 +67,35 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
     }
   }
 
-  private final class SimplifiedAddCommandInstantiator(m: PatternMatch[NodeT],
-                                                       egraph: EGraphT,
-                                                       builder: CommandScheduleBuilder[NodeT],
-                                                       nodePool: ENode.Pool,
-                                                       refPool: IntRef.Pool) {
+  private final class SimplifiedAddCommandInstantiator {
+    // Mutable state to allow pooling; initialized via init() before use.
+    private var m: PatternMatch[NodeT] = _
+    private var egraph: EGraphT = _
+    private var builder: CommandScheduleBuilder[NodeT] = _
+    private var nodePool: ENode.Pool = _
+    private var refPool: IntRef.Pool = _
+
+    def init(m0: PatternMatch[NodeT],
+             egraph0: EGraphT,
+             builder0: CommandScheduleBuilder[NodeT],
+             nodePool0: ENode.Pool,
+             refPool0: IntRef.Pool): Unit = {
+      this.m = m0
+      this.egraph = egraph0
+      this.builder = builder0
+      this.nodePool = nodePool0
+      this.refPool = refPool0
+    }
+
+    def clear(): Unit = {
+      // release references to help GC when pooled instances sit around
+      this.m = null
+      this.egraph = null.asInstanceOf[EGraphT]
+      this.builder = null
+      this.nodePool = null
+      this.refPool = null
+    }
+
     def instantiate(pattern: MixedTree[NodeT, Pattern.Var], maxBatch: IntRef): EClassSymbol = {
       pattern match {
         case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
@@ -85,8 +111,16 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
             }
           }
           val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder, nodePool, refPool)
-            .addSimplifiedNode(t, defSlots, uses, args, maxBatch)
+
+          // Acquire a nested instantiator.
+          val nested = SimplifiedAddCommandInstantiator.acquire()
+          nested.init(newMatch, egraph, builder, nodePool, refPool)
+          try {
+            nested.addSimplifiedNode(t, defSlots, uses, args, maxBatch)
+          } finally {
+            nested.clear()
+            SimplifiedAddCommandInstantiator.release(nested)
+          }
       }
     }
 
@@ -107,6 +141,25 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
     }
   }
 
+  private object SimplifiedAddCommandInstantiator {
+    // Per-thread pool to avoid contention; LIFO to improve cache locality.
+    private val local: ThreadLocal[ArrayDeque[SimplifiedAddCommandInstantiator]] =
+      new ThreadLocal[ArrayDeque[SimplifiedAddCommandInstantiator]]() {
+        override def initialValue(): ArrayDeque[SimplifiedAddCommandInstantiator] =
+          new ArrayDeque[SimplifiedAddCommandInstantiator]()
+      }
+
+    def acquire(): SimplifiedAddCommandInstantiator = {
+      val dq = local.get()
+      val inst = dq.pollFirst()
+      if (inst != null) inst else new SimplifiedAddCommandInstantiator
+    }
+
+    def release(inst: SimplifiedAddCommandInstantiator): Unit = {
+      local.get().offerFirst(inst)
+    }
+  }
+
   private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
                                                 m: PatternMatch[NodeT],
                                                 egraph: EGraphT,
@@ -114,7 +167,15 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
 
     val refPool = IntRef.defaultPool
     val ref = refPool.acquire(0)
-    val result = new SimplifiedAddCommandInstantiator(m, egraph, builder, ENode.defaultPool, refPool).instantiate(pattern, ref)
+    val inst = SimplifiedAddCommandInstantiator.acquire()
+    inst.init(m, egraph, builder, ENode.defaultPool, refPool)
+    val result =
+      try {
+        inst.instantiate(pattern, ref)
+      } finally {
+        inst.clear()
+        SimplifiedAddCommandInstantiator.release(inst)
+      }
     refPool.release(ref)
     result
   }
