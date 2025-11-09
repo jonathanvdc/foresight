@@ -99,7 +99,7 @@ private[eqsat] abstract class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT
   /**
    * Processes the readiness-driven worklist. Nodes are enqueued exactly when their last dependency becomes available.
    */
-  final def processPending(initialized: Boolean = true): Unit = {
+  final def processPending(): Unit = {
     // Process nodes whose arguments are already available; new class improvements will enqueue more.
     while (nodeQueue.nonEmpty) {
       val node = nodeQueue.dequeue()
