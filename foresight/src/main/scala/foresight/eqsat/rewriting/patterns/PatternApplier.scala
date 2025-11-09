@@ -3,10 +3,11 @@ package foresight.eqsat.rewriting.patterns
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.commands.{CommandScheduleBuilder, IntRef}
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
-import foresight.eqsat.{EClassSymbol, MixedTree, Slot}
+import foresight.eqsat.rewriting.{Applier, ReversibleApplier, Searcher}
+import foresight.eqsat.{CallTree, EClassCall, EClassSymbol, ENode, MixedTree, Slot}
 
 import scala.collection.compat.immutable.ArraySeq
+import java.util.ArrayDeque
 
 /**
  * An applier that applies a pattern match to an e-graph.
@@ -16,9 +17,9 @@ import scala.collection.compat.immutable.ArraySeq
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
 final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
-  extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
+  extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] with Applier[NodeT, AbstractPatternMatch[NodeT], EGraphT] {
 
-  override def apply(m: PatternMatch[NodeT], egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
+  override def apply(m: AbstractPatternMatch[NodeT], egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
     val symbol = instantiateAsSimplifiedAddCommand(pattern, m, egraph, builder)
     builder.unionSimplified(EClassSymbol.real(m.root), symbol, egraph)
   }
@@ -46,7 +47,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                           m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
       case MixedTree.Atom(p) => p match {
-        case v: Pattern.Var => m(v).mapAtoms(EClassSymbol.real)
+        case v: Pattern.Var => m(v).toMixedTree.mapAtoms(EClassSymbol.real)
       }
 
       case MixedTree.Node(t, Seq(), uses, args) =>
@@ -65,9 +66,35 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
     }
   }
 
-  private final class SimplifiedAddCommandInstantiator(m: PatternMatch[NodeT],
-                                                       egraph: EGraphT,
-                                                       builder: CommandScheduleBuilder[NodeT]) {
+  private final class SimplifiedAddCommandInstantiator {
+    // Mutable state to allow pooling; initialized via init() before use.
+    private var m: AbstractPatternMatch[NodeT] = _
+    private var egraph: EGraphT = _
+    private var builder: CommandScheduleBuilder[NodeT] = _
+    private var nodePool: ENode.Pool = _
+    private var refPool: IntRef.Pool = _
+
+    def init(m0: AbstractPatternMatch[NodeT],
+             egraph0: EGraphT,
+             builder0: CommandScheduleBuilder[NodeT],
+             nodePool0: ENode.Pool,
+             refPool0: IntRef.Pool): Unit = {
+      this.m = m0
+      this.egraph = egraph0
+      this.builder = builder0
+      this.nodePool = nodePool0
+      this.refPool = refPool0
+    }
+
+    def clear(): Unit = {
+      // release references to help GC when pooled instances sit around
+      this.m = null
+      this.egraph = null.asInstanceOf[EGraphT]
+      this.builder = null
+      this.nodePool = null
+      this.refPool = null
+    }
+
     def instantiate(pattern: MixedTree[NodeT, Pattern.Var], maxBatch: IntRef): EClassSymbol = {
       pattern match {
         case MixedTree.Atom(p) => builder.addSimplifiedReal(m(p), egraph)
@@ -77,13 +104,42 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
 
         case MixedTree.Node(t, defs, uses, args) =>
           val defSlots = defs.map { (s: Slot) =>
-            m.slotMapping.get(s) match {
+            m.get(s) match {
               case Some(v) => v
               case None => Slot.fresh()
             }
           }
-          val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
-          new SimplifiedAddCommandInstantiator(newMatch, egraph, builder).addSimplifiedNode(t, defSlots, uses, args, maxBatch)
+          
+          val newMatch = new AbstractPatternMatch[NodeT] {
+            override def root: EClassCall = m.root
+            override def apply(variable: Pattern.Var): CallTree[NodeT] = m.apply(variable)
+            override def apply(slot: Slot): Slot = {
+              if (defs.contains(slot)) {
+                val index = defs.indexOf(slot)
+                defSlots(index)
+              } else {
+                m.apply(slot)
+              }
+            }
+            override def get(slot: Slot): Option[Slot] = {
+              if (defs.contains(slot)) {
+                val index = defs.indexOf(slot)
+                Some(defSlots(index))
+              } else {
+                m.get(slot)
+              }
+            }
+          }
+
+          // Acquire a nested instantiator.
+          val nested = SimplifiedAddCommandInstantiator.acquire()
+          nested.init(newMatch, egraph, builder, nodePool, refPool)
+          try {
+            nested.addSimplifiedNode(t, defSlots, uses, args, maxBatch)
+          } finally {
+            nested.clear()
+            SimplifiedAddCommandInstantiator.release(nested)
+          }
       }
     }
 
@@ -92,22 +148,54 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                                   uses: SlotSeq,
                                   args: ArraySeq[MixedTree[NodeT, Pattern.Var]],
                                   maxBatch: IntRef): EClassSymbol = {
-      val argMaxBatch = new IntRef(0)
-      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, instantiate)
+      val argMaxBatch = refPool.acquire(0)
+      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, nodePool, instantiate)
       val useSymbols = uses.map(m.apply: Slot => Slot)
-      val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph)
+      val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph, nodePool)
       if (argMaxBatch.elem > maxBatch.elem) {
         maxBatch.elem = argMaxBatch.elem
       }
+      refPool.release(argMaxBatch)
       result
     }
   }
 
+  private object SimplifiedAddCommandInstantiator {
+    // Per-thread pool to avoid contention; LIFO to improve cache locality.
+    private val local: ThreadLocal[ArrayDeque[SimplifiedAddCommandInstantiator]] =
+      new ThreadLocal[ArrayDeque[SimplifiedAddCommandInstantiator]]() {
+        override def initialValue(): ArrayDeque[SimplifiedAddCommandInstantiator] =
+          new ArrayDeque[SimplifiedAddCommandInstantiator]()
+      }
+
+    def acquire(): SimplifiedAddCommandInstantiator = {
+      val dq = local.get()
+      val inst = dq.pollFirst()
+      if (inst != null) inst else new SimplifiedAddCommandInstantiator
+    }
+
+    def release(inst: SimplifiedAddCommandInstantiator): Unit = {
+      local.get().offerFirst(inst)
+    }
+  }
+
   private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
-                                                m: PatternMatch[NodeT],
+                                                m: AbstractPatternMatch[NodeT],
                                                 egraph: EGraphT,
                                                 builder: CommandScheduleBuilder[NodeT]): EClassSymbol = {
 
-    new SimplifiedAddCommandInstantiator(m, egraph, builder).instantiate(pattern, new IntRef(0))
+    val refPool = IntRef.defaultPool
+    val ref = refPool.acquire(0)
+    val inst = SimplifiedAddCommandInstantiator.acquire()
+    inst.init(m, egraph, builder, ENode.defaultPool, refPool)
+    val result =
+      try {
+        inst.instantiate(pattern, ref)
+      } finally {
+        inst.clear()
+        SimplifiedAddCommandInstantiator.release(inst)
+      }
+    refPool.release(ref)
+    result
   }
 }

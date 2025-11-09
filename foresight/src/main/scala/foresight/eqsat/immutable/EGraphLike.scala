@@ -1,8 +1,7 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
+import foresight.eqsat.{AddNodeResult, CallTree, EClassCall, ENode, MixedTree, Tree, readonly}
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.readonly
 
 import scala.collection.compat.immutable.ArraySeq
 
@@ -145,6 +144,27 @@ trait EGraphLike[NodeT, +This <: EGraphLike[NodeT, This] with EGraph[NodeT]] ext
 
       case MixedTree.Atom(call) =>
         (call, this.asInstanceOf[This])
+    }
+  }
+
+  /**
+   * Adds a call tree to the e-graph.
+   *
+   * Child subtrees are added/resolved first; then the root e-node is added or found.
+   * Returns a new e-graph containing the result.
+   *
+   * @param tree The call tree to add.
+   * @return (E-class of the root, new e-graph).
+   */
+  final def add(tree: CallTree[NodeT]): (EClassCall, This) = {
+    tree match {
+      case call: EClassCall => (call, this.asInstanceOf[This])
+      case CallTree.Node(t, defs, uses, args) =>
+        val (newArgs, graphWithArgs) = args.foldLeft((Seq.empty[EClassCall], this.asInstanceOf[This]))((acc, arg) => {
+          val (node, egraph) = acc._2.add(arg)
+          (acc._1 :+ node, egraph)
+        })
+        graphWithArgs.add(ENode(t, defs, uses, newArgs))
     }
   }
 

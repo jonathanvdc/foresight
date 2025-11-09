@@ -32,7 +32,7 @@ object ApplierOps {
 
           def subst(tree: ArithExpr): ArithExpr = {
             tree match {
-              case Var(slot) if slot == m(from) => L.fromTree[EClassCall](m(to.variable))
+              case Var(slot) if slot == m(from) => L.fromTree(m(to.variable))
               case Var(slot) => Var(slot)
               case Lam(param, body) => Lam(param, subst(body))
               case App(fun, arg) => App(subst(fun), subst(arg))
@@ -46,7 +46,7 @@ object ApplierOps {
           }
 
           val substituted = subst(extractedExpr)
-          val newMatch = m.copy(varMapping = m.varMapping + (destination.variable -> L.toTree[EClassCall](substituted)))
+          val newMatch = m.bind(destination.variable, L.toCallTree(substituted))
           applier.apply(newMatch, egraph, builder)
         }
       }
