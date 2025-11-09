@@ -1,8 +1,8 @@
 package foresight.eqsat.lang
 
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
-import foresight.eqsat.rewriting.{ReversibleSearcher, Rule}
+import foresight.eqsat.rewriting.patterns.{AbstractPatternMatch, Pattern, PatternApplier, PatternMatch, StateBorrowingMachineEClassSearcher}
+import foresight.eqsat.rewriting.{ReversibleSearcher, Rule, Searcher}
 import foresight.eqsat.*
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
@@ -377,6 +377,19 @@ trait Language[E]:
     toTree(e).toSearcher
 
   /**
+   * Build a borrowing searcher from a surface expression, by first encoding to a pattern tree.
+   *
+   * Requires an encoder for [[foresight.eqsat.rewriting.patterns.Pattern.Var]] leaves, i.e., a way to turn surface
+   * leaves into pattern variables.
+   *
+   * @param e        Surface-side pattern.
+   * @tparam EGraphT An e-graph type that supports this language.
+   */
+  def toBorrowingSearcher[EGraphT <: EGraph[Op]](e: E)
+                                                (using enc: AtomEncoder[E, Pattern.Var]): Searcher[Op, AbstractPatternMatch[Op], EGraphT] =
+    StateBorrowingMachineEClassSearcher(toTree(e).compiled)
+
+  /**
    * Build a pattern applier from a surface expression, by first encoding to a pattern tree.
    *
    * This is commonly used for rule RHS construction.
@@ -409,9 +422,38 @@ trait Language[E]:
   : Rule[Op, PatternMatch[Op], EGraphT] =
     Rule(name, toSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
 
+  /**
+   * Construct a rewrite rule that uses a borrowing searcher under the hood.
+   *
+   * @param name    Human-readable rule name (used in logs/diagnostics).
+   * @param lhs     Surface pattern to match.
+   * @param rhs     Surface template to build.
+   * @param enc     Encoder for [[foresight.eqsat.rewriting.patterns.Pattern.Var]] leaves.
+   * @tparam EGraphT An e-graph type that supports this language.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String, lhs: E, rhs: E)
+  (using enc: AtomEncoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    Rule(name, toBorrowingSearcher[EGraphT](lhs), toApplier[EGraphT](rhs))
+
   /** Generate a fresh [[foresight.eqsat.rewriting.patterns.Pattern.Var]] and decode it back to a surface `E` value. */
   private def freshPatternVar(using dec: AtomDecoder[E, Pattern.Var]): E =
     fromTree(MixedTree.Atom[Op, Pattern.Var](Pattern.Var.fresh()))
+
+  /**
+   * Create a borrowing rewrite rule by supplying a lambda that receives one fresh pattern variable.
+   *
+   * Works like [[rule(name)(f: E => (E,E))]] but compiles the LHS with a borrowing searcher.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: E => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar)
+    borrowingRule[EGraphT](name, lhs, rhs)
 
   /**
    * Create a rewrite rule by supplying a lambda that receives one fresh pattern variable.
@@ -482,6 +524,18 @@ trait Language[E]:
     rule[EGraphT](name, lhs, rhs)
 
   /**
+   * Create a borrowing rewrite rule with two fresh variables.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar)
+    borrowingRule[EGraphT](name, lhs, rhs)
+
+  /**
    * Create a rewrite rule by supplying a lambda that receives three fresh pattern variables.
    *
    * Choose this overload when your rule template references three variables.
@@ -508,6 +562,18 @@ trait Language[E]:
   : Rule[Op, PatternMatch[Op], EGraphT] =
     val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar)
     rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a borrowing rewrite rule with three fresh variables.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar)
+    borrowingRule[EGraphT](name, lhs, rhs)
 
   /**
    * Create a rewrite rule by supplying a lambda that receives four fresh pattern variables.
@@ -537,6 +603,18 @@ trait Language[E]:
   : Rule[Op, PatternMatch[Op], EGraphT] =
     val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar)
     rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a borrowing rewrite rule with four fresh variables.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar)
+    borrowingRule[EGraphT](name, lhs, rhs)
 
   /**
    * Create a rewrite rule by supplying a lambda that receives five fresh pattern variables.
@@ -570,6 +648,20 @@ trait Language[E]:
     rule[EGraphT](name, lhs, rhs)
 
   /**
+   * Create a borrowing rewrite rule with five fresh variables.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(
+      freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar
+    )
+    borrowingRule[EGraphT](name, lhs, rhs)
+
+  /**
    * Create a rewrite rule by supplying a lambda that receives six fresh pattern variables.
    *
    * This highest-arity overload avoids manual variable pluming in complex rules.
@@ -599,6 +691,20 @@ trait Language[E]:
       freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar
     )
     rule[EGraphT](name, lhs, rhs)
+
+  /**
+   * Create a borrowing rewrite rule with six fresh variables.
+   */
+  def borrowingRule[EGraphT <: EGraph[Op]]
+  (name: String)
+  (f: (E, E, E, E, E, E) => (E, E))
+  (using enc: AtomEncoder[E, Pattern.Var],
+   dec: AtomDecoder[E, Pattern.Var])
+  : Rule[Op, AbstractPatternMatch[Op], EGraphT] =
+    val (lhs, rhs) = f(
+      freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar, freshPatternVar
+    )
+    borrowingRule[EGraphT](name, lhs, rhs)
 
   /**
    * Reconstruct a surface expression `E` from an *analysis-view* of a single node.
