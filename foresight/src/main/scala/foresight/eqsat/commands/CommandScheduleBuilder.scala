@@ -128,7 +128,12 @@ trait CommandScheduleBuilder[NodeT] {
         assert(maxBatch.elem == 0)
       }
 
-      val candidateNode = pool.acquire(nodeType, definitions, uses, argCalls)
+      val candidateNode = pool.acquireUnsafe(
+        nodeType,
+        pool.acquireAndFillSlotArray(definitions),
+        pool.acquireAndFillSlotArray(uses),
+        argCalls)
+
       egraph.findOrNull(candidateNode) match {
         case null =>
           // Node does not exist in the graph but its children do exist in the graph.
