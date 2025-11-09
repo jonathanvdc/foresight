@@ -94,7 +94,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                                   args: ArraySeq[MixedTree[NodeT, Pattern.Var]],
                                   maxBatch: IntRef): EClassSymbol = {
       val argMaxBatch = new IntRef(0)
-      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, instantiate)
+      val argSymbols = CommandScheduleBuilder.symbolArrayFrom(args, argMaxBatch, pool, instantiate)
       val useSymbols = uses.map(m.apply: Slot => Slot)
       val result = builder.addSimplifiedNode(nodeType, definitions, useSymbols, argSymbols, argMaxBatch, egraph, pool)
       if (argMaxBatch.elem > maxBatch.elem) {
