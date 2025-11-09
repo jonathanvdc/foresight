@@ -278,7 +278,7 @@ class CommandScheduleBuilderTest {
    * Level 1 (children of real atoms) -> Level 2 (parents of level 1) -> Level 3 (root).
    */
   @Test
-  def addSimplifiedRealComplexTreeBatchesStable(): Unit = {
+  def addSimplifiedRealComplexTree(): Unit = {
     val g0 = EGraph.empty[Int]
     val builder = CommandScheduleBuilder.newConcurrentBuilder[Int]
 
