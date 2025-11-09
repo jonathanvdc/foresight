@@ -18,17 +18,23 @@ import scala.collection.compat.immutable.ArraySeq
  *
  * Node types (`NodeT`) supply the operator and any non-structural payload. Slots and arguments are provided here.
  *
- * @param nodeType     Operator or symbol for this node.
  * @tparam NodeT       The domain-specific node type. It defines operator identity and payload but not slots/children.
  */
 final class ENode[+NodeT] private (
-  val nodeType: NodeT,
-  private val _definitions: Array[Slot],
-  private val _uses: Array[Slot],
-  private val _args: Array[EClassCall]
+  private var _nodeType: Any,
+  private var _definitions: Array[Slot],
+  private var _uses: Array[Slot],
+  private var _args: Array[EClassCall]
 ) extends Node[NodeT, EClassCall] with ENodeSymbol[NodeT] {
   // Cached hash code to make hashing and equality fast (benign data race; like String.hash)
   private var _hash: Int = 0
+
+  /**
+   * The operator or symbol for this node.
+   *
+   * @return The node type.
+   */
+  def nodeType: NodeT = _nodeType.asInstanceOf[NodeT]
 
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
@@ -59,6 +65,16 @@ final class ENode[+NodeT] private (
    * @return Internal array of argument e-class calls.
    */
   private[eqsat] def unsafeArgsArray: Array[EClassCall] = _args
+
+  /**
+   * Unsafe access to the internal array of definition slots. Do not modify.
+   */
+  private[eqsat] def unsafeDefinitionsArray: Array[Slot] = _definitions
+
+  /**
+   * Unsafe access to the internal array of use slots. Do not modify.
+   */
+  private[eqsat] def unsafeUsesArray: Array[Slot] = _uses
 
   /**
    * The total number of slots occurring in this node: definitions, uses, and children’s argument slots.
@@ -407,16 +423,193 @@ final class ENode[+NodeT] private (
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
-  private[eqsat] def arraysEqual[T](a: Array[T], b: Array[T]): Boolean = {
-    if (a eq b) return true
-    if (a.length != b.length) return false
-    var i = 0
-    while (i < a.length) {
-      if (a(i) != b(i)) return false
-      i += 1
+  /**
+   * Pool for building and recycling `ENode`s with re-usable backing arrays.
+   *
+   * This pool both reuses `ENode` objects themselves and their backing arrays for `definitions`,
+   * `uses`, and `args` to cut allocations on hot paths.
+   */
+  final class Pool private[ENode] (
+    private val perBucketCap: Int
+  ) {
+    // Buckets indexed by length -> stack of arrays
+    private val slotBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[Slot]]]()
+    private val callBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[EClassCall]]]()
+    // Free-list of reusable ENode objects
+    private val nodeFree   = new java.util.ArrayDeque[ENode[Any]]()
+    private def borrowNode(): ENode[Any] = {
+      if (nodeFree.isEmpty) new ENode[Any](null.asInstanceOf[Any], emptySlotArray, emptySlotArray, emptyCallArray)
+      else nodeFree.removeFirst()
     }
-    true
+
+    private def prepareNode[NodeT](node: ENode[Any], nodeType: NodeT, defs: Array[Slot], uses: Array[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+      node._nodeType = nodeType
+      node._definitions = defs
+      node._uses = uses
+      node._args = args
+      node._hash = 0 // reset cached hash
+      node.asInstanceOf[ENode[NodeT]]
+    }
+
+    /**
+     * Releases an `ENode` back to this pool, along with its backing arrays.
+     * @param len Length of the array.
+     * @return An array of the given length.
+     */
+    def acquireSlotArray(len: Int): Array[Slot] = {
+      if (len == 0) return emptySlotArray
+      val q = slotBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[Slot]]())
+      val arr = if (q.isEmpty) new Array[Slot](len) else q.removeFirst()
+      arr
+    }
+
+    /**
+     * Acquires a call array of the given length from this pool.
+     * @param len Length of the array.
+     * @return An array of the given length.
+     */
+    def acquireCallArray(len: Int): Array[EClassCall] = {
+      if (len == 0) return emptyCallArray
+      val q = callBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[EClassCall]]())
+      val arr = if (q.isEmpty) new Array[EClassCall](len) else q.removeFirst()
+      arr
+    }
+
+    /**
+     * Releases a slot array back to this pool.
+     * @param arr Array to release.
+     */
+    def releaseSlotArray(arr: Array[Slot]): Unit = {
+      if (arr eq null) return
+      val len = arr.length
+      if (len == 0) return
+      java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
+      val q = slotBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[Slot]]())
+      if (q.size() < perBucketCap) q.addFirst(arr)
+    }
+
+    /**
+     * Releases a call array back to this pool.
+     * @param arr Array to release.
+     */
+    def releaseCallArray(arr: Array[EClassCall]): Unit = {
+      if (arr eq null) return
+      val len = arr.length
+      if (len == 0) return
+      java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
+      val q = callBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[EClassCall]]())
+      if (q.size() < perBucketCap) q.addFirst(arr)
+    }
+
+    private def copySlotsIntoPooledArray(slots: Seq[Slot]): Array[Slot] = slots match {
+      case slotSeq: SlotSeq =>
+        val len = slotSeq.size
+        if (len == 0) emptySlotArray
+        else {
+          val arr = acquireSlotArray(len)
+          var i = 0
+          while (i < len) { arr(i) = slotSeq.unsafeArray(i); i += 1 }
+          arr
+        }
+      case as: scala.collection.compat.immutable.ArraySeq[Slot] if as.unsafeArray.isInstanceOf[Array[Slot]] =>
+        val src = as.unsafeArray.asInstanceOf[Array[Slot]]
+        val len = src.length
+        if (len == 0) emptySlotArray
+        else {
+          val arr = acquireSlotArray(len)
+          System.arraycopy(src, 0, arr, 0, len)
+          arr
+        }
+      case _ =>
+        val len = slots.size
+        if (len == 0) emptySlotArray
+        else {
+          val arr = acquireSlotArray(len)
+          var i = 0
+          val it = slots.iterator
+          while (i < len && it.hasNext) { arr(i) = it.next(); i += 1 }
+          arr
+        }
+    }
+
+    private def copyCallsIntoPooledArray(calls: Seq[EClassCall]): Array[EClassCall] = calls match {
+      case as: scala.collection.compat.immutable.ArraySeq[EClassCall] if as.unsafeArray.isInstanceOf[Array[EClassCall]] =>
+        val src = as.unsafeArray.asInstanceOf[Array[EClassCall]]
+        val len = src.length
+        if (len == 0) emptyCallArray
+        else {
+          val arr = acquireCallArray(len)
+          System.arraycopy(src, 0, arr, 0, len)
+          arr
+        }
+      case _ =>
+        val len = calls.size
+        if (len == 0) emptyCallArray
+        else {
+          val arr = acquireCallArray(len)
+          var i = 0
+          val it = calls.iterator
+          while (i < len && it.hasNext) { arr(i) = it.next(); i += 1 }
+          arr
+        }
+    }
+
+    /**
+     * Builds an `ENode` whose backing arrays are owned by this pool and therefore recyclable via [[release]].
+     */
+    def acquire[NodeT](nodeType: NodeT, definitions: Seq[Slot], uses: Seq[Slot], args: Seq[EClassCall]): ENode[NodeT] = {
+      val defsArr = copySlotsIntoPooledArray(definitions)
+      val usesArr = copySlotsIntoPooledArray(uses)
+      val argsArr = copyCallsIntoPooledArray(args)
+      acquireUnsafe(nodeType, defsArr, usesArr, argsArr)
+    }
+
+    /**
+     * Builds an `ENode` whose backing arrays are owned by this pool and therefore recyclable via [[release]].
+     *
+     * The caller must ensure that the provided arrays are not used or retained after calling this method.
+     */
+    private[eqsat] def acquireUnsafe[NodeT](nodeType: NodeT, definitions: Array[Slot], uses: Array[Slot], args: Array[EClassCall]): ENode[NodeT] = {
+      val nAny = borrowNode()
+      val n = prepareNode(nAny, nodeType, definitions, uses, args)
+      n
+    }
+
+    /**
+     * Returns `node` to this pool. After calling this, the caller must not keep or use `node`.
+     */
+    def release(node: ENode[_]): Unit = {
+      // Return backing arrays if they belong to this pool
+      releaseSlotArray(node.unsafeDefinitionsArray)
+      releaseSlotArray(node.unsafeUsesArray)
+      releaseCallArray(node.unsafeArgsArray)
+
+      val nAny = node.asInstanceOf[ENode[Any]]
+      // Clear fields to avoid retaining references and to mark as blank
+      nAny._nodeType = null
+      nAny._definitions = emptySlotArray
+      nAny._uses = emptySlotArray
+      nAny._args = emptyCallArray
+      nAny._hash = 0
+      if (nodeFree.size() < perBucketCap) nodeFree.addFirst(nAny)
+    }
+
+    /** Clears all buckets. */
+    def clear(): Unit = {
+      slotBuckets.clear()
+      callBuckets.clear()
+      nodeFree.clear()
+    }
   }
+
+  /** Thread-local default pool for lightweight reuse without wiring one through call sites. */
+  private val threadLocalDefaultPool = new ThreadLocal[Pool] { override def initialValue(): Pool = new Pool(64) }
+  
+  /** Creates a new pool with the given per-bucket capacity. */
+  def newPool(perBucketCap: Int = 64): Pool = new Pool(perBucketCap)
+
+  /** Gets the thread-local default pool. */
+  def defaultPool: Pool = threadLocalDefaultPool.get()
 
   private val emptySlotArray: Array[Slot] = Array.empty
   private val emptyCallArray: Array[EClassCall] = Array.empty
