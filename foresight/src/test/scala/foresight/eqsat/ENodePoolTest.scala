@@ -120,7 +120,7 @@ class ENodePoolTest {
     val w = Slot.fresh(); val v = Slot.fresh()
     val c = new EClassRef(42)
 
-    val pooled = p.acquire(
+    val pooled: ENode[Int] = p.acquire(
       nodeType = 0,
       definitions = Seq(x, y),
       uses = Seq(z),
