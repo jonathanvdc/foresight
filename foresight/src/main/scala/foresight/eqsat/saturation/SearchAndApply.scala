@@ -170,7 +170,7 @@ object SearchAndApply {
     MatchT
   ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
-      override def searchLoopInterchange: Boolean = false
+      override def searchLoopInterchange: Boolean = true
 
       override def update(command: CommandSchedule[NodeT],
                           matches: Map[String, Seq[MatchT]],
@@ -195,7 +195,7 @@ object SearchAndApply {
     MatchT
   ]: SearchAndApply[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
     new NoMatchCaching[NodeT, EGraphT, MatchT] {
-      override def searchLoopInterchange: Boolean = false
+      override def searchLoopInterchange: Boolean = true
 
       override def update(command: CommandSchedule[NodeT],
                           matches: Map[String, Seq[MatchT]],
