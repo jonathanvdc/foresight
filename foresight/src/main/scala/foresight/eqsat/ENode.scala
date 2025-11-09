@@ -4,7 +4,6 @@ import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
-import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.compat.immutable.ArraySeq
 
 /**
@@ -28,8 +27,8 @@ final class ENode[+NodeT] private (
   private val _uses: Array[Slot],
   private val _args: Array[EClassCall]
 ) extends Node[NodeT, EClassCall] with ENodeSymbol[NodeT] {
-  // Cached hash code to make hashing and equality fast
-  private val _hash: AtomicInteger = new AtomicInteger(0)
+  // Cached hash code to make hashing and equality fast (benign data race; like String.hash)
+  private var _hash: Int = 0
 
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
@@ -294,13 +293,36 @@ final class ENode[+NodeT] private (
   // --- case-class-like API preservation ---
   override def toString: String = s"ENode($nodeType, $definitions, $uses, $args)"
 
+  @inline
+  private def callsEqualFast(a: Array[EClassCall], b: Array[EClassCall]): Boolean = {
+    if (a eq b) return true
+    if (a.length != b.length) return false
+    var i = 0
+    while (i < a.length) {
+      val ai = a(i); val bi = b(i)
+      // Compare the e-class ids first (cheap)
+      if (ai.ref.id != bi.ref.id) return false
+      // Then compare the SlotMap by reference first, fall back to equals only if needed
+      val aArgs = ai.args; val bArgs = bi.args
+      if ((aArgs ne bArgs) && !(aArgs == bArgs)) return false
+      i += 1
+    }
+    true
+  }
+
   //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
-      this.nodeType == that.nodeType &&
-      ENode.arraysEqual(this._definitions, that._definitions) &&
-      ENode.arraysEqual(this._uses, that._uses) &&
-      ENode.arraysEqual(this._args, that._args)
+      (this eq that) || (
+        this.nodeType == that.nodeType &&
+        // quick length checks to short-circuit before scanning arrays
+        this._definitions.length == that._definitions.length &&
+        this._uses.length == that._uses.length &&
+        this._args.length == that._args.length &&
+        ENode.arraysEqual(this._definitions, that._definitions) &&
+        ENode.arraysEqual(this._uses, that._uses) &&
+        callsEqualFast(this._args, that._args)
+      )
     case _ => false
   }
 
@@ -330,13 +352,12 @@ final class ENode[+NodeT] private (
     h
   }
 
-  override def hashCode(): Int = {
-    val cached = _hash.get()
+  @inline override def hashCode(): Int = {
+    val cached = _hash
     if (cached != 0) return cached
-
     val h = computeHash()
     val result = if (h == 0) 1 else h
-    _hash.compareAndSet(0, result)
+    _hash = result
     result
   }
 
