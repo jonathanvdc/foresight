@@ -25,7 +25,11 @@ final case class CommandSchedule[NodeT](batchZero: (ArraySeq[EClassSymbol.Virtua
    * The additions scheduled in this command schedule, grouped by batch.
    */
   def additions: Seq[(ArraySeq[EClassSymbol.Virtual], ArraySeq[ENodeSymbol[NodeT]])] = {
-    batchZero +: otherBatches
+    if (batchZero._1.isEmpty) {
+      otherBatches
+    } else {
+      batchZero +: otherBatches
+    }
   }
 
   private type ReificationMap = util.IdentityHashMap[EClassSymbol.Virtual, EClassCall]
