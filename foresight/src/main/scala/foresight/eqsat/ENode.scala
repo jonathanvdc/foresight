@@ -438,11 +438,35 @@ object ENode {
    * `uses`, and `args` to cut allocations on hot paths.
    */
   final class Pool private[ENode] (
-    private val perBucketCap: Int
+    private val perBucketCap: Int,
+    private val maxBucketLen: Int = 16
   ) {
     // Buckets indexed by length -> stack of arrays
-    private val slotBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[Slot]]]()
-    private val callBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[EClassCall]]]()
+    private val slotBuckets: Array[java.util.ArrayDeque[Array[Slot]]] =
+      new Array[java.util.ArrayDeque[Array[Slot]]](maxBucketLen + 1)
+    private val callBuckets: Array[java.util.ArrayDeque[Array[EClassCall]]] =
+      new Array[java.util.ArrayDeque[Array[EClassCall]]](maxBucketLen + 1)
+
+    // Eagerly initialize deques for all bucket lengths
+    {
+      var i = 0
+      while (i <= maxBucketLen) {
+        slotBuckets(i) = new java.util.ArrayDeque[Array[Slot]]()
+        callBuckets(i) = new java.util.ArrayDeque[Array[EClassCall]]()
+        i += 1
+      }
+    }
+
+    @inline private def slotDeque(len: Int): java.util.ArrayDeque[Array[Slot]] = {
+      if (len < 0 || len > maxBucketLen) null
+      else slotBuckets(len)
+    }
+
+    @inline private def callDeque(len: Int): java.util.ArrayDeque[Array[EClassCall]] = {
+      if (len < 0 || len > maxBucketLen) null
+      else callBuckets(len)
+    }
+
     // Free-list of reusable ENode objects
     private val nodeFree = new java.util.ArrayDeque[ENode[Any]]()
     private def borrowNode(): ENode[Any] = {
@@ -466,9 +490,9 @@ object ENode {
      */
     def acquireSlotArray(len: Int): Array[Slot] = {
       if (len == 0) return emptySlotArray
-      val q = slotBuckets.computeIfAbsent(len, newSlotDequeDelegate)
-      val arr = if (q.isEmpty) new Array[Slot](len) else q.removeFirst()
-      arr
+      val q = slotDeque(len)
+      if (q eq null) return new Array[Slot](len)
+      if (q.isEmpty) new Array[Slot](len) else q.removeFirst()
     }
 
     /**
@@ -487,9 +511,9 @@ object ENode {
      */
     def acquireCallArray(len: Int): Array[EClassCall] = {
       if (len == 0) return emptyCallArray
-      val q = callBuckets.computeIfAbsent(len, newCallDequeDelegate)
-      val arr = if (q.isEmpty) new Array[EClassCall](len) else q.removeFirst()
-      arr
+      val q = callDeque(len)
+      if (q eq null) return new Array[EClassCall](len)
+      if (q.isEmpty) new Array[EClassCall](len) else q.removeFirst()
     }
 
     /**
@@ -510,8 +534,8 @@ object ENode {
       val len = arr.length
       if (len == 0) return
       java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
-      val q = slotBuckets.computeIfAbsent(len, newSlotDequeDelegate)
-      if (q.size() < perBucketCap) q.addFirst(arr)
+      val q = slotDeque(len)
+      if ((q ne null) && q.size() < perBucketCap) q.addFirst(arr)
     }
 
     /**
@@ -523,8 +547,8 @@ object ENode {
       val len = arr.length
       if (len == 0) return
       java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
-      val q = callBuckets.computeIfAbsent(len, newCallDequeDelegate)
-      if (q.size() < perBucketCap) q.addFirst(arr)
+      val q = callDeque(len)
+      if ((q ne null) && q.size() < perBucketCap) q.addFirst(arr)
     }
 
     private def copySlotsIntoPooledArray(slots: Seq[Slot]): Array[Slot] = slots match {
@@ -622,8 +646,18 @@ object ENode {
 
     /** Clears all buckets. */
     def clear(): Unit = {
-      slotBuckets.clear()
-      callBuckets.clear()
+      var i = 0
+      while (i < slotBuckets.length) {
+        val q = slotBuckets(i)
+        if (q != null) q.clear()
+        i += 1
+      }
+      i = 0
+      while (i < callBuckets.length) {
+        val q = callBuckets(i)
+        if (q != null) q.clear()
+        i += 1
+      }
       nodeFree.clear()
     }
   }
