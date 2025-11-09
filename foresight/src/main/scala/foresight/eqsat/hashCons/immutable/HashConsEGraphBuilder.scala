@@ -21,8 +21,8 @@ private final class HashConsEGraphBuilder[NodeT](protected override val unionFin
 
   protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
 
-  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
-    hashCons.getOrElse(node, default)
+  override def nodeToRefOrInvalid(node: ENode[NodeT]): EClassRef = {
+    hashCons.getOrElse(node, EClassRef.Invalid)
   }
 
   override def dataForClass(ref: EClassRef): EClassData[NodeT] = {

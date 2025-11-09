@@ -31,6 +31,15 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
   protected val unionFind: UnionFind
 
   /**
+   * Retrieves the e-class reference for a given e-node, or returns an invalid reference if the e-node is not found.
+   * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so
+   * and simply performs a hash cons lookup.
+   * @param node The e-node to look up.
+   * @return The e-class reference corresponding to the e-node, or an invalid reference if not found.
+   */
+  def nodeToRefOrInvalid(node: ENode[NodeT]): EClassRef
+
+  /**
    * Retrieves the e-class reference for a given e-node, or returns a default value if the e-node is not found.
    * This method does not canonicalize the e-node before looking it up; it assumes the caller has already done so
    * and simply performs a hash cons lookup.
@@ -38,7 +47,10 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
    * @param default A default e-class reference to return if the e-node is not found.
    * @return The e-class reference corresponding to the e-node, or the default value if not found.
    */
-  def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef
+  final def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+    val ref = nodeToRefOrInvalid(node)
+    if (ref.isInvalid) default else ref
+  }
 
   /**
    * Retrieves the data associated with a given e-class. Assumes that the e-class reference is canonical.
@@ -165,7 +177,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       assert(renamedShape.shape.isShape)
     }
 
-    val ref = nodeToRefOrElse(renamedShape.shape, EClassRef.Invalid)
+    val ref = nodeToRefOrInvalid(renamedShape.shape)
     if (ref.isInvalid) {
       return null
     }
@@ -185,7 +197,7 @@ private[hashCons] trait ReadOnlyHashConsEGraph[NodeT] extends EGraph[NodeT] {
       assert(!node.hasSlots)
     }
 
-    val ref = nodeToRefOrElse(node, EClassRef.Invalid)
+    val ref = nodeToRefOrInvalid(node)
     if (ref.isInvalid) {
       return null
     }

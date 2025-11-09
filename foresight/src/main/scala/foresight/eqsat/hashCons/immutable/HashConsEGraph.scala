@@ -46,8 +46,8 @@ private[eqsat] final case class HashConsEGraph[NodeT] private[hashCons](protecte
     unionFind.findOrNull(ref)
   }
 
-  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
-    hashCons.getOrElse(node, default)
+  override def nodeToRefOrInvalid(node: ENode[NodeT]): EClassRef = {
+    hashCons.getOrElse(node, EClassRef.Invalid)
   }
 
   override def dataForClass(ref: EClassRef): EClassData[NodeT] = {

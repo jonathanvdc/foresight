@@ -117,16 +117,6 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
     }
   }
 
-  /**
-   * Query the hash cons for the given node. Returns null if the node is not in the hash cons.
-   *
-   * @param node The node to query.
-   * @return The e-class reference of the node, or null if the node is not in the hash cons.
-   */
-  private def nodeToClassOrNull(node: ENode[NodeT]): EClassRef = {
-    nodeToRefOrElse(node, EClassRef.Invalid)
-  }
-
   private def slots(ref: EClassRef): SlotSet = dataForClass(ref).slots
 
   /**
@@ -393,7 +383,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
      * @param node The node to repair.
      */
     def repairNodeWithoutSlots(node: ENode[NodeT]): Unit = {
-      val ref = nodeToClassOrNull(node)
+      val ref = nodeToRefOrInvalid(node)
       if (Debug.isEnabled) {
         assert(ref != EClassRef.Invalid, "The node to repair must be in the hash-cons.")
         assert(!node.hasSlots, "The node to repair must not have slots.")
@@ -411,7 +401,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       val canonicalNode = canonicalizeWithoutSlots(node)
 
       if (canonicalNode != node) {
-        nodeToClassOrNull(canonicalNode) match {
+        nodeToRefOrInvalid(canonicalNode) match {
           case EClassRef.Invalid =>
             // Eliminate the old node from the e-class and add the canonicalized node.
             removeNodeFromClass(ref, node)
@@ -448,7 +438,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       //   3. The canonicalized node is different from the original node, and the canonicalized node is not in the
       //      hash-cons map. In this case, we add the canonicalized node to the hash-cons and queue its arguments
       //      for parent set repair.
-      val ref = nodeToClassOrNull(node)
+      val ref = nodeToRefOrInvalid(node)
       if (Debug.isEnabled) {
         assert(ref != EClassRef.Invalid, "The node to repair must be in the hash-cons.")
       }
@@ -488,7 +478,7 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
       }
 
       if (canonicalNode.shape != node) {
-        nodeToClassOrNull(canonicalNode.shape) match {
+        nodeToRefOrInvalid(canonicalNode.shape) match {
           case EClassRef.Invalid =>
             // Eliminate the old node from the e-class and add the canonicalized node.
             removeNodeFromClass(ref, node)

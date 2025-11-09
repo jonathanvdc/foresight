@@ -175,7 +175,12 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
   }
 
   private def boundSlots: ArrayMap[Slot, Slot] = {
-    ArrayMap.unsafeWrapArrays(effects.boundSlots.unsafeArray, java.util.Arrays.copyOf(boundSlotsArr, slotIdx), slotIdx)
+    if (slotIdx == 0) {
+      // Avoid allocating an empty array copy
+      ArrayMap.empty[Slot, Slot]
+    } else {
+      ArrayMap.unsafeWrapArrays(effects.boundSlots.unsafeArray, java.util.Arrays.copyOf(boundSlotsArr, slotIdx), slotIdx)
+    }
   }
 
   /** Convert to an immutable MachineState snapshot. */

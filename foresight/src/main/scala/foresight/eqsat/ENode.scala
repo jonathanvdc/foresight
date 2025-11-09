@@ -4,7 +4,6 @@ import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
-import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.compat.immutable.ArraySeq
 
 /**
@@ -28,8 +27,8 @@ final class ENode[+NodeT] private (
   private val _uses: Array[Slot],
   private val _args: Array[EClassCall]
 ) extends Node[NodeT, EClassCall] with ENodeSymbol[NodeT] {
-  // Cached hash code to make hashing and equality fast
-  private val _hash: AtomicInteger = new AtomicInteger(0)
+  // Cached hash code to make hashing and equality fast (benign data race; like String.hash)
+  private var _hash: Int = 0
 
   /**
    * Slots introduced by this node that are scoped locally and invisible to parents. These are
@@ -294,49 +293,110 @@ final class ENode[+NodeT] private (
   // --- case-class-like API preservation ---
   override def toString: String = s"ENode($nodeType, $definitions, $uses, $args)"
 
+  @inline
+  private def callsEqualFast(a: Array[EClassCall], b: Array[EClassCall]): Boolean = {
+    if (a eq b) return true
+    if (a.length != b.length) return false
+    var i = 0
+    while (i < a.length) {
+      val ai = a(i); val bi = b(i)
+      // Compare the e-class ids first (cheap)
+      if (ai.ref.id != bi.ref.id) return false
+      // Then compare the SlotMap by reference first, fall back to equals only if needed
+      val aArgs = ai.args; val bArgs = bi.args
+      if ((aArgs ne bArgs) && !(aArgs == bArgs)) return false
+      i += 1
+    }
+    true
+  }
+
+  @inline
+  private def slotsEqualByRef(a: Array[Slot], b: Array[Slot]): Boolean = {
+    if (a eq b) return true
+    if (a.length != b.length) return false
+    var i = 0
+    while (i < a.length) {
+      if (a(i) ne b(i)) return false
+      i += 1
+    }
+    true
+  }
+
   //noinspection ComparingUnrelatedTypes
   override def equals(other: Any): Boolean = other match {
     case that: ENode[_] =>
-      this.nodeType == that.nodeType &&
-      ENode.arraysEqual(this._definitions, that._definitions) &&
-      ENode.arraysEqual(this._uses, that._uses) &&
-      ENode.arraysEqual(this._args, that._args)
+      if (this eq that) return true
+      // Cheap hash pre-check to avoid deep scans during collision probes
+      if (this.hashCode() != that.hashCode()) return false
+      // Now structural checks
+      (this.nodeType == that.nodeType) &&
+      (this._definitions.length == that._definitions.length) &&
+      (this._uses.length == that._uses.length) &&
+      (this._args.length == that._args.length) &&
+      slotsEqualByRef(this._definitions, that._definitions) &&
+      slotsEqualByRef(this._uses, that._uses) &&
+      callsEqualFast(this._args, that._args)
     case _ => false
   }
 
-  private def computeHash(): Int = {
-    var h = 1
-    h = 31 * h + (if (nodeType == null) 0 else nodeType.hashCode)
+  @inline private def mix(h: Int, data: Int): Int = {
+    var k = data
+    k *= 0xcc9e2d51
+    k = (k << 15) | (k >>> 17)
+    k *= 0x1b873593
+    var res = h ^ k
+    res = (res << 13) | (res >>> 19)
+    res = res * 5 + 0xe6546b64
+    res
+  }
+  @inline private def avalanche(h: Int, len: Int): Int = {
+    var x = h ^ len
+    x ^= (x >>> 16)
+    x *= 0x85ebca6b
+    x ^= (x >>> 13)
+    x *= 0xc2b2ae35
+    x ^= (x >>> 16)
+    x
+  }
 
+  private def computeHash(): Int = {
+    // Murmur3-style mix for better avalanche; keep consistent with equals:
+    // - Slots are compared by reference => use identityHashCode for slots
+    // - Args compare ref.id and SlotMap by (ref or equals) => use id + identityHashCode(map) as primary signal
+    var h = 0
+    val nt = if (nodeType == null) 0 else nodeType.hashCode
+    h = mix(h, nt)
+    // definitions (by reference)
     var i = 0
     while (i < _definitions.length) {
-      h = 31 * h + _definitions(i).hashCode()
+      h = mix(h, System.identityHashCode(_definitions(i)))
       i += 1
     }
-
+    // uses (by reference)
     i = 0
     while (i < _uses.length) {
-      h = 31 * h + _uses(i).hashCode()
+      h = mix(h, System.identityHashCode(_uses(i)))
       i += 1
     }
-
+    // args: mix ref id and structure of the SlotMap; include size to separate small maps
     i = 0
     while (i < _args.length) {
       val arg = _args(i)
-      h = 31 * h + arg.ref.id
-      h = 31 * h + arg.args.hashCode()
+      h = mix(h, arg.ref.id)
+      // Use structural hash for SlotMap to remain consistent with equals (which may consider distinct instances equal)
+      h = mix(h, arg.args.hashCode())
       i += 1
     }
-    h
+    // length salt to distinguish permutations/shapes with same prefix
+    avalanche(h, 1 + _definitions.length + _uses.length + (_args.length << 1))
   }
 
-  override def hashCode(): Int = {
-    val cached = _hash.get()
+  @inline override def hashCode(): Int = {
+    val cached = _hash
     if (cached != 0) return cached
-
     val h = computeHash()
     val result = if (h == 0) 1 else h
-    _hash.compareAndSet(0, result)
+    _hash = result
     result
   }
 
