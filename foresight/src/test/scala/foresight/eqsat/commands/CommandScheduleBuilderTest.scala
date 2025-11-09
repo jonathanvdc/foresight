@@ -271,4 +271,90 @@ class CommandScheduleBuilderTest {
     val g2 = sched.applyImmutable(g1, ParallelMap.sequential).get
     assert(g2.classes.size == g1.classes.size + 2)
   }
+
+
+  /**
+   * addSimplifiedReal: Complex tree should preserve strict batch layering across depths.
+   * Level 1 (children of real atoms) -> Level 2 (parents of level 1) -> Level 3 (root).
+   */
+  @Test
+  def addSimplifiedRealComplexTreeBatchesStable(): Unit = {
+    val g0 = EGraph.empty[Int]
+    val builder = CommandScheduleBuilder.newConcurrentBuilder[Int]
+
+    // Seed two real leaves in the graph to use as Atoms.
+    val seed = CommandScheduleBuilder.newConcurrentBuilder[Int]
+    val leafA = seed.add(ENode(101, Seq.empty, Seq.empty, Seq.empty), 0)
+    val leafB = seed.add(ENode(102, Seq.empty, Seq.empty, Seq.empty), 0)
+    val seedSched = seed.result()
+    val g1 = seedSched.applyImmutable(g0, ParallelMap.sequential).get
+    val realA: EClassCall = g1.canonicalize(g1.classes.head)
+    val realB: EClassCall = {
+      // the second class; order is not guaranteed, so find the one that's not realA
+      val calls = g1.classes.map(g1.canonicalize)
+      calls.find(_ != realA).get
+    }
+
+    // Level 1 nodes (directly depend on real atoms)
+    val child1 = MixedTree.Node[Int, EClassCall](
+      201,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(MixedTree.Atom[Int, EClassCall](realA))
+    )
+    val child2 = MixedTree.Node[Int, EClassCall](
+      202,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(MixedTree.Atom[Int, EClassCall](realA), MixedTree.Atom[Int, EClassCall](realB))
+    )
+    val childSym1 = builder.addSimplifiedReal(child1, g1)
+    val childSym2 = builder.addSimplifiedReal(child2, g1)
+
+    // Level 2 nodes (depend on Level 1)
+    val parent1 = MixedTree.Node[Int, EClassCall](
+      301,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(child1, MixedTree.Atom[Int, EClassCall](realB))
+    )
+    val parent2 = MixedTree.Node[Int, EClassCall](
+      302,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(child2)
+    )
+    val parentSym1 = builder.addSimplifiedReal(parent1, g1)
+    val parentSym2 = builder.addSimplifiedReal(parent2, g1)
+
+    // Level 3 node (root depends on both Level 2 nodes)
+    val root = MixedTree.Node[Int, EClassCall](
+      401,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(parent1, parent2)
+    )
+    val rootSym = builder.addSimplifiedReal(root, g1)
+
+    val sched = builder.result()
+
+    // Expect three distinct non-empty batches for additions: L1, L2, L3
+    assert(sched.additions.size == 3)
+    assert(sched.otherBatches.length == 2)
+
+    // Level 1 batch (batchZero) should contain both children
+    assert(sched.batchZero._1.contains(childSym1))
+    assert(sched.batchZero._1.contains(childSym2))
+
+    // Level 2 batch should contain both parents
+    assert(sched.otherBatches(0)._1.contains(parentSym1))
+    assert(sched.otherBatches(0)._1.contains(parentSym2))
+
+    // Level 3 batch should contain the root
+    assert(sched.otherBatches(1)._1.contains(rootSym))
+
+    // Applying the schedule should add exactly 5 new classes (2 L1 + 2 L2 + 1 L3)
+    val g2 = sched.applyImmutable(g1, ParallelMap.sequential).get
+    assert(g2.classes.size == g1.classes.size + 5)
+  }
 }
