@@ -6,7 +6,7 @@ import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
-import foresight.eqsat.*
+import foresight.eqsat._
 
 object ApplierOps {
   implicit class ApplierOfPatternMatchOps[EGraphT <: EGraphLike[ArrayIR, EGraphT] with EGraph[ArrayIR]](private val applier: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]]) extends AnyVal {
