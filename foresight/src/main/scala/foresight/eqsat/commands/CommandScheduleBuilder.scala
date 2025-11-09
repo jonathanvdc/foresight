@@ -84,12 +84,13 @@ trait CommandScheduleBuilder[NodeT] {
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
     val maxBatch = new IntRef(0)
-    addSimplifiedReal(tree, egraph, maxBatch)
+    addSimplifiedReal(tree, egraph, maxBatch, ENode.defaultPool)
   }
 
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
                                        egraph: EGraph[NodeT],
-                                       maxBatch: IntRef): EClassSymbol = {
+                                       maxBatch: IntRef,
+                                       pool: ENode.Pool): EClassSymbol = {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         // Local accumulator for children of this node.
@@ -97,9 +98,9 @@ trait CommandScheduleBuilder[NodeT] {
         val argSymbols = CommandScheduleBuilder.symbolArrayFrom(
           args,
           childMax,
-          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb)
+          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb, pool)
         )
-        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph)
+        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph, pool)
         // Propagate maximum required batch up to the caller's accumulator.
         if (childMax.elem > maxBatch.elem) maxBatch.elem = childMax.elem
         sym
@@ -115,7 +116,8 @@ trait CommandScheduleBuilder[NodeT] {
                                        uses: SlotSeq,
                                        args: Array[EClassSymbol],
                                        maxBatch: IntRef,
-                                       egraph: EGraph[NodeT]): EClassSymbol = {
+                                       egraph: EGraph[NodeT],
+                                       pool: ENode.Pool): EClassSymbol = {
 
     // Check if all children are already in the graph.
     val argCalls = CommandScheduleBuilder.resolveAllOrNull(args)
@@ -126,7 +128,7 @@ trait CommandScheduleBuilder[NodeT] {
         assert(maxBatch.elem == 0)
       }
 
-      val candidateNode = ENode.unsafeWrapArrays(nodeType, definitions, uses, argCalls)
+      val candidateNode = pool.acquire(nodeType, definitions, uses, argCalls)
       egraph.findOrNull(candidateNode) match {
         case null =>
           // Node does not exist in the graph but its children do exist in the graph.
@@ -135,6 +137,7 @@ trait CommandScheduleBuilder[NodeT] {
 
         case existingCall =>
           // Node already exists in the graph; reuse its class.
+          pool.release(candidateNode)
           EClassSymbol.real(existingCall)
       }
     } else {
