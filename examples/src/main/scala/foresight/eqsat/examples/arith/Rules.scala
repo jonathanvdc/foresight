@@ -4,7 +4,7 @@ import foresight.eqsat.examples.arith.ApplierOps._
 import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Rule
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.{MixedTree, Slot}
+import foresight.eqsat.{CallTree, MixedTree, Slot}
 
 /**
  * This object contains a collection of rules for rewriting arithmetic expressions.
@@ -63,7 +63,7 @@ object Rules {
           result.toSeq.map { value =>
             // If a constant value is found, create a new Number node and bind it to the variable, overwriting the
             // original binding.
-            subst.bind(x, Number(value))
+            subst.bind(x, CallTree.from(Number(value)))
           }
       }),
       MixedTree.Atom[ArithIR, Pattern.Var](x).toApplier

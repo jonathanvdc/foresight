@@ -91,6 +91,35 @@ trait Language[E]:
   def fromTree[A](n: MixedTree[Op, A])(using dec: AtomDecoder[E, A]): E
 
   /**
+   * Decode a call tree back into a surface AST `E`.
+   *
+   * @param n     A call tree with [[Op]] internal nodes and [[EClassCall]] leaves.
+   * @param dec   A given [[AtomDecoder]] that knows how to turn `EClassCall` atoms back into `E` fragments.
+   * @return      The reconstructed surface expression.
+   *
+   * Note: decoding is typically partial in the presence of analysis-only atoms; see [[fromAnalysisNode]].
+   */
+  def fromTree(n: CallTree[Op])(using dec: AtomDecoder[E, EClassCall]): E = {
+    fromTree[EClassCall](n.toMixedTree)
+  }
+
+  /**
+   * Encode a surface AST `e: E` into a call tree with [[EClassCall]] leaves.
+   *
+   * @param e     A surface AST node.
+   * @param enc   A given [[AtomEncoder]] that knows how to encode `E` atoms into `EClassCall`.
+   * @return      A call tree equivalent to `e`.
+   *
+   * @example
+   * {{{
+   * val callTree: CallTree[Lang.Op] = Lang.toCallTree(surfaceExpr)
+   * }}}
+   */
+  def toCallTree(e: E)(using enc: AtomEncoder[E, EClassCall]): CallTree[Op] = {
+    CallTree.from(toTree[EClassCall](e))
+  }
+
+  /**
    * Encode a surface AST `e: E` into an immutable e-graph, returning the root e-class call
    * and the new e-graph containing `e`.
    * @param e The surface AST expression to encode.

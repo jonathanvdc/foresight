@@ -1,9 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
+import foresight.eqsat.{CallTree, EClassCall, ENode, Slot}
 import foresight.util.collections.ArrayMap
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A mutable machine state that preallocates fixed-size arrays
@@ -170,14 +170,8 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
     varIdx += 1
   }
 
-  private def boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]] = {
-    val values = new Array[MixedTree[NodeT, EClassCall]](varIdx)
-    var i = 0
-    while (i < varIdx) {
-      values(i) = MixedTree.Atom(boundVarsArr(i))
-      i += 1
-    }
-    ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, values, varIdx)
+  private def boundVars: ArrayMap[Pattern.Var, CallTree[NodeT]] = {
+    ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, java.util.Arrays.copyOf(boundVarsArr, varIdx), varIdx)
   }
 
   private def boundSlots: ArrayMap[Slot, Slot] = {
@@ -191,8 +185,8 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
 
   /** Convert to an immutable MachineState snapshot. */
   def freeze(): MachineState[NodeT] = {
-    val regs  = immutable.ArraySeq.unsafeWrapArray(registersArr.slice(0, regIdx))
-    val nodes = immutable.ArraySeq.unsafeWrapArray(boundNodesArr.slice(0, nodeIdx))
+    val regs  = ArraySeq.unsafeWrapArray(registersArr.slice(0, regIdx))
+    val nodes = ArraySeq.unsafeWrapArray(boundNodesArr.slice(0, nodeIdx))
     MachineState(regs, boundVars, boundSlots, nodes)
   }
 

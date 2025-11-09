@@ -27,11 +27,11 @@ object ApplierOps {
         override def apply(m: PatternMatch[SdqlIR], egraph: EGraphWithMetadata[SdqlIR, EGraphT], builder: CommandScheduleBuilder[SdqlIR]): Unit = {
           val extracted = ExtractionAnalysis.smallest[SdqlIR].extractor[EGraphT](m(source), egraph)
 
-          def subst(tree: Tree[SdqlIR]): MixedTree[SdqlIR, EClassCall] = {
+          def subst(tree: Tree[SdqlIR]): CallTree[SdqlIR] = {
             tree match {
               case Tree(Var, Seq(), Seq(use), Seq()) if use == m(from) => m(to)
               case Tree(nodeType, defs, uses, args) =>
-                MixedTree.Node(nodeType, defs, uses, args.map(subst))
+                CallTree.Node(nodeType, defs, uses, args.map(subst))
             }
           }
 

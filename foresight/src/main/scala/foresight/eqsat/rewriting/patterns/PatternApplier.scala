@@ -47,7 +47,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
                           m: PatternMatch[NodeT]): MixedTree[NodeT, EClassSymbol] = {
     pattern match {
       case MixedTree.Atom(p) => p match {
-        case v: Pattern.Var => m(v).mapAtoms(EClassSymbol.real)
+        case v: Pattern.Var => m(v).toMixedTree.mapAtoms(EClassSymbol.real)
       }
 
       case MixedTree.Node(t, Seq(), uses, args) =>

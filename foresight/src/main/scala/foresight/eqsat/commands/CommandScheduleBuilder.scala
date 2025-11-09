@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
+import foresight.eqsat.{CallTree, EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
@@ -81,7 +81,7 @@ trait CommandScheduleBuilder[NodeT] {
     }
   }
 
-  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
+  private[eqsat] def addSimplifiedReal(tree: CallTree[NodeT],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
     val refPool = IntRef.defaultPool
     val maxBatch = refPool.acquire(0)
@@ -90,20 +90,20 @@ trait CommandScheduleBuilder[NodeT] {
     result
   }
 
-  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
+  private[eqsat] def addSimplifiedReal(tree: CallTree[NodeT],
                                        egraph: EGraph[NodeT],
                                        maxBatch: IntRef,
                                        nodePool: ENode.Pool,
                                        refPool: IntRef.Pool): EClassSymbol = {
     tree match {
-      case MixedTree.Node(t, defs, uses, args) =>
+      case CallTree.Node(t, defs, uses, args) =>
         // Local accumulator for children of this node.
         val childMax = refPool.acquire(0)
         val argSymbols = CommandScheduleBuilder.symbolArrayFrom(
           args,
           childMax,
           nodePool,
-          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb, nodePool, refPool)
+          (child: CallTree[NodeT], mb: IntRef) => addSimplifiedReal(child, egraph, mb, nodePool, refPool)
         )
         val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph, nodePool)
         // Propagate maximum required batch up to the caller's accumulator.
@@ -111,7 +111,7 @@ trait CommandScheduleBuilder[NodeT] {
         refPool.release(childMax)
         sym
 
-      case MixedTree.Atom(call) =>
+      case call: EClassCall =>
         // No insertion required; keep caller's accumulator unchanged.
         EClassSymbol.real(call)
     }

@@ -1,6 +1,6 @@
 package foresight.eqsat.readonly
 
-import foresight.eqsat.{EClassCall, EClassRef, MixedTree}
+import foresight.eqsat.{CallTree, EClassCall, EClassRef, MixedTree}
 import foresight.eqsat.metadata.Analysis
 
 /**
@@ -52,6 +52,28 @@ trait AnalysisMetadata[NodeT, A] {
       case MixedTree.Node(node, defs, uses, args) =>
         val argsResults = args.map(apply(_, egraph))
         analysis.make(node, defs, uses, argsResults)
+    }
+  }
+
+  /**
+   * Evaluate a call tree whose leaves are either e-class applications or concrete nodes.
+   *
+   * For a call leaf, this delegates to [[apply(EClassCall,EGraph)]]. For a node leaf, it first
+   * computes the results of all argument subtrees and then invokes the analysis transfer function
+   * [[Analysis.make]] using the node’s definitions and uses provided by the tree.
+   *
+   * @param tree   The call tree to evaluate.
+   * @param egraph The e-graph to resolve calls and canonicalization.
+   * @return The analysis result for the whole tree.
+   */
+  final def apply(tree: CallTree[NodeT],
+                  egraph: EGraph[NodeT]): A = {
+    tree match {
+      case CallTree.Node(node, defs, uses, args) =>
+        val argsResults = args.map(apply(_, egraph))
+        analysis.make(node, defs, uses, argsResults)
+
+      case call: EClassCall => apply(call, egraph)
     }
   }
 

@@ -1,9 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
+import foresight.eqsat.{CallTree, EClassCall, ENode, Slot}
 import foresight.util.collections.ArrayMap
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * The state of a pattern machine.
@@ -14,7 +14,7 @@ import scala.collection.compat._
  * @param boundNodes The nodes that are bound in the machine.
  * @tparam NodeT The type of the nodes in the e-graph.
  */
-final case class MachineState[NodeT](registers: immutable.ArraySeq[EClassCall],
-                                     boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]],
+final case class MachineState[NodeT](registers: ArraySeq[EClassCall],
+                                     boundVars: ArrayMap[Pattern.Var, CallTree[NodeT]],
                                      boundSlots: ArrayMap[Slot, Slot],
-                                     boundNodes: immutable.ArraySeq[ENode[NodeT]])
+                                     boundNodes: ArraySeq[ENode[NodeT]])
