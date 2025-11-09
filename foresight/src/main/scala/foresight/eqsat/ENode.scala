@@ -472,6 +472,15 @@ object ENode {
     }
 
     /**
+     * Acquires a slot array filled with the given slots from this pool.
+     * @param slots Slots to fill into the array.
+     * @return An array containing the given slots.
+     */
+    def acquireAndFillSlotArray(slots: Seq[Slot]): Array[Slot] = {
+      copySlotsIntoPooledArray(slots)
+    }
+
+    /**
      * Acquires a call array of the given length from this pool.
      * @param len Length of the array.
      * @return An array of the given length.
@@ -481,6 +490,15 @@ object ENode {
       val q = callBuckets.computeIfAbsent(len, newCallDequeDelegate)
       val arr = if (q.isEmpty) new Array[EClassCall](len) else q.removeFirst()
       arr
+    }
+
+    /**
+     * Acquires a call array filled with the given calls from this pool.
+     * @param calls Calls to fill into the array.
+     * @return An array containing the given calls.
+     */
+    def acquireAndFillCallArray(calls: Seq[EClassCall]): Array[EClassCall] = {
+      copyCallsIntoPooledArray(calls)
     }
 
     /**
