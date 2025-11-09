@@ -1,58 +1,75 @@
 package foresight.eqsat.hashCons.mutable
 
 import foresight.eqsat.collections.{SlotMap, SlotSet}
-import foresight.eqsat.{EClassCall, EClassRef, ENode, ShapeCall}
+import foresight.eqsat.{EClassRef, ENode}
 import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, PermutationGroup}
 import foresight.util.Debug
 
-import scala.collection.mutable
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.ints.{Int2ObjectOpenHashMap, IntArrayList}
 
 private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashConsEGraph[NodeT] {
   type ClassData = MutableEClassData[NodeT]
   type UnionFind = SlottedUnionFind
 
   protected override val unionFind: SlottedUnionFind = new SlottedUnionFind()
-  private val hashCons: mutable.HashMap[ENode[NodeT], EClassRef] = mutable.HashMap.empty
-  private val classData: mutable.HashMap[EClassRef, MutableEClassData[NodeT]] = mutable.HashMap.empty
+  private val hashCons = new Object2IntOpenHashMap[ENode[NodeT]]()
+  private val classData = new Int2ObjectOpenHashMap[MutableEClassData[NodeT]]()
+  hashCons.defaultReturnValue(EClassRef.Invalid.id)
 
   protected override def updateClassPermutations(ref: EClassRef, permutations: PermutationGroup[SlotMap]): Unit = {
-    val data = classData(ref)
+    val data = classData.get(ref.id)
     data.setPermutations(permutations)
   }
 
   protected override def updateClassSlotsAndPermutations(ref: EClassRef,
                                                          slots: SlotSet,
                                                          permutations: PermutationGroup[SlotMap]): Unit = {
-    val data = classData(ref)
+    val data = classData.get(ref.id)
     data.setSlots(slots)
     data.setPermutations(permutations)
   }
 
-  override def dataForClass(ref: EClassRef): MutableEClassData[NodeT] = classData(ref)
-  override def classes: Iterable[EClassRef] = classData.keys
-  protected override def shapes: Iterable[ENode[NodeT]] = hashCons.keys
-  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = hashCons.getOrElse(node, default)
+  override def dataForClass(ref: EClassRef): MutableEClassData[NodeT] = classData.get(ref.id)
+  override def classes: Iterable[EClassRef] = new Iterable[EClassRef] {
+    override def iterator: Iterator[EClassRef] = new Iterator[EClassRef] {
+      private val it = classData.keySet().iterator()
+      override def hasNext: Boolean = it.hasNext
+      override def next(): EClassRef = EClassRef(it.nextInt())
+    }
+  }
+
+  protected override def shapes: Iterable[ENode[NodeT]] = new Iterable[ENode[NodeT]] {
+    override def iterator: Iterator[ENode[NodeT]] = new Iterator[ENode[NodeT]] {
+      private val it = hashCons.keySet().iterator()
+      override def hasNext: Boolean = it.hasNext
+      override def next(): ENode[NodeT] = it.next()
+    }
+  }
+
+  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+    val id = hashCons.getInt(node)
+    if (id != EClassRef.Invalid.id) EClassRef(id) else default
+  }
 
   protected override def createEmptyClass(slots: SlotSet): EClassRef = {
     val ref = unionFind.add(slots)
-
     val data = new MutableEClassData[NodeT](slots, PermutationGroup.identity(SlotMap.identity(slots)))
-    classData.put(ref, data)
-
+    classData.put(ref.id, data)
     ref
   }
 
   protected override def addNodeToClass(ref: EClassRef, shape: ENode[NodeT], renaming: SlotMap): Unit = {
     // Set the node in the hash cons, update the class data and add the node to the argument e-classes' users.
-    val data = classData(ref)
-    hashCons.put(shape, ref)
+    val data = classData.get(ref.id)
+    hashCons.put(shape, ref.id)
     data.addNode(shape, renaming)
 
     val argsArray = shape.unsafeArgsArray
     var i = 0
     while (i < argsArray.length) {
       val arg = argsArray(i)
-      val argData = classData(arg.ref)
+      val argData = classData.get(arg.ref.id)
       argData.addUser(shape)
       i += 1
     }
@@ -70,15 +87,15 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
       assert(shape.isShape)
     }
 
-    val data = classData(ref)
-    hashCons.remove(shape)
+    val data = classData.get(ref.id)
+    hashCons.removeInt(shape)
     data.removeNode(shape)
 
     val argsArray = shape.unsafeArgsArray
     var i = 0
     while (i < argsArray.length) {
       val arg = argsArray(i)
-      val argData = classData(arg.ref)
+      val argData = classData.get(arg.ref.id)
       argData.removeUser(shape)
       i += 1
     }
@@ -88,8 +105,14 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
    * Unlinks all empty e-classes from the class data map. An e-class is considered empty if it has no nodes.
    */
   protected override def unlinkEmptyClasses(): Unit = {
-    val emptyClasses = classData.collect { case (ref, data) if data.nodes.isEmpty => ref }
-    emptyClasses.foreach(ref => classData.remove(ref))
+    val it = classData.int2ObjectEntrySet().fastIterator()
+    val toRemove = new IntArrayList()
+    while (it.hasNext) {
+      val e = it.next()
+      if (e.getValue.nodes.isEmpty) toRemove.add(e.getIntKey)
+    }
+    val rit = toRemove.iterator()
+    while (rit.hasNext) classData.remove(rit.nextInt())
   }
 
   override def emptied: this.type = {

@@ -118,10 +118,10 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
   }
 
   /**
-   * Query the hash cons for the given node. Returns null if the node is not in the hash cons.
+   * Query the hash cons for the given node. Returns an invalid e-class reference if the node is not in the hash cons.
    *
    * @param node The node to query.
-   * @return The e-class reference of the node, or null if the node is not in the hash cons.
+   * @return The e-class reference of the node, or an invalid reference if the node is not in the hash cons.
    */
   private def nodeToClassOrNull(node: ENode[NodeT]): EClassRef = {
     nodeToRefOrElse(node, EClassRef.Invalid)

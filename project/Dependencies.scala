@@ -17,6 +17,7 @@ object Dependencies {
     val baseDeps = Seq(
       "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
     )
+    val fastutil = Seq("it.unimi.dsi" % "fastutil" % "8.5.13")
 
     val collectionCompat = Seq("org.scala-lang.modules" %% "scala-collection-compat" % "2.13.0")
 
@@ -33,7 +34,7 @@ object Dependencies {
         Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       else Nil
 
-    baseDeps ++ collectionCompat ++ reflectDeps ++ parallelCollections
+    baseDeps ++ collectionCompat ++ reflectDeps ++ parallelCollections ++ fastutil
   }
 
   def testDependencies(scalaVersion: String): Seq[ModuleID] = {
