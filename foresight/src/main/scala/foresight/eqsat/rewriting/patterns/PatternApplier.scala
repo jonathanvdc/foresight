@@ -3,8 +3,8 @@ package foresight.eqsat.rewriting.patterns
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.commands.{CommandScheduleBuilder, IntRef}
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
-import foresight.eqsat.{EClassSymbol, ENode, MixedTree, Slot}
+import foresight.eqsat.rewriting.{Applier, ReversibleApplier, Searcher}
+import foresight.eqsat.{CallTree, EClassCall, EClassSymbol, ENode, MixedTree, Slot}
 
 import scala.collection.compat.immutable.ArraySeq
 import java.util.ArrayDeque
@@ -17,9 +17,9 @@ import java.util.ArrayDeque
  * @tparam EGraphT The type of the e-graph that the applier applies the match to.
  */
 final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedTree[NodeT, Pattern.Var])
-  extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] {
+  extends ReversibleApplier[NodeT, PatternMatch[NodeT], EGraphT] with Applier[NodeT, AbstractPatternMatch[NodeT], EGraphT] {
 
-  override def apply(m: PatternMatch[NodeT], egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
+  override def apply(m: AbstractPatternMatch[NodeT], egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
     val symbol = instantiateAsSimplifiedAddCommand(pattern, m, egraph, builder)
     builder.unionSimplified(EClassSymbol.real(m.root), symbol, egraph)
   }
@@ -68,13 +68,13 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
 
   private final class SimplifiedAddCommandInstantiator {
     // Mutable state to allow pooling; initialized via init() before use.
-    private var m: PatternMatch[NodeT] = _
+    private var m: AbstractPatternMatch[NodeT] = _
     private var egraph: EGraphT = _
     private var builder: CommandScheduleBuilder[NodeT] = _
     private var nodePool: ENode.Pool = _
     private var refPool: IntRef.Pool = _
 
-    def init(m0: PatternMatch[NodeT],
+    def init(m0: AbstractPatternMatch[NodeT],
              egraph0: EGraphT,
              builder0: CommandScheduleBuilder[NodeT],
              nodePool0: ENode.Pool,
@@ -104,12 +104,32 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
 
         case MixedTree.Node(t, defs, uses, args) =>
           val defSlots = defs.map { (s: Slot) =>
-            m.slotMapping.get(s) match {
+            m.get(s) match {
               case Some(v) => v
               case None => Slot.fresh()
             }
           }
-          val newMatch = m.copy(slotMapping = m.slotMapping ++ defs.zip(defSlots))
+          
+          val newMatch = new AbstractPatternMatch[NodeT] {
+            override def root: EClassCall = m.root
+            override def apply(variable: Pattern.Var): CallTree[NodeT] = m.apply(variable)
+            override def apply(slot: Slot): Slot = {
+              if (defs.contains(slot)) {
+                val index = defs.indexOf(slot)
+                defSlots(index)
+              } else {
+                m.apply(slot)
+              }
+            }
+            override def get(slot: Slot): Option[Slot] = {
+              if (defs.contains(slot)) {
+                val index = defs.indexOf(slot)
+                Some(defSlots(index))
+              } else {
+                m.get(slot)
+              }
+            }
+          }
 
           // Acquire a nested instantiator.
           val nested = SimplifiedAddCommandInstantiator.acquire()
@@ -160,7 +180,7 @@ final case class PatternApplier[NodeT, EGraphT <: EGraph[NodeT]](pattern: MixedT
   }
 
   private def instantiateAsSimplifiedAddCommand(pattern: MixedTree[NodeT, Pattern.Var],
-                                                m: PatternMatch[NodeT],
+                                                m: AbstractPatternMatch[NodeT],
                                                 egraph: EGraphT,
                                                 builder: CommandScheduleBuilder[NodeT]): EClassSymbol = {
 

@@ -34,6 +34,13 @@ final case class PatternMatch[NodeT](root: EClassCall,
   override def apply(slot: Slot): Slot = slotMapping(slot)
 
   /**
+   * Gets the slot that corresponds to a slot variable, returning an option.
+   * @param slot The slot variable.
+   * @return The slot if it exists; None otherwise.
+   */
+  override def get(slot: Slot): Option[Slot] = slotMapping.get(slot)
+
+  /**
    * Creates an updated match with a new variable binding.
    * @param variable The variable to bind.
    * @param value The value to bind the variable to.
