@@ -83,7 +83,7 @@ trait CommandScheduleBuilder[NodeT] {
 
   private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
-    val maxBatch = IntRef(0)
+    val maxBatch = new IntRef(0)
     addSimplifiedReal(tree, egraph, maxBatch)
   }
 
@@ -93,7 +93,7 @@ trait CommandScheduleBuilder[NodeT] {
     tree match {
       case MixedTree.Node(t, defs, uses, args) =>
         // Local accumulator for children of this node.
-        val childMax = IntRef(0)
+        val childMax = new IntRef(0)
         val argSymbols = CommandScheduleBuilder.symbolArrayFrom(
           args,
           childMax,
