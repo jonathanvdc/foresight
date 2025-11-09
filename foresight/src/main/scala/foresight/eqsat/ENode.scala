@@ -533,7 +533,7 @@ object ENode {
       if (arr eq null) return
       val len = arr.length
       if (len == 0) return
-      java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
+      // java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
       val q = slotDeque(len)
       if ((q ne null) && q.size() < perBucketCap) q.addFirst(arr)
     }
@@ -546,7 +546,7 @@ object ENode {
       if (arr eq null) return
       val len = arr.length
       if (len == 0) return
-      java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
+      // java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
       val q = callDeque(len)
       if ((q ne null) && q.size() < perBucketCap) q.addFirst(arr)
     }
