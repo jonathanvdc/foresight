@@ -14,7 +14,8 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
                                                private val boundVarsArr: Array[EClassCall],
                                                private val boundSlotsArr: Array[Slot],
                                                private val boundNodesArr: Array[ENode[NodeT]],
-                                               private val homePool: MutableMachineState.Pool[NodeT]) {
+                                               private val homePool: MutableMachineState.Pool[NodeT])
+    extends AbstractPatternMatch[NodeT] {
 
   private var regIdx: Int = 0
   private var varIdx: Int = 0
@@ -195,6 +196,51 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
    */
   def toPatternMatch: PatternMatch[NodeT] = {
     PatternMatch(registersArr(0), boundVars, boundSlots)
+  }
+
+  /**
+   * The e-class in which the pattern was found.
+   */
+  override def root: EClassCall = registersArr(0)
+
+  /**
+   * Gets the tree that corresponds to a variable.
+   *
+   * @param variable The variable.
+   * @return The tree.
+   */
+  override def apply(variable: Pattern.Var): CallTree[NodeT] = {
+    val i = effects.boundVars.indexOf(variable)
+    if (i < 0 || i >= varIdx)
+      throw new NoSuchElementException(s"Variable $variable not bound in this state")
+
+    boundVarsArr(i)
+  }
+
+  /**
+   * Gets the slot that corresponds to a slot variable.
+   *
+   * @param slot The slot variable.
+   * @return The slot.
+   */
+  override def apply(slot: Slot): Slot = {
+    val i = effects.boundSlots.indexOf(slot)
+    if (i < 0 || i >= slotIdx)
+      throw new NoSuchElementException(s"Slot $slot not bound in this state")
+
+    boundSlotsArr(i)
+  }
+
+  /**
+   * Gets the slot that corresponds to a slot variable, returning an option.
+   *
+   * @param slot The slot variable.
+   * @return The slot if it exists; None otherwise.
+   */
+  override def get(slot: Slot): Option[Slot] = {
+    val i = effects.boundSlots.indexOf(slot)
+    if (i >= 0 && i < slotIdx) Some(boundSlotsArr(i))
+    else None
   }
 }
 
