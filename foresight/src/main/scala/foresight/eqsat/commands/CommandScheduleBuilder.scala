@@ -7,7 +7,6 @@ import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
 import scala.collection.compat.immutable.ArraySeq
-import scala.runtime.IntRef
 
 /**
  * Constructs commands for later execution. Commands are scheduled in batches.

@@ -1,13 +1,12 @@
 package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.collections.SlotSeq
-import foresight.eqsat.commands.CommandScheduleBuilder
+import foresight.eqsat.commands.{CommandScheduleBuilder, IntRef}
 import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.{ReversibleApplier, Searcher}
 import foresight.eqsat.{EClassSymbol, MixedTree, Slot}
 
 import scala.collection.compat.immutable.ArraySeq
-import scala.runtime.IntRef
 
 /**
  * An applier that applies a pattern match to an e-graph.
