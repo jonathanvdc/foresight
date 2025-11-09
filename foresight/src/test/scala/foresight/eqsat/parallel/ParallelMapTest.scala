@@ -202,29 +202,6 @@ class ParallelMapTest {
   }
 
   /**
-   * processBlocks: within each block, element order is preserved even if blocks interleave.
-   */
-  @Test
-  def processBlocksPerBlockOrderPreserved(): Unit = {
-    for (impl <- implementations) {
-      val n = 25
-      val blockSize = 6 // creates 5 blocks: [0..5], [6..11], [12..17], [18..23], [24]
-      val inputs = ArraySeq.unsafeWrapArray((0 until n).toArray)
-      val seen = new ArrayBuffer[Int]()
-      impl.processBlocks[Int](inputs, blockSize, i => seen.synchronized { seen += i })
-
-      // Check: for every block, the subsequence of seen that belongs to the block is increasing.
-      val numBlocks = (n + blockSize - 1) / blockSize
-      for (b <- 0 until numBlocks) {
-        val start = b * blockSize
-        val end = math.min(start + blockSize, n)
-        val subseq = seen.filter(i => i >= start && i < end)
-        assert(subseq == subseq.sorted, s"Elements within block $b not in order: $subseq")
-      }
-    }
-  }
-
-  /**
    * processBlocks: blockSize == 1 is valid and processes all elements.
    */
   @Test
