@@ -11,7 +11,7 @@ import scala.collection.compat._
  */
 final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
                                                private val registersArr: Array[EClassCall],
-                                               private val boundVarsArr: Array[MixedTree[NodeT, EClassCall]],
+                                               private val boundVarsArr: Array[EClassCall],
                                                private val boundSlotsArr: Array[Slot],
                                                private val boundNodesArr: Array[ENode[NodeT]],
                                                private val homePool: MutableMachineState.Pool[NodeT]) {
@@ -165,13 +165,19 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
    * Bind a variable to a value.
    * @param value The value to bind the variable to.
    */
-  def bindVar(value: MixedTree[NodeT, EClassCall]): Unit = {
+  def bindVar(value: EClassCall): Unit = {
     boundVarsArr(varIdx) = value
     varIdx += 1
   }
 
   private def boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]] = {
-    ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, java.util.Arrays.copyOf(boundVarsArr, varIdx), varIdx)
+    val values = new Array[MixedTree[NodeT, EClassCall]](varIdx)
+    var i = 0
+    while (i < varIdx) {
+      values(i) = MixedTree.Atom(boundVarsArr(i))
+      i += 1
+    }
+    ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, values, varIdx)
   }
 
   private def boundSlots: ArrayMap[Slot, Slot] = {
@@ -206,7 +212,7 @@ object MutableMachineState {
   // Preallocate single empty arrays of the right types to avoid repeated allocations
   // when effects report zero bound vars/slots/nodes.
   // Unsafe casts are safe because these arrays are never written to.
-  private val emptyVars  = new Array[MixedTree[_, EClassCall]](0)
+  private val emptyVars  = new Array[EClassCall](0)
   private val emptySlots = new Array[Slot](0)
   private val emptyNodes = new Array[ENode[_]](0)
 
@@ -221,7 +227,7 @@ object MutableMachineState {
     val m = new MutableMachineState[NodeT](
       effects,
       new Array[EClassCall](1 + effects.createdRegisters),
-      if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
+      if (varsLen  > 0) new Array[EClassCall](varsLen) else emptyVars,
       if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,
       if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]],
       pool
