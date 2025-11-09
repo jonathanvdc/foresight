@@ -4,7 +4,7 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.{EClassRef, ENode}
 import foresight.eqsat.hashCons.{AbstractMutableHashConsEGraph, PermutationGroup}
 import foresight.util.Debug
-
+import it.unimi.dsi.fastutil.Hash
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import it.unimi.dsi.fastutil.ints.{Int2ObjectOpenHashMap, IntArrayList}
 
@@ -13,7 +13,7 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
   type UnionFind = SlottedUnionFind
 
   protected override val unionFind: SlottedUnionFind = new SlottedUnionFind()
-  private val hashCons = new Object2IntOpenHashMap[ENode[NodeT]]()
+  private val hashCons = new Object2IntOpenHashMap[ENode[NodeT]](16, Hash.VERY_FAST_LOAD_FACTOR)
   private val classData = new Int2ObjectOpenHashMap[MutableEClassData[NodeT]]()
   hashCons.defaultReturnValue(EClassRef.Invalid.id)
 
