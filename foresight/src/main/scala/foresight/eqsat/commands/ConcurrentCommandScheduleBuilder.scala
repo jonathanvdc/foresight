@@ -3,6 +3,7 @@ package foresight.eqsat.commands
 import foresight.eqsat.{EClassSymbol, ENode, ENodeSymbol}
 import foresight.util.collections.UnsafeSeqFromArray
 
+import java.util.function.Function
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue}
 import scala.collection.compat.immutable.ArraySeq
 import scala.reflect.ClassTag
@@ -19,7 +20,11 @@ private[commands] class ConcurrentCommandScheduleBuilder[NodeT] extends CommandS
         case _ => throw new IllegalArgumentException("Only ENode instances are allowed in batch 0")
       }
     } else {
-      val queue = otherBatchAdds.computeIfAbsent(batch, _ => new ConcurrentLinkedQueue())
+      val queue = otherBatchAdds.computeIfAbsent(batch, new Function[Int, ConcurrentLinkedQueue[(EClassSymbol.Virtual, ENodeSymbol[NodeT])]] {
+        override def apply(t: Int): ConcurrentLinkedQueue[(EClassSymbol.Virtual, ENodeSymbol[NodeT])] = {
+          new ConcurrentLinkedQueue()
+        }
+      })
       queue.add((symbol, node))
     }
   }
