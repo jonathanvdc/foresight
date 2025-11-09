@@ -423,6 +423,14 @@ final class ENode[+NodeT] private (
  * Constructors and helpers for [[ENode]].
  */
 object ENode {
+  private val newSlotDequeDelegate = new java.util.function.Function[Int, java.util.ArrayDeque[Array[Slot]]] {
+    override def apply(t: Int): java.util.ArrayDeque[Array[Slot]] = new java.util.ArrayDeque[Array[Slot]]
+  }
+
+  private val newCallDequeDelegate = new java.util.function.Function[Int, java.util.ArrayDeque[Array[EClassCall]]] {
+    override def apply(t: Int): java.util.ArrayDeque[Array[EClassCall]] = new java.util.ArrayDeque[Array[EClassCall]]
+  }
+
   /**
    * Pool for building and recycling `ENode`s with re-usable backing arrays.
    *
@@ -436,7 +444,7 @@ object ENode {
     private val slotBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[Slot]]]()
     private val callBuckets = new java.util.HashMap[Int, java.util.ArrayDeque[Array[EClassCall]]]()
     // Free-list of reusable ENode objects
-    private val nodeFree   = new java.util.ArrayDeque[ENode[Any]]()
+    private val nodeFree = new java.util.ArrayDeque[ENode[Any]]()
     private def borrowNode(): ENode[Any] = {
       if (nodeFree.isEmpty) new ENode[Any](null.asInstanceOf[Any], emptySlotArray, emptySlotArray, emptyCallArray)
       else nodeFree.removeFirst()
@@ -458,7 +466,7 @@ object ENode {
      */
     def acquireSlotArray(len: Int): Array[Slot] = {
       if (len == 0) return emptySlotArray
-      val q = slotBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[Slot]]())
+      val q = slotBuckets.computeIfAbsent(len, newSlotDequeDelegate)
       val arr = if (q.isEmpty) new Array[Slot](len) else q.removeFirst()
       arr
     }
@@ -470,7 +478,7 @@ object ENode {
      */
     def acquireCallArray(len: Int): Array[EClassCall] = {
       if (len == 0) return emptyCallArray
-      val q = callBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[EClassCall]]())
+      val q = callBuckets.computeIfAbsent(len, newCallDequeDelegate)
       val arr = if (q.isEmpty) new Array[EClassCall](len) else q.removeFirst()
       arr
     }
@@ -484,7 +492,7 @@ object ENode {
       val len = arr.length
       if (len == 0) return
       java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
-      val q = slotBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[Slot]]())
+      val q = slotBuckets.computeIfAbsent(len, newSlotDequeDelegate)
       if (q.size() < perBucketCap) q.addFirst(arr)
     }
 
@@ -497,7 +505,7 @@ object ENode {
       val len = arr.length
       if (len == 0) return
       java.util.Arrays.fill(arr.asInstanceOf[Array[AnyRef]], null)
-      val q = callBuckets.computeIfAbsent(len, _ => new java.util.ArrayDeque[Array[EClassCall]]())
+      val q = callBuckets.computeIfAbsent(len, newCallDequeDelegate)
       if (q.size() < perBucketCap) q.addFirst(arr)
     }
 
@@ -604,7 +612,7 @@ object ENode {
 
   /** Thread-local default pool for lightweight reuse without wiring one through call sites. */
   private val threadLocalDefaultPool = new ThreadLocal[Pool] { override def initialValue(): Pool = new Pool(64) }
-  
+
   /** Creates a new pool with the given per-bucket capacity. */
   def newPool(perBucketCap: Int = 64): Pool = new Pool(perBucketCap)
 
