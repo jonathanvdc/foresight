@@ -97,7 +97,7 @@ final case class CommandSchedule[NodeT](batchZero: (ArraySeq[EClassSymbol.Virtua
   def apply(egraph: mutable.EGraph[NodeT],
             parallelize: ParallelMap): Boolean = {
 
-    val reification = util.IdentityHashMap[EClassSymbol.Virtual, foresight.eqsat.EClassCall]()
+    val reification = new util.IdentityHashMap[EClassSymbol.Virtual, foresight.eqsat.EClassCall]()
 
     var anyChanges: Boolean = false
     anyChanges = anyChanges | applyBatchZero(egraph, parallelize, reification)
