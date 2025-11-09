@@ -16,21 +16,22 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  */
 final case class PatternMatch[NodeT](root: EClassCall,
                                      varMapping: ArrayMap[Pattern.Var, CallTree[NodeT]],
-                                     slotMapping: ArrayMap[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
+                                     slotMapping: ArrayMap[Slot, Slot])
+  extends AbstractPatternMatch[NodeT] with PortableMatch[NodeT, PatternMatch[NodeT]] {
 
   /**
    * Gets the tree that corresponds to a variable.
    * @param variable The variable.
    * @return The tree.
    */
-  def apply(variable: Pattern.Var): CallTree[NodeT] = varMapping(variable)
+  override def apply(variable: Pattern.Var): CallTree[NodeT] = varMapping(variable)
 
   /**
    * Gets the slot that corresponds to a slot variable.
    * @param slot The slot variable.
    * @return The slot.
    */
-  def apply(slot: Slot): Slot = slotMapping(slot)
+  override def apply(slot: Slot): Slot = slotMapping(slot)
 
   /**
    * Creates an updated match with a new variable binding.
