@@ -93,7 +93,7 @@ class CommandScheduleBuilderTest {
   }
 
   /**
-   * Batch index correctness: all direct parents must have strictly higher batch index than their children.
+   * Batch index correctness: all direct parents have strictly higher batch index than their children.
    */
   @Test
   def batchIndexParentsGreaterThanChildren(): Unit = {
@@ -168,7 +168,7 @@ class CommandScheduleBuilderTest {
   }
 
   /**
-   * addSimplifiedReal: Atom path should return the same real symbol and schedule nothing.
+   * addSimplifiedReal: Atom path returns the same real symbol and schedules nothing.
    */
   @Test
   def addSimplifiedRealAtomNoop(): Unit = {
@@ -190,7 +190,7 @@ class CommandScheduleBuilderTest {
       g1
     )
 
-    // It should return the same real symbol and schedule nothing.
+    // It returns the same real symbol and schedules nothing.
     assert(sym == EClassSymbol.real(realCall))
     val out = baseBuilder.result()
     assert(out.additions.isEmpty)
@@ -198,7 +198,7 @@ class CommandScheduleBuilderTest {
   }
 
   /**
-   * addSimplifiedReal: Single node with no children should schedule exactly one addition.
+   * addSimplifiedReal: Single node with no children schedules exactly one addition.
    */
   @Test
   def addSimplifiedRealSingleNodeAddsOne(): Unit = {
@@ -218,14 +218,14 @@ class CommandScheduleBuilderTest {
     val g1 = g1opt.get
     assert(g1.classes.nonEmpty)
 
-    // The returned symbol should be virtual and present in the first (and only) batch.
+    // The returned symbol is virtual and present in the first (and only) batch.
     val (syms0, nodes0) = sched.additions.head
     assert(syms0.contains(sym))
     assert(nodes0.nonEmpty)
   }
 
   /**
-   * addSimplifiedReal: Nested tree should create children first (earlier batch), then parent (later batch).
+   * addSimplifiedReal: Nested tree creates children first (earlier batch), then parent (later batch).
    */
   @Test
   def addSimplifiedRealNestedBatchesIncrease(): Unit = {
@@ -263,18 +263,18 @@ class CommandScheduleBuilderTest {
     assert(sched.additions.size == 2)
     assert(sched.otherBatches.length == 1)
 
-    // First batch should contain the child, second batch the parent.
+    // First batch contains the child, second batch the parent.
     assert(sched.batchZero._1.contains(childSym))
     assert(sched.otherBatches(0)._1.contains(parentSym))
 
-    // Applying the schedule should add exactly two new classes.
+    // Applying the schedule adds exactly two new classes.
     val g2 = sched.applyImmutable(g1, ParallelMap.sequential).get
     assert(g2.classes.size == g1.classes.size + 2)
   }
 
 
   /**
-   * addSimplifiedReal: Complex tree should preserve strict batch layering across depths.
+   * addSimplifiedReal: Complex tree preserves strict batch layering across depths.
    * Level 1 (children of real atoms) -> Level 2 (parents of level 1) -> Level 3 (root).
    */
   @Test
@@ -342,18 +342,18 @@ class CommandScheduleBuilderTest {
     assert(sched.additions.size == 3)
     assert(sched.otherBatches.length == 2)
 
-    // Level 1 batch (batchZero) should contain both children
+    // Level 1 batch (batchZero) contains both children
     assert(sched.batchZero._1.contains(childSym1))
     assert(sched.batchZero._1.contains(childSym2))
 
-    // Level 2 batch should contain both parents
+    // Level 2 batch contains both parents
     assert(sched.otherBatches(0)._1.contains(parentSym1))
     assert(sched.otherBatches(0)._1.contains(parentSym2))
 
-    // Level 3 batch should contain the root
+    // Level 3 batch contains the root
     assert(sched.otherBatches(1)._1.contains(rootSym))
 
-    // Applying the schedule should add exactly 5 new classes (2 L1 + 2 L2 + 1 L3)
+    // Applying the schedule adds exactly 5 new classes (2 L1 + 2 L2 + 1 L3)
     val g2 = sched.applyImmutable(g1, ParallelMap.sequential).get
     assert(g2.classes.size == g1.classes.size + 5)
   }
