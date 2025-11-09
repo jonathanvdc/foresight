@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol}
+import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
 import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
@@ -165,5 +165,110 @@ class CommandScheduleBuilderTest {
     val g2 = sched2.applyImmutable(g1, ParallelMap.sequential).get
 
     assert(g2.classes.size == 1)
+  }
+
+  /**
+   * addSimplifiedReal: Atom path should return the same real symbol and schedule nothing.
+   */
+  @Test
+  def addSimplifiedRealAtomNoop(): Unit = {
+    val baseBuilder = CommandScheduleBuilder.newConcurrentBuilder[Int]
+    val g0 = EGraph.empty[Int]
+
+    // Create one real class in the graph so we can obtain a real EClassCall.
+    val seed = CommandScheduleBuilder.newConcurrentBuilder[Int]
+    val v = seed.add(ENode(42, Seq.empty, Seq.empty, Seq.empty), 0)
+    val sched = seed.result()
+    val g1 = sched.applyImmutable(g0, ParallelMap.sequential).get
+
+    // Get a real call referring to the inserted class.
+    val realCall: EClassCall = g1.canonicalize(g1.classes.head)
+
+    // Use addSimplifiedReal on an Atom (real call).
+    val sym = baseBuilder.addSimplifiedReal(
+      MixedTree.Atom[Int, EClassCall](realCall),
+      g1
+    )
+
+    // It should return the same real symbol and schedule nothing.
+    assert(sym == EClassSymbol.real(realCall))
+    val out = baseBuilder.result()
+    assert(out.additions.isEmpty)
+    assert(out.unions.isEmpty)
+  }
+
+  /**
+   * addSimplifiedReal: Single node with no children should schedule exactly one addition.
+   */
+  @Test
+  def addSimplifiedRealSingleNodeAddsOne(): Unit = {
+    val builder = CommandScheduleBuilder.newConcurrentBuilder[Int]
+    val g0 = EGraph.empty[Int]
+
+    // Build a trivial 1-node tree: Node(7, [], [], [])
+    val tree = MixedTree.Node[Int, EClassCall](7, SlotSeq.empty, SlotSeq.empty, ArraySeq.empty[MixedTree[Int, EClassCall]])
+    val sym = builder.addSimplifiedReal(tree, g0)
+
+    // We only care that exactly one node gets scheduled and applying the schedule grows the graph by 1.
+    val sched = builder.result()
+    assert(sched.additions.size == 1)
+
+    val g1opt = sched.applyImmutable(g0, ParallelMap.sequential)
+    assert(g1opt.nonEmpty)
+    val g1 = g1opt.get
+    assert(g1.classes.nonEmpty)
+
+    // The returned symbol should be virtual and present in the first (and only) batch.
+    val (syms0, nodes0) = sched.additions.head
+    assert(syms0.contains(sym))
+    assert(nodes0.nonEmpty)
+  }
+
+  /**
+   * addSimplifiedReal: Nested tree should create children first (earlier batch), then parent (later batch).
+   */
+  @Test
+  def addSimplifiedRealNestedBatchesIncrease(): Unit = {
+    val g0 = EGraph.empty[Int]
+    val builder = CommandScheduleBuilder.newConcurrentBuilder[Int]
+
+    // Seed a real leaf in the graph to use as an Atom in the child.
+    val seed = CommandScheduleBuilder.newConcurrentBuilder[Int]
+    val leafV = seed.add(ENode(1, Seq.empty, Seq.empty, Seq.empty), 0)
+    val seedSched = seed.result()
+    val g1 = seedSched.applyImmutable(g0, ParallelMap.sequential).get
+    val realLeaf: EClassCall = g1.canonicalize(g1.classes.head)
+
+    // child = Node(10, [], [], [ Atom(realLeaf) ])
+    val child = MixedTree.Node[Int, EClassCall](
+      10,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(MixedTree.Atom[Int, EClassCall](realLeaf))
+    )
+    // parent = Node(20, [], [], [ child ])
+    val parent = MixedTree.Node[Int, EClassCall](
+      20,
+      SlotSeq.empty,
+      SlotSeq.empty,
+      ArraySeq(child)
+    )
+
+    // Instantiate child first to get its symbol and ensure batch ordering is visible.
+    val childSym = builder.addSimplifiedReal(child, g1)
+    val parentSym = builder.addSimplifiedReal(parent, g1)
+
+    val sched = builder.result()
+    // Expect two distinct non-empty batches for additions beyond batch 0.
+    assert(sched.additions.size == 2)
+    assert(sched.otherBatches.length == 1)
+
+    // First batch should contain the child, second batch the parent.
+    assert(sched.batchZero._1.contains(childSym))
+    assert(sched.otherBatches(0)._1.contains(parentSym))
+
+    // Applying the schedule should add exactly two new classes.
+    val g2 = sched.applyImmutable(g1, ParallelMap.sequential).get
+    assert(g2.classes.size == g1.classes.size + 2)
   }
 }
