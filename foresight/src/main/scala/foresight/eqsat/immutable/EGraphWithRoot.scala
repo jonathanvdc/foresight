@@ -1,6 +1,7 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat.*
+import foresight.eqsat.{EClassCall, ENode}
+import foresight.eqsat.readonly
 import foresight.eqsat.parallel.ParallelMap
 
 import scala.collection.compat.immutable.ArraySeq
