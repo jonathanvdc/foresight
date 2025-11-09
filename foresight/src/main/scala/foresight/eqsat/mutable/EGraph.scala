@@ -5,6 +5,8 @@ import foresight.eqsat.readonly
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, Tree}
 import foresight.eqsat.hashCons.mutable.HashConsEGraph
 
+import scala.collection.compat.immutable.ArraySeq
+
 /**
  * A mutable e-graph that supports adding e-nodes and merging e-classes.
  *
@@ -26,7 +28,7 @@ trait EGraph[NodeT] extends readonly.EGraph[NodeT] {
    * @param parallelize  Strategy used for any parallel work within the addition.
    * @return Per-node results in input order.
    */
-  def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): Seq[AddNodeResult]
+  def tryAddMany(nodes: ArraySeq[ENode[NodeT]], parallelize: ParallelMap): ArraySeq[AddNodeResult]
 
   /**
    * Unions (merges) pairs of e-classes.
@@ -63,7 +65,7 @@ trait EGraph[NodeT] extends readonly.EGraph[NodeT] {
    * @return E-class of `node`.
    */
   final def add(node: ENode[NodeT]): EClassCall = {
-    tryAddMany(Seq(node), ParallelMap.sequential) match {
+    tryAddMany(ArraySeq(node), ParallelMap.sequential) match {
       case Seq(AddNodeResult.Added(call)) => call
       case Seq(AddNodeResult.AlreadyThere(call)) => call
       case _ => throw new IllegalStateException("Unexpected result from tryAddMany")

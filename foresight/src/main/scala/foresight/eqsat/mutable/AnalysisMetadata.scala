@@ -113,19 +113,97 @@ object AnalysisMetadata {
   def compute[NodeT, A](analysis: Analysis[NodeT, A],
                         egraph: EGraph[NodeT]): AnalysisMetadata[NodeT, A] = {
     val result = new AnalysisMetadata[NodeT, A](analysis)
-    val updater = new AnalysisUpdater(analysis, egraph, result.results)
 
-    // Seed: nodes with no arguments.
-    for (c <- egraph.classes) {
-      for (node <- egraph.nodes(egraph.canonicalize(c))) {
-        if (node.args.isEmpty) {
-          updater.update(c, analysis.make(node, Seq.empty))
+    import scala.collection.mutable
+
+    // Worklist of nodes that are READY (all arg classes have results).
+    val nodeQueue = new mutable.Queue[ENode[NodeT]]()
+    // Tracks nodes currently pending in the queue; cleared on dequeue to allow re-enqueue after deps improve.
+    val enqueued = new mutable.HashSet[ENode[NodeT]]()
+
+    // Fast contains on class results.
+    @inline def hasClass(ref: EClassRef): Boolean =
+      result.results.contains(ref)
+
+    // Read a class result (must exist).
+    @inline def getClass(ref: EClassRef): A =
+      result.results(ref)
+
+    // Compute A for an EClassCall using already-available class result.
+    @inline def evalCall(call: EClassCall): A =
+      analysis.rename(getClass(call.ref), call.args)
+
+    // Merge a nodeResult into its class; return true if the class improved.
+    def mergeIntoClass(ref: EClassRef, nodeResult: A): Boolean = {
+      result.results.get(ref) match {
+        case Some(old) =>
+          val joined = analysis.join(old, nodeResult)
+          if (joined.asInstanceOf[AnyRef] ne old.asInstanceOf[AnyRef]) { // fast-path ref compare
+            if (joined != old) { // fallback equals in case A is value-based
+              result.results(ref) = joined
+              true
+            } else false
+          } else false
+        case None =>
+          result.results(ref) = nodeResult
+          true
+      }
+    }
+
+    // When a class improves, try to enqueue its user nodes that are now fully ready.
+    def onClassImproved(ref: EClassRef): Unit = {
+      val users = egraph.users(ref)
+      for (n <- users) {
+        if (!enqueued.contains(n)) {
+          // A node is ready if all its argument classes already have results.
+          val ready = {
+            var ok = true
+            var ai = 0
+            val as = n.args
+            while (ok && ai < as.length) {
+              ok = hasClass(as(ai).ref)
+              ai += 1
+            }
+            ok
+          }
+          if (ready) {
+            enqueued += n
+            nodeQueue.enqueue(n)
+          }
         }
       }
     }
 
-    // Propagate to a fixed point; eventually touches all e-nodes.
-    updater.processPending(initialized = false)
+    // Seed step: evaluate all nullary nodes and propagate their classes.
+    // Also opportunistically enqueue any users that become ready.
+    {
+      val classes = egraph.classes
+      for (c <- classes) {
+        val canon = egraph.canonicalize(c)
+        val nodes = egraph.nodes(canon)
+        for (n <- nodes) {
+          if (n.args.isEmpty) {
+            val nodeResult = analysis.make(n, Seq.empty)
+            if (mergeIntoClass(c, nodeResult)) {
+              onClassImproved(c)
+            }
+          }
+        }
+      }
+    }
+
+    // Main loop: process ready nodes once.
+    while (nodeQueue.nonEmpty) {
+      val n = nodeQueue.dequeue()
+      // Mark as no longer pending so that future upstream improvements can re-enqueue it.
+      enqueued -= n
+      // All arg classes are available by construction.
+      val nodeResult = analysis.make(n, n.args.map(evalCall))
+      val cls = egraph.find(n).get.ref
+      if (mergeIntoClass(cls, nodeResult)) {
+        onClassImproved(cls)
+      }
+    }
 
     result
   }

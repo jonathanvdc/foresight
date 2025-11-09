@@ -4,6 +4,7 @@ import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, ENode, readonly}
 
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable
 
 /**
@@ -78,7 +79,7 @@ final class EGraphWithMetadata[
     metadata.remove(name).isDefined
   }
 
-  override def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): Seq[AddNodeResult] = {
+  override def tryAddMany(nodes: ArraySeq[ENode[NodeT]], parallelize: ParallelMap): ArraySeq[AddNodeResult] = {
     val results = egraph.tryAddMany(nodes, parallelize)
     val newNodes = nodes.zip(results).collect {
       case (node, AddNodeResult.Added(call)) =>

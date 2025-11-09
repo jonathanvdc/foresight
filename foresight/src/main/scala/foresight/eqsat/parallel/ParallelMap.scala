@@ -150,32 +150,31 @@ trait ParallelMap {
    * Processes a single block of elements from an array sequence.
    * @param inputs The input array sequence.
    * @param blockIdx The index of the block to process.
-   * @param blockSize The size of each block.
+   * @param stride The stride between elements in the block.
    * @param f The function to apply to each element.
    * @tparam A The type of elements in the input array sequence.
    */
-  protected def processBlock[A](inputs: ArraySeq[A], blockIdx: Int, blockSize: Int, f: A => Unit): Unit = {
-    val start = blockIdx * blockSize
-    val end = math.min(start + blockSize, inputs.length)
-    var i = start
-    while (i < end) {
+  protected def processBlock[A](inputs: ArraySeq[A], blockIdx: Int, stride: Int, f: A => Unit): Unit = {
+    val len = inputs.length
+    var i = blockIdx
+    while (i < len) {
       f(inputs(i))
-      i += 1
+      i += stride
     }
   }
 
   /**
-   * Applies a function to each element of an array sequence in blocks. Blocks control the
-   * granularity of parallelism: each block is processed sequentially, while different blocks
-   * may be processed in parallel.
+   * Applies a function to each element of an array sequence using **stripes**.
+   * A stripe processes every `numStripes`-th element starting at a given offset:
+   *   - Stripe `s` processes indices `s, s + numStripes, s + 2*numStripes, ...`.
    *
-   * - Each block is processed in input order (sequentially within the block).
-   * - Blocks may execute concurrently, and their relative order is not guaranteed.
+   * - Each stripe is processed in input order relative to its own indices (sequential within the stripe).
+   * - Stripes may execute concurrently; their relative completion order is not guaranteed.
    * - If wrapped by a [[cancelable]] strategy, cancellation is checked before and during
-   *   processing (between blocks and between elements within a block).
+   *   processing (between stripes and between elements within a stripe).
    *
    * @param inputs The input array sequence.
-   * @param blockSize The size of each block to process. Must be positive.
+   * @param blockSize The number of stripes (acts as the stride). Must be positive.
    * @param f The function to apply to each element.
    * @tparam A The type of elements in the input array sequence.
    * @throws IllegalArgumentException if `blockSize <= 0`
@@ -185,18 +184,19 @@ trait ParallelMap {
       throw new IllegalArgumentException(s"blockSize must be positive, got $blockSize")
     }
 
-    val numBlocks = ((inputs.length.toLong + blockSize - 1) / blockSize).toInt
-    if (numBlocks == 0) {
-      // No blocks: nothing to do
+    if (inputs.isEmpty) {
       return
     }
 
+    // Cap stripes to the input length to avoid launching empty work
+    val numBlocks = ((inputs.length.toLong + blockSize - 1) / blockSize).toInt
+
     if (numBlocks == 1) {
-      // Single block: process sequentially to avoid overhead
-      processBlock(inputs, 0, blockSize, f)
+      // Single stripe: process sequentially to avoid overhead
+      processBlock(inputs, 0, 1, f)
     } else {
-      // Multiple blocks: process in parallel
-      apply[Int, Unit](0 until numBlocks, processBlock(inputs, _, blockSize, f))
+      // Multiple stripes: process in parallel
+      apply[Int, Unit](0 until numBlocks, processBlock(inputs, _, numBlocks, f))
     }
   }
 

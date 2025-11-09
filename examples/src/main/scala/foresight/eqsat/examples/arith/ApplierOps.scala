@@ -1,8 +1,8 @@
 package foresight.eqsat.examples.arith
 
-import foresight.eqsat.commands.Command
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.readonly.{EGraphWithMetadata, EGraph}
+import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat._
@@ -24,7 +24,7 @@ object ApplierOps {
                    destination: Pattern.Var): Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] = {
 
       new Applier[ArithIR, PatternMatch[ArithIR], EGraphWithMetadata[ArithIR, EGraphT]] {
-        override def apply(m: PatternMatch[ArithIR], egraph: EGraphWithMetadata[ArithIR, EGraphT]): Command[ArithIR] = {
+        override def apply(m: PatternMatch[ArithIR], egraph: EGraphWithMetadata[ArithIR, EGraphT], builder: CommandScheduleBuilder[ArithIR]): Unit = {
           val extracted = ExtractionAnalysis.smallest[ArithIR].extractor[EGraphT](m(source), egraph)
 
           def subst(tree: Tree[ArithIR]): MixedTree[ArithIR, EClassCall] = {
@@ -37,7 +37,7 @@ object ApplierOps {
 
           val substituted = subst(extracted)
           val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
-          applier.apply(newMatch, egraph)
+          applier.apply(newMatch, egraph, builder)
         }
       }
     }

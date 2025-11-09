@@ -1,12 +1,10 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.commands.Command
+import foresight.eqsat.commands.{CommandSchedule, CommandScheduleBuilder}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.immutable
 import foresight.eqsat.mutable
 import foresight.eqsat.readonly.EGraph
-
-import scala.collection.mutable.HashMap
 
 /**
  * A rewrite rule encapsulates a search-and-replace operation on an e-graph.
@@ -48,31 +46,64 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
   /**
    * Build a staged command from a precomputed set of matches.
    *
+   * @param matches     Matches to apply.
+   * @param egraph      Target e-graph from which matches were derived.
+   * @param parallelize Parallel strategy used when building per-match commands.
+   * @param builder     Command schedule builder to accumulate per-match commands into.
+   * @throws Rule.ApplicationException
+   * if constructing the per-match commands fails.
+   */
+  def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap, builder: CommandScheduleBuilder[NodeT]): Unit
+
+  /**
+   * Build a staged command from a precomputed set of matches.
+   *
    * This overload is useful when you have already performed searching (e.g., to de-duplicate across rules)
    * but still want to construct a single command that applies all matches.
    *
    * @param matches     Matches to apply.
    * @param egraph      Target e-graph from which matches were derived.
    * @param parallelize Parallel strategy used when building per-match commands.
-   * @return An optimized [[CommandQueue]] encapsulated as a [[Command]].
+   * @return An optimized [[CommandQueue]] encapsulated as a [[CommandSchedule]].
    * @throws Rule.ApplicationException
    * if constructing the per-match commands fails.
    */
-  def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT]
+  final def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): CommandSchedule[NodeT] = {
+    // FIXME: build sequential variant that avoids concurrency overheads when parallelism is disabled
+    val collector = CommandScheduleBuilder.newConcurrentBuilder[NodeT]
+    delayed(matches, egraph, parallelize, collector)
+    collector.result()
+  }
 
   /**
    * Build a staged command that, when executed, applies this rule's matches to `egraph`.
    *
-   * This does not mutate the e-graph now; instead it returns a [[Command]] that you can:
-   *  - enqueue into a [[CommandQueue]] with other rules; and
-   *  - execute later as part of a larger saturation step.
+   * This does not mutate the e-graph now; instead it populates the provided [[CommandScheduleBuilder]]
    *
    * @param egraph      The e-graph to search for matches. The staged command is intended to be run
    *                    against the same (or equivalent) snapshot.
    * @param parallelize Parallel strategy for both search and later application.
-   * @return A single, optimized [[Command]] that applies all current matches of this rule.
+   * @param builder     Command schedule builder to accumulate per-match commands into.
    */
-  def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT]
+  def delayed(egraph: EGraphT, parallelize: ParallelMap, builder: CommandScheduleBuilder[NodeT]): Unit
+
+  /**
+   * Build a staged command that, when executed, applies this rule's matches to `egraph`.
+   *
+   * This does not mutate the e-graph now; instead it returns a [[CommandSchedule]] that you can execute later
+   * as part of a larger saturation step.
+   *
+   * @param egraph      The e-graph to search for matches. The staged command is intended to be run
+   *                    against the same (or equivalent) snapshot.
+   * @param parallelize Parallel strategy for both search and later application.
+   * @return A single, optimized [[CommandSchedule]] that applies all current matches of this rule.
+   */
+  final def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): CommandSchedule[NodeT] = {
+    // FIXME: build sequential variant that avoids concurrency overheads when parallelism is disabled
+    val collector = CommandScheduleBuilder.newConcurrentBuilder[NodeT]
+    delayed(egraph, parallelize, collector)
+    collector.result()
+  }
 
   /**
    * Search the e-graph for matches and apply them immediately, if any.
@@ -93,7 +124,7 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
      parallelize: ParallelMap = ParallelMap.default
    ): Option[MutEGraphT] = {
     val mutGraph = mutable.FreezableEGraph[NodeT, MutEGraphT](egraph)
-    val anyChanges = delayed(egraph, parallelize)(mutGraph, HashMap.empty, parallelize)
+    val anyChanges = delayed(egraph, parallelize)(mutGraph, parallelize)
     if (anyChanges) {
       Some(mutGraph.freeze())
     } else {
@@ -136,6 +167,6 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
      egraph: MutEGraphT,
      parallelize: ParallelMap = ParallelMap.default
    ): Boolean = {
-    delayed(egraph, parallelize)(egraph, HashMap.empty, parallelize)
+    delayed(egraph, parallelize)(egraph, parallelize)
   }
 }

@@ -149,7 +149,7 @@ object AnalysisMetadata {
     }
 
     // Propagate to a fixed point; eventually touches all e-nodes.
-    updater.processPending(initialized = false)
+    updater.processPending()
 
     AnalysisMetadata(analysis, updater.results)
   }

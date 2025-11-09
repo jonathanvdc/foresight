@@ -1,10 +1,11 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat._
-import foresight.eqsat.readonly
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode, readonly}
 import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * Wrapper that couples an [[EGraph]] with a set of registered [[Metadata]] managers
@@ -131,8 +132,8 @@ extends readonly.EGraphWithMetadata[NodeT, Repr]
    *   - The per-node results from the underlying e-graph.
    *   - A new wrapper with the updated e-graph and metadata.
    */
-  override def tryAddMany(nodes: Seq[ENode[NodeT]],
-                          parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithMetadata[NodeT, Repr]) = {
+  override def tryAddMany(nodes: ArraySeq[ENode[NodeT]],
+                          parallelize: ParallelMap): (ArraySeq[AddNodeResult], EGraphWithMetadata[NodeT, Repr]) = {
     val (results, newEgraph) = egraph.tryAddMany(nodes, parallelize)
     val newNodes = nodes.zip(results).collect {
       case (node, AddNodeResult.Added(call)) =>

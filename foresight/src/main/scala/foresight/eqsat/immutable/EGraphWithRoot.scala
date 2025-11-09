@@ -1,7 +1,9 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat._
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode, MixedTree, readonly}
 import foresight.eqsat.parallel.ParallelMap
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * An e-graph that has a root e-class.
@@ -42,8 +44,8 @@ final case class EGraphWithRoot[
     EGraphWithRoot(newGraph, root)
   }
 
-  override def tryAddMany(nodes: Seq[ENode[Node]],
-                          parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRoot[Node, Repr]) = {
+  override def tryAddMany(nodes: ArraySeq[ENode[Node]],
+                          parallelize: ParallelMap): (ArraySeq[AddNodeResult], EGraphWithRoot[Node, Repr]) = {
     egraph.tryAddMany(nodes, parallelize) match {
       case (results, newGraph) => (results, EGraphWithRoot(newGraph, root))
     }

@@ -2,6 +2,7 @@ package foresight.eqsat.rewriting
 
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
 import foresight.eqsat.Slot
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.readonly.EGraph
 
 /**
@@ -104,6 +105,28 @@ trait SearcherLike[Node, Match, EGraphT <: EGraph[Node], +This <: SearcherLike[N
    */
   final def flatMap(f: (Match, EGraphT) => Iterable[Match]): This = {
     andThen(SearcherContinuation.flatMapBuilder(f))
+  }
+
+  /**
+   * Chains an applier to the searcher-like object, applying it to each match
+   * and collecting the resulting commands using the provided collector.
+   *
+   * @param applier  The applier to apply to each match.
+   * @param collector The command schedule builder to collect the resulting commands.
+   * @return A new instance of the searcher-like object that applies the applier and collects commands.
+   */
+  private[eqsat] final def andApplyAndCollect(applier: Applier[Node, Match, EGraphT],
+                                              collector: CommandScheduleBuilder[Node]): This = {
+    andThen(new ContinuationBuilder {
+      def apply(downstream: Continuation): Continuation = (m: Match, egraph: EGraphT) => {
+        if (downstream(m, egraph)) {
+          applier(m, egraph, collector)
+          true
+        } else {
+          false
+        }
+      }
+    })
   }
 }
 

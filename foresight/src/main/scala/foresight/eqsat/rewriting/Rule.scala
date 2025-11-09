@@ -1,9 +1,7 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.commands.{Command, CommandQueue}
-import foresight.eqsat.parallel.{OperationCanceledException, ParallelMap}
-import foresight.eqsat.mutable
-import foresight.eqsat.immutable
+import foresight.eqsat.commands.CommandScheduleBuilder
+import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly.EGraph
 
 /**
@@ -12,7 +10,7 @@ import foresight.eqsat.readonly.EGraph
  * A rule has two primary components:
  *
  *  1. **Search** – uses a [[Searcher]] to discover all matches of the rule in a given [[EGraph]].
- *  2. **Apply** – for each match, uses an [[Applier]] to produce a [[Command]] that mutates the e-graph
+ *  2. **Apply** – for each match, uses an [[Applier]] to produce a [[CommandSchedule]] that mutates the e-graph
  *     (e.g., unions, insertions). Applications may be parallelized via [[ParallelMap]].
  *
  * After search and apply, a rule performs a **composition step**:
@@ -48,7 +46,7 @@ import foresight.eqsat.readonly.EGraph
  * @tparam EGraphT Concrete e-graph type this rule targets. Must be both [[EGraphLike]] and [[EGraph]].
  * @param name      Human-readable rule name (used in logs/diagnostics).
  * @param searcher  Component responsible for finding matches (see [[Searcher.search]]).
- * @param applier   Component that turns a match into a [[Command]] acting on the e-graph.
+ * @param applier   Component that turns a match into a [[CommandSchedule]] acting on the e-graph.
  * @example Defining and running a rule immediately
  * {{{
  * val constantFold: Rule[MyNode, MyMatch, MyEGraph] =
@@ -96,13 +94,11 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraph[NodeT]](override val name
    * @param egraph      The e-graph to search for matches. The staged command is intended to be run
    *                    against the same (or equivalent) snapshot.
    * @param parallelize Parallel strategy for both search and later application.
-   * @return A single, optimized [[Command]] that applies all current matches of this rule.
+   * @param builder     Command schedule builder to accumulate per-match commands into.
    */
-  override def delayed(egraph: EGraphT, parallelize: ParallelMap = ParallelMap.default): Command[NodeT] = {
-    val pipeline = searcher.andApply(applier)
-    aggregateCommands(
-      pipeline.searchAndCollect(egraph, parallelize.child(s"match+apply $name")),
-      egraph)
+  override def delayed(egraph: EGraphT, parallelize: ParallelMap, builder: CommandScheduleBuilder[NodeT]): Unit = {
+    val pipeline = searcher.andApplyAndCollect(applier, builder)
+    pipeline.search(egraph, parallelize.child(s"match+apply $name"))
   }
 
   /**
@@ -114,24 +110,12 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraph[NodeT]](override val name
    * @param matches     Matches to apply.
    * @param egraph      Target e-graph from which matches were derived.
    * @param parallelize Parallel strategy used when building per-match commands.
-   * @return An optimized [[CommandQueue]] encapsulated as a [[Command]].
+   * @param builder     Command schedule builder to accumulate per-match commands into.
    * @throws Rule.ApplicationException
    * if constructing the per-match commands fails.
    */
-  override def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap): Command[NodeT] = {
-    aggregateCommands(
-      parallelize.child(s"apply $name")[MatchT, Command[NodeT]](matches, applier.apply(_, egraph)).toSeq,
-      egraph)
-  }
-
-  private def aggregateCommands(buildCommands: => Seq[Command[NodeT]], egraph: EGraphT): Command[NodeT] = {
-    try {
-      CommandQueue(buildCommands)
-    } catch {
-      case e: OperationCanceledException => throw e
-      case e: Exception =>
-        throw Rule.ApplicationException(this, egraph, e)
-    }
+  override def delayed(matches: Seq[MatchT], egraph: EGraphT, parallelize: ParallelMap, builder: CommandScheduleBuilder[NodeT]): Unit = {
+    parallelize.child(s"apply $name")[MatchT, Unit](matches, applier.apply(_, egraph, builder))
   }
 
   /**

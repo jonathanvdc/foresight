@@ -1,10 +1,10 @@
 package foresight.eqsat.examples.sdql
 
-import foresight.eqsat.commands.Command
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.extraction.ExtractionAnalysis
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternMatch}
-import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 import foresight.eqsat._
 
 object ApplierOps {
@@ -24,7 +24,7 @@ object ApplierOps {
                    destination: Pattern.Var): Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] = {
 
       new Applier[SdqlIR, PatternMatch[SdqlIR], EGraphWithMetadata[SdqlIR, EGraphT]] {
-        override def apply(m: PatternMatch[SdqlIR], egraph: EGraphWithMetadata[SdqlIR, EGraphT]): Command[SdqlIR] = {
+        override def apply(m: PatternMatch[SdqlIR], egraph: EGraphWithMetadata[SdqlIR, EGraphT], builder: CommandScheduleBuilder[SdqlIR]): Unit = {
           val extracted = ExtractionAnalysis.smallest[SdqlIR].extractor[EGraphT](m(source), egraph)
 
           def subst(tree: Tree[SdqlIR]): MixedTree[SdqlIR, EClassCall] = {
@@ -37,7 +37,7 @@ object ApplierOps {
 
           val substituted = subst(extracted)
           val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
-          applier.apply(newMatch, egraph)
+          applier.apply(newMatch, egraph, builder)
         }
       }
     }

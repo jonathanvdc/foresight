@@ -140,7 +140,7 @@ sealed trait EClassSymbol {
    * val realCall = v.reify(Map(v -> call)) // returns call
    * }}}
    */
-  final def reify(reification: collection.Map[EClassSymbol.Virtual, EClassCall]): EClassCall = this match {
+  final def reify(reification: EClassSymbol.Virtual => EClassCall): EClassCall = this match {
     case call: EClassCall => call
     case virtual: EClassSymbol.Virtual => reification(virtual)
   }

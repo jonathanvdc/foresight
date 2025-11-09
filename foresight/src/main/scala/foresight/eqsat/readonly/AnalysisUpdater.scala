@@ -16,7 +16,10 @@ import scala.collection.mutable
 private[eqsat] abstract class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT, A],
                                                         egraph: EGraph[NodeT]) {
 
-  private val worklist = mutable.Set.empty[ENode[NodeT]]
+  // Readiness-driven worklist: only nodes whose argument classes already have results are queued.
+  private val nodeQueue = new mutable.Queue[ENode[NodeT]]()
+  // Tracks nodes currently pending in the queue to avoid duplicate enqueues while in flight.
+  private val enqueued  = new mutable.HashSet[ENode[NodeT]]()
 
   /**
    * Computes the analysis result for an e-class reference.
@@ -47,6 +50,30 @@ private[eqsat] abstract class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT
    */
   def add(ref: EClassRef, result: A): Unit
 
+  /** Enqueue a node if all of its argument classes currently have results. */
+  private def enqueueIfReady(node: ENode[NodeT]): Unit = {
+    if (!enqueued.contains(node)) {
+      // Node is ready iff all arg classes are present.
+      var ready = true
+      val as = node.args
+      var i = 0
+      while (ready && i < as.length) {
+        ready = contains(as(i).ref)
+        i += 1
+      }
+      if (ready) {
+        enqueued += node
+        nodeQueue.enqueue(node)
+      }
+    }
+  }
+
+  /** After a class improves, some of its user nodes may now be ready; enqueue those. */
+  private def onClassImproved(ref: EClassRef): Unit = {
+    val it = egraph.users(ref).iterator
+    while (it.hasNext) enqueueIfReady(it.next())
+  }
+
   /**
    * Updates the analysis result for an e-class.
    *
@@ -58,7 +85,7 @@ private[eqsat] abstract class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT
       case Some(oldResult) if oldResult == result => ()
       case _ =>
         add(ref, result)
-        worklist ++= egraph.users(ref)
+        onClassImproved(ref)
     }
   }
 
@@ -70,39 +97,31 @@ private[eqsat] abstract class AnalysisUpdater[NodeT, A](analysis: Analysis[NodeT
   final def apply(call: EClassCall): A = analysis.rename(apply(call.ref), call.args)
 
   /**
-   * Processes the worklist by applying the analysis to potentially updated e-nodes.
-   * @param initialized Whether the analysis has been initialized for the e-graph. Initialization means that each
-   *                    e-class has an analysis result.
+   * Processes the readiness-driven worklist. Nodes are enqueued exactly when their last dependency becomes available.
    */
-  final def processPending(initialized: Boolean = true): Unit = {
-    while (worklist.nonEmpty) {
-      // Group the worklist by the e-class of the e-node.
-      val worklistPerClass = worklist.groupBy(n => egraph.find(n).get.ref)
+  final def processPending(): Unit = {
+    // Process nodes whose arguments are already available; new class improvements will enqueue more.
+    while (nodeQueue.nonEmpty) {
+      val node = nodeQueue.dequeue()
+      // Allow future re-enqueues if upstream classes improve again.
+      enqueued -= node
 
-      // Clear the worklist so it can accept further updates.
-      worklist.clear()
+      // By construction, all args have results.
+      val args = node.args.map(apply)
 
-      // Apply the analysis to the updates e-nodes in each e-class.
-      for ((ref, nodes) <- worklistPerClass) {
-        val init = get(ref)
-        if (initialized) {
-          assert(init.isDefined, s"Analysis not initialized for $ref")
-        }
+      val nodeResult = analysis.make(node, args)
+      val ref = egraph.find(node).get.ref
 
-        val result = nodes.foldLeft(init)((acc, node) => {
-          if (node.args.forall(arg => contains(arg.ref))) {
-            val args = node.args.map(apply)
-            val nodeResult = analysis.make(node, args)
-            acc match {
-              case None => Some(nodeResult)
-              case Some(result) => Some(analysis.join(result, nodeResult))
-            }
-          } else {
-            acc
+      get(ref) match {
+        case Some(old) =>
+          val joined = analysis.join(old, nodeResult)
+          if ((joined.asInstanceOf[AnyRef] ne old.asInstanceOf[AnyRef]) && joined != old) {
+            add(ref, joined)
+            onClassImproved(ref)
           }
-        })
-
-        result.foreach(update(ref, _))
+        case None =>
+          add(ref, nodeResult)
+          onClassImproved(ref)
       }
     }
   }

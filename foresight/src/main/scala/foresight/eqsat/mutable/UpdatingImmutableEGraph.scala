@@ -3,6 +3,8 @@ package foresight.eqsat.mutable
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.{AddNodeResult, EClassCall, EClassRef, ENode, ShapeCall, immutable}
 
+import scala.collection.compat.immutable.ArraySeq
+
 private final class UpdatingImmutableEGraph[
   NodeT,
   EGraphT <: immutable.EGraph[NodeT] with immutable.EGraphLike[NodeT, EGraphT]
@@ -16,7 +18,7 @@ private final class UpdatingImmutableEGraph[
     result
   }
 
-  override def tryAddMany(nodes: Seq[ENode[NodeT]], parallelize: ParallelMap): Seq[AddNodeResult] = update {
+  override def tryAddMany(nodes: ArraySeq[ENode[NodeT]], parallelize: ParallelMap): ArraySeq[AddNodeResult] = update {
     _egraph.tryAddMany(nodes, parallelize)
   }
 

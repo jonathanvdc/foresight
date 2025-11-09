@@ -1,6 +1,5 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.commands.{Command, CommandQueue}
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.patterns.PatternMatch
@@ -137,23 +136,6 @@ trait Searcher[NodeT, MatchT, EGraphT <: EGraph[NodeT]]
     }
 
     TransformSearcher(SearcherContinuation.identityBuilder)
-  }
-
-  /**
-   * Chain this searcher with an [[Applier]], producing a searcher that runs this searcher
-   * and then immediately applies each match using the given applier.
-   *
-   * This is useful for building pipelines of searchers and appliers without needing to
-   * construct intermediate sequences of matches.
-   *
-   * @param applier The applier to run on each match found by this searcher.
-   * @return A new searcher that applies the given applier to each match found.
-   */
-  final def andApply(applier: Applier[NodeT, MatchT, EGraphT]): Searcher[NodeT, Command[NodeT], EGraphT] = {
-    transform(applier.apply).filter {
-      case (CommandQueue(Seq()), _) => false
-      case _ => true
-    }
   }
 }
 

@@ -9,7 +9,7 @@ package foresight.eqsat
  * ## Core ideas
  *
  * The system is built on **immutable e-graphs**, where every change is represented
- * as a [[foresight.eqsat.commands.Command]] value. Instead of mutating the e-graph
+ * as a [[foresight.eqsat.commands.CommandSchedule]] value. Instead of mutating the e-graph
  * in place, commands are executed later to produce a new snapshot.
  *
  * Rules follow a **search → apply → compose** flow. A [[Searcher]] is responsible
@@ -36,7 +36,7 @@ package foresight.eqsat
  * can be enriched with [[Searcher.product]], filter, map and flatMap combinators.
  *
  * Next, an applier is defined to convert each match into a
- * [[foresight.eqsat.commands.Command]]. The searcher and applier are then paired
+ * [[foresight.eqsat.commands.CommandSchedule]]. The searcher and applier are then paired
  * to form a [[Rule]]. Rules can be executed immediately using [[Rule.apply]], or
  * staged for later execution with [[Rule.delayed]]—either individually or batched
  * with others.

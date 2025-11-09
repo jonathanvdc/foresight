@@ -1,12 +1,12 @@
 package foresight.eqsat.rewriting
 
-import foresight.eqsat.commands.{Command, CommandQueue}
+import foresight.eqsat.commands.{CommandSchedule, CommandScheduleBuilder}
 import foresight.eqsat.readonly.EGraph
 
 /**
  * Describes how to **turn a match into edits** on an e-graph, without mutating it directly.
  *
- * An [[Applier]] does not update the graph directly. Instead, it builds a [[Command]] describing the edits (e.g.,
+ * An [[Applier]] does not update the graph directly. Instead, it builds a [[CommandSchedule]] describing the edits (e.g.,
  * insertions, unions) that, when executed by the command engine, yields a new e-graph.
  *
  * Typically, an [[Applier]] is paired with a [[Searcher]] inside a [[Rule]]:
@@ -15,7 +15,7 @@ import foresight.eqsat.readonly.EGraph
  *  - those per-match commands are aggregated/optimized by the rule into a single operation.
  *
  * ## Contract
- * - **Purity**: [[apply]] does not mutate `egraph`. It only describes work via a [[Command]].
+ * - **Purity**: [[apply]] does not mutate `egraph`. It only describes work via a [[CommandSchedule]].
  * - **Thread-safety**: Appliers may be invoked in parallel across distinct matches of the same snapshot.
  * They must be safe for concurrent use and avoid shared mutable state.
  * - **Idempotence** (recommended): When feasible, produce commands that tolerate duplicates (e.g., union
@@ -38,7 +38,7 @@ trait Applier[NodeT, -MatchT, -EGraphT <: EGraph[NodeT]] {
    * @param egraph Immutable e-graph snapshot the match was derived from.
    * @return A command representing the intended edits for this match.
    */
-  def apply(m: MatchT, egraph: EGraphT): Command[NodeT]
+  def apply(m: MatchT, egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit
 }
 
 /**
@@ -54,28 +54,12 @@ object Applier {
    */
   def ignore[NodeT, MatchT, EGraphT <: EGraph[NodeT]]: Applier[NodeT, MatchT, EGraphT] =
     new ReversibleApplier[NodeT, MatchT, EGraphT] {
-      override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = CommandQueue.empty
+      override def apply(m: MatchT, egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
+
+      }
 
       override def tryReverse: Option[Searcher[NodeT, MatchT, EGraphT]] = Some(Searcher.empty)
     }
-
-  /**
-   * An applier that simplifies the commands produced by another applier.
-   * @param applier  Inner applier whose commands will be simplified.
-   * @tparam NodeT   Node payload type stored in the e-graph.
-   * @tparam MatchT  The match type produced by a [[Searcher]] and consumed here.
-   * @tparam EGraphT Concrete e-graph type (must be both [[EGraphLike]] and [[EGraph]]).
-   */
-  final case class Simplify[
-    NodeT,
-    MatchT,
-    EGraphT <: EGraph[NodeT]
-  ](applier: Applier[NodeT, MatchT, EGraphT]) extends Applier[NodeT, MatchT, EGraphT] {
-    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] = {
-      val command = applier.apply(m, egraph)
-      command.simplify(egraph)
-    }
-  }
 
   /**
    * Conditionally apply: run `applier` only when `filter(match, egraph)` is true; otherwise emit no-op.
@@ -97,8 +81,10 @@ object Applier {
     filter: (MatchT, EGraphT) => Boolean)
     extends ReversibleApplier[NodeT, MatchT, EGraphT] {
 
-    override def apply(m: MatchT, egraph: EGraphT): Command[NodeT] =
-      if (filter(m, egraph)) applier.apply(m, egraph) else CommandQueue.empty
+    override def apply(m: MatchT, egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
+      if (filter(m, egraph))
+        applier.apply(m, egraph, builder)
+    }
 
     override def tryReverse: Option[Searcher[NodeT, MatchT, EGraphT]] = applier match {
       case r: ReversibleApplier[NodeT, MatchT, EGraphT] => r.tryReverse.map(_.filter(filter))
@@ -128,8 +114,9 @@ object Applier {
     f: (MatchT1, EGraphT) => MatchT2)
     extends Applier[NodeT, MatchT1, EGraphT] {
 
-    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] =
-      applier.apply(f(m, egraph), egraph)
+    override def apply(m: MatchT1, egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit = {
+      applier.apply(f(m, egraph), egraph, builder)
+    }
   }
 
   /**
@@ -149,8 +136,8 @@ object Applier {
     f: (MatchT1, EGraphT) => Iterable[MatchT2])
     extends Applier[NodeT, MatchT1, EGraphT] {
 
-    override def apply(m: MatchT1, egraph: EGraphT): Command[NodeT] =
-      CommandQueue(f(m, egraph).map(applier.apply(_, egraph)).toSeq)
+    override def apply(m: MatchT1, egraph: EGraphT, builder: CommandScheduleBuilder[NodeT]): Unit =
+      f(m, egraph).foreach(applier.apply(_, egraph, builder))
   }
 
   // ---------------------- Syntax sugar for Applier combinators ----------------------
@@ -171,13 +158,6 @@ object Applier {
     NodeT, MatchT,
     EGraphT <: EGraph[NodeT]
   ](private val applier: Applier[NodeT, MatchT, EGraphT]) extends AnyVal {
-
-    /**
-     * Simplify the commands produced by this applier before returning them.
-     *
-     * @return An applier that simplifies its commands.
-     */
-    def simplify: Applier[NodeT, MatchT, EGraphT] = Simplify(applier)
 
     /**
      * Conditionally apply this applier; otherwise emit an empty command.

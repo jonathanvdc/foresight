@@ -1,9 +1,9 @@
 
 package foresight.eqsat.examples.liar
 
-import foresight.eqsat.commands.Command
+import foresight.eqsat.commands.CommandScheduleBuilder
 import foresight.eqsat.extraction.ExtractionAnalysis
-import foresight.eqsat.immutable.{EGraphLike, EGraphWithMetadata, EGraph}
+import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 import foresight.eqsat.rewriting.Applier
 import foresight.eqsat.rewriting.patterns.{Pattern, PatternApplier, PatternMatch}
 import foresight.eqsat._
@@ -25,7 +25,7 @@ object ApplierOps {
                    destination: Pattern.Var): Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
 
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
-        override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
+        override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT], builder: CommandScheduleBuilder[ArrayIR]): Unit = {
           val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor[EGraphT](m(source), egraph)
 
           def typeOf(tree: MixedTree[ArrayIR, EClassCall]): MixedTree[Type, EClassCall] = {
@@ -45,7 +45,7 @@ object ApplierOps {
 
           val substituted = subst(extracted)
           val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
-          applier.apply(newMatch, egraph)
+          applier.apply(newMatch, egraph, builder)
         }
       }
     }
@@ -62,10 +62,12 @@ object ApplierOps {
      */
     def typeChecked: Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] = {
       new Applier[ArrayIR, PatternMatch[ArrayIR], EGraphWithMetadata[ArrayIR, EGraphT]] {
-        override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT]): Command[ArrayIR] = {
+        override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT], builder: CommandScheduleBuilder[ArrayIR]): Unit = {
           val tree = applier.instantiate(m)
-          inferType(tree.mapAtoms(_.asInstanceOf[EClassCall]), egraph)
-          Command.equivalenceSimplified(EClassSymbol.real(m.root), tree, egraph)
+          val realTree = tree.mapAtoms(_.asInstanceOf[EClassCall])
+          inferType(realTree, egraph)
+          val c = builder.addSimplifiedReal(realTree, egraph)
+          builder.unionSimplified(EClassSymbol.real(m.root), c, egraph)
         }
       }
     }

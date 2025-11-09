@@ -1,8 +1,11 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat._
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode}
+import foresight.eqsat.readonly
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * An e-graph that records the set of matches that have been applied to it.
@@ -34,8 +37,8 @@ final case class EGraphWithRecordedApplications[
     EGraphWithRecordedApplications(newEgraph, applied)
   }
 
-  override def tryAddMany(nodes: Seq[ENode[Node]],
-                          parallelize: ParallelMap): (Seq[AddNodeResult], EGraphWithRecordedApplications[Node, Repr, Match]) = {
+  override def tryAddMany(nodes: ArraySeq[ENode[Node]],
+                          parallelize: ParallelMap): (ArraySeq[AddNodeResult], EGraphWithRecordedApplications[Node, Repr, Match]) = {
     val (results, newEgraph) = egraph.tryAddMany(nodes, parallelize)
 
     // Construct a new EGraphWithRecordedApplications with the new e-graph and the same applied matches. The applied

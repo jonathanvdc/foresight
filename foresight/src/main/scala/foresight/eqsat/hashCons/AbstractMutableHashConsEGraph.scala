@@ -5,7 +5,9 @@ import foresight.eqsat.collections.{SlotMap, SlotSet}
 import foresight.eqsat.mutable.EGraph
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.Debug
+import foresight.util.collections.UnsafeSeqFromArray
 
+import scala.collection.compat.immutable.ArraySeq
 import scala.collection.mutable.{HashMap, HashSet, LinkedHashSet}
 
 /**
@@ -78,8 +80,8 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
 
   final override def canonicalizeOrNull(ref: EClassRef): EClassCall = unionFind.findAndCompressOrNull(ref)
 
-  final override def tryAddMany(nodes: Seq[ENode[NodeT]],
-                                parallelize: ParallelMap): Seq[AddNodeResult] = {
+  final override def tryAddMany(nodes: ArraySeq[ENode[NodeT]],
+                                parallelize: ParallelMap): ArraySeq[AddNodeResult] = {
     // Adding independent e-nodes is fundamentally a sequential operation, but the most expensive part of adding nodes
     // is canonicalizing them and looking them up in the e-graph. Canonicalization can be parallelized since adding a
     // node will never change the canonical form of other nodes - only union operations can do that.
@@ -90,13 +92,14 @@ private[hashCons] abstract class AbstractMutableHashConsEGraph[NodeT]
 
     val p = parallelize.child("add nodes")
 
+    // FIXME: produce an array from the parallel map directly to avoid an extra copy.
     val canonicalized = p(nodes, canonicalize)
     val results = p.run {
       canonicalized.map { node =>
         tryAddUnsafe(node)
       }
     }
-    results.toSeq
+    UnsafeSeqFromArray(results.toArray)
   }
 
   final override def unionMany(pairs: Seq[(EClassCall, EClassCall)], parallelize: ParallelMap): Set[Set[EClassCall]] = {
