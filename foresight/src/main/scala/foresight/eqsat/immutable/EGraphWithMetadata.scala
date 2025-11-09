@@ -1,7 +1,6 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat.*
-import foresight.eqsat.readonly
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode, readonly}
 import foresight.eqsat.metadata.Analysis
 import foresight.eqsat.parallel.ParallelMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
