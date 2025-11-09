@@ -1,6 +1,7 @@
 package foresight.eqsat.immutable
 
-import foresight.eqsat.*
+import foresight.eqsat.{AddNodeResult, EClassCall, ENode}
+import foresight.eqsat.readonly
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.PortableMatch
 
