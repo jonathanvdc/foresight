@@ -47,9 +47,9 @@ private[eqsat] final class HashConsEGraph[NodeT] extends AbstractMutableHashCons
     }
   }
 
-  override def nodeToRefOrElse(node: ENode[NodeT], default: => EClassRef): EClassRef = {
+  override def nodeToRefOrInvalid(node: ENode[NodeT]): EClassRef = {
     val id = hashCons.getInt(node)
-    if (id != EClassRef.Invalid.id) EClassRef(id) else default
+    EClassRef(id)
   }
 
   protected override def createEmptyClass(slots: SlotSet): EClassRef = {
