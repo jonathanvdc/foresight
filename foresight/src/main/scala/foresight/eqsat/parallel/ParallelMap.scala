@@ -269,7 +269,7 @@ object ParallelMap {
    *         If `n == 1`, returns [[sequential]].
    */
   def fixedThreadParallel(n: Int): ParallelMap =
-    if (n == 1) sequential else ParallelMapImpl.fixedThreadParallel(n)
+    ParallelMapImpl.fixedThreadParallel(n)
 
   /**
    * The library-wide default mapping strategy.
