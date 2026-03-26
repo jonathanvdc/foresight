@@ -9,10 +9,10 @@
 Foresight is a Scala library for **equality saturation**, a technique that enables compilers and program transformers to explore many semantically equivalent rewrites of a program simultaneously.
 By separating the application of rewrite rules from the decision‑making process, equality saturation allows for more principled and comprehensive optimization.
 
-Whereas existing equality saturation frameworks such as [egg](https://egraphs‑good.github.io/egg/) rely on mutable state and sequential rule execution, Foresight introduces a new architectural model built around **immutability**, **parallelism**, and **extensibility**.
-Its purely functional design makes it well‑suited to modern compiler infrastructure, particularly in the context of functional languages.
+Whereas existing equality saturation frameworks such as [egg](https://egraphs‑good.github.io/egg/) rely on sequential rule execution, Foresight introduces a new architectural model built around **parallelism**, **flexibility**, and **extensibility**.
+It offers both immutable (purely functional) and mutable e‑graph implementations, making it well‑suited to a wide range of compiler infrastructure scenarios.
 
-Foresight’s architecture includes an immutable e‑graph representation with native support for bound variables, a parallel rewriting pipeline, and a modular strategy interface.
+Foresight’s architecture includes slotted e‑graph representations with native support for bound variables, a parallel rewriting pipeline, a modular strategy interface, and a suite of built‑in saturation strategies.
 These innovations enable safe speculative rewriting, efficient parallel execution, and flexible rewrite control.
 
 ---
@@ -20,7 +20,10 @@ These innovations enable safe speculative rewriting, efficient parallel executio
 ## Features
 
 ### Immutable, Thread‑Safe E‑Graphs
-Foresight’s e‑graphs are built using purely functional data structures. Every operation returns a new, structurally consistent e‑graph, eliminating the need for mutable state or a rebuild phase. This makes reasoning about transformations simpler and enables speculative or parallel execution without side effects.
+Foresight offers an immutable e‑graph built using purely functional data structures. Every operation returns a new, structurally consistent e‑graph without a rebuild phase. This makes reasoning about transformations simpler and enables speculative or parallel execution without side effects.
+
+### High‑Performance Mutable E‑Graphs
+For performance‑critical workloads, Foresight also provides a mutable e‑graph backed by a dedicated hash‑consing implementation. It supports in‑place addition and merging of e‑classes, delivering substantially lower latency than the immutable variant for sequential saturation workloads. Both variants share the same interface and are interchangeable across all strategies and analyses.
 
 ### Slotted E‑Graphs with Native Binding Support
 E‑classes are parameterized by [slots](https://dl.acm.org/doi/10.1145/3729326), a mechanism that encodes variable binding directly in the e‑graph. This allows Foresight to correctly and efficiently unify expressions that differ only in variable names, making it ideal for functional intermediate representations with bound variables (e.g., lambdas).
@@ -33,6 +36,15 @@ Users can attach domain‑specific metadata (such as types, constants, or cost e
 
 ### Composable Strategy Interface
 Rewrite control is decoupled from the engine using a modular strategy interface. Users can define custom saturation strategies with iteration limits, timeouts, stopping conditions, or metadata integration. Built‑in strategy combinators make it easy to experiment with complex workflows declaratively.
+
+### Flexible Built‑In Saturation Strategies
+Foresight ships with several ready‑to‑use saturation strategies:
+
+- **`MaximalRuleApplication`** – performs a single exhaustive pass over all rules per iteration.
+- **`BackoffRuleApplication`** – assigns each rule a dynamic match quota and a cooldown period, preventing any single rule from dominating the search.
+- **`StochasticRuleApplication`** – uses weighted random sampling guided by user‑defined `MatchPriorities` to apply a batch of matches each iteration, enabling efficient exploration of large rule sets.
+
+Caching variants of the last two strategies avoid reapplying matches across iterations.
 
 ### Cost‑Guided Extraction
 Foresight includes a built‑in analysis that tracks the lowest‑cost term in each equivalence class using a user‑defined cost model. Extraction is incremental and can occur during or after saturation, supporting efficient selection of optimized expressions.
