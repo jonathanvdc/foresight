@@ -123,7 +123,7 @@ object Applier {
    * Pre-flatMap the input match type: expand one match into **many** then apply and batch them.
    *
    * Useful when a single outer match implies multiple inner edits (e.g., expand an equivalence to
-   * a set of updates). The resulting [[CommandQueue]] preserves the order of the produced
+   * a set of updates). The resulting [[foresight.eqsat.commands.CommandSchedule]] preserves the order of the produced
    * inner commands (though the engine may later optimize/deduplicate).
    *
    * @param applier Downstream applier that consumes `MatchT2`.

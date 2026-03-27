@@ -115,15 +115,11 @@ final case class CommandSchedule[NodeT](batchZero: (ArraySeq[EClassSymbol.Virtua
    * Executes the command schedule against an immutable e-graph.
    *
    * @param egraph
-   * Destination e-graph. Implementations may either return it unchanged or produce a new immutable
-   * e-graph snapshot.
-   * @param reification
-   * Mapping from virtual symbols to concrete calls available before this command runs. This is used
-   * to ground virtual references present in [[uses]].
+   *   Destination e-graph. A new immutable e-graph snapshot is produced if any change occurs.
    * @param parallelize
-   * Parallelization strategy to label and distribute any internal work.
+   *   Parallelization strategy to label and distribute any internal work.
    * @return
-   * `Some(newGraph)` if any change occurred, or `None` for a no-op.
+   *   `Some(newGraph)` if any change occurred, or `None` for a no-op.
    */
   def applyImmutable[
     Repr <: immutable.EGraphLike[NodeT, Repr] with immutable.EGraph[NodeT]
