@@ -14,7 +14,7 @@
  <div class="doc">
   <p>The root of Foresight's equality saturation framework. It provides immutable e-graph data structures, symbolic references, slot-based binding semantics, and core interfaces for search, application, and extraction.</p>
   <p>An <strong>e-graph</strong> represents equivalence classes of expressions, or <em>e-classes</em>, each containing multiple <em>e-nodes</em> that differ in structure but are semantically equal. This representation supports efficient, parallel, and reversible rewrite-driven optimization, with explicit tracking of symbolic bindings (<em>slots</em>) and rich metadata.</p>
-  <p>E-graphs in Foresight are purely functional: every operation returns a new value rather than mutating in place. This immutability underpins reproducibility, concurrent analysis, and caching across snapshots.</p>
+  <p>E-graphs in Foresight come in two flavors: an <strong>immutable</strong> variant (<a href="eqsat/immutable/EGraph.html">eqsat.immutable.EGraph</a>) where every operation returns a new e-graph value without modifying the original (underpinning reproducibility, concurrent analysis, and caching across snapshots), and a <strong>mutable</strong> variant (<a href="eqsat/mutable/EGraph.html">eqsat.mutable.EGraph</a>) that supports in-place additions and unions for workloads where allocation overhead matters. Both variants implement the same read-only query interface (<a href="eqsat/readonly/EGraph.html">eqsat.readonly.EGraph</a>).</p>
   <h2><a href="#core-concepts" id="core-concepts">Core Concepts</a></h2>
   <p>At the heart of the API are symbolic identifiers and slot-based binding. An <a href="eqsat/EClassRef.html">eqsat.EClassRef</a> is a reference to an e-class within a particular e-graph snapshot. Over time, merges may cause multiple references to point to the same canonical e-class; callers can normalize them with <a href="eqsat/readonly/EGraph.html#canonicalize-d24">eqsat.readonly.EGraph.canonicalize</a>. An <a href="eqsat/EClassCall.html">eqsat.EClassCall</a> couples a root reference with a total slot map, allowing the same structural e-class to be applied with different bindings. A <a href="eqsat/Slot.html">eqsat.Slot</a> identifies a bound variable in an expression, and a <span data-unresolved-link="" title="Problem linking eqsat.SlotMap: No DRI found for query">eqsat.SlotMap</span> gives a complete mapping from slots to other slots or values.</p>
   <h2><a href="#egraph-and-egraphlike" id="egraph-and-egraphlike">EGraph and EGraphLike</a></h2>
@@ -47,12 +47,12 @@
 </span><span line-number="5" class=""><span class="tooltip-container"></span>import foresight.eqsat.saturation._
 </span><span line-number="6" class=""><span class="tooltip-container"></span>// Create an empty e-graph for a custom node type
 </span><span line-number="7" class=""><span class="tooltip-container"></span>val g0: EGraph[MyNode] = EGraph.empty
-</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a command queue
-</span><span line-number="9" class=""><span class="tooltip-container"></span>val builder = new CommandQueueBuilder[MyNode]
-</span><span line-number="10" class=""><span class="tooltip-container"></span>val root    = builder.add(myENode)
-</span><span line-number="11" class=""><span class="tooltip-container"></span>val queue   = builder.queue.optimized
-</span><span line-number="12" class=""><span class="tooltip-container"></span>// Apply commands to produce a new graph
-</span><span line-number="13" class=""><span class="tooltip-container"></span>val (g1, reif) = queue.applyImmutable(g0, Map.empty, ParallelMap.sequential)
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a command schedule using a builder
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+</span><span line-number="10" class=""><span class="tooltip-container"></span>builder.add(EClassSymbol.virtual(), myENodeSymbol, batch = 0)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val schedule = builder.result()
+</span><span line-number="12" class=""><span class="tooltip-container"></span>// Apply the schedule to produce a new immutable graph
+</span><span line-number="13" class=""><span class="tooltip-container"></span>val g1 = schedule.applyImmutable(g0, ParallelMap.sequential).getOrElse(g0)
 </span><span line-number="14" class=""><span class="tooltip-container"></span>// Run a saturation strategy
 </span><span line-number="15" class=""><span class="tooltip-container"></span>val rules: Seq[Rule[MyNode, MyMatch, EGraph[MyNode]]] = Seq(r1, r2)
 </span><span line-number="16" class=""><span class="tooltip-container"></span>val strat = MaximalRuleApplicationWithCaching(rules).repeatUntilStable
@@ -496,7 +496,7 @@
              <p>Rules follow a <strong>search → apply → compose</strong> flow. A <a href="eqsat/rewriting/Searcher.html">Searcher</a> is responsible for finding matches; an <a href="eqsat/rewriting/Applier.html">Applier</a> transforms each match into a command; and a <a href="eqsat/rewriting/Rule.html">Rule</a> combines these per-match commands into a single optimized operation.</p>
              <p>Many methods in this package support <strong>parallelism</strong> through <a href="eqsat/parallel/ParallelMap.html">foresight.eqsat.parallel.ParallelMap</a>, allowing work to be labeled and distributed efficiently.</p>
              <p>Components are often <strong>reversible</strong>. A <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>, for example, can be inverted into an applier, while a <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a> can become a searcher. A <a href="eqsat/rewriting/Rule.html">Rule</a> built from reversible parts can be flipped in its entirety using <a href="eqsat/rewriting/Rule.html#tryReverse-0">Rule.tryReverse</a>.</p>
-             <p>Matches are also <strong>portable</strong>. By implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>, a match can remain meaningful across multiple e-graph snapshots, enabling caching and reapplication through <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithRecordedApplications: No DRI found for query">foresight.eqsat.saturation.EGraphWithRecordedApplications</span> and <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>.</p>
+             <p>Matches are also <strong>portable</strong>. By implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>, a match can remain meaningful across multiple e-graph snapshots, enabling caching and reapplication through <a href="eqsat/immutable/EGraphWithRecordedApplications.html">foresight.eqsat.immutable.EGraphWithRecordedApplications</a> and <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>.</p>
              <h2><a href="#typical-workflow" id="typical-workflow">Typical workflow</a></h2>
              <p>A typical use of this package begins by defining a searcher. Searchers can be enriched with <a href="eqsat/rewriting/Searcher.html#product-727">Searcher.product</a>, filter, map and flatMap combinators.</p>
              <p>Next, an applier is defined to convert each match into a <a href="eqsat/commands/CommandSchedule.html">foresight.eqsat.commands.CommandSchedule</a>. The searcher and applier are then paired to form a <a href="eqsat/rewriting/Rule.html">Rule</a>. Rules can be executed immediately using <a href="eqsat/rewriting/Rule.html#apply-20e">Rule.apply</a>, or staged for later execution with <a href="eqsat/rewriting/Rule.html#delayed-fffffa72">Rule.delayed</a>—either individually or batched with others.</p>
@@ -506,11 +506,11 @@
              <h2><a href="#reversal" id="reversal">Reversal</a></h2>
              <p>Reversal is a key capability for bidirectional reasoning. A <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a> can produce an applier that undoes its transformation, and a <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a> can do the opposite. Pipelines can be reversed phase by phase via <a href="eqsat/rewriting/SearcherContinuation$$ContinuationBuilder.html#tryReverse-3c2">SearcherContinuation.ContinuationBuilder.tryReverse</a>, and if both the searcher and applier in a <a href="eqsat/rewriting/Rule.html">Rule</a> are reversible, the entire rule can be inverted with <a href="eqsat/rewriting/Rule.html#tryReverse-0">Rule.tryReverse</a>.</p>
              <h2><a href="#portability-and-caching" id="portability-and-caching">Portability and caching</a></h2>
-             <p>Portability ensures that matches survive e-graph changes. A type implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a> can map its internal identifiers to the corresponding ones in a new snapshot, preserving structural meaning. Purely structural matches can treat <code>port</code> as a no-op, while ID-bearing matches perform translations such as canonicalization. Recording and replaying matches is supported by <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithRecordedApplications: No DRI found for query">foresight.eqsat.saturation.EGraphWithRecordedApplications</span>, and caching is provided by <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>.</p>
+             <p>Portability ensures that matches survive e-graph changes. A type implementing <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a> can map its internal identifiers to the corresponding ones in a new snapshot, preserving structural meaning. Purely structural matches can treat <code>port</code> as a no-op, while ID-bearing matches perform translations such as canonicalization. Recording and replaying matches is supported by <a href="eqsat/immutable/EGraphWithRecordedApplications.html">foresight.eqsat.immutable.EGraphWithRecordedApplications</a>, and caching is provided by <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>.</p>
              <h2><a href="#design-contracts" id="design-contracts">Design contracts</a></h2>
              <p>The package assumes that searchers and phases are pure, meaning they never mutate the e-graph directly. Appliers produce commands rather than making in-place changes. Search and application are safe to run in parallel when operating on disjoint work units. Finally, commands generated by a rule are aggregated into an optimized batch and are intended to be idempotent.</p>
              <h2><a href="#quick-reference" id="quick-reference">Quick reference</a></h2>
-             <p>Main entry points for search are <a href="eqsat/rewriting/Searcher.html">Searcher</a> and <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>; for application: <a href="eqsat/rewriting/Applier.html">Applier</a> and <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a>; for composition: <a href="eqsat/rewriting/Rule.html">Rule</a>; for matches across snapshots: <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>; and for caching and recording: <span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithRecordedApplications: No DRI found for query">foresight.eqsat.saturation.EGraphWithRecordedApplications</span> and <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>. Strategies for high-level orchestration include <a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a>, <a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a>, <a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a>, and <a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>.</p>
+             <p>Main entry points for search are <a href="eqsat/rewriting/Searcher.html">Searcher</a> and <a href="eqsat/rewriting/ReversibleSearcher.html">ReversibleSearcher</a>; for application: <a href="eqsat/rewriting/Applier.html">Applier</a> and <a href="eqsat/rewriting/ReversibleApplier.html">ReversibleApplier</a>; for composition: <a href="eqsat/rewriting/Rule.html">Rule</a>; for matches across snapshots: <a href="eqsat/rewriting/PortableMatch.html">PortableMatch</a>; and for caching and recording: <a href="eqsat/immutable/EGraphWithRecordedApplications.html">foresight.eqsat.immutable.EGraphWithRecordedApplications</a> and <a href="eqsat/saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a>. Strategies for high-level orchestration include <a href="eqsat/saturation/Strategy.html">foresight.eqsat.saturation.Strategy</a>, <a href="eqsat/saturation/MaximalRuleApplication.html">foresight.eqsat.saturation.MaximalRuleApplication</a>, <a href="eqsat/saturation/BackoffRuleApplication.html">foresight.eqsat.saturation.BackoffRuleApplication</a>, and <a href="eqsat/saturation/StochasticRuleApplication.html">foresight.eqsat.saturation.StochasticRuleApplication</a>.</p>
             </div>
             <h2 class="h200">Attributes</h2>
             <dl class="attributes attributes-small">
@@ -524,7 +524,7 @@
                 <div class="snippet mono-small-block">
                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.rewriting._
 </span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.parallel.ParallelMap
-</span><span line-number="3" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.CommandQueue
+</span><span line-number="3" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.CommandScheduleBuilder
 </span><span line-number="4" class=""><span class="tooltip-container"></span>// 1) Search: find matches in the e-graph
 </span><span line-number="5" class=""><span class="tooltip-container"></span>val s: Searcher[MyNode, MyMatch, MyEGraph] = ...
 </span><span line-number="6" class=""><span class="tooltip-container"></span>// 2) Apply: turn a match into a Command program
@@ -532,9 +532,12 @@
 </span><span line-number="8" class=""><span class="tooltip-container"></span>// 3) Rule: run now or stage/batch
 </span><span line-number="9" class=""><span class="tooltip-container"></span>val r = Rule("my-rule", s, a)
 </span><span line-number="10" class=""><span class="tooltip-container"></span>val updated = r(egraph, ParallelMap.default)                     // immediate
-</span><span line-number="11" class=""><span class="tooltip-container"></span>val staged  = r.delayed(egraph)                                  // staged
-</span><span line-number="12" class=""><span class="tooltip-container"></span>val batched = CommandQueue(Seq(staged, r2.delayed(egraph))).optimized
-</span><span line-number="13" class=""><span class="tooltip-container"></span>val (next, _) = batched(egraph, Map.empty, ParallelMap.default)  // execute batch
+</span><span line-number="11" class=""><span class="tooltip-container"></span>// Batch two rules via a shared builder
+</span><span line-number="12" class=""><span class="tooltip-container"></span>val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+</span><span line-number="13" class=""><span class="tooltip-container"></span>r.delayed(egraph, ParallelMap.default, builder)
+</span><span line-number="14" class=""><span class="tooltip-container"></span>r2.delayed(egraph, ParallelMap.default, builder)
+</span><span line-number="15" class=""><span class="tooltip-container"></span>val batched = builder.result()
+</span><span line-number="16" class=""><span class="tooltip-container"></span>val next = batched.applyImmutable(egraph, ParallelMap.default).getOrElse(egraph)
 </span></code></pre>
                  <div class="buttons"></div>
                 </div>
@@ -568,11 +571,12 @@
                 <p>Portability and caching</p>
                 <div class="snippet mono-small-block">
                  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.saturation._
-</span><span line-number="2" class=""><span class="tooltip-container"></span>type M = MyMatch with PortableMatch[MyNode, M]
-</span><span line-number="3" class=""><span class="tooltip-container"></span>val sa = SearchAndApply.withCaching[MyNode, MyEGraph, M]
-</span><span line-number="4" class=""><span class="tooltip-container"></span>val found: Map[String, Seq[M]] =
-</span><span line-number="5" class=""><span class="tooltip-container"></span> sa.search(Seq(r1, r2), EGraphWithRecordedApplications(egraph), ParallelMap.default)
-</span><span line-number="6" class=""><span class="tooltip-container"></span>val after = sa.apply(Seq(r1, r2), found, EGraphWithRecordedApplications(egraph), ParallelMap.default)
+</span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.immutable.EGraphWithRecordedApplications
+</span><span line-number="3" class=""><span class="tooltip-container"></span>type M = MyMatch with PortableMatch[MyNode, M]
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val sa = SearchAndApply.immutableWithCaching[MyNode, MyEGraph, M]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>val found: Map[String, Seq[M]] =
+</span><span line-number="6" class=""><span class="tooltip-container"></span> sa.search(Seq(r1, r2), EGraphWithRecordedApplications(egraph), ParallelMap.default)
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val after = sa.apply(Seq(r1, r2), found, EGraphWithRecordedApplications(egraph), ParallelMap.default)
 </span></code></pre>
                  <div class="buttons"></div>
                 </div>

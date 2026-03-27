@@ -215,15 +215,11 @@
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally</p>
+             <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration without duplicating common substructure.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally</p>
-              <ul>
-               <li>compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration</li>
-               <li>without duplicating common substructure.</li>
-              </ul>
+              <p>An e-graph compactly represents many equivalent expressions at once by grouping structurally compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration without duplicating common substructure.</p>
               <p><code>EGraph</code> is a convenience alias of <span data-unresolved-link="">EGraphLike</span> where the self type equals the trait itself: <code>EGraph[NodeT]</code> extends <code>EGraphLike[NodeT, EGraph[NodeT]]</code>. Use this when you don’t need a custom concrete e-graph subtype in your method signatures.</p>
               <p>Semantics:</p>
               <ul>

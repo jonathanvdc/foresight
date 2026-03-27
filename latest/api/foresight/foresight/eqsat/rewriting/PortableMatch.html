@@ -23,7 +23,7 @@
     <p><strong>Structural-only matches</strong> — the match stores only stable, structural data (e.g., constants, shapes). In this case, <code>port</code> can simply return <code>this</code>. Even so, implementing <code>PortableMatch</code> is valuable because the caching and recording infrastructure requires all matches to be portable:</p></li>
   </ol>
   <ul>
-   <li><span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithRecordedApplications: No DRI found for query">foresight.eqsat.saturation.EGraphWithRecordedApplications</span> records applied matches per rule and re-ports them after unions.</li>
+   <li><a href="../immutable/EGraphWithRecordedApplications.html">foresight.eqsat.immutable.EGraphWithRecordedApplications</a> records applied matches per rule and re-ports them after unions.</li>
    <li><a href="../saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a> filters out already-applied matches; portability keeps equality and hashing consistent as the graph evolves.</li>
   </ul>
   <h1><a href="#what-counts-as-a-derived-e-graph" id="what-counts-as-a-derived-e-graph">What counts as a "derived" e-graph?</a></h1>
@@ -59,7 +59,7 @@
    <dd class="body-medium">
     <div>
      <div>
-      <p><span data-unresolved-link="" title="Problem linking foresight.eqsat.saturation.EGraphWithRecordedApplications: No DRI found for query">foresight.eqsat.saturation.EGraphWithRecordedApplications</span> for how applied matches are recorded and re-ported after unions; and <a href="../saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a> for how cached applications are filtered using <code>PortableMatch</code>.</p>
+      <p><a href="../immutable/EGraphWithRecordedApplications.html">foresight.eqsat.immutable.EGraphWithRecordedApplications</a> for how applied matches are recorded and re-ported after unions; and <a href="../saturation/SearchAndApply$.html#immutableWithCaching-bc7">foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching</a> for how cached applications are filtered using <code>PortableMatch</code>.</p>
      </div>
     </div>
    </dd>

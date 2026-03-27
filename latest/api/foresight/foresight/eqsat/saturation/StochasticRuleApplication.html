@@ -92,7 +92,7 @@
       <div class="snippet mono-small-block">
        <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val strategy = StochasticRuleApplication(
 </span><span line-number="2" class=""><span class="tooltip-container"></span> rules = myRules,
-</span><span line-number="3" class=""><span class="tooltip-container"></span> searchAndApply = SearchAndApply.withoutCaching,
+</span><span line-number="3" class=""><span class="tooltip-container"></span> searchAndApply = SearchAndApply.immutable,
 </span><span line-number="4" class=""><span class="tooltip-container"></span> priorities = MyCustomPriorities,
 </span><span line-number="5" class=""><span class="tooltip-container"></span> random = Random(42)
 </span><span line-number="6" class=""><span class="tooltip-container"></span>)

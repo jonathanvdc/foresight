@@ -25,7 +25,7 @@
    <li><a href="Rewrite.html#delayed-840">delayed</a>: Build a staged command that applies all current matches when executed later.</li>
    <li><a href="Rewrite.html#apply-20e">apply</a>/<a href="Rewrite.html#applyImmutable-fffffe0c">applyImmutable</a>/<a href="Rewrite.html#tryApply-773">tryApply</a>: Search and apply all matches immediately, returning either the updated e-graph or a flag indicating whether any change occurred.</li>
   </ul>
-  <p>The staged command produced by <a href="Rewrite.html#delayed-840">delayed</a> can be enqueued into a <span data-unresolved-link="" title="Problem linking CommandQueue: No DRI found for query">CommandQueue</span> along with other rules, allowing callers to batch multiple rewrites into a single saturation step.</p>
+  <p>The staged command produced by <a href="Rewrite.html#delayed-840">delayed</a> can be batched with commands from other rules by sharing a <a href="../commands/CommandScheduleBuilder.html">foresight.eqsat.commands.CommandScheduleBuilder</a>, allowing callers to combine multiple rewrites into a single saturation step.</p>
  </div>
  <section id="attributes">
   <h2 class="h500">Type parameters</h2>
@@ -342,12 +342,11 @@ node4 -> node0;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Search and apply all matches immediately.</p>
+             <p>Search and apply all matches immediately, mutating the e-graph in place.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Search and apply all matches immediately.</p>
-              <p>If the rule makes any changes, <code>true</code> is returned without mutating the e-graph. If no changes occur, <code>false</code> is returned.</p>
+              <p>Search and apply all matches immediately, mutating the e-graph in place.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -355,7 +354,7 @@ node4 -> node0;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>Target e-graph.</p>
+               <p>Target e-graph. Mutated in place if any changes occur.</p>
               </dd>
               <dt class="body-small">
                parallelize
@@ -370,7 +369,7 @@ node4 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The updated e-graph if changes occurred; otherwise the original <code>egraph</code>.</p>
+               <p><code>true</code> if any change occurred; <code>false</code> otherwise.</p>
               </dd>
              </dl>
             </div>
@@ -478,7 +477,7 @@ node4 -> node0;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An optimized <span data-unresolved-link="" title="Problem linking CommandQueue: No DRI found for query">CommandQueue</span> encapsulated as a <span data-unresolved-link="" title="Problem linking CommandSchedule: No DRI found for query">CommandSchedule</span>.</p>
+               <p>A single, optimized <a href="../commands/CommandSchedule.html">foresight.eqsat.commands.CommandSchedule</a> that applies all current matches of this rule.</p>
               </dd>
               <dt class="body-small">
                Throws

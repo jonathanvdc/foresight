@@ -46,7 +46,7 @@
             <div class="doc">
              <p>The root of Foresight's equality saturation framework. It provides immutable e-graph data structures, symbolic references, slot-based binding semantics, and core interfaces for search, application, and extraction.</p>
              <p>An <strong>e-graph</strong> represents equivalence classes of expressions, or <em>e-classes</em>, each containing multiple <em>e-nodes</em> that differ in structure but are semantically equal. This representation supports efficient, parallel, and reversible rewrite-driven optimization, with explicit tracking of symbolic bindings (<em>slots</em>) and rich metadata.</p>
-             <p>E-graphs in Foresight are purely functional: every operation returns a new value rather than mutating in place. This immutability underpins reproducibility, concurrent analysis, and caching across snapshots.</p>
+             <p>E-graphs in Foresight come in two flavors: an <strong>immutable</strong> variant (<a href="foresight/eqsat/immutable/EGraph.html">eqsat.immutable.EGraph</a>) where every operation returns a new e-graph value without modifying the original (underpinning reproducibility, concurrent analysis, and caching across snapshots), and a <strong>mutable</strong> variant (<a href="foresight/eqsat/mutable/EGraph.html">eqsat.mutable.EGraph</a>) that supports in-place additions and unions for workloads where allocation overhead matters. Both variants implement the same read-only query interface (<a href="foresight/eqsat/readonly/EGraph.html">eqsat.readonly.EGraph</a>).</p>
              <h2><a href="#core-concepts" id="core-concepts">Core Concepts</a></h2>
              <p>At the heart of the API are symbolic identifiers and slot-based binding. An <a href="foresight/eqsat/EClassRef.html">eqsat.EClassRef</a> is a reference to an e-class within a particular e-graph snapshot. Over time, merges may cause multiple references to point to the same canonical e-class; callers can normalize them with <a href="foresight/eqsat/readonly/EGraph.html#canonicalize-d24">eqsat.readonly.EGraph.canonicalize</a>. An <a href="foresight/eqsat/EClassCall.html">eqsat.EClassCall</a> couples a root reference with a total slot map, allowing the same structural e-class to be applied with different bindings. A <a href="foresight/eqsat/Slot.html">eqsat.Slot</a> identifies a bound variable in an expression, and a <span data-unresolved-link="" title="Problem linking eqsat.SlotMap: No DRI found for query">eqsat.SlotMap</span> gives a complete mapping from slots to other slots or values.</p>
              <h2><a href="#egraph-and-egraphlike" id="egraph-and-egraphlike">EGraph and EGraphLike</a></h2>
@@ -78,12 +78,12 @@
 </span><span line-number="5" class=""><span class="tooltip-container"></span>import foresight.eqsat.saturation._
 </span><span line-number="6" class=""><span class="tooltip-container"></span>// Create an empty e-graph for a custom node type
 </span><span line-number="7" class=""><span class="tooltip-container"></span>val g0: EGraph[MyNode] = EGraph.empty
-</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a command queue
-</span><span line-number="9" class=""><span class="tooltip-container"></span>val builder = new CommandQueueBuilder[MyNode]
-</span><span line-number="10" class=""><span class="tooltip-container"></span>val root    = builder.add(myENode)
-</span><span line-number="11" class=""><span class="tooltip-container"></span>val queue   = builder.queue.optimized
-</span><span line-number="12" class=""><span class="tooltip-container"></span>// Apply commands to produce a new graph
-</span><span line-number="13" class=""><span class="tooltip-container"></span>val (g1, reif) = queue.applyImmutable(g0, Map.empty, ParallelMap.sequential)
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Build a command schedule using a builder
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+</span><span line-number="10" class=""><span class="tooltip-container"></span>builder.add(EClassSymbol.virtual(), myENodeSymbol, batch = 0)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>val schedule = builder.result()
+</span><span line-number="12" class=""><span class="tooltip-container"></span>// Apply the schedule to produce a new immutable graph
+</span><span line-number="13" class=""><span class="tooltip-container"></span>val g1 = schedule.applyImmutable(g0, ParallelMap.sequential).getOrElse(g0)
 </span><span line-number="14" class=""><span class="tooltip-container"></span>// Run a saturation strategy
 </span><span line-number="15" class=""><span class="tooltip-container"></span>val rules: Seq[Rule[MyNode, MyMatch, EGraph[MyNode]]] = Seq(r1, r2)
 </span><span line-number="16" class=""><span class="tooltip-container"></span>val strat = MaximalRuleApplicationWithCaching(rules).repeatUntilStable

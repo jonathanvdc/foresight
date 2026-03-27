@@ -23,7 +23,7 @@
   </ol>
   <p>After search and apply, a rule performs a <strong>composition step</strong>:</p>
   <ul>
-   <li>Command aggregation – all per-match commands are combined into a single, optimized <span data-unresolved-link="" title="Problem linking CommandQueue: No DRI found for query">CommandQueue</span> so they can be executed as one logical unit.</li>
+   <li>Command aggregation – all per-match commands are combined into a single, optimized <a href="../commands/CommandSchedule.html">foresight.eqsat.commands.CommandSchedule</a> so they can be executed as one logical unit.</li>
    <li>This aggregation deduplicates operations, removes no-ops, and preserves an execution order that is valid but not necessarily identical to the match order.</li>
    <li>The result can be executed immediately (via <a href="Rule.html#apply-20e">apply</a> / <a href="Rule.html#tryApply-773">tryApply</a>) or returned for later execution (via <a href="Rule.html#delayed-fffffa72">delayed</a>).</li>
   </ul>
@@ -107,13 +107,15 @@
      <div>
       <p>Staging a rule and applying later (batching with other rules)</p>
       <div class="snippet mono-small-block">
-       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val r1Cmd = r1.delayed(egraph) // stage first rule
-</span><span line-number="2" class=""><span class="tooltip-container"></span>val r2Cmd = r2.delayed(egraph) // stage second rule
-</span><span line-number="3" class=""><span class="tooltip-container"></span>// Merge both into one optimized command
-</span><span line-number="4" class=""><span class="tooltip-container"></span>val batched = CommandQueue(Seq(r1Cmd, r2Cmd)).optimized
-</span><span line-number="5" class=""><span class="tooltip-container"></span>// Somewhere later in the saturation loop:
-</span><span line-number="6" class=""><span class="tooltip-container"></span>val (maybeNewEGraph, _) = batched(egraph, Map.empty, ParallelMap.default)
-</span><span line-number="7" class=""><span class="tooltip-container"></span>val next = maybeNewEGraph.getOrElse(egraph) // fallback to original if no changes
+       <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>import foresight.eqsat.commands.CommandScheduleBuilder
+</span><span line-number="2" class=""><span class="tooltip-container"></span>import foresight.eqsat.parallel.ParallelMap
+</span><span line-number="3" class=""><span class="tooltip-container"></span>// Batch two rules into a single command schedule using a shared builder
+</span><span line-number="4" class=""><span class="tooltip-container"></span>val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+</span><span line-number="5" class=""><span class="tooltip-container"></span>r1.delayed(egraph, ParallelMap.default, builder) // stage first rule
+</span><span line-number="6" class=""><span class="tooltip-container"></span>r2.delayed(egraph, ParallelMap.default, builder) // stage second rule
+</span><span line-number="7" class=""><span class="tooltip-container"></span>val batched = builder.result()
+</span><span line-number="8" class=""><span class="tooltip-container"></span>// Somewhere later in the saturation loop:
+</span><span line-number="9" class=""><span class="tooltip-container"></span>val next = batched.applyImmutable(egraph, ParallelMap.default).getOrElse(egraph)
 </span></code></pre>
        <div class="buttons"></div>
       </div>
@@ -233,7 +235,7 @@ node7 -> node2;
               <p>Build a staged command that, when executed, applies this rule's matches to <code>egraph</code>.</p>
               <p>This does not mutate the e-graph now; instead it returns a <span data-unresolved-link="" title="Problem linking Command: No DRI found for query">Command</span> that you can:</p>
               <ul>
-               <li>enqueue into a <span data-unresolved-link="" title="Problem linking CommandQueue: No DRI found for query">CommandQueue</span> with other rules; and</li>
+               <li>enqueue alongside other rules via a <a href="../commands/CommandScheduleBuilder.html">foresight.eqsat.commands.CommandScheduleBuilder</a>; and</li>
                <li>execute later as part of a larger saturation step.</li>
               </ul>
              </div>
@@ -472,12 +474,11 @@ node7 -> node2;
            <div class="originInfo"></div>
            <div class="memberDocumentation">
             <div class="documentableBrief doc">
-             <p>Search and apply all matches immediately.</p>
+             <p>Search and apply all matches immediately, mutating the e-graph in place.</p>
             </div>
             <div class="cover">
              <div class="doc">
-              <p>Search and apply all matches immediately.</p>
-              <p>If the rule makes any changes, <code>true</code> is returned without mutating the e-graph. If no changes occur, <code>false</code> is returned.</p>
+              <p>Search and apply all matches immediately, mutating the e-graph in place.</p>
              </div>
              <h2 class="h200">Value parameters</h2>
              <dl class="attributes attributes-small">
@@ -485,7 +486,7 @@ node7 -> node2;
                egraph
               </dt>
               <dd class="body-medium">
-               <p>Target e-graph.</p>
+               <p>Target e-graph. Mutated in place if any changes occur.</p>
               </dd>
               <dt class="body-small">
                parallelize
@@ -500,7 +501,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>The updated e-graph if changes occurred; otherwise the original <code>egraph</code>.</p>
+               <p><code>true</code> if any change occurred; <code>false</code> otherwise.</p>
               </dd>
               <dt class="body-small">
                Inherited from:
@@ -677,7 +678,7 @@ node7 -> node2;
                Returns
               </dt>
               <dd class="body-medium">
-               <p>An optimized <span data-unresolved-link="" title="Problem linking CommandQueue: No DRI found for query">CommandQueue</span> encapsulated as a <span data-unresolved-link="" title="Problem linking CommandSchedule: No DRI found for query">CommandSchedule</span>.</p>
+               <p>A single, optimized <a href="../commands/CommandSchedule.html">foresight.eqsat.commands.CommandSchedule</a> that applies all current matches of this rule.</p>
               </dd>
               <dt class="body-small">
                Throws
