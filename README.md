@@ -23,6 +23,7 @@ These innovations enable safe speculative rewriting, efficient parallel executio
 - [Key Concepts](#key-concepts)
 - [Features](#features)
 - [More Resources](#more-resources)
+- [Citing Foresight](#citing-foresight)
 
 ---
 
@@ -345,3 +346,29 @@ All parallel behavior in Foresight is implemented via a pluggable `ParallelMap` 
 - **[Equality Saturation](https://doi.org/10.1145/1480881.1480915)** (Tate et al., POPL 2009) – The original paper introducing equality saturation as a compilation strategy.
 - **[egg: Fast and Extensible Equality Saturation](https://dl.acm.org/doi/10.1145/3434304)** (Willsey et al., POPL 2021) – A widely used equality saturation framework and a key point of reference for Foresight.
 - **[Slotted E‑Graphs](https://dl.acm.org/doi/10.1145/3729326)** – The paper describing the slotted e‑graph representation that underpins Foresight's native support for bound variables.
+
+---
+
+## Citing Foresight
+
+If you use Foresight in academic work, please cite the following paper:
+
+```bibtex
+@inproceedings{vandercruysse2026parallel,
+  author    = {Van der Cruysse, Jonathan and Zayed, Abd-El-Aziz and
+               Peng, Mai Jacob and Dubach, Christophe},
+  title     = {Parallel and Customizable Equality Saturation},
+  booktitle = {Proceedings of the 35th ACM SIGPLAN International Conference
+               on Compiler Construction},
+  series    = {CC '26},
+  year      = {2026},
+  pages     = {94--105},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/3771775.3786266},
+  url       = {https://doi.org/10.1145/3771775.3786266},
+  keywords  = {Compiler Infrastructure, E-Graphs, Equality Saturation,
+               Program Optimization, Rewrite Systems},
+  location  = {Sydney, NSW, Australia},
+}
+```
