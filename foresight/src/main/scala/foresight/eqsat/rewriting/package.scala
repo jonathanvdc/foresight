@@ -27,7 +27,7 @@ package foresight.eqsat
  * Matches are also **portable**. By implementing [[PortableMatch]], a match can
  * remain meaningful across multiple e-graph snapshots, enabling caching and
  * reapplication through
- * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
+ * [[foresight.eqsat.immutable.EGraphWithRecordedApplications]] and
  * [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]].
  *
  * ## Typical workflow
@@ -74,7 +74,7 @@ package foresight.eqsat
  * a new snapshot, preserving structural meaning. Purely structural matches can
  * treat `port` as a no-op, while ID-bearing matches perform translations such as
  * canonicalization. Recording and replaying matches is supported by
- * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]], and caching is
+ * [[foresight.eqsat.immutable.EGraphWithRecordedApplications]], and caching is
  * provided by [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]].
  *
  * ## Design contracts
@@ -91,7 +91,7 @@ package foresight.eqsat
  * [[ReversibleSearcher]]; for application:
  * [[Applier]] and [[ReversibleApplier]]; for composition: [[Rule]]; for matches
  * across snapshots: [[PortableMatch]]; and for caching and recording:
- * [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] and
+ * [[foresight.eqsat.immutable.EGraphWithRecordedApplications]] and
  * [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]]. Strategies for
  * high-level orchestration include
  * [[foresight.eqsat.saturation.Strategy]],
@@ -103,7 +103,7 @@ package foresight.eqsat
  * {{{
  * import foresight.eqsat.rewriting._
  * import foresight.eqsat.parallel.ParallelMap
- * import foresight.eqsat.commands.CommandQueue
+ * import foresight.eqsat.commands.CommandScheduleBuilder
  *
  * // 1) Search: find matches in the e-graph
  * val s: Searcher[MyNode, MyMatch, MyEGraph] = ...
@@ -114,9 +114,13 @@ package foresight.eqsat
  * // 3) Rule: run now or stage/batch
  * val r = Rule("my-rule", s, a)
  * val updated = r(egraph, ParallelMap.default)                     // immediate
- * val staged  = r.delayed(egraph)                                  // staged
- * val batched = CommandQueue(Seq(staged, r2.delayed(egraph))).optimized
- * val (next, _) = batched(egraph, Map.empty, ParallelMap.default)  // execute batch
+ *
+ * // Batch two rules via a shared builder
+ * val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+ * r.delayed(egraph, ParallelMap.default, builder)
+ * r2.delayed(egraph, ParallelMap.default, builder)
+ * val batched = builder.result()
+ * val next = batched.applyImmutable(egraph, ParallelMap.default).getOrElse(egraph)
  * }}}
  * @example Run with a saturation strategy
  * {{{
@@ -141,9 +145,10 @@ package foresight.eqsat
  * @example Portability and caching
  * {{{
  * import foresight.eqsat.saturation._
+ * import foresight.eqsat.immutable.EGraphWithRecordedApplications
  *
  * type M = MyMatch with PortableMatch[MyNode, M]
- * val sa = SearchAndApply.withCaching[MyNode, MyEGraph, M]
+ * val sa = SearchAndApply.immutableWithCaching[MyNode, MyEGraph, M]
  *
  * val found: Map[String, Seq[M]] =
  *   sa.search(Seq(r1, r2), EGraphWithRecordedApplications(egraph), ParallelMap.default)

@@ -15,7 +15,7 @@ import foresight.eqsat.readonly.EGraph
  *
  * After search and apply, a rule performs a **composition step**:
  *  - Command aggregation – all per-match commands are combined into a single, optimized
- *    [[CommandQueue]] so they can be executed as one logical unit.
+ *    [[foresight.eqsat.commands.CommandSchedule]] so they can be executed as one logical unit.
  *  - This aggregation deduplicates operations, removes no-ops, and preserves an execution order
  *    that is valid but not necessarily identical to the match order.
  *  - The result can be executed immediately (via [[apply]] / [[tryApply]]) or returned for later
@@ -57,15 +57,17 @@ import foresight.eqsat.readonly.EGraph
  * }}}
  * @example Staging a rule and applying later (batching with other rules)
  * {{{
- * val r1Cmd = r1.delayed(egraph) // stage first rule
- * val r2Cmd = r2.delayed(egraph) // stage second rule
+ * import foresight.eqsat.commands.CommandScheduleBuilder
+ * import foresight.eqsat.parallel.ParallelMap
  *
- * // Merge both into one optimized command
- * val batched = CommandQueue(Seq(r1Cmd, r2Cmd)).optimized
+ * // Batch two rules into a single command schedule using a shared builder
+ * val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+ * r1.delayed(egraph, ParallelMap.default, builder) // stage first rule
+ * r2.delayed(egraph, ParallelMap.default, builder) // stage second rule
+ * val batched = builder.result()
  *
  * // Somewhere later in the saturation loop:
- * val (maybeNewEGraph, _) = batched(egraph, Map.empty, ParallelMap.default)
- * val next = maybeNewEGraph.getOrElse(egraph) // fallback to original if no changes
+ * val next = batched.applyImmutable(egraph, ParallelMap.default).getOrElse(egraph)
  * }}}
  */
 final case class Rule[NodeT, MatchT, EGraphT <: EGraph[NodeT]](override val name: String,
@@ -88,7 +90,7 @@ final case class Rule[NodeT, MatchT, EGraphT <: EGraph[NodeT]](override val name
    * Build a staged command that, when executed, applies this rule's matches to `egraph`.
    *
    * This does not mutate the e-graph now; instead it returns a [[Command]] that you can:
-   *  - enqueue into a [[CommandQueue]] with other rules; and
+   *  - enqueue alongside other rules via a [[foresight.eqsat.commands.CommandScheduleBuilder]]; and
    *  - execute later as part of a larger saturation step.
    *
    * @param egraph      The e-graph to search for matches. The staged command is intended to be run

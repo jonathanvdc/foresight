@@ -22,7 +22,7 @@ import foresight.eqsat.readonly.EGraph
  *   2. **Structural-only matches** — the match stores only stable, structural data (e.g., constants,
  *   shapes). In this case, `port` can simply return `this`. Even so, implementing `PortableMatch`
  *   is valuable because the caching and recording infrastructure requires all matches to be portable:
- *     - [[foresight.eqsat.saturation.EGraphWithRecordedApplications]] records applied matches per rule
+ *     - [[foresight.eqsat.immutable.EGraphWithRecordedApplications]] records applied matches per rule
  *      and re-ports them after unions.
  *     - [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]] filters out already-applied matches; portability
  *       keeps equality and hashing consistent as the graph evolves.
@@ -54,7 +54,7 @@ import foresight.eqsat.readonly.EGraph
  *   def port(egraph: EGraph[NodeT]): ConstShapeMatch[NodeT] = this
  * }
  * }}}
- * @see [[foresight.eqsat.saturation.EGraphWithRecordedApplications]]
+ * @see [[foresight.eqsat.immutable.EGraphWithRecordedApplications]]
  *      for how applied matches are recorded and re-ported after unions; and
  *      [[foresight.eqsat.saturation.SearchAndApply$.immutableWithCaching]]
  *      for how cached applications are filtered using `PortableMatch`.

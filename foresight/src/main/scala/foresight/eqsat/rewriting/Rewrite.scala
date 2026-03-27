@@ -20,8 +20,9 @@ import foresight.eqsat.readonly.EGraph
  *  - [[apply]]/[[applyImmutable]]/[[tryApply]]: Search and apply all matches immediately, returning
  *    either the updated e-graph or a flag indicating whether any change occurred.
  *
- * The staged command produced by [[delayed]] can be enqueued into a [[CommandQueue]] along with
- * other rules, allowing callers to batch multiple rewrites into a single saturation step.
+ * The staged command produced by [[delayed]] can be batched with commands from other rules by
+ * sharing a [[foresight.eqsat.commands.CommandScheduleBuilder]], allowing callers to
+ * combine multiple rewrites into a single saturation step.
  *
  * @tparam NodeT   Node type for expressions represented by the e-graph.
  * @tparam MatchT  Type of matches produced by this rule's search phase.
@@ -64,7 +65,7 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
    * @param matches     Matches to apply.
    * @param egraph      Target e-graph from which matches were derived.
    * @param parallelize Parallel strategy used when building per-match commands.
-   * @return An optimized [[CommandQueue]] encapsulated as a [[CommandSchedule]].
+   * @return A single, optimized [[foresight.eqsat.commands.CommandSchedule]] that applies all current matches of this rule.
    * @throws Rule.ApplicationException
    * if constructing the per-match commands fails.
    */
@@ -152,14 +153,11 @@ trait Rewrite[NodeT, MatchT, -EGraphT <: EGraph[NodeT]] {
   }
 
   /**
-   * Search and apply all matches immediately.
+   * Search and apply all matches immediately, mutating the e-graph in place.
    *
-   * If the rule makes any changes, `true` is returned without mutating the e-graph.
-   * If no changes occur, `false` is returned.
-   *
-   * @param egraph      Target e-graph.
+   * @param egraph      Target e-graph. Mutated in place if any changes occur.
    * @param parallelize Parallel strategy used for both search and apply.
-   * @return The updated e-graph if changes occurred; otherwise the original `egraph`.
+   * @return `true` if any change occurred; `false` otherwise.
    */
   def apply[
     MutEGraphT <: EGraphT with mutable.EGraph[NodeT]

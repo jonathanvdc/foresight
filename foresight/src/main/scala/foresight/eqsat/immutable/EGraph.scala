@@ -5,8 +5,8 @@ import foresight.eqsat.{EClassCall, MixedTree}
 
 /**
  * An e-graph compactly represents many equivalent expressions at once by grouping structurally
- * * compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration
- * * without duplicating common substructure.
+ * compatible nodes into e-classes. This enables fast equality saturation and rewrite exploration
+ * without duplicating common substructure.
  *
  * `EGraph` is a convenience alias of [[EGraphLike]] where the self type equals the trait itself:
  * `EGraph[NodeT]` extends `EGraphLike[NodeT, EGraph[NodeT]]`. Use this when you don’t need a custom

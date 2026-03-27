@@ -10,9 +10,12 @@ package foresight
  * This representation supports efficient, parallel, and reversible rewrite-driven
  * optimization, with explicit tracking of symbolic bindings (*slots*) and rich metadata.
  *
- * E-graphs in Foresight are purely functional: every operation returns a new value
- * rather than mutating in place. This immutability underpins reproducibility,
- * concurrent analysis, and caching across snapshots.
+ * E-graphs in Foresight come in two flavors: an **immutable** variant
+ * ([[eqsat.immutable.EGraph]]) where every operation returns a new e-graph value
+ * without modifying the original (underpinning reproducibility, concurrent analysis, and
+ * caching across snapshots), and a **mutable** variant ([[eqsat.mutable.EGraph]]) that
+ * supports in-place additions and unions for workloads where allocation overhead matters.
+ * Both variants implement the same read-only query interface ([[eqsat.readonly.EGraph]]).
  *
  * ## Core Concepts
  *
@@ -87,13 +90,13 @@ package foresight
  * // Create an empty e-graph for a custom node type
  * val g0: EGraph[MyNode] = EGraph.empty
  *
- * // Build a command queue
- * val builder = new CommandQueueBuilder[MyNode]
- * val root    = builder.add(myENode)
- * val queue   = builder.queue.optimized
+ * // Build a command schedule using a builder
+ * val builder = CommandScheduleBuilder.newConcurrentBuilder[MyNode]
+ * builder.add(EClassSymbol.virtual(), myENodeSymbol, batch = 0)
+ * val schedule = builder.result()
  *
- * // Apply commands to produce a new graph
- * val (g1, reif) = queue.applyImmutable(g0, Map.empty, ParallelMap.sequential)
+ * // Apply the schedule to produce a new immutable graph
+ * val g1 = schedule.applyImmutable(g0, ParallelMap.sequential).getOrElse(g0)
  *
  * // Run a saturation strategy
  * val rules: Seq[Rule[MyNode, MyMatch, EGraph[MyNode]]] = Seq(r1, r2)

@@ -23,7 +23,7 @@ import foresight.util.random.{Random, Sample}
  * {{{
  * val strategy = StochasticRuleApplication(
  *   rules = myRules,
- *   searchAndApply = SearchAndApply.withoutCaching,
+ *   searchAndApply = SearchAndApply.immutable,
  *   priorities = MyCustomPriorities,
  *   random = Random(42)
  * )
@@ -151,7 +151,7 @@ object StochasticRuleApplication {
      priorities: MatchPriorities[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT],
      random: Random
   ): StochasticRuleApplication[NodeT, Rewrite[NodeT, MatchT, EGraphT], EGraphT, MatchT] = {
-    apply(rules, SearchAndApply.immutable[NodeT, EGraphT, MatchT], priorities)
+    new StochasticRuleApplication(rules, SearchAndApply.immutable[NodeT, EGraphT, MatchT], priorities, random)
   }
 
   /**
