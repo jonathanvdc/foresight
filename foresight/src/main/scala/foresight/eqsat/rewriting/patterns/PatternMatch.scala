@@ -2,7 +2,7 @@ package foresight.eqsat.rewriting.patterns
 
 import foresight.eqsat.readonly.EGraph
 import foresight.eqsat.rewriting.PortableMatch
-import foresight.eqsat.{EClassCall, MixedTree, Slot}
+import foresight.eqsat.{CallTree, EClassCall, MixedTree, Slot}
 import foresight.util.collections.ArrayMap
 import foresight.util.collections.StrictMapOps.toStrictMapOps
 
@@ -15,22 +15,30 @@ import foresight.util.collections.StrictMapOps.toStrictMapOps
  * @tparam NodeT The type of the nodes in the e-graph.
  */
 final case class PatternMatch[NodeT](root: EClassCall,
-                                     varMapping: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]],
-                                     slotMapping: ArrayMap[Slot, Slot]) extends PortableMatch[NodeT, PatternMatch[NodeT]] {
+                                     varMapping: ArrayMap[Pattern.Var, CallTree[NodeT]],
+                                     slotMapping: ArrayMap[Slot, Slot])
+  extends AbstractPatternMatch[NodeT] with PortableMatch[NodeT, PatternMatch[NodeT]] {
 
   /**
    * Gets the tree that corresponds to a variable.
    * @param variable The variable.
    * @return The tree.
    */
-  def apply(variable: Pattern.Var): MixedTree[NodeT, EClassCall] = varMapping(variable)
+  override def apply(variable: Pattern.Var): CallTree[NodeT] = varMapping(variable)
 
   /**
    * Gets the slot that corresponds to a slot variable.
    * @param slot The slot variable.
    * @return The slot.
    */
-  def apply(slot: Slot): Slot = slotMapping(slot)
+  override def apply(slot: Slot): Slot = slotMapping(slot)
+
+  /**
+   * Gets the slot that corresponds to a slot variable, returning an option.
+   * @param slot The slot variable.
+   * @return The slot if it exists; None otherwise.
+   */
+  override def get(slot: Slot): Option[Slot] = slotMapping.get(slot)
 
   /**
    * Creates an updated match with a new variable binding.
@@ -38,7 +46,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
    * @param value The value to bind the variable to.
    * @return The updated match with the new binding.
    */
-  def bind(variable: Pattern.Var, value: MixedTree[NodeT, EClassCall]): PatternMatch[NodeT] = {
+  def bind(variable: Pattern.Var, value: CallTree[NodeT]): PatternMatch[NodeT] = {
     PatternMatch(root, varMapping.updated(variable, value), slotMapping)
   }
 
@@ -74,7 +82,7 @@ final case class PatternMatch[NodeT](root: EClassCall,
 
   override def port(egraph: EGraph[NodeT]): PatternMatch[NodeT] = {
     val newRoot = egraph.canonicalize(root)
-    val newVarMapping = varMapping.mapValuesStrict(_.mapAtoms(egraph.canonicalize))
+    val newVarMapping = varMapping.mapValuesStrict(_.mapCalls(egraph.canonicalize))
     val newSlotMapping = slotMapping
     PatternMatch(newRoot, newVarMapping, newSlotMapping)
   }

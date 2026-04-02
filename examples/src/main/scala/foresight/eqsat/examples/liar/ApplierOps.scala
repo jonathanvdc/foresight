@@ -28,23 +28,23 @@ object ApplierOps {
         override def apply(m: PatternMatch[ArrayIR], egraph: EGraphWithMetadata[ArrayIR, EGraphT], builder: CommandScheduleBuilder[ArrayIR]): Unit = {
           val extracted = ExtractionAnalysis.smallest[ArrayIR].extractor[EGraphT](m(source), egraph)
 
-          def typeOf(tree: MixedTree[ArrayIR, EClassCall]): MixedTree[Type, EClassCall] = {
-            TypeInferenceAnalysis.get(egraph)(tree, egraph)
+          def typeOf(tree: CallTree[ArrayIR]): CallTree[Type] = {
+            CallTree.from(TypeInferenceAnalysis.get(egraph)(tree, egraph))
           }
 
-          def subst(tree: Tree[ArrayIR]): MixedTree[ArrayIR, EClassCall] = {
+          def subst(tree: Tree[ArrayIR]): CallTree[ArrayIR] = {
             tree match {
               case Tree(Var, Seq(), Seq(use), Seq(fromType))
-                if use == m(from) && typeOf(m(to)) == MixedTree.fromTree(fromType) =>
+                if use == m(from) && typeOf(m(to)) == CallTree.from(fromType) =>
 
                 m(to)
               case Tree(nodeType, defs, uses, args) =>
-                MixedTree.Node(nodeType, defs, uses, args.map(subst))
+                CallTree.Node(nodeType, defs, uses, args.map(subst))
             }
           }
 
           val substituted = subst(extracted)
-          val newMatch = m.copy(varMapping = m.varMapping + (destination -> substituted))
+          val newMatch = m.bind(destination, substituted)
           applier.apply(newMatch, egraph, builder)
         }
       }
@@ -66,7 +66,7 @@ object ApplierOps {
           val tree = applier.instantiate(m)
           val realTree = tree.mapAtoms(_.asInstanceOf[EClassCall])
           inferType(realTree, egraph)
-          val c = builder.addSimplifiedReal(realTree, egraph)
+          val c = builder.addSimplifiedReal(CallTree.from(realTree), egraph)
           builder.unionSimplified(EClassSymbol.real(m.root), c, egraph)
         }
       }

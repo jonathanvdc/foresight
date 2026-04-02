@@ -63,8 +63,8 @@ class MutableMachineStateTest {
     val m = MutableMachineState[Any](root, effects)
 
     // Values for the variables
-    val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
-    val mt2: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    val mt1: EClassCall = null.asInstanceOf[EClassCall]
+    val mt2: EClassCall = null.asInstanceOf[EClassCall]
 
     m.bindVar(mt1)
     m.bindVar(mt2)
@@ -170,8 +170,8 @@ class MutableMachineStateTest {
     val m = MutableMachineState[Any](root, effects)
 
     // Bind two variables
-    val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
-    val mt2: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    val mt1: EClassCall = null.asInstanceOf[EClassCall]
+    val mt2: EClassCall = null.asInstanceOf[EClassCall]
     m.bindVar(mt1)
     m.bindVar(mt2)
 
@@ -269,7 +269,7 @@ class MutableMachineStateTest {
     val ms1 = pool.borrow(root1)
 
     // Mutate state to non-zero indices
-    val mt: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    val mt: EClassCall = null.asInstanceOf[EClassCall]
     ms1.bindVar(mt)
     ms1.bindVar(mt)
     assertEquals(2, ms1.boundVarsCount)
@@ -390,8 +390,8 @@ class MutableMachineStateTest {
     val ms = pool.borrow(root)
 
     // Populate state: two vars and one node with one slot use
-    val mt1: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
-    val mt2: MixedTree[Any, EClassCall] = null.asInstanceOf[MixedTree[Any, EClassCall]]
+    val mt1: EClassCall = null.asInstanceOf[EClassCall]
+    val mt2: EClassCall = null.asInstanceOf[EClassCall]
     ms.bindVar(mt1)
     ms.bindVar(mt2)
 

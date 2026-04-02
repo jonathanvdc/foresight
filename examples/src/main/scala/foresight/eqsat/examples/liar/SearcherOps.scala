@@ -4,7 +4,7 @@ import foresight.eqsat.examples.liar.TypeRequirements.RequirementsSearcherContin
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.patterns.{CompiledPattern, Pattern, PatternMatch}
 import foresight.eqsat.rewriting.{Applier, ReversibleSearcher, Searcher}
-import foresight.eqsat.MixedTree
+import foresight.eqsat.{CallTree, EClassCall, MixedTree}
 import foresight.eqsat.immutable.{EGraph, EGraphLike, EGraphWithMetadata}
 
 object SearcherOps {
@@ -23,8 +23,8 @@ object SearcherOps {
       searcher.map((m, egraph) => {
         val newVarMapping = m.varMapping ++ types.map {
           case (value, t) =>
-            val (call, newEGraph) = egraph.add(m(value))
-            t -> TypeInferenceAnalysis.get(newEGraph)(call, newEGraph)
+            val (call, newEGraph) = egraph.add(m(value).toMixedTree)
+            t -> CallTree.from(TypeInferenceAnalysis.get(newEGraph)(call, newEGraph))
         }
         PatternMatch(m.root, newVarMapping, m.slotMapping)
       })
@@ -53,8 +53,8 @@ object SearcherOps {
       searcher.filter((m, egraph) => {
         values.forall(v => {
           m(v) match {
-            case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
-            case MixedTree.Node(nodeType, _, _, _) => nodeType.isInstanceOf[Value]
+            case c: EClassCall => egraph.nodes(c).head.nodeType.isInstanceOf[Value]
+            case CallTree.Node(nodeType, _, _, _) => nodeType.isInstanceOf[Value]
           }
         })
       })
@@ -69,8 +69,8 @@ object SearcherOps {
     def requireNonFunctionType(t: Pattern.Var): Searcher[ArrayIR, PatternMatch[ArrayIR], EGraphT] = {
       searcher.filter((m, egraph) => {
         m(t) match {
-          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType != FunctionType
-          case MixedTree.Node(nodeType, _, _, _) => nodeType != FunctionType
+          case c: EClassCall => egraph.nodes(c).head.nodeType != FunctionType
+          case CallTree.Node(nodeType, _, _, _) => nodeType != FunctionType
         }
       })
     }
@@ -83,8 +83,8 @@ object SearcherOps {
     def requireInt32Type(t: Pattern.Var): Searcher[ArrayIR, PatternMatch[ArrayIR], EGraphT] = {
       searcher.filter((m, egraph) => {
         m(t) match {
-          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType == Int32Type
-          case MixedTree.Node(nodeType, _, _, _) => nodeType == Int32Type
+          case c: EClassCall => egraph.nodes(c).head.nodeType == Int32Type
+          case CallTree.Node(nodeType, _, _, _) => nodeType == Int32Type
         }
       })
     }
@@ -97,8 +97,8 @@ object SearcherOps {
     def requireDoubleType(t: Pattern.Var): Searcher[ArrayIR, PatternMatch[ArrayIR], EGraphT] = {
       searcher.filter((m, egraph) => {
         m(t) match {
-          case MixedTree.Atom(c) => egraph.nodes(c).head.nodeType == DoubleType
-          case MixedTree.Node(nodeType, _, _, _) => nodeType == DoubleType
+          case c: EClassCall => egraph.nodes(c).head.nodeType == DoubleType
+          case CallTree.Node(nodeType, _, _, _) => nodeType == DoubleType
         }
       })
     }
