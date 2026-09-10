@@ -1,5 +1,5 @@
 // Default scala used for day-to-day dev / IDE
-val devScala = "3.4.1"
+val devScala = "3.6.4"
 
 // During IntelliJ import (VM option -DIDEA_IMPORT=1), expose only Scala 3 to the IDE.
 // From the CLI (no IDEA_IMPORT prop), keep the full cross set for + / ++.
@@ -8,7 +8,7 @@ ThisBuild / crossScalaVersions := {
   if (sys.props.get("IDEA_IMPORT").contains("1"))
     Seq(devScala)
   else {
-    Seq(devScala, "2.11.12", "2.12.20", "2.13.14")
+    Seq(devScala, "3.4.1", "2.11.12", "2.12.20", "2.13.14")
   }
 }
 
