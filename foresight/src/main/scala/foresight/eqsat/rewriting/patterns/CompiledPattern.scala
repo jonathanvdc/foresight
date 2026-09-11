@@ -48,6 +48,27 @@ final case class CompiledPattern[NodeT, EGraphT <: EGraph[NodeT]](pattern: Mixed
   }
 
   /**
+   * Searches for matches of the pattern in an e-graph, calling a continuation for each match.
+   * If the continuation returns false, the search is stopped.
+   *
+   * Borrows the machine state and passes it to the continuation. The continuation must not
+   * retain the state after returning.
+   *
+   * @param call         The e-class application to search for.
+   * @param egraph       The e-graph to search in.
+   * @param continuation A continuation that is called for each match of the pattern. If the continuation returns false,
+   *                     the search is stopped.
+   */
+  def searchBorrowed(call: EClassCall, egraph: EGraphT, continuation: (AbstractPatternMatch[NodeT], EGraphT) => Boolean): Unit = {
+    val state = machinePool.borrow(call)
+    Machine.run(egraph, state, instructions, (state: MutableMachineState[NodeT]) => {
+      val result = continuation(state, egraph)
+      state.release()
+      result
+    })
+  }
+
+  /**
    * Searches for matches of the pattern in an e-graph.
    * @param call The e-class application to search for.
    * @param egraph The e-graph to search in.

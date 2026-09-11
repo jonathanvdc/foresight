@@ -1,9 +1,9 @@
 package foresight.eqsat.rewriting.patterns
 
-import foresight.eqsat.{EClassCall, ENode, MixedTree, Slot}
+import foresight.eqsat.{CallTree, EClassCall, ENode, Slot}
 import foresight.util.collections.ArrayMap
 
-import scala.collection.compat._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * A mutable machine state that preallocates fixed-size arrays
@@ -11,10 +11,11 @@ import scala.collection.compat._
  */
 final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
                                                private val registersArr: Array[EClassCall],
-                                               private val boundVarsArr: Array[MixedTree[NodeT, EClassCall]],
+                                               private val boundVarsArr: Array[EClassCall],
                                                private val boundSlotsArr: Array[Slot],
                                                private val boundNodesArr: Array[ENode[NodeT]],
-                                               private val homePool: MutableMachineState.Pool[NodeT]) {
+                                               private val homePool: MutableMachineState.Pool[NodeT])
+    extends AbstractPatternMatch[NodeT] {
 
   private var regIdx: Int = 0
   private var varIdx: Int = 0
@@ -165,12 +166,12 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
    * Bind a variable to a value.
    * @param value The value to bind the variable to.
    */
-  def bindVar(value: MixedTree[NodeT, EClassCall]): Unit = {
+  def bindVar(value: EClassCall): Unit = {
     boundVarsArr(varIdx) = value
     varIdx += 1
   }
 
-  private def boundVars: ArrayMap[Pattern.Var, MixedTree[NodeT, EClassCall]] = {
+  private def boundVars: ArrayMap[Pattern.Var, CallTree[NodeT]] = {
     ArrayMap.unsafeWrapArrays(effects.boundVars.unsafeArray, java.util.Arrays.copyOf(boundVarsArr, varIdx), varIdx)
   }
 
@@ -185,8 +186,8 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
 
   /** Convert to an immutable MachineState snapshot. */
   def freeze(): MachineState[NodeT] = {
-    val regs  = immutable.ArraySeq.unsafeWrapArray(registersArr.slice(0, regIdx))
-    val nodes = immutable.ArraySeq.unsafeWrapArray(boundNodesArr.slice(0, nodeIdx))
+    val regs  = ArraySeq.unsafeWrapArray(registersArr.slice(0, regIdx))
+    val nodes = ArraySeq.unsafeWrapArray(boundNodesArr.slice(0, nodeIdx))
     MachineState(regs, boundVars, boundSlots, nodes)
   }
 
@@ -195,6 +196,51 @@ final class MutableMachineState[NodeT] private(val effects: Instruction.Effects,
    */
   def toPatternMatch: PatternMatch[NodeT] = {
     PatternMatch(registersArr(0), boundVars, boundSlots)
+  }
+
+  /**
+   * The e-class in which the pattern was found.
+   */
+  override def root: EClassCall = registersArr(0)
+
+  /**
+   * Gets the tree that corresponds to a variable.
+   *
+   * @param variable The variable.
+   * @return The tree.
+   */
+  override def apply(variable: Pattern.Var): CallTree[NodeT] = {
+    val i = effects.boundVars.indexOf(variable)
+    if (i < 0 || i >= varIdx)
+      throw new NoSuchElementException(s"Variable $variable not bound in this state")
+
+    boundVarsArr(i)
+  }
+
+  /**
+   * Gets the slot that corresponds to a slot variable.
+   *
+   * @param slot The slot variable.
+   * @return The slot.
+   */
+  override def apply(slot: Slot): Slot = {
+    val i = effects.boundSlots.indexOf(slot)
+    if (i < 0 || i >= slotIdx)
+      throw new NoSuchElementException(s"Slot $slot not bound in this state")
+
+    boundSlotsArr(i)
+  }
+
+  /**
+   * Gets the slot that corresponds to a slot variable, returning an option.
+   *
+   * @param slot The slot variable.
+   * @return The slot if it exists; None otherwise.
+   */
+  override def get(slot: Slot): Option[Slot] = {
+    val i = effects.boundSlots.indexOf(slot)
+    if (i >= 0 && i < slotIdx) Some(boundSlotsArr(i))
+    else None
   }
 }
 
@@ -206,7 +252,7 @@ object MutableMachineState {
   // Preallocate single empty arrays of the right types to avoid repeated allocations
   // when effects report zero bound vars/slots/nodes.
   // Unsafe casts are safe because these arrays are never written to.
-  private val emptyVars  = new Array[MixedTree[_, EClassCall]](0)
+  private val emptyVars  = new Array[EClassCall](0)
   private val emptySlots = new Array[Slot](0)
   private val emptyNodes = new Array[ENode[_]](0)
 
@@ -221,7 +267,7 @@ object MutableMachineState {
     val m = new MutableMachineState[NodeT](
       effects,
       new Array[EClassCall](1 + effects.createdRegisters),
-      if (varsLen  > 0) new Array[MixedTree[NodeT, EClassCall]](varsLen) else emptyVars.asInstanceOf[Array[MixedTree[NodeT, EClassCall]]],
+      if (varsLen  > 0) new Array[EClassCall](varsLen) else emptyVars,
       if (slotsLen > 0) new Array[Slot](slotsLen) else emptySlots,
       if (nodesLen > 0) new Array[ENode[NodeT]](nodesLen) else emptyNodes.asInstanceOf[Array[ENode[NodeT]]],
       pool

@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.readonly.EGraph
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
+import foresight.eqsat.{CallTree, EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
 import foresight.util.Debug
 import foresight.util.collections.UnsafeSeqFromArray
 
@@ -81,30 +81,37 @@ trait CommandScheduleBuilder[NodeT] {
     }
   }
 
-  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
+  private[eqsat] def addSimplifiedReal(tree: CallTree[NodeT],
                                        egraph: EGraph[NodeT]): EClassSymbol = {
-    val maxBatch = new IntRef(0)
-    addSimplifiedReal(tree, egraph, maxBatch)
+    val refPool = IntRef.defaultPool
+    val maxBatch = refPool.acquire(0)
+    val result = addSimplifiedReal(tree, egraph, maxBatch, ENode.defaultPool, refPool)
+    refPool.release(maxBatch)
+    result
   }
 
-  private[eqsat] def addSimplifiedReal(tree: MixedTree[NodeT, EClassCall],
+  private[eqsat] def addSimplifiedReal(tree: CallTree[NodeT],
                                        egraph: EGraph[NodeT],
-                                       maxBatch: IntRef): EClassSymbol = {
+                                       maxBatch: IntRef,
+                                       nodePool: ENode.Pool,
+                                       refPool: IntRef.Pool): EClassSymbol = {
     tree match {
-      case MixedTree.Node(t, defs, uses, args) =>
+      case CallTree.Node(t, defs, uses, args) =>
         // Local accumulator for children of this node.
-        val childMax = new IntRef(0)
+        val childMax = refPool.acquire(0)
         val argSymbols = CommandScheduleBuilder.symbolArrayFrom(
           args,
           childMax,
-          (child: MixedTree[NodeT, EClassCall], mb: IntRef) => addSimplifiedReal(child, egraph, mb)
+          nodePool,
+          (child: CallTree[NodeT], mb: IntRef) => addSimplifiedReal(child, egraph, mb, nodePool, refPool)
         )
-        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph)
+        val sym = addSimplifiedNode(t, defs, uses, argSymbols, childMax, egraph, nodePool)
         // Propagate maximum required batch up to the caller's accumulator.
         if (childMax.elem > maxBatch.elem) maxBatch.elem = childMax.elem
+        refPool.release(childMax)
         sym
 
-      case MixedTree.Atom(call) =>
+      case call: EClassCall =>
         // No insertion required; keep caller's accumulator unchanged.
         EClassSymbol.real(call)
     }
@@ -115,7 +122,8 @@ trait CommandScheduleBuilder[NodeT] {
                                        uses: SlotSeq,
                                        args: Array[EClassSymbol],
                                        maxBatch: IntRef,
-                                       egraph: EGraph[NodeT]): EClassSymbol = {
+                                       egraph: EGraph[NodeT],
+                                       pool: ENode.Pool): EClassSymbol = {
 
     // Check if all children are already in the graph.
     val argCalls = CommandScheduleBuilder.resolveAllOrNull(args)
@@ -126,7 +134,12 @@ trait CommandScheduleBuilder[NodeT] {
         assert(maxBatch.elem == 0)
       }
 
-      val candidateNode = ENode.unsafeWrapArrays(nodeType, definitions, uses, argCalls)
+      val candidateNode = pool.acquireUnsafe(
+        nodeType,
+        pool.acquireAndFillSlotArray(definitions),
+        pool.acquireAndFillSlotArray(uses),
+        argCalls)
+
       egraph.findOrNull(candidateNode) match {
         case null =>
           // Node does not exist in the graph but its children do exist in the graph.
@@ -135,6 +148,7 @@ trait CommandScheduleBuilder[NodeT] {
 
         case existingCall =>
           // Node already exists in the graph; reuse its class.
+          pool.release(candidateNode)
           EClassSymbol.real(existingCall)
       }
     } else {
@@ -157,14 +171,14 @@ object CommandScheduleBuilder {
    */
   def newConcurrentBuilder[NodeT]: CommandScheduleBuilder[NodeT] = new ConcurrentCommandScheduleBuilder[NodeT]()
 
-  private[eqsat] def symbolArrayFrom[A](values: ArraySeq[A], maxBatch: IntRef, valueToSymbol: (A, IntRef) => EClassSymbol): Array[EClassSymbol] = {
+  private[eqsat] def symbolArrayFrom[A](values: ArraySeq[A], maxBatch: IntRef, pool: ENode.Pool, valueToSymbol: (A, IntRef) => EClassSymbol): Array[EClassSymbol] = {
     // Try to avoid allocating an array of EClassSymbol if all entries are EClassCall.
     // The common case is that all children are already in the e-graph, and we will
     // want to construct an ENode with an Array[EClassCall].
     // If we find any entry that is not an EClassCall, we fall back to allocating
     // an Array[EClassSymbol] and copying the prefix of calls.
     val n = values.length
-    val calls = new Array[EClassCall](n)
+    val calls = pool.acquireCallArray(n)
     var i = 0
     while (i < n) {
       valueToSymbol(values(i), maxBatch) match {
@@ -175,8 +189,10 @@ object CommandScheduleBuilder {
           val syms = new Array[EClassSymbol](n)
           var j = 0
           while (j < i) {
-            syms(j) = calls(j); j += 1
+            syms(j) = calls(j)
+            j += 1
           }
+          pool.releaseCallArray(calls)
           syms(i) = other
           j = i + 1
           while (j < n) {

@@ -64,7 +64,7 @@ final case class Rules()(using L: Language[ArithExpr]) {
           result.toSeq.map { value =>
             // If a constant value is found, create a new Number node and bind it to the variable, overwriting the
             // original binding.
-            subst.bind(x.variable, L.toTree(Number(value)))
+            subst.bind(x.variable, L.toCallTree(Number(value)))
           }
       }),
       L.toApplier(x)

@@ -1,8 +1,7 @@
 package foresight.eqsat.extraction
 
-import foresight.eqsat.{EClassCall, MixedTree, Tree}
+import foresight.eqsat.{CallTree, EClassCall, MixedTree, Tree, readonly}
 import foresight.eqsat.immutable.{EGraph, EGraphLike}
-import foresight.eqsat.readonly
 
 /**
  * An extractor that converts e-graph references (e-class calls) into concrete expression trees.
@@ -52,6 +51,28 @@ trait Extractor[NodeT, -Repr <: readonly.EGraph[NodeT]] {
 
       case MixedTree.Atom(call) =>
         apply(call, egraph)
+    }
+  }
+
+  /**
+   * Extracts a concrete expression tree from a [[CallTree]] by extracting an expression for each
+   * e-class call within it.
+   *
+   * @param tree   The call tree to materialize prior to extraction.
+   * @param egraph The original e-graph; remains unchanged.
+   * @return A concrete [[Tree]] extracted from the materialized call.
+   *
+   * @example
+   *   {{{
+   *   val result: Tree[NodeT] = extractor(callTree, egraph) // `egraph` is unchanged
+   *   }}}
+   */
+  final def apply(tree: CallTree[NodeT], egraph: Repr): Tree[NodeT] = {
+    tree match {
+      case call: EClassCall => apply(call, egraph)
+      case CallTree.Node(n, defs, uses, children) =>
+        val extractedChildren = children.map(child => apply(child, egraph))
+        Tree(n, defs, uses, extractedChildren)
     }
   }
 }

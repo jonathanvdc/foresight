@@ -400,7 +400,7 @@ object Instruction {
     )
 
     override def execute(ctx: Instruction.Execution[NodeT, EGraphT]): Boolean = {
-      val value = MixedTree.Atom[NodeT, EClassCall](ctx.machine.registerAt(register))
+      val value = ctx.machine.registerAt(register)
       ctx.machine.bindVar(value)
       ctx.continue()
     }

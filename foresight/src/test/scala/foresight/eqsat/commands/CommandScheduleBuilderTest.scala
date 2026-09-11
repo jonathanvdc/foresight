@@ -2,7 +2,7 @@ package foresight.eqsat.commands
 
 import foresight.eqsat.collections.SlotSeq
 import foresight.eqsat.parallel.ParallelMap
-import foresight.eqsat.{EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
+import foresight.eqsat.{CallTree, EClassCall, EClassSymbol, ENode, ENodeSymbol, MixedTree}
 import foresight.eqsat.immutable.EGraph
 import org.junit.Test
 
@@ -186,7 +186,7 @@ class CommandScheduleBuilderTest {
 
     // Use addSimplifiedReal on an Atom (real call).
     val sym = baseBuilder.addSimplifiedReal(
-      MixedTree.Atom[Int, EClassCall](realCall),
+      realCall,
       g1
     )
 
@@ -206,7 +206,7 @@ class CommandScheduleBuilderTest {
     val g0 = EGraph.empty[Int]
 
     // Build a trivial 1-node tree: Node(7, [], [], [])
-    val tree = MixedTree.Node[Int, EClassCall](7, SlotSeq.empty, SlotSeq.empty, ArraySeq.empty[MixedTree[Int, EClassCall]])
+    val tree = CallTree.Node[Int](7, SlotSeq.empty, SlotSeq.empty, ArraySeq.empty[CallTree[Int]])
     val sym = builder.addSimplifiedReal(tree, g0)
 
     // We only care that exactly one node gets scheduled and applying the schedule grows the graph by 1.
@@ -240,14 +240,14 @@ class CommandScheduleBuilderTest {
     val realLeaf: EClassCall = g1.canonicalize(g1.classes.head)
 
     // child = Node(10, [], [], [ Atom(realLeaf) ])
-    val child = MixedTree.Node[Int, EClassCall](
+    val child = CallTree.Node[Int](
       10,
       SlotSeq.empty,
       SlotSeq.empty,
-      ArraySeq(MixedTree.Atom[Int, EClassCall](realLeaf))
+      ArraySeq(realLeaf)
     )
     // parent = Node(20, [], [], [ child ])
-    val parent = MixedTree.Node[Int, EClassCall](
+    val parent = CallTree.Node[Int](
       20,
       SlotSeq.empty,
       SlotSeq.empty,
@@ -296,29 +296,29 @@ class CommandScheduleBuilderTest {
     }
 
     // Level 1 nodes (directly depend on real atoms)
-    val child1 = MixedTree.Node[Int, EClassCall](
+    val child1 = CallTree.Node[Int](
       201,
       SlotSeq.empty,
       SlotSeq.empty,
-      ArraySeq(MixedTree.Atom[Int, EClassCall](realA))
+      ArraySeq(realA)
     )
-    val child2 = MixedTree.Node[Int, EClassCall](
+    val child2 = CallTree.Node[Int](
       202,
       SlotSeq.empty,
       SlotSeq.empty,
-      ArraySeq(MixedTree.Atom[Int, EClassCall](realA), MixedTree.Atom[Int, EClassCall](realB))
+      ArraySeq(realA, realB)
     )
     val childSym1 = builder.addSimplifiedReal(child1, g1)
     val childSym2 = builder.addSimplifiedReal(child2, g1)
 
     // Level 2 nodes (depend on Level 1)
-    val parent1 = MixedTree.Node[Int, EClassCall](
+    val parent1 = CallTree.Node[Int](
       301,
       SlotSeq.empty,
       SlotSeq.empty,
-      ArraySeq(child1, MixedTree.Atom[Int, EClassCall](realB))
+      ArraySeq(child1, realB)
     )
-    val parent2 = MixedTree.Node[Int, EClassCall](
+    val parent2 = CallTree.Node[Int](
       302,
       SlotSeq.empty,
       SlotSeq.empty,
@@ -328,7 +328,7 @@ class CommandScheduleBuilderTest {
     val parentSym2 = builder.addSimplifiedReal(parent2, g1)
 
     // Level 3 node (root depends on both Level 2 nodes)
-    val root = MixedTree.Node[Int, EClassCall](
+    val root = CallTree.Node[Int](
       401,
       SlotSeq.empty,
       SlotSeq.empty,

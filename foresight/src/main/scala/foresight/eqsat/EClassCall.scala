@@ -1,7 +1,9 @@
 package foresight.eqsat
 
-import foresight.eqsat.collections.{SlotMap, SlotSet}
+import foresight.eqsat.collections.{SlotMap, SlotSeq, SlotSet}
 import foresight.eqsat.readonly.EGraph
+
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * Represents the application of an [[EClassRef]] to a set of argument slots.
@@ -29,7 +31,7 @@ import foresight.eqsat.readonly.EGraph
  * val call2 = EClassCall(subXY, SlotMap(x -> b, y -> a)) // represents "b - a"
  * }}}
  */
-final case class EClassCall(ref: EClassRef, args: SlotMap) extends EClassSymbol {
+final case class EClassCall(ref: EClassRef, args: SlotMap) extends EClassSymbol with CallTree[Nothing] {
   /**
    * The set of slots used as arguments in this application, in sequence order.
    * These are the slots referenced by the argument values, not the parameter slots.
@@ -39,7 +41,7 @@ final case class EClassCall(ref: EClassRef, args: SlotMap) extends EClassSymbol 
   /**
    * The set of distinct slots used as arguments in this application.
    */
-  def slotSet: SlotSet = args.valueSet
+  override def slotSet: SlotSet = args.valueSet
 
   /**
    * Renames all argument slots in this application according to a given mapping.
@@ -207,4 +209,79 @@ object EClassSymbol {
    * Indicates that the given call is a real e-class symbol.
    */
   def real(call: EClassCall): Real = call
+}
+
+/**
+ * A tree of nodes and e-class calls, representing expressions in an e-graph.
+ * @tparam NodeT The type of the nodes in the e-graph.
+ */
+sealed trait CallTree[+NodeT] {
+  /**
+   * The set of distinct slots used in this call tree.
+   */
+  def slotSet: Set[Slot] = this match {
+    case call: EClassCall => call.slotSet
+    case CallTree.Node(_, defs, uses, children) =>
+      defs.toSet ++ uses ++ children.flatMap(_.slotSet)
+  }
+
+  /**
+   * Converts this call tree into a mixed tree of nodes and e-class calls.
+   * @return The resulting mixed tree.
+   */
+  final def toMixedTree: MixedTree[NodeT, EClassCall] = this match {
+    case call: EClassCall => MixedTree.Atom(call)
+    case CallTree.Node(n, defs, uses, children) =>
+      MixedTree.Node(n, defs, uses, children.map(_.toMixedTree))
+  }
+
+  /**
+   * Maps all [[EClassCall]] nodes in this call tree using a given function.
+   * @param f The mapping function.
+   * @return The resulting call tree with mapped calls.
+   */
+  final def mapCalls(f: EClassCall => EClassCall): CallTree[NodeT] = this match {
+    case call: EClassCall => f(call)
+    case CallTree.Node(n, defs, uses, children) =>
+      CallTree.Node(n, defs, uses, children.map(_.mapCalls(f)))
+  }
+}
+
+/**
+ * Constructors for [[CallTree]] nodes.
+ */
+object CallTree {
+  /**
+   * Represents a node in the call tree.
+   * @param node The node.
+   * @param definitions The slots defined by this node.
+   * @param uses The slots used by this node.
+   * @param children The child call trees.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   */
+  final case class Node[+NodeT](node: NodeT, definitions: SlotSeq, uses: SlotSeq, children: ArraySeq[CallTree[NodeT]])
+    extends CallTree[NodeT]
+
+  /**
+   * Converts a [[MixedTree]] of [[EClassCall]]s into a [[CallTree]].
+   * @param tree The mixed tree to convert.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @return The resulting call tree.
+   */
+  def from[NodeT](tree: MixedTree[NodeT, EClassCall]): CallTree[NodeT] = tree match {
+    case MixedTree.Atom(call) => call
+    case MixedTree.Node(n, defs, uses, args) =>
+      Node(n, defs, uses, args.map(arg => from(arg)))
+  }
+
+  /**
+   * Converts a [[Tree]] into a [[CallTree]].
+   * @param tree The tree to convert.
+   * @tparam NodeT The type of the nodes in the e-graph.
+   * @return The resulting call tree.
+   */
+  def from[NodeT](tree: Tree[NodeT]): CallTree[NodeT] = tree match {
+    case Tree(n, defs, uses, children) =>
+      Node(n, defs, uses, children.map(child => from(child)))
+  }
 }
