@@ -2,7 +2,7 @@ package foresight.eqsat.examples.incremental
 
 import foresight.eqsat.parallel.ParallelMap
 import foresight.eqsat.rewriting.{EClassSearcher, EClassesToSearch, Rule, Searcher}
-import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, MachineEClassSearcher, PatternMatch}
+import foresight.eqsat.rewriting.patterns.{CompiledPattern, Instruction, PatternCompiler, MachineEClassSearcher, PatternMatch}
 import foresight.eqsat.{EClassCall, EClassRef, ENode}
 import foresight.eqsat.readonly.{EGraph, EGraphWithMetadata}
 import foresight.util.collections.UnsafeSeqFromArray
@@ -91,7 +91,14 @@ object IncrementalSaturation {
   ): Searcher[NodeT, PatternMatch[NodeT], EGraphWithMetadata[NodeT, EGraphT]] = {
     val newInstructions = ArrayBuffer[Instruction[NodeT, EGraphWithMetadata[NodeT, EGraphT]]]()
     var bindings = 0
-    for (instr <- pattern.instructions) {
+    // Lookups hide node bindings that require individual top-k checks. Expand only
+    // compiler-generated lookup tapes; preserve custom instructions otherwise.
+    val instructions = if (pattern.instructions.exists(_.isInstanceOf[Instruction.Lookup[_, _]])) {
+      require(pattern.instructions == PatternCompiler.compile[NodeT, EGraphWithMetadata[NodeT, EGraphT]](pattern.pattern),
+        "Compile with groundedLookups = false before adding custom instructions to an incremental pattern")
+      PatternCompiler.compile[NodeT, EGraphWithMetadata[NodeT, EGraphT]](pattern.pattern, groundedLookups = false)
+    } else pattern.instructions
+    for (instr <- instructions) {
       newInstructions.append(instr)
       instr match {
         case Instruction.BindNode(register, nodeType, definitions, uses, arity) =>

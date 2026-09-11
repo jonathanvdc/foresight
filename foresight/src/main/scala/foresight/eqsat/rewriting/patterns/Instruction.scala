@@ -382,6 +382,56 @@ object Instruction {
   }
 
   /**
+   * Checks a fully bound subtree through the hash-cons.
+   * @param register The machine register containing the e-class call that the subtree must match.
+   * @param term The subtree to look up, with atoms identifying machine registers containing its bound e-class calls.
+   */
+  final case class Lookup[NodeT, EGraphT <: EGraph[NodeT]](
+    register: Int,
+    term: MixedTree[NodeT, Int]
+  ) extends Instruction[NodeT, EGraphT] {
+    override val effects: Effects = Effects.none
+
+    override def execute(ctx: Execution[NodeT, EGraphT]): Boolean = {
+      def hasSlottedArgument(tree: MixedTree[NodeT, Int]): Boolean = tree match {
+        case MixedTree.Atom(r) => !ctx.machine.registerAt(r).args.isEmpty
+        case MixedTree.Node(_, _, _, args) => args.exists(hasSlottedArgument)
+      }
+
+      def lookup(tree: MixedTree[NodeT, Int]): EClassCall = tree match {
+        case MixedTree.Atom(r) => ctx.machine.registerAt(r)
+        case MixedTree.Node(t, definitions, uses, args) =>
+          val children = new Array[EClassCall](args.length)
+          var i = 0
+          while (i < children.length) {
+            val child = lookup(args(i))
+            if (child eq null) return null
+            children(i) = child
+            i += 1
+          }
+          ctx.graph.findOrNull(ENode(t, definitions, uses, ArraySeq.unsafeWrapArray(children)))
+      }
+
+      def matches(tree: MixedTree[NodeT, Int], call: EClassCall): Boolean = tree match {
+        case MixedTree.Atom(r) => ctx.graph.areSame(call, ctx.machine.registerAt(r))
+        case MixedTree.Node(t, definitions, uses, args) =>
+          ctx.graph.nodes(call, t).exists { node =>
+            node.definitions == definitions && node.uses == uses &&
+              node.args.length == args.length && args.indices.forall(i => matches(args(i), node.args(i)))
+          }
+      }
+
+      val expected = ctx.machine.registerAt(register)
+      val found = if (hasSlottedArgument(term)) matches(term, expected) else {
+        val actual = lookup(term)
+        (actual ne null) && ctx.graph.areSame(expected, actual)
+      }
+      if (found) ctx.continue()
+      else ctx.error(MachineError.LookupFailed(this, expected))
+    }
+  }
+
+  /**
    * An instruction that binds a pattern variable to an e-class call in register.
    * @param register The index of the register to bind the variable to.
    * @param variable The variable to bind.
